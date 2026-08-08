@@ -16,19 +16,19 @@ provides:
   presets:
     - id: "vpndev-standards"
       version: "1.0.0"
-      source: "https://github.com/venha-pra-nuvem/speckit-vpndev-standards"
+      source: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards"
       priority: 5
       strategy: "wrap"
 
   extensions:
     - id: "vpndev-backlog-sync"
       version: "1.0.0"
-      source: "https://github.com/venha-pra-nuvem/speckit-vpndev-standards"
+      source: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards"
 
   workflows:
     - id: "vpndev-full-cycle"
       version: "1.0.0"
-      source: "https://github.com/venha-pra-nuvem/speckit-vpndev-standards"
+      source: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards"
 
 tags:
   - "vpndev"

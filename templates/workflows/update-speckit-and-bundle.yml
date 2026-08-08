@@ -1,10 +1,18 @@
 name: Verificar atualizações do Spec Kit e do bundle VPN Dev
 
-# Roda semanalmente e sob demanda. Verifica a versão mais recente do Spec Kit
-# CLI e do bundle vpndev-project-bundle e, se houver diferença, abre um Pull
-# Request com a atualização já aplicada localmente — mas NUNCA faz merge
-# sozinho. A atualização só entra em `main` quando alguém aprovar e mergear
-# esse PR manualmente, como qualquer outra mudança de dependência.
+# Roda semanalmente e sob demanda. Compara a versão do Spec Kit CLI e do bundle
+# vpndev-project-bundle instaladas neste projeto com a versão mais recente
+# publicada, e abre/atualiza uma issue com o diagnóstico e os comandos exatos
+# para atualizar manualmente. NUNCA aplica a atualização sozinho — a versão só
+# muda quando alguém rodar os comandos e abrir um PR revisado normalmente,
+# conforme a política em
+# https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards#versão-do-bundle-em-uso--política-de-atualização
+#
+# Requer o secret VPNDEV_STANDARDS_READ_TOKEN: um token (PAT clássico ou GitHub
+# App) com permissão de leitura em venha-pra-nuvem/speckit-vpndev-standards.
+# O GITHUB_TOKEN padrão só enxerga o próprio repositório — como
+# speckit-vpndev-standards é privado, a leitura do catalog.json precisa desse
+# token adicional configurado nos Secrets deste repositório.
 
 on:
   schedule:
@@ -12,11 +20,11 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+  issues: write
 
 jobs:
-  check-and-propose-update:
+  check-updates:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -32,51 +40,53 @@ jobs:
         id: current
         run: |
           CURRENT_SPECKIT=$(python3 -c "import json;print(json.load(open('.specify/integration.json'))['version'])")
+          CURRENT_BUNDLE=$(grep -A5 'Bundle .vpndev-project-bundle.' README.md | grep -oE '\`[0-9]+\.[0-9]+\.[0-9]+\`' | head -1 | tr -d '\`' || echo "desconhecida")
           echo "speckit=$CURRENT_SPECKIT" >> "$GITHUB_OUTPUT"
+          echo "bundle=$CURRENT_BUNDLE" >> "$GITHUB_OUTPUT"
 
-      - name: Verificar última versão do Spec Kit e do bundle
+      - name: Verificar última versão disponível
         id: latest
+        env:
+          VPNDEV_TOKEN: ${{ secrets.VPNDEV_STANDARDS_READ_TOKEN }}
         run: |
-          LATEST_SPECKIT=$(specify self check --json 2>/dev/null | python3 -c "import json,sys;print(json.load(sys.stdin).get('latest_version','')) " || true)
-          LATEST_BUNDLE=$(curl -fsSL https://raw.githubusercontent.com/venha-pra-nuvem/speckit-vpndev-standards/main/bundles/catalog.json \
+          LATEST_SPECKIT=$(specify self check --json 2>/dev/null | python3 -c "import json,sys;print(json.load(sys.stdin).get('latest_version',''))" || true)
+          LATEST_BUNDLE=$(curl -fsSL -H "Authorization: token ${VPNDEV_TOKEN}" \
+            https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/bundles/catalog.json \
             | python3 -c "import json,sys;print(json.load(sys.stdin)['bundles']['vpndev-project-bundle']['version'])")
           echo "speckit=$LATEST_SPECKIT" >> "$GITHUB_OUTPUT"
           echo "bundle=$LATEST_BUNDLE" >> "$GITHUB_OUTPUT"
 
-      - name: Aplicar upgrade do Spec Kit CLI (arquivos do projeto)
-        if: steps.latest.outputs.speckit != '' && steps.latest.outputs.speckit != steps.current.outputs.speckit
-        run: specify self upgrade --tag "v${{ steps.latest.outputs.speckit }}"
-
-      - name: Atualizar bundle vpndev-project-bundle
-        run: specify bundle update vpndev-project-bundle || true
-
-      - name: Verificar se há mudanças
-        id: diff
+      - name: Montar corpo da issue
+        id: body
         run: |
-          if git diff --quiet; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Verificação semanal — Spec Kit / Bundle VPN Dev"
+            echo ""
+            echo "| Item | Instalada | Disponível |"
+            echo "| --- | --- | --- |"
+            echo "| Spec Kit CLI | \`${{ steps.current.outputs.speckit }}\` | \`${{ steps.latest.outputs.speckit }}\` |"
+            echo "| Bundle \`vpndev-project-bundle\` | \`${{ steps.current.outputs.bundle }}\` | \`${{ steps.latest.outputs.bundle }}\` |"
+            echo ""
+            echo "**Esta verificação não aplica nenhuma mudança.** Se a atualização for aprovada, rodar localmente:"
+            echo ""
+            echo '```bash'
+            echo "specify self upgrade --tag v${{ steps.latest.outputs.speckit }}"
+            echo "specify bundle update vpndev-project-bundle"
+            echo '```'
+            echo ""
+            echo "Depois de aplicar e testar, abrir um PR normal com o diff e atualizar a tabela"
+            echo "de versões na seção 'Spec Kit — Padrões VPN Dev' do README (ver"
+            echo "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/templates/README-bundle-section.md)."
+          } > /tmp/issue-body.md
+
+      - name: Abrir ou atualizar issue de verificação
+        if: steps.current.outputs.speckit != steps.latest.outputs.speckit || steps.current.outputs.bundle != steps.latest.outputs.bundle
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          EXISTING=$(gh issue list --search "Verificação semanal — Spec Kit / Bundle VPN Dev in:title" --state open --json number -q '.[0].number' || true)
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --body-file /tmp/issue-body.md
           else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
+            gh issue create --title "Verificação semanal — Spec Kit / Bundle VPN Dev" --body-file /tmp/issue-body.md --label "dependencies"
           fi
-
-      - name: Abrir Pull Request de atualização
-        if: steps.diff.outputs.changed == 'true'
-        uses: peter-evans/create-pull-request@v6
-        with:
-          commit-message: "chore: atualizar Spec Kit/bundle VPN Dev (speckit ${{ steps.latest.outputs.speckit }}, bundle ${{ steps.latest.outputs.bundle }})"
-          title: "chore: atualizar Spec Kit para ${{ steps.latest.outputs.speckit }} e bundle VPN Dev para ${{ steps.latest.outputs.bundle }}"
-          body: |
-            Atualização automática detectada pela verificação semanal.
-
-            | Item | Antes | Depois |
-            | --- | --- | --- |
-            | Spec Kit CLI | `${{ steps.current.outputs.speckit }}` | `${{ steps.latest.outputs.speckit }}` |
-            | Bundle `vpndev-project-bundle` | ver README atual | `${{ steps.latest.outputs.bundle }}` |
-
-            **Este PR não é aplicado automaticamente.** Revise o diff, atualize a
-            tabela de versões na seção "Spec Kit — Padrões VPN Dev" do README
-            (ver [modelo](https://github.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/templates/README-bundle-section.md))
-            e só faça merge após aprovação formal, conforme a
-            [política de versionamento](https://github.com/venha-pra-nuvem/speckit-vpndev-standards#versão-do-bundle-em-uso--política-de-atualização).
-          branch: chore/update-speckit-vpndev-bundle
-          labels: dependencies

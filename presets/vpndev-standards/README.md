@@ -21,7 +21,7 @@ aditiva (`wrap`/`append`).
 ## Instalação isolada (sem o bundle completo)
 
 ```bash
-specify preset add vpndev-standards --from https://github.com/venha-pra-nuvem/speckit-vpndev-standards/releases/download/vX.Y.Z/vpndev-standards-X.Y.Z.zip --priority 5
+specify preset add vpndev-standards --from https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/releases/download/vX.Y.Z/vpndev-standards-X.Y.Z.zip --priority 5
 ```
 
 Ou, em modo desenvolvimento, a partir de um clone local:

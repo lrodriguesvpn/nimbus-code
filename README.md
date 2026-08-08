@@ -20,7 +20,7 @@ ver o README de cada pasta.
 ## Como um projeto novo já nasce com isso
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/venha-pra-nuvem/speckit-vpndev-standards/main/bootstrap.sh | bash
+curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/bootstrap.sh | bash
 ```
 
 Isso executa `specify init` (se ainda não inicializado) e instala preset +
@@ -50,11 +50,12 @@ Fluxo de atualização:
    aprovada via PR normal.
 2. Uma nova versão do bundle é publicada (ver [Versionamento](#versionamento))
    **somente** depois da aprovação — nunca antes.
-3. Cada projeto consumidor recebe, semanalmente, um PR automático (workflow
-   `update-speckit-and-bundle.yml`, ver [`templates/workflows/`](templates/workflows/))
-   comparando sua versão instalada com a mais recente publicada aqui — **esse
-   PR nunca aplica a atualização sozinho**, apenas avisa e prepara o comando a
-   rodar; o merge da atualização exige revisão humana como qualquer outra
+3. Cada projeto consumidor recebe, semanalmente, uma **issue automática**
+   (workflow `update-speckit-and-bundle.yml`, ver
+   [`templates/workflows/`](templates/workflows/)) comparando sua versão
+   instalada com a mais recente publicada aqui — **essa issue nunca aplica a
+   atualização sozinha**, apenas avisa e traz os comandos exatos a rodar; a
+   atualização em si sempre vira um PR normal, revisado como qualquer outra
    mudança de dependência.
 
 Todo projeto que consome este bundle deve documentar, no seu próprio README, a
@@ -86,24 +87,36 @@ Para registrar os catálogos uma vez por projeto (ou uma vez por máquina, em
 
 ```bash
 specify preset catalog add \
-  https://raw.githubusercontent.com/venha-pra-nuvem/speckit-vpndev-standards/main/presets/catalog.json \
+  https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/presets/catalog.json \
   --name vpndev --priority 5 --install-allowed
 
 specify extension catalog add \
-  https://raw.githubusercontent.com/venha-pra-nuvem/speckit-vpndev-standards/main/extensions/catalog.json \
+  https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/extensions/catalog.json \
   --name vpndev --install-allowed
 
 specify workflow catalog add \
-  https://raw.githubusercontent.com/venha-pra-nuvem/speckit-vpndev-standards/main/workflows/catalog.json \
+  https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/workflows/catalog.json \
   --name vpndev
 
 specify bundle catalog add \
-  https://raw.githubusercontent.com/venha-pra-nuvem/speckit-vpndev-standards/main/bundles/catalog.json \
+  https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/bundles/catalog.json \
   --id vpndev --priority 5 --policy install-allowed
 ```
 
 Depois disso, `specify bundle install vpndev-project-bundle --integration copilot`
 funciona como um comando único, em qualquer diretório (novo ou existente).
+
+> ⚠️ **Este repositório é privado.** Diferente de um repo público, as URLs
+> `raw.venha-pra-nuvem.ghe.com/...` acima **exigem autenticação** (token) para
+> requisições HTTP simples (`curl`, e o fetcher interno do `specify` CLI) — não
+> é o mesmo mecanismo de autenticação usado por `git clone`/`gh`, que já
+> funciona com as credenciais configuradas na máquina/CI. Por isso, **o caminho
+> recomendado e já validado ponta a ponta hoje é o [`bootstrap.sh`](bootstrap.sh)**
+> (que usa `git clone` autenticado, não HTTP cru) — o fluxo por catálogo acima
+> é o alvo de longo prazo, mas requer configurar um token de leitura para este
+> repositório em cada máquina/pipeline que for consumi-lo (ex.:
+> `git config --global http.https://venha-pra-nuvem.ghe.com/.extraheader` ou
+> equivalente, fora do escopo deste README).
 
 ## Extensões candidatas a repositório próprio
 

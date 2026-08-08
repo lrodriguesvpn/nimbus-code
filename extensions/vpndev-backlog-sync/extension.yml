@@ -8,9 +8,9 @@ extension:
   category: "integration"
   effect: "read-write"
   author: "VPN Dev"
-  repository: "https://github.com/venha-pra-nuvem/speckit-vpndev-standards"
+  repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards"
   license: "Proprietary"
-  homepage: "https://github.com/venha-pra-nuvem/speckit-vpndev-standards"
+  homepage: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards"
 
 requires:
   speckit_version: ">=0.16.0"

@@ -3,7 +3,7 @@
   manualmente a cada atualização aprovada do bundle/Spec Kit. Não edite a versão
   aqui sem antes ter aprovado e aplicado a atualização correspondente — ver a
   política de versionamento em
-  https://github.com/venha-pra-nuvem/speckit-vpndev-standards#versão-do-bundle-em-uso--política-de-atualização
+  https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards#versão-do-bundle-em-uso--política-de-atualização
 -->
 
 ## Spec Kit — Padrões VPN Dev
@@ -14,7 +14,7 @@ padrões corporativos da VPN Dev aplicados via bundle.
 | Item | Versão instalada |
 | --- | --- |
 | **Spec Kit CLI** | `0.16.1` |
-| **Bundle `vpndev-project-bundle`** ([speckit-vpndev-standards](https://github.com/venha-pra-nuvem/speckit-vpndev-standards)) | `1.0.0` |
+| **Bundle `vpndev-project-bundle`** ([speckit-vpndev-standards](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards)) | `1.0.0` |
 | — preset `vpndev-standards` | `1.0.0` |
 | — extensão `vpndev-backlog-sync` | `1.0.0` |
 | — workflow `vpndev-full-cycle` | `1.0.0` |

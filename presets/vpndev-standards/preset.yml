@@ -6,7 +6,7 @@ preset:
   version: "1.0.0"
   description: "Constituição base, gate de segurança/DevSecOps e framework de decisões de arquitetura padrão da VPN Dev, aplicados sobre os templates nativos do Spec Kit."
   author: "VPN Dev"
-  repository: "https://github.com/venha-pra-nuvem/speckit-vpndev-standards"
+  repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards"
   license: "Proprietary"
 
 requires:
