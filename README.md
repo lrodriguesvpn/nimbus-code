@@ -106,17 +106,20 @@ specify bundle catalog add \
 Depois disso, `specify bundle install vpndev-project-bundle --integration copilot`
 funciona como um comando único, em qualquer diretório (novo ou existente).
 
-> ⚠️ **Este repositório é privado.** Diferente de um repo público, as URLs
-> `raw.venha-pra-nuvem.ghe.com/...` acima **exigem autenticação** (token) para
-> requisições HTTP simples (`curl`, e o fetcher interno do `specify` CLI) — não
-> é o mesmo mecanismo de autenticação usado por `git clone`/`gh`, que já
-> funciona com as credenciais configuradas na máquina/CI. Por isso, **o caminho
-> recomendado e já validado ponta a ponta hoje é o [`bootstrap.sh`](bootstrap.sh)**
-> (que usa `git clone` autenticado, não HTTP cru) — o fluxo por catálogo acima
-> é o alvo de longo prazo, mas requer configurar um token de leitura para este
-> repositório em cada máquina/pipeline que for consumi-lo (ex.:
-> `git config --global http.https://venha-pra-nuvem.ghe.com/.extraheader` ou
-> equivalente, fora do escopo deste README).
+> ℹ️ **Este repositório é interno** (visível a todos os membros da organização
+> `venha-pra-nuvem`, fora do público). Isso simplifica bastante o acesso em
+> relação a um repositório privado: qualquer membro autenticado da
+> organização — incluindo um token de máquina/CI que seja membro da org —
+> já enxerga `raw.venha-pra-nuvem.ghe.com/...` sem precisar ser adicionado
+> como colaborador deste repositório especificamente. Ainda assim, requisições
+> HTTP simples (`curl`, e o fetcher interno do `specify` CLI) **exigem um
+> token de autenticação** (não é o mesmo mecanismo usado por `git clone`/`gh`,
+> que já funciona com as credenciais configuradas na máquina/CI). Por isso,
+> **o caminho recomendado e já validado ponta a ponta hoje é o
+> [`bootstrap.sh`](bootstrap.sh)** (que usa `git clone` autenticado, não HTTP
+> cru) — o fluxo por catálogo acima é o alvo de longo prazo e só precisa de
+> um token de leitura de escopo mínimo (qualquer membro da org já serve, não
+> precisa de acesso concedido especificamente a este repo).
 
 ## Extensões candidatas a repositório próprio
 
