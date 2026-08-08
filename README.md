@@ -17,6 +17,58 @@ consistentes — sem que cada time precise reescrever essas regras.
 Cada peça é independentemente versionada (SemVer) e pode ser instalada isolada —
 ver o README de cada pasta.
 
+## 📘 Manual do Dev — comece por aqui
+
+Se você é dev e vai usar o Spec Kit no dia a dia (repo novo, repo existente
+sem Spec Kit, ou importar um card do Azure DevOps/JIRA para começar uma
+feature), o documento central é
+[`docs/developer-guide.md`](docs/developer-guide.md) — cobre os três cenários
+passo a passo, com os prompts exatos a usar.
+
+### 🔶 Brownfield: boas práticas, DOs e DONTs
+
+Se você está rodando Spec Kit em um **repositório já existente** (brownfield),
+leia **obrigatoriamente** [`docs/brownfield-best-practices.md`](docs/brownfield-best-practices.md)
+— é referência profunda sobre:
+
+- Por que a constituição é o passo crítico (e como iterá-la).
+- Múltiplos passes de `implement` → `converge` (esperado, não erro).
+- Artefatos SDD como documentos vivos (quando editar vs. regenerar).
+- Integração com backlog externo (Azure DevOps/JIRA).
+- Troubleshooting comum e estratégias de migração incremental.
+
+**TL;DR do brownfield**: sempre rode `/speckit.constitution` **antes** de qualquer
+feature (análise profunda do código existente é essencial); use
+`/speckit.converge` **sempre** após `implement`; aceite múltiplos passes e
+documentar exceções no Architecture Decision Log.
+
+## Modelo visual do bundle
+
+```mermaid
+flowchart TB
+    subgraph BUNDLE["📦 bundle: vpndev-project-bundle (v1.0.0)"]
+        direction TB
+        PRESET["🧩 preset: vpndev-standards (v1.0.0)\nrole: governança/DevSecOps"]
+        EXT["🔌 extension: vpndev-backlog-sync (v1.0.0)\nrole: integração JIRA/Azure DevOps"]
+        WF["🔁 workflow: vpndev-full-cycle (v1.0.0)\nrole: orquestra o ciclo SDD"]
+    end
+
+    BUNDLE -->|"specify bundle install\nvpndev-project-bundle"| PROJ["📁 Projeto consumidor\n(specs/, .specify/, .github/)"]
+
+    PRESET -. "usado pelos steps plan/tasks" .-> WF
+    EXT -. "hooks after_specify/after_tasks\nchamados pelos steps" .-> WF
+
+    style BUNDLE fill:#eef,stroke:#446,stroke-width:2px
+    style PROJ fill:#efe,stroke:#484
+```
+
+O bundle só amarra os três componentes acima em versões pinadas — nenhum tem
+lógica própria fora do que já é descrito na tabela acima. Diagramas completos
+(estratégias `wrap`/`append` do preset, fluxo do workflow com os gates,
+instalação/atualização e o ecossistema de servidores MCP candidatos por
+plataforma — GitHub, Microsoft 365, Azure, Google Workspace, GCP) estão em
+[`docs/bundle-architecture.md`](docs/bundle-architecture.md).
+
 ## Como um projeto novo já nasce com isso
 
 ```bash
@@ -61,6 +113,29 @@ Fluxo de atualização:
 Todo projeto que consome este bundle deve documentar, no seu próprio README, a
 versão instalada — ver o modelo em
 [`templates/README-bundle-section.md`](templates/README-bundle-section.md).
+
+## Templates Reutilizáveis para Projetos Consumidores
+
+Este repositório fornece arquivos prontos para copiar em projetos que usam o Spec Kit:
+
+| Template | Propósito | Onde copiar |
+|---|---|---|
+| [`templates/README-bundle-section.md`](templates/README-bundle-section.md) | Seção do README do projeto documentando versão do bundle | `README.md` do projeto (adapte para seu contexto) |
+| [`templates/BROWNFIELD-SETUP-CHECKLIST.md`](templates/BROWNFIELD-SETUP-CHECKLIST.md) | Checklist interativo para setup de Spec Kit em repo existente | `.specify/BROWNFIELD-SETUP-CHECKLIST.md` (brownfield) |
+| [`templates/workflows/update-speckit-and-bundle.yml`](templates/workflows/update-speckit-and-bundle.yml) | GitHub Action automática para notificar atualizações do bundle | `.github/workflows/update-speckit-and-bundle.yml` (todos os projetos) |
+
+**Para brownfield especificamente**: depois de rodar `specify init` e o
+`bootstrap.sh`, copie o checklist para o seu `.specify/`:
+
+```bash
+curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/templates/BROWNFIELD-SETUP-CHECKLIST.md \
+  > .specify/BROWNFIELD-SETUP-CHECKLIST.md
+git add .specify/BROWNFIELD-SETUP-CHECKLIST.md
+```
+
+Depois, siga as fases do checklist como um roadmap de setup — lê-o enquanto trabalha
+com o Spec Kit. Após completado, o arquivo fica versionado como parte do histórico
+de decisões do projeto.
 
 ## Versionamento
 
@@ -130,7 +205,10 @@ Ver análise completa em [`docs/extension-candidates.md`](docs/extension-candida
 O Spec Kit **não instala nem gerencia** servidores MCP — o bundle/extensão só
 pode **declarar** uma dependência informativa (`requires.mcp` em `extension.yml`),
 que aparece como aviso na instalação, mas não provisiona nada. Ver detalhes em
-[`docs/mcp-and-bundles.md`](docs/mcp-and-bundles.md).
+[`docs/mcp-and-bundles.md`](docs/mcp-and-bundles.md), incluindo uma tabela de
+referência com os servidores MCP mais relevantes por plataforma (GitHub,
+Microsoft 365, Azure, Google Workspace, GCP) como candidatos avaliados — nenhum
+deles instalado pelo bundle hoje.
 
 ## Estrutura
 
@@ -142,9 +220,14 @@ speckit-vpndev-standards/
 ├── bundles/vpndev-project-bundle/      # bundle.yml
 ├── templates/                         # arquivos para copiar em projetos consumidores
 │   ├── README-bundle-section.md
+│   ├── BROWNFIELD-SETUP-CHECKLIST.md
 │   └── workflows/update-speckit-and-bundle.yml
 ├── docs/
+│   ├── bundle-architecture.md
+│   ├── brownfield-best-practices.md
+│   ├── developer-guide.md
 │   ├── extension-candidates.md
+│   ├── ai-code-quality-and-observability.md
 │   └── mcp-and-bundles.md
 ├── bootstrap.sh
 └── .github/workflows/release.yml
