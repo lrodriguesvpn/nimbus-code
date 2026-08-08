@@ -78,6 +78,26 @@ curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-st
 Isso executa `specify init` (se ainda não inicializado) e instala preset +
 extensão + workflow na versão publicada mais recente da branch `main`.
 
+### Bônus: GitHub Project criado automaticamente
+
+Se o `gh` CLI estiver instalado e autenticado, o `bootstrap.sh` **cria
+automaticamente um GitHub Project V2** com 3 views padrão (copiadas do
+IOX-CROWDFUNDINGPAAS):
+
+- **Board por Epic** — organize issues por épicas
+- **Board por Prioridade** — organize por níveis de prioridade
+- **Tabela — P0 Blocker** — filtro pré-configurado para P0-blocker críticos
+
+O project é criado com o nome `{repo-name} — Spec Kit Roadmap` e fica
+imediatamente acessível para customize (adicionar/remover filtros, agrupar
+por campos, etc.).
+
+Se preferir criar o project **manualmente** ou em **um repositório existente**:
+
+```bash
+bash ./scripts/setup-github-project.sh --repo-owner venha-pra-nuvem --repo-name meu-projeto
+```
+
 > **Nota sobre `specify bundle install`**: o CLI do Spec Kit resolve os
 > componentes de um bundle (`provides.presets/extensions/workflows`) **somente
 > através de um catálogo registrado** — o campo `source` do `bundle.yml` é só
@@ -218,6 +238,8 @@ speckit-vpndev-standards/
 ├── extensions/vpndev-backlog-sync/     # extension.yml + commands/
 ├── workflows/vpndev-full-cycle/        # workflow.yml
 ├── bundles/vpndev-project-bundle/      # bundle.yml
+├── scripts/
+│   └── setup-github-project.sh         # cria GitHub Project V2 com views padrão
 ├── templates/                         # arquivos para copiar em projetos consumidores
 │   ├── README-bundle-section.md
 │   ├── BROWNFIELD-SETUP-CHECKLIST.md
