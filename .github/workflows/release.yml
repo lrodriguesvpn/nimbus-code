@@ -23,25 +23,25 @@ jobs:
       - name: Empacotar preset vpndev-standards
         run: |
           cd presets/vpndev-standards
-          VERSION=$(grep -m1 'version:' preset.yml | sed 's/.*version:[[:space:]]*"\(.*\)"/\1/')
+          VERSION=$(grep -m1 -E '^[[:space:]]*version:' preset.yml | sed -E 's/.*"([0-9.]+)".*/\1/')
           zip -r "../../vpndev-standards-${VERSION}.zip" . -x ".*"
 
       - name: Empacotar extensão vpndev-backlog-sync
         run: |
           cd extensions/vpndev-backlog-sync
-          VERSION=$(grep -m1 'version:' extension.yml | sed 's/.*version:[[:space:]]*"\(.*\)"/\1/')
+          VERSION=$(grep -m1 -E '^[[:space:]]*version:' extension.yml | sed -E 's/.*"([0-9.]+)".*/\1/')
           zip -r "../../vpndev-backlog-sync-${VERSION}.zip" . -x ".*"
 
       - name: Empacotar workflow vpndev-full-cycle
         run: |
           cd workflows/vpndev-full-cycle
-          VERSION=$(grep -m1 'version:' workflow.yml | sed 's/.*version:[[:space:]]*"\(.*\)"/\1/')
+          VERSION=$(grep -m1 -E '^[[:space:]]*version:' workflow.yml | sed -E 's/.*"([0-9.]+)".*/\1/')
           zip -r "../../vpndev-full-cycle-${VERSION}.zip" . -x ".*"
 
       - name: Empacotar bundle vpndev-project-bundle
         run: |
           cd bundles/vpndev-project-bundle
-          VERSION=$(grep -m1 'version:' bundle.yml | sed 's/.*version:[[:space:]]*"\(.*\)"/\1/')
+          VERSION=$(grep -m1 -E '^[[:space:]]*version:' bundle.yml | sed -E 's/.*"([0-9.]+)".*/\1/')
           zip -r "../../vpndev-project-bundle-${VERSION}.zip" . -x ".*"
 
       - name: Publicar GitHub Release

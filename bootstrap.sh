@@ -64,7 +64,7 @@ echo "→ Instalando workflow vpndev-full-cycle..."
 specify workflow add "$LOCAL_PATH/workflows/vpndev-full-cycle" \
   || echo "  (workflow já instalado — pulei; use 'specify workflow remove vpndev-full-cycle' antes para reinstalar)"
 
-BUNDLE_VERSION="$(grep -A2 '^bundle:' "$LOCAL_PATH/bundles/vpndev-project-bundle/bundle.yml" | grep 'version:' | head -1 | sed 's/.*version:[[:space:]]*"\(.*\)"/\1/')"
+BUNDLE_VERSION="$(grep -A4 '^bundle:' "$LOCAL_PATH/bundles/vpndev-project-bundle/bundle.yml" | grep -E '^\s*version:' | head -1 | sed -E 's/.*"([0-9.]+)".*/\1/')"
 echo ""
 echo "✅ Bundle vpndev-project-bundle v${BUNDLE_VERSION} aplicado com sucesso."
 echo "   Registre a versão instalada no README do projeto (ver seção 'Bundle VPN Dev' do template de README)."
