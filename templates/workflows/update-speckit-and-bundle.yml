@@ -8,11 +8,12 @@ name: Verificar atualizações do Spec Kit e do bundle VPN Dev
 # conforme a política em
 # https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards#versão-do-bundle-em-uso--política-de-atualização
 #
-# Requer o secret VPNDEV_STANDARDS_READ_TOKEN: um token (PAT clássico ou GitHub
-# App) com permissão de leitura em venha-pra-nuvem/speckit-vpndev-standards.
-# O GITHUB_TOKEN padrão só enxerga o próprio repositório — como
-# speckit-vpndev-standards é privado, a leitura do catalog.json precisa desse
-# token adicional configurado nos Secrets deste repositório.
+# Requer o secret VPNDEV_STANDARDS_READ_TOKEN: um PAT de qualquer membro da
+# organização venha-pra-nuvem (basta ser membro — speckit-vpndev-standards é
+# um repositório interno, não exige ser colaborador explícito dele). O
+# GITHUB_TOKEN padrão do workflow só enxerga o próprio repositório onde roda,
+# por isso a leitura do catalog.json em outro repo precisa desse token
+# adicional configurado nos Secrets deste repositório consumidor.
 
 on:
   schedule:

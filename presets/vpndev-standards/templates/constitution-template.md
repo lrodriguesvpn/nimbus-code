@@ -25,6 +25,16 @@
 
 ## Infraestrutura como Código
 
+- **Toda infraestrutura é código, sem exceção**: nenhum recurso em nuvem
+  (AWS, GCP ou Azure) é criado ou alterado manualmente via console/CLI em
+  ambiente compartilhado — sempre via IaC versionado e revisado em Pull
+  Request.
+- **Terraform é o framework padrão para os três provedores** (AWS, GCP e
+  Azure). Usar a ferramenta nativa do provedor (ex.: AWS CDK, Bicep/ARM,
+  Google Cloud Deployment Manager) só é permitido como **exceção
+  justificada**, registrada no Architecture Decision Log do `plan.md` da
+  feature que a introduziu — nunca como escolha silenciosa ou "porque o time
+  prefere".
 - Least privilege por padrão: nenhuma role/permissão de IAM ampla (ex.: `Owner`,
   `roles/editor`, papéis "básicos") sem justificativa explícita registrada no plano.
 - Versões de imagens base, actions de CI e providers Terraform devem ser fixadas
@@ -41,5 +51,30 @@
 - Achados de ferramentas de SAST/IaC scanning (ex.: CodeQL, Checkov, tflint)
   classificados como High/Critical bloqueiam o merge, salvo supressão documentada
   com justificativa técnica explícita no próprio código (comentário de skip).
+- Todo Pull Request passa por revisão de qualidade de código assistida por IA
+  (GitHub Copilot code review) antes do merge, **em complemento** à revisão
+  humana já exigida acima — nunca em substituição a ela. Findings High/Critical
+  do Copilot bloqueiam o merge sob a mesma régua do SAST/IaC scanning.
+- Cada critério de aceitação declarado em `spec.md` deve ter, sempre que
+  tecnicamente viável, um teste de integração automatizado correspondente — não
+  apenas cobertura por testes unitários isolados. Exceções (ex.: dependência
+  externa indisponível em CI) exigem justificativa explícita registrada no
+  `plan.md`.
+- Observabilidade (logs estruturados, métricas e alertas) é obrigatória para
+  todo componente/serviço novo ou alterado de forma relevante — não é opcional.
+- Em arquiteturas de microsserviços/distribuídas: propagação de correlation-id
+  (ou trace-id via W3C Trace Context) ponta a ponta entre serviços, e
+  visibilidade documentada da orquestração/coreografia entre eles, são
+  obrigatórias.
+- Todo bug identificado (em CI, produção ou revisão de código) que não for
+  corrigido dentro da própria tarefa em andamento deve ser aberto
+  automaticamente como Issue no GitHub e atribuído ao Copilot coding agent —
+  nunca deixado apenas registrado em log/alerta sem rastreamento formal.
+
+Ver o detalhamento técnico de como aplicar estas regras (como solicitar a
+revisão do Copilot, padrão de correlation-id/tracing, e como automatizar a
+abertura/atribuição de bugs) em
+[`docs/ai-code-quality-and-observability.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/ai-code-quality-and-observability.md)
+do repositório `speckit-vpndev-standards`.
 
 {CORE_TEMPLATE}

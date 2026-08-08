@@ -68,3 +68,38 @@ BUNDLE_VERSION="$(grep -A4 '^bundle:' "$LOCAL_PATH/bundles/vpndev-project-bundle
 echo ""
 echo "✅ Bundle vpndev-project-bundle v${BUNDLE_VERSION} aplicado com sucesso."
 echo "   Registre a versão instalada no README do projeto (ver seção 'Bundle VPN Dev' do template de README)."
+echo ""
+
+# Criar GitHub Project com as views padrão (opcional, requer GH CLI autenticado)
+if command -v gh >/dev/null 2>&1; then
+  echo ""
+  echo "→ Configurando GitHub Project V2 com views padrão..."
+  
+  # Detectar repo owner/name a partir do git remote
+  if GIT_REMOTE=$(git config --get remote.origin.url 2>/dev/null); then
+    # Extrai owner/repo de URLs como:
+    # - https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/meu-repo.git
+    # - git@venha-pra-nuvem.ghe.com:venha-pra-nuvem/meu-repo.git
+    if [[ "$GIT_REMOTE" =~ ^(https://|git@).*[:/]([^/]+)/([^/]+?)(\.git)?$ ]]; then
+      REPO_OWNER="${BASH_REMATCH[2]}"
+      REPO_NAME="${BASH_REMATCH[3]}"
+      
+      # Chamar script de setup de project
+      SETUP_SCRIPT="$LOCAL_PATH/scripts/setup-github-project.sh"
+      if [[ -f "$SETUP_SCRIPT" ]]; then
+        bash "$SETUP_SCRIPT" --repo-owner "$REPO_OWNER" --repo-name "$REPO_NAME" || \
+          echo "  ⚠ Não consegui criar o GitHub Project automaticamente. Execute manualmente:"
+          echo "    bash $SETUP_SCRIPT --repo-owner $REPO_OWNER --repo-name $REPO_NAME"
+      else
+        echo "  ⚠ Script setup-github-project.sh não encontrado"
+      fi
+    else
+      echo "  ⚠ Não consegui extrair owner/repo do git remote: $GIT_REMOTE"
+    fi
+  else
+    echo "  ⚠ Repositório git não configurado (remote.origin.url)"
+  fi
+else
+  echo "  ⚠ GH CLI não encontrado — pulando criação automática de GitHub Project"
+  echo "    Para criar manualmente, execute: ./scripts/setup-github-project.sh"
+fi
