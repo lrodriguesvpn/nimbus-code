@@ -1,0 +1,50 @@
+schema_version: "1.0"
+
+preset:
+  id: "vpndev-standards"
+  name: "VPN Dev — Padrões de Governança"
+  version: "1.0.0"
+  description: "Constituição base, gate de segurança/DevSecOps e framework de decisões de arquitetura padrão da VPN Dev, aplicados sobre os templates nativos do Spec Kit."
+  author: "VPN Dev"
+  repository: "https://github.com/venha-pra-nuvem/speckit-vpndev-standards"
+  license: "Proprietary"
+
+requires:
+  speckit_version: ">=0.16.0"
+
+provides:
+  templates:
+    # Envolve o template nativo de constituição com os princípios não-negociáveis
+    # da empresa. {CORE_TEMPLATE} preserva a estrutura de fábrica do Spec Kit por
+    # baixo — o preset só adiciona, nunca remove, o que o Spec Kit já oferece.
+    - type: "template"
+      name: "constitution-template"
+      file: "templates/constitution-template.md"
+      strategy: "wrap"
+      replaces: "constitution-template"
+      description: "Princípios não-negociáveis da VPN Dev, aplicados antes da constituição específica de cada projeto."
+
+    # Acrescenta o Security/DevSecOps Gate e o framework de decisões de
+    # arquitetura ao final do plan-template.md nativo, sem alterar as seções
+    # existentes (Technical Context, Constitution Check, Project Structure...).
+    - type: "template"
+      name: "plan-template"
+      file: "templates/plan-template.md"
+      strategy: "append"
+      replaces: "plan-template"
+      description: "Security/DevSecOps Gate e Architecture Decision Log padrão da VPN Dev."
+
+    # Acrescenta o checklist DevSecOps por tarefa ao final do tasks-template.md
+    # nativo, cobrindo os itens que hoje vivem soltos na skill devops-planning.
+    - type: "template"
+      name: "tasks-template"
+      file: "templates/tasks-template.md"
+      strategy: "append"
+      replaces: "tasks-template"
+      description: "Checklist de qualidade/segurança por tarefa de infraestrutura e deploy."
+
+tags:
+  - "governance"
+  - "security"
+  - "devsecops"
+  - "vpndev"

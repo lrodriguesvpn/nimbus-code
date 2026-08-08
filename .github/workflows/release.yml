@@ -1,0 +1,55 @@
+name: Release componentes VPN Dev
+
+# Empacota preset/extensão/workflow/bundle em .zip e publica como assets de uma
+# GitHub Release, na tag pushada. Os catalog.json (presets/, extensions/,
+# workflows/, bundles/) devem ser atualizados no MESMO PR que muda a versão,
+# antes de criar a tag — este workflow só empacota e publica, não decide versão.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Empacotar preset vpndev-standards
+        run: |
+          cd presets/vpndev-standards
+          VERSION=$(grep -m1 'version:' preset.yml | sed 's/.*version:[[:space:]]*"\(.*\)"/\1/')
+          zip -r "../../vpndev-standards-${VERSION}.zip" . -x ".*"
+
+      - name: Empacotar extensão vpndev-backlog-sync
+        run: |
+          cd extensions/vpndev-backlog-sync
+          VERSION=$(grep -m1 'version:' extension.yml | sed 's/.*version:[[:space:]]*"\(.*\)"/\1/')
+          zip -r "../../vpndev-backlog-sync-${VERSION}.zip" . -x ".*"
+
+      - name: Empacotar workflow vpndev-full-cycle
+        run: |
+          cd workflows/vpndev-full-cycle
+          VERSION=$(grep -m1 'version:' workflow.yml | sed 's/.*version:[[:space:]]*"\(.*\)"/\1/')
+          zip -r "../../vpndev-full-cycle-${VERSION}.zip" . -x ".*"
+
+      - name: Empacotar bundle vpndev-project-bundle
+        run: |
+          cd bundles/vpndev-project-bundle
+          VERSION=$(grep -m1 'version:' bundle.yml | sed 's/.*version:[[:space:]]*"\(.*\)"/\1/')
+          zip -r "../../vpndev-project-bundle-${VERSION}.zip" . -x ".*"
+
+      - name: Publicar GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            vpndev-standards-*.zip
+            vpndev-backlog-sync-*.zip
+            vpndev-full-cycle-*.zip
+            vpndev-project-bundle-*.zip
+          generate_release_notes: true

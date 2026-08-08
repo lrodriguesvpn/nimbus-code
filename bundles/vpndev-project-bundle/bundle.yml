@@ -1,0 +1,36 @@
+schema_version: "1.0"
+
+bundle:
+  id: "vpndev-project-bundle"
+  name: "VPN Dev — Modelo de Projeto"
+  version: "1.0.0"
+  role: "all"
+  description: "Bundle de bootstrap para novos repositórios da VPN Dev: aplica o preset de governança/DevSecOps, a extensão de sincronização de backlog e o workflow de ciclo completo com gate de segurança."
+  author: "VPN Dev"
+  license: "Proprietary"
+
+requires:
+  speckit_version: ">=0.16.0"
+
+provides:
+  presets:
+    - id: "vpndev-standards"
+      version: "1.0.0"
+      source: "https://github.com/venha-pra-nuvem/speckit-vpndev-standards"
+      priority: 5
+      strategy: "wrap"
+
+  extensions:
+    - id: "vpndev-backlog-sync"
+      version: "1.0.0"
+      source: "https://github.com/venha-pra-nuvem/speckit-vpndev-standards"
+
+  workflows:
+    - id: "vpndev-full-cycle"
+      version: "1.0.0"
+      source: "https://github.com/venha-pra-nuvem/speckit-vpndev-standards"
+
+tags:
+  - "vpndev"
+  - "governance"
+  - "bootstrap"

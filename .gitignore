@@ -1,0 +1,7 @@
+# Artefatos empacotados localmente (gerados por bootstrap/testes ou pelo workflow de release)
+*.zip
+
+# Estado local de testes do Spec Kit, se alguém rodar `specify init` dentro deste repo por engano
+.specify/extensions/.cache/
+.specify/presets/.cache/
+.specify/workflows/.cache/
