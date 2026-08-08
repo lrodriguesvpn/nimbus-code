@@ -210,6 +210,8 @@ Abordagem **low-risk**:
 
 1. **Dia 1**: instale o Spec Kit (section 2.1-2.2 do `developer-guide.md`).
    Gere constituição profunda. Nenhuma feature nova ainda.
+   - Execute também `bash ./scripts/setup-github-project.sh` para criar o
+     GitHub Project com views padrão (facilita rastreamento de features).
 2. **Semana 1**: próxima feature que chegar, use Spec Kit completo (spec →
    plan → tasks → implement → converge). Essa se torna a "prova de conceito".
 3. **Dia 7 forward**: features subsequentes usam Spec Kit. As antigos features

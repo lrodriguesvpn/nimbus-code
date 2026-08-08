@@ -37,8 +37,32 @@ curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-st
 ```
 
 Isso já deixa o projeto com `specify init` feito e o bundle
-`vpndev-project-bundle` (preset + extensão + workflow) instalado. Depois disso,
-pule direto para a seção 3 para começar sua primeira feature.
+`vpndev-project-bundle` (preset + extensão + workflow) instalado.
+
+### 1.1. GitHub Project criado automaticamente
+
+Se você tiver o `gh` CLI instalado e autenticado, o `bootstrap.sh` também cria
+**automaticamente um GitHub Project V2** com o nome `{repo-name} — Spec Kit Roadmap`.
+
+O project já vem com **3 views padrão** (copiadas do IOX-CROWDFUNDINGPAAS):
+
+- **Board por Epic** — organize issues por épicas (personalizável)
+- **Board por Prioridade** — organize por prioridade (personalizável)
+- **Tabela — P0 Blocker** — filtro pré-pronto para bloqueadores críticos (P0-blocker)
+
+Depois do bootstrap, você pode:
+
+1. Abrir o project (link será exibido no output do script)
+2. Customizar filtros, grupos e colunas conforme sua necessidade
+3. Ligar o project ao repositório (Settings do repo → Project → habilitar)
+
+**Se o `gh` CLI não estiver disponível** ou você preferir criar manualmente, rode:
+
+```bash
+bash ./scripts/setup-github-project.sh --repo-owner venha-pra-nuvem --repo-name seu-repo
+```
+
+Depois disso, pule direto para a seção 3 para começar sua primeira feature.
 
 ## 2. Repositório existente sem Spec Kit (brownfield)
 

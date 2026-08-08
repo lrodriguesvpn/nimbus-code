@@ -26,6 +26,8 @@ Status: ⏳ Em andamento
 - [ ] Repositório clonado em `[PLACEHOLDER: caminho local]`
 - [ ] Executado: `cd [PLACEHOLDER: caminho] && specify init --here --integration copilot --force`
 - [ ] Executado: `curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/bootstrap.sh | bash`
+- [ ] GitHub Project V2 criado automaticamente pelo bootstrap (URL: [PLACEHOLDER: link do project])
+- [ ] GitHub Project customizado conforme necessário (filtros, grupos, colunas)
 - [ ] `.specify/` adicionado ao `.gitignore`? (se necessário) — ou, preferência: versione `.specify/features/`, ignore `.specify/memory/`
 - [ ] README do projeto atualizado com a seção de Spec Kit (copie de [`templates/README-bundle-section.md`](../../templates/README-bundle-section.md))
 
