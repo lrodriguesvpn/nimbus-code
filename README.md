@@ -105,6 +105,40 @@ Se preferir criar o project **manualmente** ou em **um repositório existente**:
 bash ./scripts/setup-github-project.sh --repo-owner venha-pra-nuvem --repo-name meu-projeto
 ```
 
+### Bônus: Labels de priorização e desenvolvimento autônomo
+
+O `bootstrap.sh` também **cria/atualiza automaticamente a taxonomia de
+labels** do bundle (via `scripts/setup-github-labels.sh`): `priority:P0-blocker`
+a `P3-low`, `complexity:S0`–`S4`, `type:bug/feature/chore/docs`,
+`agent:autonomous-ok`/`agent:needs-human` e `status:needs-triage`/`blocked`.
+
+O label `agent:autonomous-ok` dispara automaticamente a atribuição da issue
+ao GitHub Copilot coding agent (via
+[`.github/workflows/agent-auto-assign.yml`](.github/workflows/agent-auto-assign.yml)),
+com guardrails que impedem atribuição autônoma em issues `agent:needs-human`,
+`complexity:S4`, `status:blocked` ou já atribuídas. Requer o secret
+`COPILOT_AGENT_ASSIGN_TOKEN` configurado no repositório consumidor — ver guia
+completo, incluindo como evitar gatilhos duplicados com a feature nativa
+"Copilot Automations" do GitHub, em
+[`docs/label-taxonomy-and-autonomous-dev.md`](docs/label-taxonomy-and-autonomous-dev.md).
+
+Para criar/atualizar os labels manualmente em qualquer repositório:
+
+```bash
+bash ./scripts/setup-github-labels.sh --repo-owner venha-pra-nuvem --repo-name meu-projeto
+```
+
+### Bônus: verificação automática de atualização do Spec Kit/bundle
+
+O `bootstrap.sh` também copia
+[`templates/workflows/update-speckit-and-bundle.yml`](templates/workflows/update-speckit-and-bundle.yml)
+para `.github/workflows/` do projeto consumidor. Esse workflow roda
+semanalmente + sob demanda e abre/atualiza uma issue avisando quando há uma
+versão mais nova do Spec Kit CLI ou do bundle — nunca aplica a atualização
+sozinho (ver [Versão do Bundle em uso — Política de Atualização](#versão-do-bundle-em-uso--política-de-atualização)).
+Requer o secret `VPNDEV_STANDARDS_READ_TOKEN` configurado no projeto
+consumidor.
+
 > **Nota sobre `specify bundle install`**: o CLI do Spec Kit resolve os
 > componentes de um bundle (`provides.presets/extensions/workflows`) **somente
 > através de um catálogo registrado** — o campo `source` do `bundle.yml` é só
@@ -130,12 +164,14 @@ Fluxo de atualização:
 2. Uma nova versão do bundle é publicada (ver [Versionamento](#versionamento))
    **somente** depois da aprovação — nunca antes.
 3. Cada projeto consumidor recebe, semanalmente, uma **issue automática**
-   (workflow `update-speckit-and-bundle.yml`, ver
+   (workflow `update-speckit-and-bundle.yml`, instalado automaticamente em
+   `.github/workflows/` pelo `bootstrap.sh` — ver
    [`templates/workflows/`](templates/workflows/)) comparando sua versão
    instalada com a mais recente publicada aqui — **essa issue nunca aplica a
    atualização sozinha**, apenas avisa e traz os comandos exatos a rodar; a
    atualização em si sempre vira um PR normal, revisado como qualquer outra
-   mudança de dependência.
+   mudança de dependência. Requer o secret `VPNDEV_STANDARDS_READ_TOKEN`
+   (PAT de qualquer membro da organização) configurado no projeto consumidor.
 
 Todo projeto que consome este bundle deve documentar, no seu próprio README, a
 versão instalada — ver o modelo em
@@ -246,7 +282,8 @@ speckit-vpndev-standards/
 ├── workflows/vpndev-full-cycle/        # workflow.yml
 ├── bundles/vpndev-project-bundle/      # bundle.yml
 ├── scripts/
-│   └── setup-github-project.sh         # cria GitHub Project V2 com views padrão
+│   ├── setup-github-project.sh         # cria GitHub Project V2 com views padrão
+│   └── setup-github-labels.sh          # cria/atualiza taxonomia de labels (priority/complexity/type/agent/status)
 ├── templates/                         # arquivos para copiar em projetos consumidores
 │   ├── README-bundle-section.md
 │   ├── BROWNFIELD-SETUP-CHECKLIST.md
@@ -257,7 +294,12 @@ speckit-vpndev-standards/
 │   ├── developer-guide.md
 │   ├── extension-candidates.md
 │   ├── ai-code-quality-and-observability.md
+│   ├── label-taxonomy-and-autonomous-dev.md
 │   └── mcp-and-bundles.md
 ├── bootstrap.sh
-└── .github/workflows/release.yml
+└── .github/workflows/
+    ├── release.yml
+    ├── agent-auto-assign.yml           # auto-assign do Copilot coding agent via label agent:autonomous-ok
+    ├── graph-guard.yml
+    └── dependency-review.yml
 ```

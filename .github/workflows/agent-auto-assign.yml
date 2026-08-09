@@ -1,0 +1,126 @@
+name: Agent Auto-Assign — Desenvolvimento Autônomo por Label
+
+# Quando o label `agent:autonomous-ok` é aplicado a uma issue, atribui
+# automaticamente o GitHub Copilot coding agent para implementá-la sem
+# intervenção humana prévia — respeitando as guardrails abaixo.
+#
+# Instalar este workflow em cada repositório do projeto:
+#   cp .github/workflows/agent-auto-assign.yml <repo>/.github/workflows/
+#
+# Pré-requisitos:
+#   1. Rodar scripts/setup-github-labels.sh no repositório (cria a taxonomia
+#      de labels, incluindo agent:autonomous-ok e agent:needs-human).
+#   2. GitHub Copilot coding agent habilitado no repositório/organização.
+#   3. Secret COPILOT_AGENT_ASSIGN_TOKEN: um Personal Access Token (classic,
+#      escopo `repo`, ou fine-grained com read/write em actions+contents+
+#      issues+pull requests) de um usuário com acesso de escrita ao repo.
+#      A API de atribuição de issues ao Copilot exige um token
+#      "user-to-server" — o GITHUB_TOKEN padrão do workflow (server-to-server)
+#      NÃO é aceito por essa API, então este secret adicional é obrigatório.
+#      Sem ele, o workflow falha explicitamente (não falha silenciosamente).
+#
+# Guardrails (ver docs/label-taxonomy-and-autonomous-dev.md):
+#   - NUNCA atribui se a issue também tiver o label `agent:needs-human`.
+#   - NUNCA atribui se a issue tiver `complexity:S4` (exige revisão humana
+#     por princípio da constituição VPN Dev — S4 nunca é 100% autônomo).
+#   - NUNCA atribui se a issue já tiver algum assignee (evita reatribuir
+#     trabalho que já está em andamento, humano ou agente).
+#   - NUNCA atribui se a issue tiver `status:blocked`.
+#   - A ordem de prioridade (priority:P0-blocker > P1-high > P2-medium >
+#     P3-low) é passada como contexto em `custom_instructions` para o agente
+#     entender onde este item se encaixa na fila, mas NÃO controla o
+#     disparo em si — cada issue com agent:autonomous-ok dispara seu próprio
+#     auto-assign assim que o label é aplicado.
+#
+# ⚠️ Antes de instalar: este é o ÚNICO gatilho versionado deste bundle para
+# auto-assign do Copilot — não existe outro label/script/workflow equivalente
+# neste repositório. Porém confira a aba "Agents → Automations" (feature
+# nativa do GitHub, configurada na UI e NÃO versionada em git, privada por
+# criador) antes de habilitar, para não ter dois gatilhos rodando em paralelo
+# na mesma issue. Ver docs/label-taxonomy-and-autonomous-dev.md seção 6.
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  auto-assign-copilot:
+    name: Atribuir Copilot coding agent
+    runs-on: ubuntu-latest
+    if: github.event.label.name == 'agent:autonomous-ok'
+    steps:
+      - name: Verificar guardrails e coletar labels da issue
+        id: guard
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LABELS=$(gh api "repos/${{ github.repository }}/issues/${{ github.event.issue.number }}" --jq '[.labels[].name] | join(",")')
+          ASSIGNEES=$(gh api "repos/${{ github.repository }}/issues/${{ github.event.issue.number }}" --jq '[.assignees[].login] | join(",")')
+          echo "labels=$LABELS" >> "$GITHUB_OUTPUT"
+          echo "assignees=$ASSIGNEES" >> "$GITHUB_OUTPUT"
+
+          SKIP=""
+          if echo ",$LABELS," | grep -q ",agent:needs-human,"; then
+            SKIP="a issue tem agent:needs-human (exige humano no loop)"
+          elif echo ",$LABELS," | grep -q ",complexity:S4,"; then
+            SKIP="a issue tem complexity:S4 (revisão humana obrigatória pela constituição VPN Dev)"
+          elif echo ",$LABELS," | grep -q ",status:blocked,"; then
+            SKIP="a issue tem status:blocked"
+          elif [[ -n "$ASSIGNEES" ]]; then
+            SKIP="a issue já tem assignee(s): $ASSIGNEES"
+          fi
+          echo "skip=$SKIP" >> "$GITHUB_OUTPUT"
+
+      - name: Comentar e abortar (guardrail violada)
+        if: steps.guard.outputs.skip != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue comment "${{ github.event.issue.number }}" \
+            --repo "${{ github.repository }}" \
+            --body "🤖 **Auto-assign ao Copilot coding agent não disparado**: ${{ steps.guard.outputs.skip }}. Remova o(s) bloqueio(s) e reaplique o label \`agent:autonomous-ok\` se ainda quiser desenvolvimento autônomo, ou atribua manualmente."
+
+      - name: Extrair prioridade para contexto do agente
+        id: priority
+        if: steps.guard.outputs.skip == ''
+        run: |
+          LABELS="${{ steps.guard.outputs.labels }}"
+          PRIORITY="não classificada — trate como priority:P2-medium por padrão"
+          for p in P0-blocker P1-high P2-medium P3-low; do
+            if echo ",$LABELS," | grep -q ",priority:${p},"; then
+              PRIORITY="priority:${p}"
+              break
+            fi
+          done
+          echo "value=$PRIORITY" >> "$GITHUB_OUTPUT"
+
+      - name: Atribuir Copilot coding agent à issue
+        if: steps.guard.outputs.skip == ''
+        env:
+          GH_TOKEN: ${{ secrets.COPILOT_AGENT_ASSIGN_TOKEN }}
+        run: |
+          if [[ -z "${GH_TOKEN:-}" ]]; then
+            echo "::error::Secret COPILOT_AGENT_ASSIGN_TOKEN não configurado. A API de atribuição ao Copilot exige um token user-to-server (PAT), o GITHUB_TOKEN padrão não é aceito. Ver comentário no topo deste workflow."
+            exit 1
+          fi
+
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/assignees" \
+            -f "assignees[]=copilot-swe-agent[bot]" \
+            -f "agent_assignment[custom_instructions]=Prioridade desta issue no backlog: ${{ steps.priority.outputs.value }}. Siga os gates obrigatórios do preset vpndev-standards (Security/DevSecOps Gate, Module Dependency Graph, SLO Gate) descritos em copilot-instructions.md antes de abrir o PR."
+
+      - name: Confirmar atribuição
+        if: steps.guard.outputs.skip == ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue comment "${{ github.event.issue.number }}" \
+            --repo "${{ github.repository }}" \
+            --body "🤖 Issue atribuída ao GitHub Copilot coding agent para desenvolvimento autônomo (${{ steps.priority.outputs.value }}). Acompanhe o progresso na aba **Agents** do repositório."

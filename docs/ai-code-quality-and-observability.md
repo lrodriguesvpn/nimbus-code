@@ -109,15 +109,23 @@ Duas formas de aplicar, conforme o ponto de origem do bug:
   Issue normalmente e usar o botão **"Assign to Copilot"** em Assignees — é a
   forma suportada nativamente pelo GitHub para delegar o bug ao Copilot cloud
   agent, que then pesquisa o repositório, cria um plano e abre um PR.
-- **Automatizado (ex.: falha de teste em CI, alerta de produção)**: um step de
-  workflow do GitHub Actions cria a Issue via `gh issue create` (com título,
-  stack trace/logs relevantes e labels, ex.: `bug`, `auto-filed`); a atribuição
-  ao Copilot pode ser feita na sequência por uma automação que tenha acesso à
-  mesma capacidade exposta pela ferramenta MCP `assign_copilot_to_issue` do
-  GitHub MCP Server (é a via recomendada neste ambiente, já configurada) — evite
-  tentar atribuir via `assignees` da REST API pura, pois o Copilot não é um
-  colaborador comum e a atribuição usa o mecanismo dedicado do recurso "Assign
-  to Copilot".
+- **Automatizado por label (recomendado para este bundle)**: aplicar o label
+  `agent:autonomous-ok` dispara o workflow
+  [`.github/workflows/agent-auto-assign.yml`](../.github/workflows/agent-auto-assign.yml),
+  que atribui o Copilot coding agent via REST API (`POST
+  /repos/{owner}/{repo}/issues/{issue_number}/assignees` com
+  `assignees: ["copilot-swe-agent[bot]"]`) — endpoint oficialmente suportado
+  para esse fim, desde que autenticado com um token **user-to-server** (PAT),
+  nunca o `GITHUB_TOKEN` padrão do workflow (server-to-server, rejeitado por
+  essa API). Ver taxonomia completa de labels, guardrails e ordenamento por
+  prioridade em
+  [`docs/label-taxonomy-and-autonomous-dev.md`](label-taxonomy-and-autonomous-dev.md).
+- **Automatizado ad-hoc (ex.: falha de teste em CI, alerta de produção)**: um
+  step de workflow do GitHub Actions cria a Issue via `gh issue create` (com
+  título, stack trace/logs relevantes e labels, ex.: `type:bug`,
+  `agent:autonomous-ok`) — a issue já nasce marcada para acionar o auto-assign
+  acima, ou pode ser atribuída na hora via a mesma ferramenta MCP
+  `assign_copilot_to_issue` do GitHub MCP Server, se disponível no ambiente.
 - Rastreado no `plan.md` pela linha "Gestão de bugs" do novo gate, e por tarefa
   no checklist do `tasks.md`.
 

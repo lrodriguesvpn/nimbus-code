@@ -64,6 +64,20 @@ echo "→ Instalando workflow vpndev-full-cycle..."
 specify workflow add "$LOCAL_PATH/workflows/vpndev-full-cycle" \
   || echo "  (workflow já instalado — pulei; use 'specify workflow remove vpndev-full-cycle' antes para reinstalar)"
 
+echo "→ Instalando GitHub Action de verificação de atualização (Spec Kit + bundle VPN Dev)..."
+UPDATE_CHECK_SRC="$LOCAL_PATH/templates/workflows/update-speckit-and-bundle.yml"
+if [[ -f "$UPDATE_CHECK_SRC" ]]; then
+  mkdir -p "$WORKDIR/.github/workflows"
+  cp "$UPDATE_CHECK_SRC" "$WORKDIR/.github/workflows/update-speckit-and-bundle.yml"
+  echo "  ✅ .github/workflows/update-speckit-and-bundle.yml instalado."
+  echo "  ℹ Roda semanalmente + sob demanda; nunca aplica atualização sozinho, só abre/atualiza"
+  echo "    uma issue de aviso. Requer o secret VPNDEV_STANDARDS_READ_TOKEN (PAT de qualquer"
+  echo "    membro da organização venha-pra-nuvem) — configure em Settings → Secrets and"
+  echo "    variables → Actions deste repositório. Ver 'Versão do Bundle em uso' no README."
+else
+  echo "  ⚠ Template update-speckit-and-bundle.yml não encontrado em $UPDATE_CHECK_SRC"
+fi
+
 BUNDLE_VERSION="$(grep -A4 '^bundle:' "$LOCAL_PATH/bundles/vpndev-project-bundle/bundle.yml" | grep -E '^\s*version:' | head -1 | sed -E 's/.*"([0-9.]+)".*/\1/')"
 echo ""
 echo "✅ Bundle vpndev-project-bundle v${BUNDLE_VERSION} aplicado com sucesso."
@@ -93,6 +107,22 @@ if command -v gh >/dev/null 2>&1; then
       else
         echo "  ⚠ Script setup-github-project.sh não encontrado"
       fi
+
+      # Criar/atualizar taxonomia de labels (priority:*, complexity:*, type:*, agent:*, status:*)
+      echo ""
+      echo "→ Configurando taxonomia de labels (priorização e desenvolvimento autônomo)..."
+      LABELS_SCRIPT="$LOCAL_PATH/scripts/setup-github-labels.sh"
+      if [[ -f "$LABELS_SCRIPT" ]]; then
+        bash "$LABELS_SCRIPT" --repo-owner "$REPO_OWNER" --repo-name "$REPO_NAME" || \
+          echo "  ⚠ Não consegui criar os labels automaticamente. Execute manualmente:"
+          echo "    bash $LABELS_SCRIPT --repo-owner $REPO_OWNER --repo-name $REPO_NAME"
+        echo "  ℹ Para habilitar o auto-assign do Copilot coding agent via label"
+        echo "    'agent:autonomous-ok', copie .github/workflows/agent-auto-assign.yml"
+        echo "    para o repositório e configure o secret COPILOT_AGENT_ASSIGN_TOKEN."
+        echo "    Ver docs/label-taxonomy-and-autonomous-dev.md."
+      else
+        echo "  ⚠ Script setup-github-labels.sh não encontrado"
+      fi
     else
       echo "  ⚠ Não consegui extrair owner/repo do git remote: $GIT_REMOTE"
     fi
@@ -100,6 +130,7 @@ if command -v gh >/dev/null 2>&1; then
     echo "  ⚠ Repositório git não configurado (remote.origin.url)"
   fi
 else
-  echo "  ⚠ GH CLI não encontrado — pulando criação automática de GitHub Project"
+  echo "  ⚠ GH CLI não encontrado — pulando criação automática de GitHub Project e labels"
   echo "    Para criar manualmente, execute: ./scripts/setup-github-project.sh"
+  echo "    e: ./scripts/setup-github-labels.sh"
 fi

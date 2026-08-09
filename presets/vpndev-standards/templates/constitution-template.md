@@ -91,6 +91,25 @@
 - Features S4 exigem label `complexity:S4` no PR e revisão humana — nunca
   apenas revisão automática.
 
+## Priorização e Desenvolvimento Autônomo (Labels)
+
+- Todo projeto deve manter a taxonomia de labels do bundle VPN Dev criada por
+  `scripts/setup-github-labels.sh`: `priority:P0-blocker` a `P3-low`,
+  `complexity:S0`–`S4`, `type:bug/feature/chore/docs`,
+  `agent:autonomous-ok`/`agent:needs-human` e
+  `status:needs-triage`/`status:blocked`.
+- **Ordenamento do backlog** é sempre por `priority:*`
+  (`P0-blocker` > `P1-high` > `P2-medium` > `P3-low`), excluindo itens
+  `status:blocked` ou `status:needs-triage` da fila até serem triados.
+- **Desenvolvimento autônomo** (atribuição automática ao Copilot coding agent
+  sem supervisão humana constante) só é permitido quando a issue tem o label
+  `agent:autonomous-ok` **e não tem** nenhum dos seguintes: `agent:needs-human`,
+  `complexity:S4` ou `status:blocked`. `complexity:S4` bloqueia autonomia
+  **sempre**, reforçando a regra acima de revisão humana obrigatória para S4.
+- Ver detalhamento completo (taxonomia, guardrails do workflow de auto-assign
+  e como evitar gatilhos duplicados) em
+  [`docs/label-taxonomy-and-autonomous-dev.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/label-taxonomy-and-autonomous-dev.md).
+
 ## Release e Feature Flags
 
 - **Deploy desacoplado de release é o padrão**: features S3/S4 devem chegar a

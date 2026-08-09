@@ -75,6 +75,33 @@ Antes de `/speckit-tasks`, todos os seguintes gates devem estar aprovados no `pl
 
 ---
 
+## Priorização e Labels (Desenvolvimento Autônomo)
+
+Este projeto usa uma taxonomia de labels padrão do bundle VPN Dev para ordenar
+o backlog e decidir o que pode ser trabalhado por agente sem supervisão
+humana constante. Instalada via `scripts/setup-github-labels.sh`.
+
+- **Ordem de prioridade**: `priority:P0-blocker` > `priority:P1-high` >
+  `priority:P2-medium` > `priority:P3-low`. Ao escolher a próxima issue para
+  trabalhar, sempre puxe a de maior prioridade disponível (que não esteja
+  `status:blocked` ou `status:needs-triage`).
+- **Antes de iniciar trabalho autônomo numa issue**, verifique:
+  - Ela tem o label `agent:autonomous-ok`? Se não, trate como trabalho que
+    precisa de acompanhamento humano mais próximo.
+  - Ela **não** tem `agent:needs-human`? Esse label sempre bloqueia,
+    independente de qualquer outro.
+  - Ela **não** tem `complexity:S4`? S4 nunca é autônomo — exige revisão
+    humana (ver escala acima).
+  - Ela **não** tem `status:blocked`?
+- Em repositórios com o workflow `agent-auto-assign.yml` instalado, essas
+  checagens já acontecem automaticamente quando `agent:autonomous-ok` é
+  aplicado — mas ao decidir manualmente qual issue puxar (ex.: ao planejar
+  seu próprio trabalho), aplique a mesma lógica.
+- Guia completo, incluindo como evitar gatilhos duplicados de auto-assign:
+  `docs/label-taxonomy-and-autonomous-dev.md`.
+
+---
+
 ## Estratégia de Release e Feature Flags
 
 - Toda feature S3/S4 deve chegar a produção atrás de feature flag, canary ou
@@ -106,3 +133,4 @@ Antes de `/speckit-tasks`, todos os seguintes gates devem estar aprovados no `pl
 - [Guia do Dev VPN Dev](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/developer-guide.md)
 - [Seleção de Modelos por Complexidade](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/ai-code-quality-and-observability.md#7-seleção-de-modelo-por-complexidade-s0s4)
 - [Grafos de Módulos — Guia](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/module-graphs.md)
+- [Labels — Priorização e Desenvolvimento Autônomo](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/label-taxonomy-and-autonomous-dev.md)

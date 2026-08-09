@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-08-09T00:00:00Z",
+  "updated_at": "2026-08-09T12:23:00Z",
   "catalog_url": "https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/presets/catalog.json",
   "presets": {
     "vpndev-standards": {
       "name": "VPN Dev — Padrões de Governança",
       "id": "vpndev-standards",
-      "version": "1.1.0",
-      "description": "Constituição base, gate de segurança/DevSecOps e framework de decisões de arquitetura padrão da VPN Dev.",
+      "version": "1.2.0",
+      "description": "Constituição base, gate de segurança/DevSecOps, taxonomia de labels de priorização/desenvolvimento autônomo e framework de decisões de arquitetura padrão da VPN Dev.",
       "author": "VPN Dev",
-      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/releases/download/v1.1.0/vpndev-standards-1.1.0.zip",
+      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/releases/download/v1.2.0/vpndev-standards-1.2.0.zip",
       "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards",
       "license": "Proprietary",
       "requires": {
         "speckit_version": ">=0.16.0"
       },
-      "tags": ["governance", "security", "devsecops", "vpndev"]
+      "tags": ["governance", "security", "devsecops", "vpndev", "labels", "prioritization", "autonomous-development"]
     }
   }
 }

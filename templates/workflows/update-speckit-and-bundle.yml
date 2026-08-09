@@ -89,5 +89,9 @@ jobs:
           if [ -n "$EXISTING" ]; then
             gh issue comment "$EXISTING" --body-file /tmp/issue-body.md
           else
-            gh issue create --title "Verificação semanal — Spec Kit / Bundle VPN Dev" --body-file /tmp/issue-body.md --label "dependencies"
+            # Tenta com a taxonomia completa (requer scripts/setup-github-labels.sh já
+            # aplicado); se os labels type:chore/status:needs-triage ainda não existirem
+            # neste repositório, cai para o label padrão "dependencies" apenas.
+            gh issue create --title "Verificação semanal — Spec Kit / Bundle VPN Dev" --body-file /tmp/issue-body.md --label "dependencies,type:chore,status:needs-triage" \
+              || gh issue create --title "Verificação semanal — Spec Kit / Bundle VPN Dev" --body-file /tmp/issue-body.md --label "dependencies"
           fi
