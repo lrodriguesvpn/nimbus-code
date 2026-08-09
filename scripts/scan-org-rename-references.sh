@@ -54,7 +54,14 @@ collect_query() {
   local page=1
   while true; do
     local response
-    response="$(gh api search/code -f q="$query" -F per_page=100 -F page="$page")"
+    if ! response="$(gh api search/code -f q="$query" -F per_page=100 -F page="$page" 2>&1)"; then
+      echo "❌ Falha ao consultar GitHub Code Search para query: $query" >&2
+      echo "$response" >&2
+      if echo "$response" | grep -q "HTTP 403"; then
+        echo "🔐 Verifique permissões do token do gh (Code Search/leitura na organização)." >&2
+      fi
+      exit 1
+    fi
 
     local count
     count="$(echo "$response" | jq '.items | length')"
