@@ -3,7 +3,7 @@ schema_version: "1.0"
 workflow:
   id: "vpndev-full-cycle"
   name: "VPN Dev — Ciclo Completo com Gate DevSecOps"
-  version: "1.0.0"
+  version: "1.2.0"
   author: "VPN Dev"
   description: "Ciclo SDD completo (specify → plan → tasks → implement → converge) com gates de DevSecOps, grafo de módulos, release strategy e convergência pós-implementação."
 
