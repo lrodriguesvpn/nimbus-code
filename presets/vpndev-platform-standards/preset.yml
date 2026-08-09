@@ -3,7 +3,7 @@ schema_version: "1.0"
 preset:
   id: "vpndev-platform-standards"
   name: "VPN Dev — Padrões de Plataforma/Cliente (Ambientes e Legado)"
-  version: "0.1.0"
+  version: "0.1.1"
   description: "Constituição para repositórios de PLATAFORMA/CLIENTE/TENANT (ambientes, contas cloud, tenants M365/GWS/D365 e sistemas legados) — inventário multi-nuvem, regra de zero-diff como critério de verdade, proibição de aplicar mudança direta em produção, registro de schemas de bancos legados e o grafo de 2 níveis (plataforma ↔ workload). Complementar ao `vpndev-standards`: um repositório de plataforma usa ESTE preset; repositórios de projeto/workload continuam usando `vpndev-standards`."
   author: "VPN Dev"
   repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards"
@@ -54,29 +54,29 @@ provides:
 
     # Grafo de 2 níveis: recursos de plataforma (contas/tenants/assinaturas)
     # e quais repositórios de workload dependem de cada superfície.
-    - type: "artifact"
+    - type: "template"
       name: "platform-graph-yaml"
       file: "templates/feature-artifacts/platform-graph.yaml"
       description: "Grafo estruturado de recursos de plataforma, status de cobertura IaC e workloads dependentes."
 
-    - type: "artifact"
+    - type: "template"
       name: "platform-graph-md"
       file: "templates/feature-artifacts/platform-graph.md"
       description: "Grafo de plataforma em Mermaid para leitura humana (por nuvem/domínio e por workload dependente)."
 
     # Auditoria "as-is" por nuvem/domínio (Azure, AWS, GCP, GWS, M365, D365).
-    - type: "artifact"
+    - type: "template"
       name: "legacy-inventory"
       file: "templates/feature-artifacts/legacy-inventory.md"
       description: "Checklist de auditoria as-is por nuvem/domínio: recurso, ambiente, ferramenta usada hoje, status de IaC, criticidade, dono."
 
     # Registro de schemas de bancos de dados de sistemas legados.
-    - type: "artifact"
+    - type: "template"
       name: "db-schema-registry"
       file: "templates/feature-artifacts/db-schema-registry.md"
       description: "Catálogo de schemas (DDL, somente leitura) de bancos de sistemas legados versionados neste repositório."
 
-    - type: "artifact"
+    - type: "template"
       name: "copilot-instructions"
       file: "templates/project-root/copilot-instructions.md"
       description: "Instruções do Copilot para repositório de plataforma: regra de nunca aplicar mudança em produção, matriz de ferramentas por nuvem/domínio e fluxo de reconciliação."

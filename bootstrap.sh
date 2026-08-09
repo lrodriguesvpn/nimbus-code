@@ -138,6 +138,23 @@ else
   echo "  ⚠ Template reuse-catalog.yaml não encontrado em $REUSE_CATALOG_SRC"
 fi
 
+echo ""
+echo "→ Instalando instruções do Copilot (.github/copilot-instructions.md)..."
+COPILOT_INSTRUCTIONS_SRC="$LOCAL_PATH/presets/vpndev-standards/templates/project-root/copilot-instructions.md"
+if [[ -f "$COPILOT_INSTRUCTIONS_SRC" ]]; then
+  mkdir -p "$WORKDIR/.github"
+  if [[ -f "$WORKDIR/.github/copilot-instructions.md" ]]; then
+    echo "  ℹ .github/copilot-instructions.md já existe — pulei (não sobrescrevo customização local)."
+  else
+    cp "$COPILOT_INSTRUCTIONS_SRC" "$WORKDIR/.github/copilot-instructions.md"
+    echo "  ✅ .github/copilot-instructions.md instalado — preencha os placeholders"
+    echo "     (<project-name>, <org>/<repo>, stack) e mantenha atualizado a cada"
+    echo "     mudança de arquitetura."
+  fi
+else
+  echo "  ⚠ Template copilot-instructions.md não encontrado em $COPILOT_INSTRUCTIONS_SRC"
+fi
+
 BUNDLE_VERSION="$(grep -A4 '^bundle:' "$LOCAL_PATH/bundles/vpndev-project-bundle/bundle.yml" | grep -E '^\s*version:' | head -1 | sed -E 's/.*"([0-9.]+)".*/\1/')"
 echo ""
 echo "✅ Bundle vpndev-project-bundle v${BUNDLE_VERSION} aplicado com sucesso."
