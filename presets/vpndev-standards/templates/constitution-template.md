@@ -104,7 +104,7 @@
 
 - Todo projeto deve manter a taxonomia de labels do bundle VPN Dev criada por
   `scripts/setup-github-labels.sh`: `priority:P0-blocker` a `P3-low`,
-  `complexity:S0`–`S4`, `type:bug/feature/chore/docs`,
+  `complexity:S0`–`S4`, `type:bug/feature/chore/docs/incident`,
   `agent:autonomous-ok`/`agent:needs-human`,
   `status:needs-triage`/`status:blocked` e
   `dora:deployment-frequency`/`dora:lead-time`/`dora:change-failure-rate`/`dora:mttr`.
@@ -114,14 +114,37 @@
 - **Desenvolvimento autônomo** (atribuição automática ao Copilot coding agent
   sem supervisão humana constante) só é permitido quando a issue tem o label
   `agent:autonomous-ok` **e não tem** nenhum dos seguintes: `agent:needs-human`,
-  `complexity:S4` ou `status:blocked`. `complexity:S4` bloqueia autonomia
-  **sempre**, reforçando a regra acima de revisão humana obrigatória para S4.
+  `complexity:S4`, `type:incident` ou `status:blocked`. `complexity:S4` e
+  `type:incident` bloqueiam autonomia **sempre**, cada um reforçando sua
+  própria regra de revisão humana obrigatória (S4 por arquitetura/segurança;
+  `type:incident` por ser originada de ocorrência em produção/ambiente de
+  cliente — independente da complexidade S0–S4 daquela issue específica).
 - **Labels DORA** (`dora:*`) marcam qual dos 4 indicadores DORA (Deployment
   Frequency, Lead Time for Changes, Change Failure Rate, MTTR) uma issue
   impacta — usados para correlação/relatório, não disparam automação.
+  `type:incident` tipicamente carrega também `dora:mttr` (o tempo entre
+  abertura e fechamento da issue é a métrica de restauração de serviço).
 - Ver detalhamento completo (taxonomia, guardrails do workflow de auto-assign
   e como evitar gatilhos duplicados) em
   [`docs/label-taxonomy-and-autonomous-dev.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/label-taxonomy-and-autonomous-dev.md).
+
+## Ocorrências (CRM) e Issues de Infraestrutura
+
+- Ocorrências tratadas em N1 no CRM que exigirem uma mudança real no ambiente
+  (não resolvidas por procedimento padrão) devem virar uma **issue** no
+  repositório de infraestrutura correspondente, com o label `type:incident` e
+  o campo **"Ocorrência CRM (N1)"** do GitHub Project preenchido com a
+  URL/ID do atendimento original (rastreabilidade + cálculo de MTTR).
+- `type:incident` **sempre exige revisão humana**, independente da
+  complexidade S0–S4 — nunca é atribuída automaticamente ao Copilot coding
+  agent (ver guardrail acima).
+- Ausência de Terraform (ou outra IaC formal) **não é bloqueio** para usar o
+  Spec Kit em infraestrutura: a classificação S0–S4, o Module Dependency
+  Graph e o `impact-map.md` (S3/S4) se aplicam independente da ferramenta —
+  o `impact-map.md` fica ainda **mais crítico** sem `terraform plan` como
+  rede de segurança, pois é o único artefato documentando blast radius e
+  rollback antes de uma mudança manual. Documente a ferramenta real usada
+  (scripts, runbook, ClickOps documentado etc.) no `plan.md` da feature.
 
 ## Modelo Híbrido (Agente + Humano) e Custo Real
 

@@ -356,8 +356,62 @@ aquela quantidade de horas foi necessária, não *quanto* foi.
 
 ### Taxa de conversão horas → custo
 
-Este bundle não define uma taxa de custo/hora padrão (varia por projeto,
-região e nível do time) — cada projeto deve documentar a sua própria taxa
-(ex.: custo médio carregado por hora do time) no próprio `README.md` ou em um
-ADR, para que o cálculo de custo real (`tokens + horas × taxa`) seja
-reproduzível por qualquer pessoa que audite depois.
+Este bundle define uma tabela **padrão** de perfis e taxa/hora — ver
+[`docs/cost-profiles-and-rates.md`](../presets/vpndev-standards/templates/cost-profiles-and-rates.md)
+(copiado automaticamente para `docs/cost-profiles-and-rates.md` de cada
+projeto pelo `bootstrap.sh`): **Júnior R$ 40/h, Pleno R$ 60/h (padrão),
+Sênior R$ 90/h** — classificados por senioridade, não por tecnologia. Esses
+valores são um ponto de partida documentado, não uma trava — cada projeto
+pode e deve ajustar a tabela já copiada para refletir a realidade de custo do
+seu time (ver "Como ajustar por projeto" no próprio arquivo). O objetivo é
+que o cálculo de custo real (`tokens + horas × taxa do perfil`) seja sempre
+**reproduzível por qualquer pessoa que audite depois**, com a taxa
+documentada em algum lugar versionado — nunca "de cabeça".
+
+> ⚠️ Regra de uso: este dado existe só para compor custo real (FinOps), nunca
+> para avaliar performance individual — ver a "Regra de uso obrigatória" em
+> `cost-profiles-and-rates.md`.
+
+### Como o PMO acompanha o status (visão por projeto e visão global)
+
+Duas visões complementares, ambas nativas do GitHub (sem ferramenta externa):
+
+**Visão por projeto (um repositório):** o GitHub Project V2 do próprio
+repositório (criado por `scripts/setup-github-project.sh`, garantido por
+`.github/workflows/ensure-github-project.yml`). O PMO recebe acesso de
+leitura ao repositório/project e usa a aba **Insights** do Project para criar
+um gráfico nativo somando o campo `Horas Humanas` agrupado por
+`priority:*`, `type:*` ou sprint — sem automação adicional, só configurar o
+gráfico uma vez.
+
+**Visão global (portfólio, todos os repositórios):**
+
+1. **Backlog/prioridade consolidados** — `scripts/setup-pmo-org-project.sh`
+   cria (uma vez, por organização) um GitHub Project V2 de **portfólio**, que
+   agrega itens de múltiplos repositórios. Cada repositório que deve
+   alimentar esse board instala
+   [`templates/workflows/add-to-pmo-project.yml`](../templates/workflows/add-to-pmo-project.yml)
+   (usa a action [`actions/add-to-project`](https://github.com/actions/add-to-project)),
+   apontando para a URL desse project — toda issue/PR nova aparece
+   automaticamente lá, sem duplicar cadastro manual.
+2. **Custo real e Oportunidades D365 consolidados** — os campos `Horas
+   Humanas` e `Oportunidade D365` são **por-projeto** no modelo de dados do
+   GitHub Projects V2: o mesmo item em dois projects (o do repositório e o de
+   portfólio) tem valores de campo **independentes** em cada um — não somam
+   sozinhos no board de portfólio. Para consolidar de fato, rode
+   `scripts/pmo-cost-rollup.sh --repo owner/repo1 --repo owner/repo2 ...`
+   (ou `--repos-file`), que lê os valores direto de cada repositório via
+   GraphQL e gera uma tabela Markdown consolidada (total de horas e
+   contagem de itens vinculados a Oportunidade D365, por repositório e
+   geral). Rode manualmente quando o PMO precisar de um corte, ou agende
+   como workflow separado se o relatório precisar ser recorrente.
+
+### Vínculo com Oportunidade D365 (CRM)
+
+`scripts/setup-github-project.sh` cria também o campo de texto **"Oportunidade
+D365"** no Project V2 de cada repositório — cole ali a URL completa da
+Oportunidade no Dynamics 365 quando a issue/PR estiver vinculada a uma
+venda/negócio específico (deixe em branco para trabalho técnico interno sem
+vínculo comercial direto). Isso permite depois cruzar esforço técnico
+(tokens + horas humanas) com a oportunidade de origem, e é a mesma
+informação somada entre repositórios via `scripts/pmo-cost-rollup.sh` acima.

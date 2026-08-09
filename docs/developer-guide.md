@@ -39,16 +39,28 @@ curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-st
 Isso já deixa o projeto com `specify init` feito e o bundle
 `vpndev-project-bundle` (preset + extensão + workflow) instalado.
 
-### 1.1. GitHub Project criado automaticamente
+### 1.1. GitHub Project criado automaticamente (e garantido continuamente)
 
 Se você tiver o `gh` CLI instalado e autenticado, o `bootstrap.sh` também cria
 **automaticamente um GitHub Project V2** com o nome `{repo-name} — Spec Kit Roadmap`.
 
-O project já vem com **3 views padrão** (copiadas do IOX-CROWDFUNDINGPAAS):
+O project já vem com **3 views padrão** (copiadas do IOX-CROWDFUNDINGPAAS) e
+**2 campos customizados**:
 
 - **Board por Epic** — organize issues por épicas (personalizável)
 - **Board por Prioridade** — organize por prioridade (personalizável)
 - **Tabela — P0 Blocker** — filtro pré-pronto para bloqueadores críticos (P0-blocker)
+- **Campo "Horas Humanas"** (número) — custo real do modelo híbrido (ver
+  seção 8 de [`ai-code-quality-and-observability.md`](ai-code-quality-and-observability.md)
+  e [`cost-profiles-and-rates.md`](../presets/vpndev-standards/templates/cost-profiles-and-rates.md))
+- **Campo "Oportunidade D365"** (texto) — URL da Oportunidade no Dynamics 365 vinculada
+
+O `bootstrap.sh` também instala `.github/workflows/ensure-github-project.yml`,
+que roda semanalmente e **recria o Project automaticamente se ele não existir
+mais** — garante que todo repositório com este bundle sempre tenha o Project,
+mesmo que o passo automático do bootstrap tenha sido pulado originalmente
+(ex.: `gh` CLI indisponível na máquina de quem rodou o bootstrap). Requer os
+secrets `VPNDEV_PROJECT_TOKEN` e `VPNDEV_STANDARDS_READ_TOKEN`.
 
 Depois do bootstrap, você pode:
 
@@ -61,6 +73,11 @@ Depois do bootstrap, você pode:
 ```bash
 bash ./scripts/setup-github-project.sh --repo-owner venha-pra-nuvem --repo-name seu-repo
 ```
+
+**Visão de portfólio (PMO, todos os repositórios)**: ver [`README.md` — Bônus:
+Portfólio PMO](../README.md#bônus-portfólio-pmo-visão-consolidada-de-todos-os-repositórios)
+para agregar backlog/prioridade e custo real de múltiplos repositórios num
+único board.
 
 Depois disso, pule direto para a seção 3 para começar sua primeira feature.
 

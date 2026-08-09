@@ -85,29 +85,68 @@ curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-st
 Isso executa `specify init` (se ainda não inicializado) e instala preset +
 extensão + workflow na versão publicada mais recente da branch `main`.
 
-### Bônus: GitHub Project criado automaticamente
+### Bônus: GitHub Project criado automaticamente (garantido em todo repo)
 
 Se o `gh` CLI estiver instalado e autenticado, o `bootstrap.sh` **cria
 automaticamente um GitHub Project V2** com 3 views padrão (copiadas do
-IOX-CROWDFUNDINGPAAS) e 1 campo customizado:
+IOX-CROWDFUNDINGPAAS) e 2 campos customizados:
 
 - **Board por Epic** — organize issues por épicas
 - **Board por Prioridade** — organize por níveis de prioridade
 - **Tabela — P0 Blocker** — filtro pré-configurado para P0-blocker críticos
 - **Campo "Horas Humanas"** (número) — para lançar tempo humano em tarefas de
   modelo híbrido (agente + humano) e compor o custo real da tarefa (tokens do
-  agente + horas humanas × custo/hora do time) — ver
+  agente + horas humanas × taxa do perfil) — ver
   [`docs/ai-code-quality-and-observability.md`](docs/ai-code-quality-and-observability.md#8-modelo-híbrido-agentes-de-ia--humanos-codando-juntos)
+  e [`docs/cost-profiles-and-rates.md`](presets/vpndev-standards/templates/cost-profiles-and-rates.md)
+- **Campo "Oportunidade D365"** (texto) — cole a URL completa da Oportunidade
+  no Dynamics 365 para vincular a issue/PR à venda/negócio de origem
 
 O project é criado com o nome `{repo-name} — Spec Kit Roadmap` e fica
 imediatamente acessível para customize (adicionar/remover filtros, agrupar
 por campos, etc.).
+
+**Garantia contínua:** o `bootstrap.sh` também instala
+[`.github/workflows/ensure-github-project.yml`](.github/workflows/ensure-github-project.yml),
+que roda semanalmente e recria o Project automaticamente se ele não existir
+mais (ex.: `gh` CLI indisponível no bootstrap original, ou Project apagado por
+engano) — garantindo que **todo repositório com este bundle sempre tenha o
+Project**, mesmo sem intervenção manual. Requer os secrets
+`VPNDEV_PROJECT_TOKEN` (PAT com escopos `repo`+`project`) e
+`VPNDEV_STANDARDS_READ_TOKEN`.
 
 Se preferir criar o project **manualmente** ou em **um repositório existente**:
 
 ```bash
 bash ./scripts/setup-github-project.sh --repo-owner venha-pra-nuvem --repo-name meu-projeto
 ```
+
+### Bônus: Portfólio PMO (visão consolidada de todos os repositórios)
+
+Além do Project por repositório acima, o bundle também cobre a visão
+**cross-repositório** que o PMO precisa (backlog/prioridade e custo real
+consolidados):
+
+1. **Uma vez por organização**, crie o Project de portfólio:
+   ```bash
+   bash ./scripts/setup-pmo-org-project.sh --org venha-pra-nuvem
+   ```
+   Cria um GitHub Project V2 de organização com 4 views (Board por
+   Repositório, Board por Prioridade, Tabela — Backlog Consolidado, Tabela —
+   P0 Blocker).
+2. **Em cada repositório** que deve alimentar esse board, instale
+   [`templates/workflows/add-to-pmo-project.yml`](templates/workflows/add-to-pmo-project.yml)
+   apontando para a URL do project criado acima — toda issue/PR nova é
+   adicionada automaticamente (via [`actions/add-to-project`](https://github.com/actions/add-to-project)).
+3. Para **custo real (Horas Humanas) e Oportunidades D365 consolidados**
+   entre repositórios — que não somam sozinhos no board de portfólio, pois
+   são campos por-projeto no GitHub Projects V2 — rode:
+   ```bash
+   bash ./scripts/pmo-cost-rollup.sh --repo venha-pra-nuvem/repo1 --repo venha-pra-nuvem/repo2
+   ```
+
+Detalhes completos em
+[`docs/ai-code-quality-and-observability.md` — "Como o PMO acompanha o status"](docs/ai-code-quality-and-observability.md#como-o-pmo-acompanha-o-status-visão-por-projeto-e-visão-global).
 
 ### Bônus: Labels de priorização e desenvolvimento autônomo
 

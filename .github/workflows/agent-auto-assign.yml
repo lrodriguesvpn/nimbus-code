@@ -23,6 +23,9 @@ name: Agent Auto-Assign — Desenvolvimento Autônomo por Label
 #   - NUNCA atribui se a issue também tiver o label `agent:needs-human`.
 #   - NUNCA atribui se a issue tiver `complexity:S4` (exige revisão humana
 #     por princípio da constituição VPN Dev — S4 nunca é 100% autônomo).
+#   - NUNCA atribui se a issue tiver `type:incident` (originada de ocorrência
+#     em produção/ambiente de cliente — exige revisão humana obrigatória,
+#     independente da complexidade S0–S4, por princípio da constituição VPN Dev).
 #   - NUNCA atribui se a issue já tiver algum assignee (evita reatribuir
 #     trabalho que já está em andamento, humano ou agente).
 #   - NUNCA atribui se a issue tiver `status:blocked`.
@@ -68,6 +71,8 @@ jobs:
             SKIP="a issue tem agent:needs-human (exige humano no loop)"
           elif echo ",$LABELS," | grep -q ",complexity:S4,"; then
             SKIP="a issue tem complexity:S4 (revisão humana obrigatória pela constituição VPN Dev)"
+          elif echo ",$LABELS," | grep -q ",type:incident,"; then
+            SKIP="a issue tem type:incident (originada de ocorrência/produção — revisão humana obrigatória independente da complexidade, pela constituição VPN Dev)"
           elif echo ",$LABELS," | grep -q ",status:blocked,"; then
             SKIP="a issue tem status:blocked"
           elif [[ -n "$ASSIGNEES" ]]; then

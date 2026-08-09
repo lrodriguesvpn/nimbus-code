@@ -26,6 +26,12 @@ jobs:
           VERSION=$(grep -m1 -E '^[[:space:]]*version:' preset.yml | sed -E 's/.*"([0-9.]+)".*/\1/')
           zip -r "../../vpndev-standards-${VERSION}.zip" . -x ".*"
 
+      - name: Empacotar preset vpndev-platform-standards
+        run: |
+          cd presets/vpndev-platform-standards
+          VERSION=$(grep -m1 -E '^[[:space:]]*version:' preset.yml | sed -E 's/.*"([0-9.]+)".*/\1/')
+          zip -r "../../vpndev-platform-standards-${VERSION}.zip" . -x ".*"
+
       - name: Empacotar extensão vpndev-backlog-sync
         run: |
           cd extensions/vpndev-backlog-sync
@@ -44,12 +50,20 @@ jobs:
           VERSION=$(grep -m1 -E '^[[:space:]]*version:' bundle.yml | sed -E 's/.*"([0-9.]+)".*/\1/')
           zip -r "../../vpndev-project-bundle-${VERSION}.zip" . -x ".*"
 
+      - name: Empacotar bundle vpndev-platform-bundle
+        run: |
+          cd bundles/vpndev-platform-bundle
+          VERSION=$(grep -m1 -E '^[[:space:]]*version:' bundle.yml | sed -E 's/.*"([0-9.]+)".*/\1/')
+          zip -r "../../vpndev-platform-bundle-${VERSION}.zip" . -x ".*"
+
       - name: Publicar GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
             vpndev-standards-*.zip
+            vpndev-platform-standards-*.zip
             vpndev-backlog-sync-*.zip
             vpndev-full-cycle-*.zip
             vpndev-project-bundle-*.zip
+            vpndev-platform-bundle-*.zip
           generate_release_notes: true

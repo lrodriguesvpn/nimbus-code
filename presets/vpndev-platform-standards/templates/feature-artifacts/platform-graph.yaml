@@ -1,0 +1,61 @@
+# platform-graph.yaml — Grafo de Plataforma (nível 1 do grafo de 2 níveis)
+#
+# OBRIGATÓRIO neste repositório de plataforma/cliente. Diferente do
+# graph.yaml de um repositório de workload (que modela módulos de código),
+# este arquivo modela SUPERFÍCIES DE PLATAFORMA: contas/assinaturas cloud,
+# tenants, redes hub, políticas compartilhadas, ambientes D365 — e quais
+# repositórios de workload dependem de cada uma.
+#
+# Campos:
+#   client         — cliente/tenant que este repositório representa
+#   version        — incrementar a cada atualização estrutural
+#   surfaces       — superfícies de plataforma (recursos compartilhados)
+#   iac_status     — nao_iniciado | parcial | completo (completo == zero-diff confirmado)
+#   reconciliation — ferramenta usada para validar zero-diff nesta superfície
+#   dependents     — repositórios de workload que consomem esta superfície
+
+client: "<nome-do-cliente-ou-tenant>"   # ex.: Venha Pra Nuvem (piloto interno)
+version: 1
+updated_at: "YYYY-MM-DD"
+
+surfaces:
+  - id: "azure-hub-network"
+    cloud: "azure"                     # azure | aws | gcp | gws | m365 | d365
+    type: "network"                    # network | identity | policy | database | tenant-config | environment
+    resource_ref: "<subscription-id>/<resource-group>/<nome>"
+    environment: "prod"                # prod | hml | dev
+    iac_status: "parcial"              # nao_iniciado | parcial | completo
+    reconciliation:
+      tool: "terraform plan"
+      last_checked: "YYYY-MM-DD"
+      diff_zero: false
+    criticality: "high"                # high | medium | low
+    dependents: ["workload-repo-a", "workload-repo-b"]
+    description: "VNet hub compartilhada, DNS privado e firewall central"
+
+  - id: "m365-conditional-access-baseline"
+    cloud: "m365"
+    type: "policy"
+    resource_ref: "tenant:<tenant-id>/conditional-access"
+    environment: "prod"
+    iac_status: "nao_iniciado"
+    reconciliation:
+      tool: "Test-M365DSCConfiguration"
+      last_checked: null
+      diff_zero: false
+    criticality: "high"
+    dependents: []
+    description: "Baseline de Conditional Access do tenant M365 — ainda não capturado como config-as-code"
+
+  # Remover os exemplos acima e adicionar as superfícies reais deste ambiente
+
+legacy_systems:
+  - id: "<sistema-legado-exemplo>"
+    environment: "prod"
+    cloud: "azure"
+    has_terraform: false
+    schema_registry_ref: "db-schema-registry.md#<sistema>"
+    owning_workload_repo: null          # preencher quando um projeto nascer para mexer nele
+    notes: "Aguardando aztfexport + validação de zero-diff antes de classificar iac_status"
+
+  # Remover o exemplo acima e adicionar os sistemas legados reais (ou deixar vazio: [])

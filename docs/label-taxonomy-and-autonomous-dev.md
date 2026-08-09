@@ -32,7 +32,7 @@ não tendo) uma forma consistente de responder a duas perguntas recorrentes:
 | Prioridade | `priority:P2-medium` | `#fbca04` | Planejado, sem urgência imediata |
 | Prioridade | `priority:P3-low` | `#0e8a16` | Nice-to-have |
 | Complexidade | `complexity:S0`–`S4` | gradiente verde→vermelho | Mesma escala S0–S4 do `copilot-instructions.md` (ver [`ai-code-quality-and-observability.md`](ai-code-quality-and-observability.md#6-seleção-de-modelo-por-complexidade-s0s4)) |
-| Tipo | `type:bug` / `type:feature` / `type:chore` / `type:docs` | padrão GitHub | Classificação padrão de issue/PR |
+| Tipo | `type:bug` / `type:feature` / `type:chore` / `type:docs` / `type:incident` | padrão GitHub | Classificação padrão de issue/PR — `type:incident` é originada de ocorrência em produção/ambiente de cliente e **sempre** exige revisão humana (ver seção 4.1) |
 | Agente | `agent:autonomous-ok` | `#0e8a16` | Dispara o auto-assign ao Copilot coding agent |
 | Agente | `agent:needs-human` | `#e99695` | Bloqueia qualquer auto-assign, mesmo que `agent:autonomous-ok` também esteja presente |
 | Status | `status:needs-triage` | `#ededed` | Issue nova, ainda sem `priority:*`/`complexity:*` — não deve ser puxada por agente autônomo |
@@ -75,6 +75,9 @@ acompanhar cada etapa) quando:
 - **Não** tem `complexity:S4` (regra da constituição VPN Dev: S4 sempre exige
   revisão humana, nunca é autônomo — ver
   [`constitution-template.md`](../presets/vpndev-standards/templates/constitution-template.md)) **e**
+- **Não** tem `type:incident` (regra da constituição VPN Dev: issues originadas
+  de ocorrência em produção/ambiente de cliente sempre exigem revisão humana,
+  independente da complexidade S0–S4 — ver seção 6) **e**
 - **Não** tem `status:blocked` **e**
 - Ainda não tem nenhum assignee (evita reatribuir trabalho em andamento).
 
@@ -86,7 +89,7 @@ motivo** em vez de falhar silenciosamente ou assumir o pior.
 
 ```mermaid
 flowchart LR
-    A["Alguém aplica o label\nagent:autonomous-ok"] --> B{"Guardrails OK?\nagent:needs-human?\ncomplexity:S4?\nstatus:blocked?\njá tem assignee?"}
+    A["Alguém aplica o label\nagent:autonomous-ok"] --> B{"Guardrails OK?\nagent:needs-human?\ncomplexity:S4?\ntype:incident?\nstatus:blocked?\njá tem assignee?"}
     B -- "Falhou alguma" --> C["Comenta na issue\nexplicando o motivo\n(não atribui)"]
     B -- "Passou em todas" --> D["Atribui copilot-swe-agent[bot]\nvia REST API\ncom prioridade no contexto"]
     D --> E["Copilot coding agent\ntrabalha na issue\ne abre PR"]
@@ -126,6 +129,16 @@ PR e revisão humana`, ver
 O workflow apenas garante que essa regra não pode ser contornada
 acidentalmente aplicando `agent:autonomous-ok` numa issue S4.
 
+### Guardrail: por que `type:incident` bloqueia sempre
+
+Mesma lógica do guardrail de `complexity:S4`, mas para uma dimensão diferente:
+uma issue pode ser tecnicamente simples (S0/S1) e ainda assim ser
+**arriscada de automatizar** porque se origina de uma ocorrência real em
+produção/ambiente de cliente — o contexto de "algo já quebrou uma vez" pesa
+mais que a complexidade técnica isolada da correção. Por isso `type:incident`
+bloqueia autonomia **independente** do label `complexity:*` presente na
+mesma issue. Ver seção 6 para o fluxo completo de ocorrência → issue.
+
 ## 5. Labels DORA — correlação com métricas DevOps
 
 Os labels `dora:*` não afetam nenhum workflow automático (não são gatilho de
@@ -162,7 +175,57 @@ e dashboards que correlacionem issues fechadas com os **4 indicadores DORA**
    **complemento qualitativo** (visão de "issue → intenção"), não como
    substituto da fonte de verdade quantitativa.
 
-## 6. Instalação em um projeto novo ou existente
+## 6. Ocorrências (CRM) e Issues de Infraestrutura
+
+Times que hoje gerenciam atendimento inicial (N1) de ocorrências num CRM (ex.:
+Dynamics 365) e querem trazer o trabalho de infraestrutura resultante para o
+Spec Kit seguem este fluxo:
+
+```mermaid
+flowchart LR
+    A["Ocorrência aberta\nno CRM (N1)"] --> B{"N1 resolve com\nprocedimento padrão?"}
+    B -- "Sim" --> C["Fecha no CRM\n(não vira issue)"]
+    B -- "Não — exige mudança\nreal no ambiente" --> D["Cria issue no repo\nde INFRA"]
+    D --> E["Label type:incident\n+ dora:mttr"]
+    D --> F["Campo \"Ocorrência CRM (N1)\"\n= URL/ID do atendimento"]
+    E --> G["complexity:S0-S4\nnormal (a maioria S0/S1)"]
+    G --> H["Revisão humana OBRIGATÓRIA\n(type:incident bloqueia\nauto-assign sempre)"]
+```
+
+**Critério de "quando vira issue"**: se o N1 resolveu com um procedimento
+padrão já documentado (reinício, ajuste de configuração pontual), **não**
+precisa virar issue — foi só um atendimento. Se exigir uma mudança real e
+potencialmente recorrente no ambiente (script, correção de infraestrutura,
+algo que provavelmente vai se repetir se não for corrigido na causa raiz),
+**aí sim** vira issue no repositório de INFRA correspondente.
+
+**Na issue de INFRA:**
+
+- Label `type:incident` (ver seção 2 e o guardrail na seção 4) — **sempre**
+  bloqueia atribuição autônoma ao Copilot coding agent, independente da
+  complexidade S0–S4 daquela issue específica.
+- Label `dora:mttr` na maioria dos casos — o tempo entre abertura da issue e
+  fechamento é literalmente a métrica de tempo de restauração de serviço.
+- Campo **"Ocorrência CRM (N1)"** do GitHub Project (criado por
+  `scripts/setup-github-project.sh`) preenchido com a URL/ID do atendimento
+  original no CRM — rastreabilidade e cálculo de MTTR consistente entre as
+  duas ferramentas.
+- Classificação S0–S4 normal — a maioria das correções de ocorrência é S0/S1,
+  mas se a causa raiz exigir redesenho de infraestrutura, pode chegar a S2+
+  (e então também exige `graph.yaml`/`graph.md`, e S3/S4 exige `impact-map.md`).
+
+**Infraestrutura sem Terraform (ou sem IaC formal):** isso não é bloqueio
+para usar o Spec Kit. A classificação S0–S4, o Module Dependency Graph e o
+`impact-map.md` (S3/S4) não presumem nenhuma ferramenta específica de IaC —
+o `impact-map.md` fica, na verdade, **mais crítico** quando não há
+`terraform plan` como rede de segurança, pois passa a ser o único artefato
+documentando blast radius e plano de rollback antes de uma mudança manual no
+ambiente do cliente. Documente no `plan.md` da feature qual é a ferramenta
+real usada (script, runbook, ClickOps documentado, Ansible, etc.) — o Spec
+Kit governa o *o quê* e o *porquê* (spec, critérios de aceitação, risco),
+não exige uma ferramenta específica para o *como*.
+
+## 7. Instalação em um projeto novo ou existente
 
 O `bootstrap.sh` já chama `setup-github-labels.sh` automaticamente (mesmo
 padrão do GitHub Project — ver
@@ -184,7 +247,7 @@ git add .github/workflows/agent-auto-assign.yml
 gh secret set COPILOT_AGENT_ASSIGN_TOKEN --repo venha-pra-nuvem/meu-projeto
 ```
 
-## 7. Evitando disparo duplicado (importante antes de habilitar)
+## 8. Evitando disparo duplicado (importante antes de habilitar)
 
 Este workflow é **o único gatilho versionado** deste bundle para atribuição
 automática ao Copilot — não existe (e nunca existiu neste repositório) nenhum
@@ -211,7 +274,7 @@ Antes de habilitar `agent-auto-assign.yml` num repositório:
    assim, **não instale** `agent-auto-assign.yml` — os dois mecanismos não
    devem coexistir no mesmo repositório para a mesma finalidade.
 
-## 8. Relação com outros documentos
+## 9. Relação com outros documentos
 
 - [`ai-code-quality-and-observability.md`](ai-code-quality-and-observability.md#5-bugs-abertos-e-atribuídos-automaticamente-ao-copilot) —
   gestão de bugs e atribuição ao Copilot (contexto mais amplo).

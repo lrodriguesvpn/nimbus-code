@@ -78,6 +78,40 @@ else
   echo "  ⚠ Template update-speckit-and-bundle.yml não encontrado em $UPDATE_CHECK_SRC"
 fi
 
+echo ""
+echo "→ Instalando GitHub Action que garante o GitHub Project do repositório..."
+ENSURE_PROJECT_SRC="$LOCAL_PATH/templates/workflows/ensure-github-project.yml"
+if [[ -f "$ENSURE_PROJECT_SRC" ]]; then
+  mkdir -p "$WORKDIR/.github/workflows"
+  cp "$ENSURE_PROJECT_SRC" "$WORKDIR/.github/workflows/ensure-github-project.yml"
+  echo "  ✅ .github/workflows/ensure-github-project.yml instalado."
+  echo "  ℹ Roda semanalmente + sob demanda; recria o GitHub Project (views + campos"
+  echo "    'Horas Humanas'/'Oportunidade D365') se ele não existir mais — garante que"
+  echo "    este repositório sempre tenha o Project, mesmo que o passo automático abaixo"
+  echo "    tenha sido pulado (ex.: gh CLI indisponível na máquina de quem rodou o"
+  echo "    bootstrap). Requer os secrets VPNDEV_PROJECT_TOKEN (PAT com escopos"
+  echo "    repo+project) e VPNDEV_STANDARDS_READ_TOKEN — configure em Settings →"
+  echo "    Secrets and variables → Actions deste repositório."
+else
+  echo "  ⚠ Template ensure-github-project.yml não encontrado em $ENSURE_PROJECT_SRC"
+fi
+
+echo ""
+echo "→ Instalando doc de perfis de custo humano (Júnior/Pleno/Sênior)..."
+COST_PROFILES_SRC="$LOCAL_PATH/presets/vpndev-standards/templates/cost-profiles-and-rates.md"
+if [[ -f "$COST_PROFILES_SRC" ]]; then
+  mkdir -p "$WORKDIR/docs"
+  if [[ -f "$WORKDIR/docs/cost-profiles-and-rates.md" ]]; then
+    echo "  ℹ docs/cost-profiles-and-rates.md já existe — pulei (não sobrescrevo customização local)."
+  else
+    cp "$COST_PROFILES_SRC" "$WORKDIR/docs/cost-profiles-and-rates.md"
+    echo "  ✅ docs/cost-profiles-and-rates.md instalado (taxas padrão: Júnior R\$40/Pleno"
+    echo "     R\$60/Sênior R\$90 por hora — ajuste livremente para o seu projeto)."
+  fi
+else
+  echo "  ⚠ Template cost-profiles-and-rates.md não encontrado em $COST_PROFILES_SRC"
+fi
+
 BUNDLE_VERSION="$(grep -A4 '^bundle:' "$LOCAL_PATH/bundles/vpndev-project-bundle/bundle.yml" | grep -E '^\s*version:' | head -1 | sed -E 's/.*"([0-9.]+)".*/\1/')"
 echo ""
 echo "✅ Bundle vpndev-project-bundle v${BUNDLE_VERSION} aplicado com sucesso."

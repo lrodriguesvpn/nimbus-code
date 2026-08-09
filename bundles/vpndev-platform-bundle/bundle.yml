@@ -1,0 +1,33 @@
+schema_version: "1.0"
+
+bundle:
+  id: "vpndev-platform-bundle"
+  name: "VPN Dev — Modelo de Plataforma/Cliente"
+  version: "0.1.0"
+  role: "all"
+  description: "Bundle de bootstrap para repositórios de PLATAFORMA/CLIENTE/TENANT da VPN Dev: aplica o preset vpndev-platform-standards (inventário multi-nuvem Azure/AWS/GCP/GWS/M365/D365, grafo de superfícies de plataforma, registro de schemas de sistemas legados e regra de zero-diff como critério de verdade — nunca aplica mudança direta em ambiente). Distinto do vpndev-project-bundle, que é para repositórios de projeto/workload."
+  author: "VPN Dev"
+  license: "Proprietary"
+
+requires:
+  speckit_version: ">=0.16.0"
+
+provides:
+  presets:
+    - id: "vpndev-platform-standards"
+      version: "0.1.0"
+      source: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards"
+      priority: 5
+      strategy: "wrap"
+
+tags:
+  - "vpndev"
+  - "governance"
+  - "platform"
+  - "multi-cloud"
+  - "legacy"
+  - "infrastructure-as-code"
+  - "terraform"
+  - "m365"
+  - "d365"
+  - "drift-detection"

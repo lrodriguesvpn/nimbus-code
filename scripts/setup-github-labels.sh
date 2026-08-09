@@ -106,6 +106,7 @@ declare -a LABELS=(
   "type:feature|a2eeef|Nova funcionalidade ou capacidade"
   "type:chore|cfd3d7|Manutenção, refactor ou débito técnico sem mudança de comportamento visível"
   "type:docs|0075ca|Somente documentação (specs, ADRs, README, guias)"
+  "type:incident|b60205|Originada de uma ocorrência em produção/ambiente de cliente (ex.: N1 do CRM que virou mudança real de infra) — SEMPRE exige revisão humana, independente da complexidade S0–S4"
 
   # Desenvolvimento autônomo — sinal de decisão + gatilho do workflow
   # .github/workflows/agent-auto-assign.yml (ver docs/label-taxonomy-and-autonomous-dev.md)

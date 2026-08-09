@@ -3,7 +3,7 @@ schema_version: "1.0"
 preset:
   id: "vpndev-standards"
   name: "VPN Dev — Padrões de Governança"
-  version: "1.3.0"
+  version: "1.4.0"
   description: "Constituição base, grafos de módulos obrigatórios, escala S0–S4 com estimativa de tokens e ajuste por projeto, SLO Gate, estratégia de release, ADRs, taxonomia de labels de priorização/desenvolvimento autônomo/DORA, modelo híbrido humano+agente, e framework DevSecOps da VPN Dev, aplicados sobre os templates nativos do Spec Kit."
   author: "VPN Dev"
   repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards"
@@ -81,6 +81,14 @@ provides:
       file: "templates/project-root/copilot-instructions.md"
       description: "Instruções do Copilot com regras de grafo, escala S0–S4 e feature flags pré-configuradas."
 
+    # Perfis de custo humano (Júnior/Pleno/Sênior) e taxa/hora — copiado para
+    # docs/cost-profiles-and-rates.md no projeto, usado para compor o custo
+    # real do modelo híbrido (agente + humano).
+    - type: "artifact"
+      name: "cost-profiles-and-rates"
+      file: "templates/cost-profiles-and-rates.md"
+      description: "Perfis de senioridade (Júnior/Pleno/Sênior) e taxa média de custo/hora para controle de custo real do modelo híbrido agente+humano."
+
 tags:
   - "governance"
   - "security"
@@ -97,3 +105,6 @@ tags:
   - "token-estimation"
   - "dora-metrics"
   - "finops"
+  - "pmo-portfolio"
+  - "incident-management"
+  - "d365"
