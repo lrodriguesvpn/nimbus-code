@@ -171,9 +171,25 @@ if command -v gh >/dev/null 2>&1; then
     # Extrai owner/repo de URLs como:
     # - https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/meu-repo.git
     # - git@venha-pra-nuvem.ghe.com:venha-pra-nuvem/meu-repo.git
-    if [[ "$GIT_REMOTE" =~ ^(https://|git@).*[:/]([^/]+)/([^/]+?)(\.git)?$ ]]; then
-      REPO_OWNER="${BASH_REMATCH[2]}"
-      REPO_NAME="${BASH_REMATCH[3]}"
+    #
+    # Usa expansão de parâmetros em vez de regex com quantificador "lazy"
+    # (`+?`) — o bash padrão do macOS (3.2, por licenciamento GPL) usa ERE
+    # puro, que NÃO suporta quantificadores lazy; `[^/]+?` casava de forma
+    # imprevisível (ou não casava) e, quando casava, incluía o sufixo
+    # ".git" no nome do repo. Isso fazia esta detecção falhar silenciosamente
+    # (cai no "⚠ Não consegui extrair...") em praticamente todo bootstrap
+    # real, já que qualquer remote clonado normalmente termina em ".git".
+    REPO_PATH="$GIT_REMOTE"
+    if [[ "$REPO_PATH" == git@* ]]; then
+      REPO_PATH="${REPO_PATH#*:}"
+    else
+      REPO_PATH="${REPO_PATH#*://}"
+      REPO_PATH="${REPO_PATH#*/}"
+    fi
+    REPO_PATH="${REPO_PATH%.git}"
+    if [[ -n "$REPO_PATH" && "$REPO_PATH" == */* ]]; then
+      REPO_OWNER="${REPO_PATH%%/*}"
+      REPO_NAME="${REPO_PATH#*/}"
       
       # Chamar script de setup de project
       SETUP_SCRIPT="$LOCAL_PATH/scripts/setup-github-project.sh"

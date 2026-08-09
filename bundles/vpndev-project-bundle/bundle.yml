@@ -3,7 +3,7 @@ schema_version: "1.0"
 bundle:
   id: "vpndev-project-bundle"
   name: "VPN Dev — Modelo de Projeto"
-  version: "1.5.2"
+  version: "1.5.3"
   role: "all"
   description: "Bundle de bootstrap para novos repositórios da VPN Dev: aplica o preset de governança/DevSecOps (incluindo grafos de módulos obrigatórios, escala S0–S4 com estimativa de tokens, catálogo de reuso de conteúdo para reduzir custo de tokens, taxonomia de labels de priorização/desenvolvimento autônomo/DORA/incidente, modelo híbrido humano+agente com perfis de custo padrão, GitHub Project por repositório garantido continuamente com campos de Horas Humanas/Oportunidade D365, e Portfólio PMO consolidado entre repositórios), a extensão de sincronização de backlog e o workflow de ciclo completo com gate de segurança."
   author: "VPN Dev"
