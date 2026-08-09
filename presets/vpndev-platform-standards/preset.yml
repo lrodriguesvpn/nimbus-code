@@ -6,7 +6,7 @@ preset:
   version: "0.1.1"
   description: "Constituição para repositórios de PLATAFORMA/CLIENTE/TENANT (ambientes, contas cloud, tenants M365/GWS/D365 e sistemas legados) — inventário multi-nuvem, regra de zero-diff como critério de verdade, proibição de aplicar mudança direta em produção, registro de schemas de bancos legados e o grafo de 2 níveis (plataforma ↔ workload). Complementar ao `vpndev-standards`: um repositório de plataforma usa ESTE preset; repositórios de projeto/workload continuam usando `vpndev-standards`."
   author: "VPN Dev"
-  repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards"
+  repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
   license: "Proprietary"
 
 requires:

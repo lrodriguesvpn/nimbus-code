@@ -172,9 +172,9 @@ seção 8.
 
 ## Referências
 
-- [Guia do Dev VPN Dev](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/developer-guide.md)
-- [Seleção de Modelos por Complexidade](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/ai-code-quality-and-observability.md#6-seleção-de-modelo-por-complexidade-s0s4)
-- [Grafos de Módulos — Guia](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/module-graphs.md)
-- [Labels — Priorização e Desenvolvimento Autônomo](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/label-taxonomy-and-autonomous-dev.md)
-- [Modelo Híbrido e Estimativa de Tokens](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/ai-code-quality-and-observability.md#8-modelo-híbrido-agentes-de-ia--humanos-codando-juntos)
-- [Catálogo de Reuso](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/ai-code-quality-and-observability.md#9-catálogo-de-reuso--reduzindo-custo-de-tokens-com-conteúdo-já-existente)
+- [Guia do Dev VPN Dev](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/developer-guide.md)
+- [Seleção de Modelos por Complexidade](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/ai-code-quality-and-observability.md#6-seleção-de-modelo-por-complexidade-s0s4)
+- [Grafos de Módulos — Guia](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/module-graphs.md)
+- [Labels — Priorização e Desenvolvimento Autônomo](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/label-taxonomy-and-autonomous-dev.md)
+- [Modelo Híbrido e Estimativa de Tokens](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/ai-code-quality-and-observability.md#8-modelo-híbrido-agentes-de-ia--humanos-codando-juntos)
+- [Catálogo de Reuso](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/ai-code-quality-and-observability.md#9-catálogo-de-reuso--reduzindo-custo-de-tokens-com-conteúdo-já-existente)

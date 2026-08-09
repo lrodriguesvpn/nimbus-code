@@ -186,7 +186,7 @@ exceção.
 ## 9. Instalação e Relação com Outros Documentos
 
 ```bash
-specify preset add --dev ./speckit-vpndev-standards/presets/vpndev-platform-standards --priority 5
+specify preset add --dev ./nimbus-code-spec-kit-template/presets/vpndev-platform-standards --priority 5
 ```
 
 Ver também:

@@ -16,19 +16,19 @@ provides:
   presets:
     - id: "vpndev-standards"
       version: "1.5.1"
-      source: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards"
+      source: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
       priority: 5
       strategy: "wrap"
 
   extensions:
     - id: "vpndev-backlog-sync"
       version: "1.1.0"
-      source: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards"
+      source: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
 
   workflows:
     - id: "vpndev-full-cycle"
       version: "1.2.0"
-      source: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards"
+      source: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
 
 tags:
   - "vpndev"

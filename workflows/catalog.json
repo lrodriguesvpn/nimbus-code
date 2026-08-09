@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "updated_at": "2026-08-09T19:47:22Z",
-  "catalog_url": "https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/workflows/catalog.json",
+  "catalog_url": "https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/workflows/catalog.json",
   "workflows": {
     "vpndev-full-cycle": {
       "name": "VPN Dev — Ciclo Completo com Gate DevSecOps",
@@ -9,8 +9,8 @@
       "version": "1.2.0",
       "description": "Ciclo SDD completo (specify → plan → tasks → implement → converge) com gates de DevSecOps, grafo de módulos, release strategy e convergência pós-implementação.",
       "author": "VPN Dev",
-      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/releases/download/v1.5.3/vpndev-full-cycle-1.2.0.zip",
-      "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards",
+      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.5.3/vpndev-full-cycle-1.2.0.zip",
+      "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template",
       "license": "Proprietary",
       "requires": {
         "speckit_version": ">=0.16.0"

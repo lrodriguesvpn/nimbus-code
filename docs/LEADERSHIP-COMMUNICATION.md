@@ -1,7 +1,7 @@
 # Email de Comunicação para Liderança Técnica
 
 **Data:** 08 de agosto de 2026  
-**Assunto:** Padronização Obrigatória — Spec Kit VPN Dev Bundle + FinOps
+**Assunto:** Padronização Obrigatória — NIMBUS CODE™ AI Delivery System + FinOps
 
 ---
 
@@ -43,9 +43,10 @@ Precisamos de FinOps + policies imediato.
 
 ---
 
-## ✅ SOLUÇÃO: Spec Kit VPN Dev Bundle
+## ✅ SOLUÇÃO: NIMBUS CODE™ AI Delivery System
 
-Implementei um bundle que **padroniza SDD (Spec-Driven Development)** com:
+Implementei uma base técnica do **NIMBUS CODE™ AI Delivery System**, construída
+sobre o **GitHub Spec Kit**, que padroniza SDD (Spec-Driven Development) com:
 
 ### Componentes
 
@@ -77,7 +78,7 @@ vpndev-project-bundle v1.0.0
 
 **Bootstrap automático:**
 ```bash
-curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/bootstrap.sh | bash
+curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bootstrap.sh | bash
 ```
 
 **Resultado:** projeto pronto em ~15 min (antes: 3-4 dias)
@@ -242,7 +243,7 @@ Projeção Anual (40 devs, 5 features/semana):
 ## 🔗 RECURSOS
 
 **Bundle repo:**
-https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards
+https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template
 
 **Docs principais:**
 - Developer Guide: `docs/developer-guide.md`

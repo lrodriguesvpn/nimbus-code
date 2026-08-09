@@ -1,4 +1,4 @@
-# speckit-vpndev-standards
+# nimbus-code-spec-kit-template
 
 > ⚠️ **Propriedade Intelectual — Uso Interno Exclusivo**
 > Este repositório e todo o seu conteúdo (templates, presets, extensões, workflows,
@@ -7,10 +7,26 @@
 > [`LICENSE`](LICENSE). Qualquer alteração em arquivos de padrão exige aprovação do
 > `@vpndev-arch-board` via Pull Request (ver [`.github/CODEOWNERS`](.github/CODEOWNERS)).
 
-Padrões corporativos de **Spec-Driven Development** (GitHub Spec Kit) da
-**VPN Dev**, distribuídos como um **bundle** único para que todo projeto novo já
-nasça com governança, gate de segurança/DevSecOps e integração de backlog
-consistentes — sem que cada time precise reescrever essas regras.
+Repositório-base do **NIMBUS CODE™ AI Delivery System** para bootstrap,
+templates, presets, workflows, catálogos e documentação operacional.
+Tecnicamente, ele continua sendo construído **sobre o GitHub Spec Kit** e
+preserva os nomes operacionais do modelo (`specify`, `plan`, `tasks`,
+`implement`, `converge`) para que futuras atualizações do upstream possam ser
+absorvidas sem retrabalho conceitual.
+
+## Posicionamento dos repositórios NIMBUS CODE
+
+| Repositório | Papel | O que contém | O que não deve conter |
+|---|---|---|---|
+| **`nimbus-code-spec-kit-template`** | **Template / foundation** | bootstrap, presets, extensões, workflows, catálogos, templates e documentação operacional | storytelling de produto, landing pages, GTM e ativos de marketing |
+| **`nimbus-code`** | **Produto / marketing** | naming comercial, narrativa executiva, decks, páginas, posicionamento e materiais de venda | dependências operacionais para bootstrap, automação ou catálogos |
+
+**Regra de leitura para a organização:**
+- **template/foundation repo** = como os projetos são criados e governados;
+- **product/marketing repo** = como o NIMBUS CODE é apresentado e vendido.
+
+O **nome comercial do sistema** é **NIMBUS CODE™ AI Delivery System**. O
+**nome técnico base** continua sendo **Spec Kit**.
 
 ## O que este repositório contém
 
@@ -25,6 +41,10 @@ Cada peça é independentemente versionada (SemVer) e pode ser instalada isolada
 ver o README de cada pasta.
 
 ## 📘 Manual do Dev — comece por aqui
+
+Se você está conduzindo a migração do nome do repositório ou atualizando
+projetos consumidores, veja também
+[`docs/repository-rename-migration.md`](docs/repository-rename-migration.md).
 
 Se você é dev e vai usar o Spec Kit no dia a dia (repo novo, repo existente
 sem Spec Kit, ou importar um card do Azure DevOps/JIRA para começar uma
@@ -79,7 +99,7 @@ plataforma — GitHub, Microsoft 365, Azure, Google Workspace, GCP) estão em
 ## Como um projeto novo já nasce com isso
 
 ```bash
-curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/bootstrap.sh | bash
+curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bootstrap.sh | bash
 ```
 
 Isso executa `specify init` (se ainda não inicializado) e instala preset +
@@ -236,7 +256,7 @@ Este repositório fornece arquivos prontos para copiar em projetos que usam o Sp
 `bootstrap.sh`, copie o checklist para o seu `.specify/`:
 
 ```bash
-curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/templates/BROWNFIELD-SETUP-CHECKLIST.md \
+curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/templates/BROWNFIELD-SETUP-CHECKLIST.md \
   > .specify/BROWNFIELD-SETUP-CHECKLIST.md
 git add .specify/BROWNFIELD-SETUP-CHECKLIST.md
 ```
@@ -270,19 +290,19 @@ Para registrar os catálogos uma vez por projeto (ou uma vez por máquina, em
 
 ```bash
 specify preset catalog add \
-  https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/presets/catalog.json \
+  https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/presets/catalog.json \
   --name vpndev --priority 5 --install-allowed
 
 specify extension catalog add \
-  https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/extensions/catalog.json \
+  https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/extensions/catalog.json \
   --name vpndev --install-allowed
 
 specify workflow catalog add \
-  https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/workflows/catalog.json \
+  https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/workflows/catalog.json \
   --name vpndev
 
 specify bundle catalog add \
-  https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/bundles/catalog.json \
+  https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bundles/catalog.json \
   --id vpndev --priority 5 --policy install-allowed
 ```
 
@@ -321,7 +341,7 @@ deles instalado pelo bundle hoje.
 ## Estrutura
 
 ```text
-speckit-vpndev-standards/
+nimbus-code-spec-kit-template/
 ├── presets/vpndev-standards/           # preset.yml + templates/
 ├── extensions/vpndev-backlog-sync/     # extension.yml + commands/
 ├── workflows/vpndev-full-cycle/        # workflow.yml

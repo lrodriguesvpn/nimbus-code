@@ -6,10 +6,10 @@ name: Verificar atualizações do Spec Kit e do bundle VPN Dev
 # para atualizar manualmente. NUNCA aplica a atualização sozinho — a versão só
 # muda quando alguém rodar os comandos e abrir um PR revisado normalmente,
 # conforme a política em
-# https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards#versão-do-bundle-em-uso--política-de-atualização
+# https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template#versão-do-bundle-em-uso--política-de-atualização
 #
 # Requer o secret VPNDEV_STANDARDS_READ_TOKEN: um PAT de qualquer membro da
-# organização venha-pra-nuvem (basta ser membro — speckit-vpndev-standards é
+# organização venha-pra-nuvem (basta ser membro — nimbus-code-spec-kit-template é
 # um repositório interno, não exige ser colaborador explícito dele). O
 # GITHUB_TOKEN padrão do workflow só enxerga o próprio repositório onde roda,
 # por isso a leitura do catalog.json em outro repo precisa desse token
@@ -52,7 +52,7 @@ jobs:
         run: |
           LATEST_SPECKIT=$(specify self check --json 2>/dev/null | python3 -c "import json,sys;print(json.load(sys.stdin).get('latest_version',''))" || true)
           LATEST_BUNDLE=$(curl -fsSL -H "Authorization: token ${VPNDEV_TOKEN}" \
-            https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/bundles/catalog.json \
+            https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bundles/catalog.json \
             | python3 -c "import json,sys;print(json.load(sys.stdin)['bundles']['vpndev-project-bundle']['version'])")
           echo "speckit=$LATEST_SPECKIT" >> "$GITHUB_OUTPUT"
           echo "bundle=$LATEST_BUNDLE" >> "$GITHUB_OUTPUT"
@@ -77,7 +77,7 @@ jobs:
             echo ""
             echo "Depois de aplicar e testar, abrir um PR normal com o diff e atualizar a tabela"
             echo "de versões na seção 'Spec Kit — Padrões VPN Dev' do README (ver"
-            echo "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/templates/README-bundle-section.md)."
+            echo "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/templates/README-bundle-section.md)."
           } > /tmp/issue-body.md
 
       - name: Abrir ou atualizar issue de verificação
