@@ -3,7 +3,7 @@ schema_version: "1.0"
 preset:
   id: "vpndev-standards"
   name: "VPN Dev — Padrões de Governança"
-  version: "1.0.0"
+  version: "1.1.0"
   description: "Constituição base, grafos de módulos obrigatórios, escala S0–S4, SLO Gate, estratégia de release, ADRs e framework DevSecOps da VPN Dev, aplicados sobre os templates nativos do Spec Kit."
   author: "VPN Dev"
   repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards"
