@@ -47,14 +47,15 @@ WEB_OLD="${GH_HOST}/${ORG}/${OLD_SLUG}"
 RAW_NEW="raw.${GH_HOST}/${ORG}/${NEW_SLUG}"
 WEB_NEW="${GH_HOST}/${ORG}/${NEW_SLUG}"
 
-declare -A HITS=()
+HITS_FILE="$(mktemp)"
+trap 'rm -f "$HITS_FILE"' EXIT
 
 collect_query() {
   local query="$1"
   local page=1
   while true; do
     local response
-    if ! response="$(gh api search/code -f q="$query" -F per_page=100 -F page="$page" 2>&1)"; then
+    if ! response="$(gh api -X GET search/code -f q="$query" -F per_page=100 -F page="$page" 2>&1)"; then
       echo "❌ Falha ao consultar GitHub Code Search para query: $query" >&2
       echo "$response" >&2
       if echo "$response" | grep -q "HTTP 403"; then
@@ -69,10 +70,7 @@ collect_query() {
       break
     fi
 
-    while IFS=$'\t' read -r repo path; do
-      [[ -z "$repo" || -z "$path" ]] && continue
-      HITS["$repo|$path"]=1
-    done < <(echo "$response" | jq -r '.items[] | [.repository.full_name, .path] | @tsv')
+    echo "$response" | jq -r '.items[] | [.repository.full_name, .path] | @tsv' >> "$HITS_FILE"
 
     if [[ "$count" -lt 100 ]]; then
       break
@@ -102,7 +100,13 @@ collect_query "org:${ORG} raw.${GH_HOST}/${ORG}/${OLD_SLUG}"
 collect_query "org:${ORG} ${GH_HOST}/${ORG}/${OLD_SLUG}"
 collect_query "org:${ORG} ./${OLD_SLUG}"
 
-if [[ "${#HITS[@]}" -eq 0 ]]; then
+# Dedup por repo+path — usa sort -u em vez de chaves de array associativo, já
+# que `declare -A` (bash 4+) não existe no bash 3.2 padrão do macOS (preso
+# nessa versão por licenciamento GPLv2 da Apple), causando erro imediato
+# ("declare: -A: invalid option") antes mesmo da primeira consulta rodar.
+sort -u -t $'\t' -k1,2 "$HITS_FILE" -o "$HITS_FILE"
+
+if [[ ! -s "$HITS_FILE" ]]; then
   echo "✅ Nenhuma referência encontrada."
   exit 0
 fi
@@ -113,12 +117,11 @@ echo "| Criticidade | Repositório | Arquivo | Mudar manualmente |"
 echo "|---|---|---|---|"
 
 {
-  for key in "${!HITS[@]}"; do
-    repo="${key%%|*}"
-    path="${key#*|}"
+  while IFS=$'\t' read -r repo path; do
+    [[ -z "$repo" || -z "$path" ]] && continue
     level="$(classify_path "$path")"
     printf "%s\t%s\t%s\n" "$level" "$repo" "$path"
-  done
+  done < "$HITS_FILE"
 } | sort | while IFS=$'\t' read -r level repo path; do
   echo "| ${level} | \`${repo}\` | \`${path}\` | substituir \`${OLD_SLUG}\` por \`${NEW_SLUG}\`; trocar \`${RAW_OLD}\` → \`${RAW_NEW}\`; trocar \`${WEB_OLD}\` → \`${WEB_NEW}\` |"
 done
