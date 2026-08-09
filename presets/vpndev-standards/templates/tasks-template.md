@@ -12,6 +12,9 @@ infraestrutura) — traduz em ação as regras de "Qualidade e Processo" da
 constituição da VPN Dev. Marcar como concluída somente após validar cada item
 relevante ao artefato entregue pela tarefa.*
 
+- [ ] `graph.yaml` e `graph.md` atualizados para refletir módulos adicionados ou
+      alterados por esta tarefa (Graph Guard valida automaticamente na PR)
+- [ ] Para complexidade S3/S4: `impact-map.md` atualizado e revisado antes do merge
 - [ ] Revisão de código por IA (GitHub Copilot code review) solicitada no PR e
       sem findings High/Critical pendentes
 - [ ] Teste de integração cobrindo o(s) critério(s) de aceitação do `spec.md`

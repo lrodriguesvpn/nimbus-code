@@ -48,6 +48,17 @@ steps:
     options: [approve, reject]
     on_reject: abort
 
+  - id: graph-gate
+    type: gate
+    message: |
+      Grafo de módulos obrigatório:
+      - specs/<feature>/graph.yaml existe e está atualizado?
+      - specs/<feature>/graph.md existe e está atualizado?
+      - Para S3/S4: specs/<feature>/impact-map.md existe?
+      - Complexidade da feature foi classificada (S0–S4) no plan.md?
+    options: [approve, reject]
+    on_reject: abort
+
   - id: tasks
     command: speckit.tasks
     integration: "{{ inputs.integration }}"

@@ -5,7 +5,7 @@ bundle:
   name: "VPN Dev — Modelo de Projeto"
   version: "1.0.0"
   role: "all"
-  description: "Bundle de bootstrap para novos repositórios da VPN Dev: aplica o preset de governança/DevSecOps, a extensão de sincronização de backlog e o workflow de ciclo completo com gate de segurança."
+  description: "Bundle de bootstrap para novos repositórios da VPN Dev: aplica o preset de governança/DevSecOps (incluindo grafos de módulos obrigatórios e escala S0–S4), a extensão de sincronização de backlog e o workflow de ciclo completo com gate de segurança."
   author: "VPN Dev"
   license: "Proprietary"
 
@@ -34,3 +34,5 @@ tags:
   - "vpndev"
   - "governance"
   - "bootstrap"
+  - "module-graph"
+  - "complexity-scale"

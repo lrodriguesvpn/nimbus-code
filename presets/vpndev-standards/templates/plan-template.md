@@ -2,9 +2,42 @@
   Este bloco é inserido pelo preset `vpndev-standards` (estratégia `append`) ao final
   do plan-template.md nativo do Spec Kit — não substitui nenhuma seção existente
   (Summary, Technical Context, Constitution Check, Project Structure, Complexity
-  Tracking). Ele formaliza duas práticas que hoje viviam soltas nas skills internas
+  Tracking). Ele formaliza práticas que hoje viviam soltas nas skills internas
   de refinamento técnico e planejamento DevOps da VPN Dev.
 -->
+
+## VPN Dev — Classificação de Complexidade (S0–S4)
+
+*Preencher antes de qualquer gate. Determina modelo de IA, artefatos obrigatórios e
+nível de revisão exigido.*
+
+| Campo | Valor |
+|---|---|
+| **Nível** | S0 · S1 · S2 · **S3** · S4 *(marcar um)* |
+| **Justificativa** | [ex.: cruza order-service e billing-service via evento] |
+| **Modelo de IA** | Auto / Reasoning / Modelo forte *(conforme tabela abaixo)* |
+| **Revisão humana obrigatória** | Sim (S4) · Não (S0–S3) |
+
+> S0 = documentação · S1 = função isolada · S2 = módulo · S3 = múltiplos módulos ·
+> S4 = arquitetura, segurança, dados ou integração crítica
+
+## VPN Dev — Module Dependency Graph
+
+*OBRIGATÓRIO — deve estar presente e atualizado antes de `/speckit-tasks`.
+Para S3/S4, criar também `impact-map.md` na mesma pasta.*
+
+**Arquivos:**
+- `specs/<feature-slug>/graph.yaml` — fonte de verdade estruturada (lida pelo Graph Guard)
+- `specs/<feature-slug>/graph.md` — diagramas Mermaid para leitura humana
+- `specs/<feature-slug>/impact-map.md` — **obrigatório para S3 e S4**
+
+**Checklist de manutenção do grafo:**
+- [ ] `graph.yaml` criado/atualizado com todos os nós e arestas desta feature
+- [ ] `graph.md` criado/atualizado com diagrama por código e diagrama por business
+- [ ] Para S3/S4: `impact-map.md` criado/atualizado com análise de risco e plano de rollback
+- [ ] Nenhum módulo/serviço novo criado nesta feature está faltando no grafo
+- [ ] Dependências externas (third-party, cloud) declaradas em `externals` no `graph.yaml`
+- [ ] Grafo será atualizado novamente após `/speckit-implement` se a implementação divergir do plano
 
 ## VPN Dev — Security & DevSecOps Gate
 

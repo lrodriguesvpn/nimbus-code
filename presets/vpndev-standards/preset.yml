@@ -22,29 +22,53 @@ provides:
       file: "templates/constitution-template.md"
       strategy: "wrap"
       replaces: "constitution-template"
-      description: "Princípios não-negociáveis da VPN Dev, aplicados antes da constituição específica de cada projeto."
+      description: "Princípios não-negociáveis da VPN Dev, incluindo regras de grafos de módulos e escala de complexidade S0–S4."
 
-    # Acrescenta o Security/DevSecOps Gate e o framework de decisões de
-    # arquitetura ao final do plan-template.md nativo, sem alterar as seções
-    # existentes (Technical Context, Constitution Check, Project Structure...).
+    # Acrescenta o Security/DevSecOps Gate, a classificação de complexidade S0–S4
+    # e o Module Dependency Graph obrigatório ao final do plan-template.md nativo.
     - type: "template"
       name: "plan-template"
       file: "templates/plan-template.md"
       strategy: "append"
       replaces: "plan-template"
-      description: "Security/DevSecOps Gate e Architecture Decision Log padrão da VPN Dev."
+      description: "Classificação S0–S4, Module Dependency Graph obrigatório, Security/DevSecOps Gate e Architecture Decision Log padrão da VPN Dev."
 
-    # Acrescenta o checklist DevSecOps por tarefa ao final do tasks-template.md
-    # nativo, cobrindo os itens que hoje vivem soltos na skill devops-planning.
+    # Acrescenta o checklist DevSecOps + grafo por tarefa ao final do tasks-template.md nativo.
     - type: "template"
       name: "tasks-template"
       file: "templates/tasks-template.md"
       strategy: "append"
       replaces: "tasks-template"
-      description: "Checklist de qualidade/segurança por tarefa de infraestrutura e deploy."
+      description: "Checklist de qualidade/segurança e atualização de grafo por tarefa."
+
+    # Template de graph.yaml para features — gerado em specs/<feature>/graph.yaml.
+    - type: "artifact"
+      name: "graph-yaml"
+      file: "templates/feature-artifacts/graph.yaml"
+      description: "Grafo de módulos estruturado (fonte de verdade para o Graph Guard)."
+
+    # Template de graph.md para features — gerado em specs/<feature>/graph.md.
+    - type: "artifact"
+      name: "graph-md"
+      file: "templates/feature-artifacts/graph.md"
+      description: "Grafo de módulos em Mermaid para leitura humana (código + business)."
+
+    # Template de impact-map.md para features S3/S4 — gerado em specs/<feature>/impact-map.md.
+    - type: "artifact"
+      name: "impact-map"
+      file: "templates/feature-artifacts/impact-map.md"
+      description: "Mapa de impacto e análise de risco — obrigatório para S3 e S4."
+
+    # Template de copilot-instructions.md para o repositório do projeto.
+    - type: "artifact"
+      name: "copilot-instructions"
+      file: "templates/project-root/copilot-instructions.md"
+      description: "Instruções do Copilot com regras de grafo e escala S0–S4 pré-configuradas."
 
 tags:
   - "governance"
   - "security"
   - "devsecops"
   - "vpndev"
+  - "module-graph"
+  - "complexity-scale"

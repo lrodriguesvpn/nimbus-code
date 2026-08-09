@@ -42,6 +42,43 @@
 - Toda alteração de infraestrutura passa por `terraform plan`/equivalente revisado
   em Pull Request antes de aplicar em qualquer ambiente compartilhado.
 
+## Grafos de Módulos
+
+- Todo `plan.md` de feature **deve** conter ou referenciar um `graph.yaml` e um
+  `graph.md` estruturados (localização: `specs/<feature-slug>/`), preenchidos
+  antes de `/speckit-tasks`. Grafo ausente ou desatualizado bloqueia merge sob a
+  mesma régua do gate de segurança.
+- O `graph.yaml` é a fonte de verdade estrutural: lista todos os módulos/serviços
+  envolvidos, suas dependências (tipo e protocolo) e os sistemas externos com sua
+  criticidade. O `graph.md` é o equivalente legível por humanos, com diagramas
+  Mermaid (grafo por código e grafo por business).
+- Toda PR que altera código em `src/`, `services/`, `infrastructure/` ou
+  `modules/` deve atualizar `graph.yaml` e `graph.md` na mesma PR — o GitHub
+  Action Graph Guard valida isso automaticamente.
+- Features de complexidade **S3 ou S4** (múltiplos módulos, arquitetura, segurança
+  ou integração crítica) exigem também um `impact-map.md` com análise de risco,
+  dependências indiretas, plano de rollback e critérios de Go/No-Go.
+
+## Escala de Complexidade e Seleção de Modelo (S0–S4)
+
+- Toda tarefa deve ser classificada na escala de complexidade abaixo antes de
+  iniciar a implementação. Essa classificação determina o modelo de IA usado e os
+  artefatos obrigatórios.
+
+  | Nível | Descrição | Modelo obrigatório |
+  |---|---|---|
+  | **S0** | Documentação, comentários, textos | Auto / modo rápido |
+  | **S1** | Função isolada, sem dependência externa | Auto / modo rápido |
+  | **S2** | Módulo completo, testes, refatoração | Auto |
+  | **S3** | Múltiplos módulos, integração entre serviços | Modelo de reasoning |
+  | **S4** | Arquitetura, segurança, dados sensíveis ou integração crítica | Modelo mais forte + **revisão humana obrigatória** |
+
+- Usar modelo mais forte que o nível exige é desperdício e deve ser evitado.
+  Usar modelo mais fraco que o nível exige é risco técnico e também deve ser
+  evitado.
+- Features S4 exigem label `complexity:S4` no PR e revisão humana — nunca
+  apenas revisão automática.
+
 ## Qualidade e Processo
 
 - Nenhuma implementação de feature relevante começa sem uma especificação formal

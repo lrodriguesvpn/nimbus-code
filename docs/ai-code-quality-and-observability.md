@@ -121,6 +121,72 @@ Duas formas de aplicar, conforme o ponto de origem do bug:
 - Rastreado no `plan.md` pela linha "Gestão de bugs" do novo gate, e por tarefa
   no checklist do `tasks.md`.
 
+## 7. Seleção de Modelo por Complexidade (S0–S4)
+
+**Regra**: toda tarefa deve ser classificada na escala de complexidade abaixo
+antes de iniciar a implementação. O modelo de IA é escolhido com base nessa
+classificação — nunca usar modelo mais forte que o necessário (custo) nem mais
+fraco que o necessário (risco técnico).
+
+### Escala de Complexidade
+
+| Nível | Descrição | Exemplos típicos |
+|---|---|---|
+| **S0** | Documentação, comentários, textos | README, ADL, docstrings, mensagens de commit |
+| **S1** | Função isolada, sem dependência externa | Util, helper, validação simples, mapper |
+| **S2** | Módulo completo, testes, refatoração | CRUD de um serviço, módulo novo, suite de testes |
+| **S3** | Múltiplos módulos, integração entre serviços | Feature que cruza 2+ serviços, contrato de evento, refatoração cross-module |
+| **S4** | Arquitetura, segurança, dados sensíveis ou integração crítica | Auth/authz, schema de banco de dados, API pública, pipeline de dados PII, mudança de infraestrutura core |
+
+### Modelo por Nível
+
+| Nível | Modelo no Copilot | Modo | Artefatos obrigatórios |
+|---|---|---|---|
+| **S0** | Auto (GPT-5.6 Luna ou Claude Haiku) | Rápido / inline | — |
+| **S1** | Auto (GPT-5.6 Luna ou Claude Haiku) | Rápido / inline | — |
+| **S2** | Auto (GPT-5.6 Terra ou equivalente) | Padrão | `graph.yaml` + `graph.md` |
+| **S3** | GPT-5.4 / Claude Sonnet (reasoning) | Reasoning ativo | `graph.yaml` + `graph.md` + ADL entry |
+| **S4** | GPT-5.5 / Claude Opus (máximo) | Reasoning máximo | `graph.yaml` + `graph.md` + `impact-map.md` + revisão humana |
+
+### Como declarar no início de cada tarefa
+
+O agente (Copilot ou equivalente) deve declarar explicitamente ao receber um
+`/speckit-implement` ou iniciar trabalho em qualquer task:
+
+```
+Complexidade desta tarefa: S<N> — <justificativa em uma linha>
+Modelo selecionado: <modelo>
+Artefatos de grafo necessários: graph.yaml [+ graph.md] [+ impact-map.md]
+```
+
+Se a complexidade real for maior que a declarada no `plan.md`, o agente deve:
+1. Parar a implementação.
+2. Atualizar a classificação no `plan.md`.
+3. Escalar o modelo conforme a nova classificação.
+4. Atualizar `graph.yaml`/`graph.md`/`impact-map.md` se necessário.
+
+### Medição de Custo por Tipo de Tarefa
+
+O objetivo da escala S0–S4 é reduzir o custo total do código automático sem
+sacrificar qualidade. A referência de custo relativo por nível:
+
+| Nível | Custo relativo por tarefa | Meta de distribuição |
+|---|---|---|
+| S0 | ~1× (base) | 20–30% das tarefas |
+| S1 | ~1–2× | 30–40% das tarefas |
+| S2 | ~3–5× | 20–30% das tarefas |
+| S3 | ~10–20× | 5–10% das tarefas |
+| S4 | ~30–50× | <5% das tarefas |
+
+Se a distribuição real de tarefas da equipe mostrar mais de 15% em S3/S4, rever
+se a classificação está sendo usada corretamente — muitas tarefas podem estar
+sendo superclassificadas.
+
+A política de modelos habilitados para a organização deve ser configurada em
+**Organization/Enterprise Settings → Copilot → Policies** para restringir
+modelos de alta capacidade (S3/S4) conforme o plano contratado, reforçando a
+escala acima no nível organizacional.
+
 ## 6. Modelos do Copilot Agent prioritários — dá para declarar isso no preset?
 
 **Não diretamente no schema do Spec Kit.** `preset.yml`/`extension.yml`/
