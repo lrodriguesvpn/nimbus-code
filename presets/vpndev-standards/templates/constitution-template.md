@@ -1,6 +1,13 @@
 # Princípios Não-Negociáveis da VPN Dev
 
 <!--
+  © Venha Pra Nuvem — Propriedade Intelectual Exclusiva.
+  Uso restrito a colaboradores autorizados da organização venha-pra-nuvem.
+  Cópia, redistribuição ou uso externo são proibidos — ver LICENSE no repositório
+  speckit-vpndev-standards. Alterações exigem aprovação do @vpndev-arch-board.
+-->
+
+<!--
   Este bloco é inserido pelo preset `vpndev-standards` (estratégia `wrap`) antes da
   constituição específica de cada projeto. Ele representa o conjunto MÍNIMO de regras
   que valem para TODO projeto da organização — o restante da constituição (abaixo)

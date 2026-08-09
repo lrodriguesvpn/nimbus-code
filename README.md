@@ -1,5 +1,12 @@
 # speckit-vpndev-standards
 
+> ⚠️ **Propriedade Intelectual — Uso Interno Exclusivo**
+> Este repositório e todo o seu conteúdo (templates, presets, extensões, workflows,
+> padrões de governança e documentação) são propriedade exclusiva da **Venha Pra Nuvem**.
+> Cópia, redistribuição ou uso fora da organização são expressamente proibidos — ver
+> [`LICENSE`](LICENSE). Qualquer alteração em arquivos de padrão exige aprovação do
+> `@vpndev-arch-board` via Pull Request (ver [`.github/CODEOWNERS`](.github/CODEOWNERS)).
+
 Padrões corporativos de **Spec-Driven Development** (GitHub Spec Kit) da
 **VPN Dev**, distribuídos como um **bundle** único para que todo projeto novo já
 nasça com governança, gate de segurança/DevSecOps e integração de backlog
