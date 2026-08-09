@@ -5,3 +5,7 @@
 .specify/extensions/.cache/
 .specify/presets/.cache/
 .specify/workflows/.cache/
+
+# Arquivos de sistema do macOS/Windows
+.DS_Store
+Thumbs.db
