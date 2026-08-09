@@ -1,0 +1,124 @@
+name: Sincronizar campo Priority com label priority:*
+
+# Mantém o campo nativo "Priority" (single-select, criado por
+# scripts/setup-github-project.sh e scripts/setup-pmo-org-project.sh)
+# sincronizado com o label priority:* da issue/PR — sem isso, "Group by" nas
+# views dos GitHub Projects só funciona por Labels, que mistura priority:*
+# com type:*/agent:*/status:*/dora:*/complexity:* na mesma view (Labels é um
+# campo multi-valor com TODOS os labels, não só a família de prioridade).
+#
+# Genérico e sem configuração: descobre automaticamente TODOS os GitHub
+# Projects (por-repositório e/ou Portfólio PMO) aos quais a issue/PR já
+# pertence e que tenham um campo chamado "Priority" — não precisa de
+# project-url nem de edição manual após copiar este arquivo.
+#
+# Instalar em cada repositório:
+#   cp templates/workflows/sync-priority-field.yml <repo>/.github/workflows/
+#
+# Requer o secret ADD_TO_PROJECT_PAT (o mesmo já usado por
+# add-to-pmo-project.yml — PAT classic escopo `project`, ou fine-grained com
+# permissão de escrita em "Projects"). O GITHUB_TOKEN padrão do workflow NÃO
+# tem escopo `project`, por isso este secret é obrigatório.
+
+on:
+  issues:
+    types: [opened, labeled, unlabeled, reopened]
+  pull_request:
+    types: [opened, labeled, unlabeled, reopened]
+
+jobs:
+  sync-priority:
+    name: Sincronizar Priority
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar secret obrigatório
+        run: |
+          if [ -z "${{ secrets.ADD_TO_PROJECT_PAT }}" ]; then
+            echo "::error::Secret ADD_TO_PROJECT_PAT não configurado. Ver templates/workflows/add-to-pmo-project.yml para instruções."
+            exit 1
+          fi
+
+      - name: Sincronizar campo Priority nos projects do item
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.ADD_TO_PROJECT_PAT }}
+          script: |
+            const content = context.payload.issue || context.payload.pull_request;
+            const contentId = content.node_id;
+            const priorityLabel = (content.labels || []).map(l => l.name).find(n => /^priority:/.test(n));
+
+            const { node } = await github.graphql(`
+              query($id: ID!) {
+                node(id: $id) {
+                  ... on Issue {
+                    projectItems(first: 20, includeArchived: false) {
+                      nodes {
+                        id
+                        project {
+                          id
+                          fields(first: 30) {
+                            nodes {
+                              ... on ProjectV2SingleSelectField { id name options { id name } }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                  ... on PullRequest {
+                    projectItems(first: 20, includeArchived: false) {
+                      nodes {
+                        id
+                        project {
+                          id
+                          fields(first: 30) {
+                            nodes {
+                              ... on ProjectV2SingleSelectField { id name options { id name } }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }`, { id: contentId });
+
+            const items = node?.projectItems?.nodes ?? [];
+            if (items.length === 0) {
+              core.info("Item não pertence a nenhum GitHub Project ainda — nada a sincronizar.");
+              return;
+            }
+
+            for (const item of items) {
+              const priorityField = (item.project.fields.nodes || []).find(f => f && f.name === "Priority");
+              if (!priorityField) {
+                core.info(`Project ${item.project.id} não tem campo "Priority" — pulando.`);
+                continue;
+              }
+
+              if (priorityLabel) {
+                const suffix = priorityLabel.replace(/^priority:/, "");
+                const option = priorityField.options.find(o => o.name === suffix);
+                if (!option) {
+                  core.warning(`Label "${priorityLabel}" não corresponde a nenhuma opção do campo Priority (esperado: P0-blocker/P1-high/P2-medium/P3-low).`);
+                  continue;
+                }
+                await github.graphql(`
+                  mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                    updateProjectV2ItemFieldValue(input: {
+                      projectId: $projectId, itemId: $itemId, fieldId: $fieldId,
+                      value: { singleSelectOptionId: $optionId }
+                    }) { projectV2Item { id } }
+                  }`, { projectId: item.project.id, itemId: item.id, fieldId: priorityField.id, optionId: option.id });
+                core.info(`Priority = ${suffix} aplicado no project ${item.project.id}.`);
+              } else {
+                // Nenhum label priority:* presente (ex.: foi removido) — limpa o campo.
+                await github.graphql(`
+                  mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!) {
+                    clearProjectV2ItemFieldValue(input: {
+                      projectId: $projectId, itemId: $itemId, fieldId: $fieldId
+                    }) { projectV2Item { id } }
+                  }`, { projectId: item.project.id, itemId: item.id, fieldId: priorityField.id });
+                core.info(`Priority limpo no project ${item.project.id} (sem label priority:* no item).`);
+              }
+            }

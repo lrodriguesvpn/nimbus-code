@@ -97,6 +97,15 @@ else
 fi
 
 echo ""
+echo "ℹ Workflows OPT-IN (copie manualmente quando os pré-requisitos existirem):"
+echo "  • templates/workflows/add-to-pmo-project.yml — conecta este repo ao Portfólio"
+echo "    PMO (1x por organização, ver scripts/setup-pmo-org-project.sh)."
+echo "  • templates/workflows/sync-priority-field.yml — mantém o campo nativo"
+echo "    \"Priority\" sincronizado com o label priority:* em qualquer GitHub Project"
+echo "    ao qual a issue/PR pertença (por-repositório e/ou Portfólio PMO). Sem"
+echo "    edição manual após copiar. Ambos requerem o secret ADD_TO_PROJECT_PAT."
+
+echo ""
 echo "→ Instalando doc de perfis de custo humano (Júnior/Pleno/Sênior)..."
 COST_PROFILES_SRC="$LOCAL_PATH/presets/vpndev-standards/templates/cost-profiles-and-rates.md"
 if [[ -f "$COST_PROFILES_SRC" ]]; then

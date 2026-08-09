@@ -224,9 +224,58 @@ mutation($viewId:ID!, $filter:String!) {
   fi
 done
 
-# 4. Resumo final
+# 4. Criar campo customizado "Priority" (single-select sincronizado com labels priority:*)
 echo ""
-echo -e "${BLUE}[4/4]${NC} Setup concluído!"
+echo -e "${BLUE}[4/5]${NC} Criando campo customizado \"Priority\" (single-select)..."
+
+EXISTING_FIELDS_JSON=$(GH_HOST="$GH_HOST" gh api graphql -f projectId="$PROJECT_ID" -f query='
+query($projectId:ID!) {
+  node(id: $projectId) {
+    ... on ProjectV2 {
+      fields(first: 50) { nodes { ... on ProjectV2FieldCommon { id name } } }
+    }
+  }
+}' 2>/dev/null | jq -c '.data.node.fields.nodes // []')
+
+if echo "$EXISTING_FIELDS_JSON" | jq -e '.[] | select(.name == "Priority")' >/dev/null 2>&1; then
+  echo -e "${YELLOW}  ℹ Campo já existe (pulando): Priority${NC}"
+else
+  PRIORITY_FIELD_RESPONSE=$(GH_HOST="$GH_HOST" gh api graphql \
+    -f projectId="$PROJECT_ID" \
+    -f query='
+mutation($projectId:ID!) {
+  createProjectV2Field(input: {
+    projectId: $projectId
+    dataType: SINGLE_SELECT
+    name: "Priority"
+    singleSelectOptions: [
+      {name: "P0-blocker", color: RED,    description: "Bloqueador — trata antes de qualquer outro item"},
+      {name: "P1-high",    color: ORANGE, description: "Próximo item a puxar após todo P0"},
+      {name: "P2-medium",  color: YELLOW, description: "Planejado, sem urgência imediata"},
+      {name: "P3-low",     color: GREEN,  description: "Nice-to-have"}
+    ]
+  }) {
+    projectV2Field {
+      ... on ProjectV2SingleSelectField {
+        id
+        name
+      }
+    }
+  }
+}' 2>&1) || true
+
+  PRIORITY_FIELD_NAME_RESULT=$(echo "$PRIORITY_FIELD_RESPONSE" | jq -r '.data.createProjectV2Field.projectV2Field.name // empty' 2>/dev/null)
+
+  if [[ -n "$PRIORITY_FIELD_NAME_RESULT" ]]; then
+    echo -e "${GREEN}  ✓ Campo criado: Priority (single-select: P0-blocker/P1-high/P2-medium/P3-low)${NC}"
+  else
+    echo -e "${YELLOW}  ⚠ Campo pode já existir ou erro ao criar (crie manualmente se necessário): Priority${NC}"
+  fi
+fi
+
+# 5. Resumo final
+echo ""
+echo -e "${BLUE}[5/5]${NC} Setup concluído!"
 echo ""
 echo -e "${GREEN}═══════════════════════════════════════════════════════════════${NC}"
 echo -e "GitHub Project (Portfólio PMO) configurado com sucesso!"
@@ -235,14 +284,20 @@ echo -e "${GREEN}ID:${NC}  ${PROJECT_ID}"
 echo ""
 echo -e "Views criadas (ajuste \"group by\" manualmente na UI — não exposto pela API):"
 echo -e "  • Board por Repositório  → agrupar por campo nativo \"Repository\""
-echo -e "  • Board por Prioridade   → agrupar por Labels (prefixo priority:*)"
+echo -e "  • Board por Prioridade   → agrupar pelo campo \"Priority\" (single-select"
+echo -e "    criado no passo 4 — NÃO usar \"Labels\", que mistura priority:*/type:*/"
+echo -e "    agent:*/status:*/dora:*/complexity:* na mesma view)"
 echo -e "  • Tabela — Backlog Consolidado"
 echo -e "  • Tabela — P0 Blocker"
 echo ""
 echo -e "Próximos passos (por repositório que deve alimentar este board):"
 echo -e "  1. cp templates/workflows/add-to-pmo-project.yml <repo>/.github/workflows/"
 echo -e "  2. Editar o 'project-url' no arquivo copiado para: ${PROJECT_URL}"
-echo -e "  3. Configurar o secret ADD_TO_PROJECT_PAT (PAT com escopo project) em cada repo"
+echo -e "  3. cp templates/workflows/sync-priority-field.yml <repo>/.github/workflows/"
+echo -e "     (mantém o campo \"Priority\" sincronizado com o label priority:* — sem"
+echo -e "     editar nada, descobre o project automaticamente)"
+echo -e "  4. Configurar o secret ADD_TO_PROJECT_PAT (PAT com escopo project) em cada repo"
+echo -e "     (usado pelos 2 workflows acima)"
 echo ""
 echo -e "Para custo real (Horas Humanas) e Oportunidades D365 consolidados entre"
 echo -e "repositórios, rode periodicamente: scripts/pmo-cost-rollup.sh"

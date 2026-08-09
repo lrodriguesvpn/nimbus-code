@@ -396,9 +396,49 @@ mutation($projectId:ID!, $fieldName:String!) {
   fi
 fi
 
-# 7. Resumo final
+# 7. Criar campo customizado "Priority" (single-select sincronizado com labels priority:*)
 echo ""
-echo -e "${BLUE}[7/7]${NC} Setup concluído!"
+echo -e "${BLUE}[7/8]${NC} Criando campo customizado \"Priority\" (single-select)..."
+
+if field_already_exists "Priority"; then
+  echo -e "${YELLOW}  ℹ Campo já existe (pulando): Priority${NC}"
+else
+  PRIORITY_FIELD_RESPONSE=$(GH_HOST="$GH_HOST" gh api graphql \
+    -f projectId="$PROJECT_ID" \
+    -f query='
+mutation($projectId:ID!) {
+  createProjectV2Field(input: {
+    projectId: $projectId
+    dataType: SINGLE_SELECT
+    name: "Priority"
+    singleSelectOptions: [
+      {name: "P0-blocker", color: RED,    description: "Bloqueador — trata antes de qualquer outro item"},
+      {name: "P1-high",    color: ORANGE, description: "Próximo item a puxar após todo P0"},
+      {name: "P2-medium",  color: YELLOW, description: "Planejado, sem urgência imediata"},
+      {name: "P3-low",     color: GREEN,  description: "Nice-to-have"}
+    ]
+  }) {
+    projectV2Field {
+      ... on ProjectV2SingleSelectField {
+        id
+        name
+      }
+    }
+  }
+}' 2>&1) || true
+
+  PRIORITY_FIELD_NAME_RESULT=$(echo "$PRIORITY_FIELD_RESPONSE" | jq -r '.data.createProjectV2Field.projectV2Field.name // empty' 2>/dev/null)
+
+  if [[ -n "$PRIORITY_FIELD_NAME_RESULT" ]]; then
+    echo -e "${GREEN}  ✓ Campo criado: Priority (single-select: P0-blocker/P1-high/P2-medium/P3-low)${NC}"
+  else
+    echo -e "${YELLOW}  ⚠ Campo pode já existir ou erro ao criar (crie manualmente se necessário): Priority${NC}"
+  fi
+fi
+
+# 8. Resumo final
+echo ""
+echo -e "${BLUE}[8/8]${NC} Setup concluído!"
 echo ""
 echo -e "${GREEN}═══════════════════════════════════════════════════════════════${NC}"
 echo -e "GitHub Project configurado com sucesso!"
@@ -420,6 +460,11 @@ echo -e "    Dynamics 365 para vincular a issue/PR à venda/negócio de origem."
 echo -e "  • Ocorrência CRM (N1) (texto) — cole a URL/ID do atendimento N1 no CRM"
 echo -e "    quando a issue vier de uma ocorrência/incidente (use com o label"
 echo -e "    type:incident). Ver docs/label-taxonomy-and-autonomous-dev.md."
+echo -e "  • Priority (single-select) — espelha o label priority:* como campo nativo,"
+echo -e "    para permitir \"Group by Priority\" sem misturar outras famílias de label."
+echo -e "    Preenchido automaticamente por .github/workflows/sync-priority-field.yml"
+echo -e "    (template em templates/workflows/) sempre que o label priority:* mudar —"
+echo -e "    instale esse workflow no repositório para manter o campo sincronizado."
 echo ""
 echo -e "Próximos passos:"
 echo -e "  1. Abra o projeto acima e customize as views conforme necessário"
