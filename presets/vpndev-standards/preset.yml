@@ -3,7 +3,7 @@ schema_version: "1.0"
 preset:
   id: "vpndev-standards"
   name: "VPN Dev — Padrões de Governança"
-  version: "1.5.1"
+  version: "1.5.2"
   description: "Constituição base, grafos de módulos obrigatórios, escala S0–S4 com estimativa de tokens e ajuste por projeto, catálogo de reuso de conteúdo para reduzir custo de tokens, SLO Gate, estratégia de release, ADRs, taxonomia de labels de priorização/desenvolvimento autônomo/DORA, modelo híbrido humano+agente, e framework DevSecOps da VPN Dev, aplicados sobre os templates nativos do Spec Kit."
   author: "VPN Dev"
   repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"

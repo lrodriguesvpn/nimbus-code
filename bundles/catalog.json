@@ -1,17 +1,17 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-08-09T19:47:22Z",
+  "updated_at": "2026-08-09T20:36:04Z",
   "catalog_url": "https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bundles/catalog.json",
   "bundles": {
     "vpndev-project-bundle": {
       "name": "VPN Dev — Modelo de Projeto",
       "id": "vpndev-project-bundle",
-      "version": "1.5.3",
+      "version": "1.5.4",
       "role": "all",
       "description": "Bundle de bootstrap para novos repositórios da VPN Dev: preset de governança/DevSecOps (com escala S0–S4 e estimativa de tokens, catálogo de reuso de conteúdo para reduzir custo de tokens, labels de priorização/desenvolvimento autônomo/DORA/incidente, modelo híbrido humano+agente com perfis de custo padrão, GitHub Project por repositório garantido continuamente e Portfólio PMO consolidado), extensão de sincronização de backlog e workflow de ciclo completo com gate de segurança.",
       "author": "VPN Dev",
       "license": "Proprietary",
-      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.5.3/vpndev-project-bundle-1.5.3.zip",
+      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.5.4/vpndev-project-bundle-1.5.4.zip",
       "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template",
       "requires": {
         "speckit_version": ">=0.16.0"
@@ -41,12 +41,12 @@
     "vpndev-platform-bundle": {
       "name": "VPN Dev — Modelo de Plataforma/Cliente",
       "id": "vpndev-platform-bundle",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "role": "all",
       "description": "Bundle de bootstrap para repositórios de PLATAFORMA/CLIENTE/TENANT da VPN Dev: aplica o preset vpndev-platform-standards (inventário multi-nuvem Azure/AWS/GCP/GWS/M365/D365, grafo de superfícies de plataforma, registro de schemas de sistemas legados e regra de zero-diff como critério de verdade — nunca aplica mudança direta em ambiente). Distinto do vpndev-project-bundle, que é para repositórios de projeto/workload.",
       "author": "VPN Dev",
       "license": "Proprietary",
-      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.5.3/vpndev-platform-bundle-0.1.1.zip",
+      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.5.4/vpndev-platform-bundle-0.1.2.zip",
       "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template",
       "requires": {
         "speckit_version": ">=0.16.0"
