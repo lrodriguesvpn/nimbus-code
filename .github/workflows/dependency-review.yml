@@ -1,0 +1,60 @@
+name: Dependency Review — Segurança de Supply Chain
+
+# Bloqueia PRs que introduzem dependências com vulnerabilidades CVE High/Critical.
+# Complementa o DevSecOps Gate: PRs com dependências vulneráveis não passam
+# pelo gate mesmo que o código em si não tenha problemas.
+#
+# Instalar nos repositórios de projeto junto com graph-guard.yml:
+#   cp .github/workflows/dependency-review.yml <repo>/.github/workflows/
+#
+# Requer: repositório com Dependency Graph habilitado (Settings → Security).
+
+on:
+  pull_request:
+    branches: ["**"]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  dependency-review:
+    name: Dependency Review — CVE High/Critical
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          # Bloqueia dependências com severidade High ou Critical
+          fail-on-severity: high
+
+          # Permite licenças open-source comuns (ajustar conforme política de IP)
+          allow-licenses: >-
+            MIT,
+            Apache-2.0,
+            BSD-2-Clause,
+            BSD-3-Clause,
+            ISC,
+            MPL-2.0,
+            LGPL-2.1,
+            LGPL-3.0,
+            CC0-1.0,
+            Unlicense
+
+          # Bloqueia licenças incompatíveis com software proprietário
+          deny-licenses: >-
+            GPL-2.0,
+            GPL-3.0,
+            AGPL-3.0,
+            SSPL-1.0,
+            BUSL-1.1
+
+          # Comentar na PR com resumo de vulnerabilidades encontradas
+          comment-summary-in-pr: always
+
+          # Avisar (não bloquear) para Medium — visibilidade sem travar o time
+          warn-on-openssl-cf: true

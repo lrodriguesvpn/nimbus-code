@@ -2,9 +2,79 @@
   Este bloco é inserido pelo preset `vpndev-standards` (estratégia `append`) ao final
   do plan-template.md nativo do Spec Kit — não substitui nenhuma seção existente
   (Summary, Technical Context, Constitution Check, Project Structure, Complexity
-  Tracking). Ele formaliza duas práticas que hoje viviam soltas nas skills internas
+  Tracking). Ele formaliza práticas que hoje viviam soltas nas skills internas
   de refinamento técnico e planejamento DevOps da VPN Dev.
 -->
+
+## VPN Dev — Classificação de Complexidade (S0–S4)
+
+*Preencher antes de qualquer gate. Determina modelo de IA, artefatos obrigatórios e
+nível de revisão exigido.*
+
+| Campo | Valor |
+|---|---|
+| **Nível** | S0 · S1 · S2 · **S3** · S4 *(marcar um)* |
+| **Justificativa** | [ex.: cruza order-service e billing-service via evento] |
+| **Modelo de IA** | Auto / Reasoning / Modelo forte *(conforme tabela abaixo)* |
+| **Revisão humana obrigatória** | Sim (S4) · Não (S0–S3) |
+
+> S0 = documentação · S1 = função isolada · S2 = módulo · S3 = múltiplos módulos ·
+> S4 = arquitetura, segurança, dados ou integração crítica
+
+## VPN Dev — Module Dependency Graph
+
+*OBRIGATÓRIO — deve estar presente e atualizado antes de `/speckit-tasks`.
+Para S3/S4, criar também `impact-map.md` na mesma pasta.*
+
+**Arquivos:**
+- `specs/<feature-slug>/graph.yaml` — fonte de verdade estruturada (lida pelo Graph Guard)
+- `specs/<feature-slug>/graph.md` — diagramas Mermaid para leitura humana
+- `specs/<feature-slug>/impact-map.md` — **obrigatório para S3 e S4**
+
+**Checklist de manutenção do grafo:**
+- [ ] `graph.yaml` criado/atualizado com todos os nós e arestas desta feature
+- [ ] `graph.md` criado/atualizado com diagrama por código e diagrama por business
+- [ ] Para S3/S4: `impact-map.md` criado/atualizado com análise de risco e plano de rollback
+- [ ] Nenhum módulo/serviço novo criado nesta feature está faltando no grafo
+- [ ] Dependências externas (third-party, cloud) declaradas em `externals` no `graph.yaml`
+- [ ] Grafo será atualizado novamente após `/speckit-implement` se a implementação divergir do plano
+
+## VPN Dev — Estratégia de Release
+
+*Declarar antes de `/speckit-tasks`. Para S3/S4, esta escolha alimenta o
+`impact-map.md` (simplifica ou complica o plano de rollback).*
+
+| Campo | Valor |
+|---|---|
+| **Estratégia** | `flag` · `direct` · `canary` · `blue-green` *(marcar uma)* |
+| **Feature flag name** | `<nome-da-flag>` — ou `N/A` se não usar flag |
+| **Flag provider** | [ex.: LaunchDarkly, AWS AppConfig, OpenFeature] — ou `N/A` |
+| **Critério de ativação** | [ex.: 10% tráfego por 24h sem aumento de erro rate] |
+| **Critério de rollback** | [ex.: taxa de erro > 0,5% ou p99 > 500ms por 5 min] |
+
+> **Regra**: features S3/S4 **obrigam** estratégia `flag`, `canary` ou `blue-green`
+> — `direct` não é permitido sem justificativa explícita registrada aqui e no ADL.
+
+**Justificativa para deploy `direct` (se aplicável):**
+[Razão técnica para não usar flag/canary — ex.: migration de schema incompatível
+com flag, ou feature de infraestrutura sem plano de ativação incremental]
+
+## VPN Dev — SLO Gate
+
+*Preencher para todo componente novo ou alterado de forma relevante. Os valores
+aqui definidos são a referência para configuração de alertas (Observability Gate)
+e critérios de Go/No-Go do `impact-map.md` (S3/S4).*
+
+| Componente | Latência p99 | Taxa de erro máx. | Disponibilidade | RTO | RPO |
+|---|---|---|---|---|---|
+| `<serviço>` | [ex.: 200ms] | [ex.: 0,1%] | [ex.: 99,9%] | [ex.: 5 min] | [ex.: 1 min] |
+
+> Deixar `—` apenas quando o componente não expõe SLO mensurável (ex.: job batch
+> interno). Omissão sem justificativa bloqueia o Observability Gate.
+
+**SLOs não definidos nesta feature e justificativa:**
+[Listar componentes sem SLO e o motivo — ex.: "consumer Kafka assíncrono: sem
+SLO de latência, monitorado por lag de fila"]
 
 ## VPN Dev — Security & DevSecOps Gate
 
@@ -14,6 +84,7 @@ por domínio técnico.*
 
 | Domínio | Controles aplicáveis | Status | Observações |
 |---|---|---|---|
+| Autenticação (SSO) | Sistemas novos (greenfield) devem usar SSO; ausência de SSO deve estar formalmente declarada e registrada no Architecture Decision Log abaixo | | Se não usar SSO, registrar justificativa no ADL — caso contrário este gate é bloqueante |
 | Containers | Imagem base pinada, scan de vulnerabilidade, usuário não-root | | |
 | CI/CD | Segredos via cofre/CI secrets, least privilege no service account do pipeline | | |
 | IaC — provider(s) usado(s) | 100% da infra desta feature via IaC (nenhuma alteração manual); **Terraform** como framework padrão para AWS/GCP/Azure; `plan` revisado em PR, sem credenciais hardcoded, state remoto protegido | | Se usar ferramenta nativa do provedor (CDK/Bicep/Deployment Manager) em vez de Terraform, justificar no Architecture Decision Log abaixo |
