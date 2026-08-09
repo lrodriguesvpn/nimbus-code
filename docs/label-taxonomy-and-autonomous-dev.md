@@ -31,12 +31,16 @@ não tendo) uma forma consistente de responder a duas perguntas recorrentes:
 | Prioridade | `priority:P1-high` | `#d93f0b` | Próximo item a puxar após todo P0 |
 | Prioridade | `priority:P2-medium` | `#fbca04` | Planejado, sem urgência imediata |
 | Prioridade | `priority:P3-low` | `#0e8a16` | Nice-to-have |
-| Complexidade | `complexity:S0`–`S4` | gradiente verde→vermelho | Mesma escala S0–S4 do `copilot-instructions.md` (ver [`ai-code-quality-and-observability.md`](ai-code-quality-and-observability.md#7-seleção-de-modelo-por-complexidade-s0s4)) |
+| Complexidade | `complexity:S0`–`S4` | gradiente verde→vermelho | Mesma escala S0–S4 do `copilot-instructions.md` (ver [`ai-code-quality-and-observability.md`](ai-code-quality-and-observability.md#6-seleção-de-modelo-por-complexidade-s0s4)) |
 | Tipo | `type:bug` / `type:feature` / `type:chore` / `type:docs` | padrão GitHub | Classificação padrão de issue/PR |
 | Agente | `agent:autonomous-ok` | `#0e8a16` | Dispara o auto-assign ao Copilot coding agent |
 | Agente | `agent:needs-human` | `#e99695` | Bloqueia qualquer auto-assign, mesmo que `agent:autonomous-ok` também esteja presente |
 | Status | `status:needs-triage` | `#ededed` | Issue nova, ainda sem `priority:*`/`complexity:*` — não deve ser puxada por agente autônomo |
 | Status | `status:blocked` | `#5319e7` | Pular na fila, mesmo com `priority:P0-blocker` |
+| DORA | `dora:deployment-frequency` | `#0052cc` | Issue impacta a frequência de deploy |
+| DORA | `dora:lead-time` | `#1d76db` | Issue impacta o lead time for changes |
+| DORA | `dora:change-failure-rate` | `#d93f0b` | Issue impacta a taxa de falha de mudança |
+| DORA | `dora:mttr` | `#b60205` | Issue impacta o tempo de restauração de serviço (MTTR) |
 
 A lista de labels (nome, cor, descrição) vive como fonte única da verdade em
 [`scripts/setup-github-labels.sh`](../scripts/setup-github-labels.sh) — este
@@ -50,7 +54,8 @@ o próximo item a puxar" é:
 1. Excluir tudo com `status:blocked` ou `status:needs-triage`.
 2. Ordenar o restante por `priority:*`: `P0-blocker` > `P1-high` >
    `P2-medium` > `P3-low`. Itens sem label de prioridade são tratados como
-   `P2-medium` por padrão (ver comportamento do workflow na seção 5).
+   `P2-medium` por padrão (ver comentários do workflow
+   `.github/workflows/agent-auto-assign.yml`).
 3. Dentro do mesmo nível de prioridade, usar `complexity:*` apenas para
    decidir alocação de agente/modelo (ver escala S0–S4) — não para desempatar
    ordem, a menos que o time decida isso explicitamente.
@@ -121,7 +126,43 @@ PR e revisão humana`, ver
 O workflow apenas garante que essa regra não pode ser contornada
 acidentalmente aplicando `agent:autonomous-ok` numa issue S4.
 
-## 5. Instalação em um projeto novo ou existente
+## 5. Labels DORA — correlação com métricas DevOps
+
+Os labels `dora:*` não afetam nenhum workflow automático (não são gatilho de
+nada) — são puramente um **domínio de classificação** para permitir consultas
+e dashboards que correlacionem issues fechadas com os **4 indicadores DORA**
+("Four Keys", DevOps Research and Assessment):
+
+| Label | Métrica DORA correspondente | Quando aplicar |
+|---|---|---|
+| `dora:deployment-frequency` | Deployment Frequency | Issues sobre pipeline de release, automação de deploy, cadência de entrega (ex.: "automatizar deploy canário", "reduzir passos manuais do release") |
+| `dora:lead-time` | Lead Time for Changes | Issues sobre reduzir o tempo entre commit e produção (ex.: "paralelizar suite de testes no CI", "remover aprovação manual redundante") |
+| `dora:change-failure-rate` | Change Failure Rate | Bugs introduzidos por um deploy/mudança recente, ou trabalho preventivo para reduzir a taxa de falha (ex.: "adicionar smoke test pós-deploy") |
+| `dora:mttr` | Time to Restore Service (MTTR) | Incidentes, hotfixes emergenciais, ou trabalho para acelerar detecção/recuperação (ex.: "melhorar alerta de rollback automático") |
+
+**Como usar na prática:**
+
+1. Aplique o label `dora:*` relevante ao **triar** a issue — pode coexistir
+   com `priority:*`, `complexity:*` e `type:*` normalmente (não são mutuamente
+   exclusivos; uma issue pode até ter mais de um `dora:*` se impactar mais de
+   uma métrica, embora isso deva ser raro).
+2. Nem toda issue precisa de um label `dora:*` — só aplique quando a issue tem
+   relação direta e mensurável com um dos 4 indicadores. Trabalho de feature
+   comum (sem relação com pipeline/incidente/qualidade de release) não precisa
+   desse label.
+3. Para reportar as métricas de fato, consulte/filtre issues fechadas por
+   `dora:*` e cruze com dados reais de deploy do seu pipeline de CI/CD — os
+   labels **não substituem** a medição automatizada (deploy timestamps,
+   incident timestamps), apenas dão contexto de **quais itens de trabalho**
+   contribuíram para mover cada indicador, o que é útil para retrospectivas e
+   priorização (ex.: "quantas issues P1/P2 deste trimestre foram sobre
+   `dora:change-failure-rate`? Vale investir mais aqui?").
+4. Times que já têm uma ferramenta dedicada de métricas DORA (ex.: DORA
+   Metrics do GitHub, um dashboard próprio) podem usar esses labels como
+   **complemento qualitativo** (visão de "issue → intenção"), não como
+   substituto da fonte de verdade quantitativa.
+
+## 6. Instalação em um projeto novo ou existente
 
 O `bootstrap.sh` já chama `setup-github-labels.sh` automaticamente (mesmo
 padrão do GitHub Project — ver
@@ -143,7 +184,7 @@ git add .github/workflows/agent-auto-assign.yml
 gh secret set COPILOT_AGENT_ASSIGN_TOKEN --repo venha-pra-nuvem/meu-projeto
 ```
 
-## 6. Evitando disparo duplicado (importante antes de habilitar)
+## 7. Evitando disparo duplicado (importante antes de habilitar)
 
 Este workflow é **o único gatilho versionado** deste bundle para atribuição
 automática ao Copilot — não existe (e nunca existiu neste repositório) nenhum
@@ -170,7 +211,7 @@ Antes de habilitar `agent-auto-assign.yml` num repositório:
    assim, **não instale** `agent-auto-assign.yml` — os dois mecanismos não
    devem coexistir no mesmo repositório para a mesma finalidade.
 
-## 7. Relação com outros documentos
+## 8. Relação com outros documentos
 
 - [`ai-code-quality-and-observability.md`](ai-code-quality-and-observability.md#5-bugs-abertos-e-atribuídos-automaticamente-ao-copilot) —
   gestão de bugs e atribuição ao Copilot (contexto mais amplo).

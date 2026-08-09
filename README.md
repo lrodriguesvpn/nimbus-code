@@ -89,11 +89,15 @@ extensão + workflow na versão publicada mais recente da branch `main`.
 
 Se o `gh` CLI estiver instalado e autenticado, o `bootstrap.sh` **cria
 automaticamente um GitHub Project V2** com 3 views padrão (copiadas do
-IOX-CROWDFUNDINGPAAS):
+IOX-CROWDFUNDINGPAAS) e 1 campo customizado:
 
 - **Board por Epic** — organize issues por épicas
 - **Board por Prioridade** — organize por níveis de prioridade
 - **Tabela — P0 Blocker** — filtro pré-configurado para P0-blocker críticos
+- **Campo "Horas Humanas"** (número) — para lançar tempo humano em tarefas de
+  modelo híbrido (agente + humano) e compor o custo real da tarefa (tokens do
+  agente + horas humanas × custo/hora do time) — ver
+  [`docs/ai-code-quality-and-observability.md`](docs/ai-code-quality-and-observability.md#8-modelo-híbrido-agentes-de-ia--humanos-codando-juntos)
 
 O project é criado com o nome `{repo-name} — Spec Kit Roadmap` e fica
 imediatamente acessível para customize (adicionar/remover filtros, agrupar
@@ -110,7 +114,9 @@ bash ./scripts/setup-github-project.sh --repo-owner venha-pra-nuvem --repo-name 
 O `bootstrap.sh` também **cria/atualiza automaticamente a taxonomia de
 labels** do bundle (via `scripts/setup-github-labels.sh`): `priority:P0-blocker`
 a `P3-low`, `complexity:S0`–`S4`, `type:bug/feature/chore/docs`,
-`agent:autonomous-ok`/`agent:needs-human` e `status:needs-triage`/`blocked`.
+`agent:autonomous-ok`/`agent:needs-human`, `status:needs-triage`/`blocked` e
+`dora:deployment-frequency`/`dora:lead-time`/`dora:change-failure-rate`/`dora:mttr`
+(para correlacionar issues com os 4 indicadores DORA).
 
 O label `agent:autonomous-ok` dispara automaticamente a atribuição da issue
 ao GitHub Copilot coding agent (via

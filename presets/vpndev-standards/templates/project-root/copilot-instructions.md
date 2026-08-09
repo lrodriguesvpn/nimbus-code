@@ -50,7 +50,16 @@ No início de cada tarefa (ou ao receber um `/speckit-implement`), declare:
 ```
 Complexidade desta tarefa: S<N> — <justificativa breve>
 Modelo selecionado: <modelo>
+Estimativa de tokens (input+output): ~<X>–<Y> mil tokens
 ```
+
+A estimativa de tokens vai para a tabela de Classificação de Complexidade do
+`plan.md` e é comparada com o consumo real no fechamento do `tasks.md` (ver
+`docs/ai-code-quality-and-observability.md`, seção 6, para a metodologia de
+estimativa e as limitações de medição real). O mapeamento nível→modelo acima é
+a recomendação padrão do bundle — pode ser ajustado por projeto (nunca a
+régua S0–S4 em si nem a exigência de revisão humana em S4); documente o ajuste
+no `constitution.md` do projeto ou no ADL.
 
 ### Regras de escalonamento
 
@@ -99,6 +108,23 @@ humana constante. Instalada via `scripts/setup-github-labels.sh`.
   seu próprio trabalho), aplique a mesma lógica.
 - Guia completo, incluindo como evitar gatilhos duplicados de auto-assign:
   `docs/label-taxonomy-and-autonomous-dev.md`.
+- **Labels DORA** (`dora:deployment-frequency`/`dora:lead-time`/
+  `dora:change-failure-rate`/`dora:mttr`): aplique na issue quando ela impacta
+  diretamente um dos 4 indicadores DORA (deploy, lead time, taxa de falha de
+  mudança, tempo de recuperação) — usado para correlacionar trabalho entregue
+  com esses indicadores, não dispara automação nenhuma.
+
+---
+
+## Modelo Híbrido (Agente + Humano) e Controle de Custo
+
+Toda tarefa em modo híbrido (agente gera a maior parte, humano revisa/ajusta)
+deve ter as horas humanas lançadas no campo **"Horas Humanas"** do GitHub
+Project (criado por `scripts/setup-github-project.sh`), mesmo que seja apenas
+o tempo de revisão do PR — isso é o que permite calcular o custo real da
+tarefa (`tokens do agente + horas humanas × custo/hora do time`), não apenas o
+custo de tokens isolado. Ver `docs/ai-code-quality-and-observability.md`,
+seção 8.
 
 ---
 
@@ -131,6 +157,7 @@ humana constante. Instalada via `scripts/setup-github-labels.sh`.
 ## Referências
 
 - [Guia do Dev VPN Dev](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/developer-guide.md)
-- [Seleção de Modelos por Complexidade](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/ai-code-quality-and-observability.md#7-seleção-de-modelo-por-complexidade-s0s4)
+- [Seleção de Modelos por Complexidade](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/ai-code-quality-and-observability.md#6-seleção-de-modelo-por-complexidade-s0s4)
 - [Grafos de Módulos — Guia](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/module-graphs.md)
 - [Labels — Priorização e Desenvolvimento Autônomo](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/label-taxonomy-and-autonomous-dev.md)
+- [Modelo Híbrido e Estimativa de Tokens](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/ai-code-quality-and-observability.md#8-modelo-híbrido-agentes-de-ia--humanos-codando-juntos)

@@ -37,7 +37,7 @@ name: Agent Auto-Assign — Desenvolvimento Autônomo por Label
 # neste repositório. Porém confira a aba "Agents → Automations" (feature
 # nativa do GitHub, configurada na UI e NÃO versionada em git, privada por
 # criador) antes de habilitar, para não ter dois gatilhos rodando em paralelo
-# na mesma issue. Ver docs/label-taxonomy-and-autonomous-dev.md seção 6.
+# na mesma issue. Ver docs/label-taxonomy-and-autonomous-dev.md seção 7.
 
 on:
   issues:

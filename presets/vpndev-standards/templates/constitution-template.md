@@ -90,14 +90,24 @@
   evitado.
 - Features S4 exigem label `complexity:S4` no PR e revisão humana — nunca
   apenas revisão automática.
+- O mapeamento nível→modelo acima é a recomendação padrão do bundle e **pode
+  ser ajustado por projeto** (política de modelos habilitados, compliance,
+  disponibilidade) — a régua S0–S4 em si e a exigência de revisão humana em S4
+  **não são ajustáveis**. Documente qualquer ajuste no Architecture Decision
+  Log do `plan.md`.
+- Toda feature deve ter uma **estimativa de tokens** registrada no `plan.md`
+  antes de `/speckit-tasks`, e o consumo real comparado com ela no fechamento
+  do `tasks.md` — ver metodologia em
+  [`docs/ai-code-quality-and-observability.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/ai-code-quality-and-observability.md), seção 6.
 
 ## Priorização e Desenvolvimento Autônomo (Labels)
 
 - Todo projeto deve manter a taxonomia de labels do bundle VPN Dev criada por
   `scripts/setup-github-labels.sh`: `priority:P0-blocker` a `P3-low`,
   `complexity:S0`–`S4`, `type:bug/feature/chore/docs`,
-  `agent:autonomous-ok`/`agent:needs-human` e
-  `status:needs-triage`/`status:blocked`.
+  `agent:autonomous-ok`/`agent:needs-human`,
+  `status:needs-triage`/`status:blocked` e
+  `dora:deployment-frequency`/`dora:lead-time`/`dora:change-failure-rate`/`dora:mttr`.
 - **Ordenamento do backlog** é sempre por `priority:*`
   (`P0-blocker` > `P1-high` > `P2-medium` > `P3-low`), excluindo itens
   `status:blocked` ou `status:needs-triage` da fila até serem triados.
@@ -106,9 +116,24 @@
   `agent:autonomous-ok` **e não tem** nenhum dos seguintes: `agent:needs-human`,
   `complexity:S4` ou `status:blocked`. `complexity:S4` bloqueia autonomia
   **sempre**, reforçando a regra acima de revisão humana obrigatória para S4.
+- **Labels DORA** (`dora:*`) marcam qual dos 4 indicadores DORA (Deployment
+  Frequency, Lead Time for Changes, Change Failure Rate, MTTR) uma issue
+  impacta — usados para correlação/relatório, não disparam automação.
 - Ver detalhamento completo (taxonomia, guardrails do workflow de auto-assign
   e como evitar gatilhos duplicados) em
   [`docs/label-taxonomy-and-autonomous-dev.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/label-taxonomy-and-autonomous-dev.md).
+
+## Modelo Híbrido (Agente + Humano) e Custo Real
+
+- Tarefas de modelo híbrido (agente gera a maior parte, humano revisa/ajusta)
+  devem ter as horas humanas lançadas no campo **"Horas Humanas"** do GitHub
+  Project (criado por `scripts/setup-github-project.sh`), mesmo que seja
+  apenas o tempo de revisão do PR.
+- Custo real da tarefa = tokens do agente (estimado vs. real, ver acima) +
+  horas humanas × custo/hora do time. A taxa custo/hora é documentada pelo
+  próprio projeto (README ou ADR) — este bundle não define uma taxa padrão.
+- Detalhamento completo em
+  [`docs/ai-code-quality-and-observability.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/ai-code-quality-and-observability.md), seção 8.
 
 ## Release e Feature Flags
 
@@ -166,7 +191,7 @@
   nunca deixado apenas registrado em log/alerta sem rastreamento formal.
 
 Ver o detalhamento técnico de como aplicar estas regras em:
-- [`docs/ai-code-quality-and-observability.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/ai-code-quality-and-observability.md) — revisão por IA, seleção de modelos S0–S4, tracing, gestão de bugs
+- [`docs/ai-code-quality-and-observability.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/ai-code-quality-and-observability.md) — revisão por IA, seleção de modelos S0–S4, estimativa de tokens, modelo híbrido humano+agente, tracing, gestão de bugs
 - [`docs/module-graphs.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/module-graphs.md) — grafos de módulos, Graph Guard, templates
 - [`docs/adr-guide.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/adr-guide.md) — como criar e manter ADRs organizacionais
 

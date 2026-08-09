@@ -17,9 +17,15 @@ nível de revisão exigido.*
 | **Justificativa** | [ex.: cruza order-service e billing-service via evento] |
 | **Modelo de IA** | Auto / Reasoning / Modelo forte *(conforme tabela abaixo)* |
 | **Revisão humana obrigatória** | Sim (S4) · Não (S0–S3) |
+| **Estimativa de tokens (input+output)** | ~[X]–[Y] mil tokens — baseado no multiplicador de custo relativo do nível (ver `docs/ai-code-quality-and-observability.md` seção 6) |
 
 > S0 = documentação · S1 = função isolada · S2 = módulo · S3 = múltiplos módulos ·
 > S4 = arquitetura, segurança, dados ou integração crítica
+
+> A estimativa de tokens é preenchida **antes** de `/speckit-tasks` e comparada
+> com o consumo real no fechamento do `tasks.md` (ver checklist "Estimativa vs.
+> Consumo Real de Tokens"). Não é um compromisso exato — é uma faixa para
+> permitir comparar depois.
 
 ## VPN Dev — Module Dependency Graph
 

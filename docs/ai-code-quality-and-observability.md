@@ -129,7 +129,7 @@ Duas formas de aplicar, conforme o ponto de origem do bug:
 - Rastreado no `plan.md` pela linha "Gestão de bugs" do novo gate, e por tarefa
   no checklist do `tasks.md`.
 
-## 7. Seleção de Modelo por Complexidade (S0–S4)
+## 6. Seleção de Modelo por Complexidade (S0–S4)
 
 **Regra**: toda tarefa deve ser classificada na escala de complexidade abaixo
 antes de iniciar a implementação. O modelo de IA é escolhido com base nessa
@@ -156,6 +156,31 @@ fraco que o necessário (risco técnico).
 | **S3** | GPT-5.4 / Claude Sonnet (reasoning) | Reasoning ativo | `graph.yaml` + `graph.md` + ADL entry |
 | **S4** | GPT-5.5 / Claude Opus (máximo) | Reasoning máximo | `graph.yaml` + `graph.md` + `impact-map.md` + revisão humana |
 
+### Ajuste por Projeto
+
+A **régua de complexidade S0–S4 em si é não-negociável** (todo projeto do
+bundle usa a mesma escala e a mesma exigência de revisão humana obrigatória em
+S4 — isso é o que permite comparar custo/qualidade entre projetos da VPN Dev).
+
+O que **pode** ser ajustado por projeto é a coluna **"Modelo no Copilot"**: a
+tabela acima é a recomendação padrão do bundle, mas cada projeto pode adaptar
+qual modelo específico usar em cada nível conforme:
+
+- política de modelos habilitados pela organização (Settings → Copilot →
+  Policies) — se um modelo recomendado aqui não estiver disponível, o projeto
+  documenta o substituto equivalente;
+- restrições de compliance/dados sensíveis do projeto (ex.: exigir um modelo
+  específico certificado para residência de dados);
+- disponibilidade de modelos novos que substituam os listados aqui com o
+  tempo (esta tabela não é atualizada automaticamente).
+
+Para ajustar, documente a substituição no `constitution.md` do próprio projeto
+(logo após a seção `{CORE_TEMPLATE}` do `constitution-template.md`, que é onde
+conteúdo específico do projeto entra sem conflitar com o que o preset já
+define) ou como entrada no Architecture Decision Log do `plan.md`. **Nunca**
+remova a exigência de revisão humana em S4 como parte desse ajuste — isso não
+é "modelo", é a régua de governança em si.
+
 ### Como declarar no início de cada tarefa
 
 O agente (Copilot ou equivalente) deve declarar explicitamente ao receber um
@@ -164,6 +189,9 @@ O agente (Copilot ou equivalente) deve declarar explicitamente ao receber um
 ```
 Complexidade desta tarefa: S<N> — <justificativa em uma linha>
 Modelo selecionado: <modelo>
+Estimativa de tokens (input+output): ~<N> mil tokens — <racional: nº de
+  arquivos/linhas de diff esperado, iterações previstas, baseado na tabela de
+  custo relativo abaixo>
 Artefatos de grafo necessários: graph.yaml [+ graph.md] [+ impact-map.md]
 ```
 
@@ -172,6 +200,7 @@ Se a complexidade real for maior que a declarada no `plan.md`, o agente deve:
 2. Atualizar a classificação no `plan.md`.
 3. Escalar o modelo conforme a nova classificação.
 4. Atualizar `graph.yaml`/`graph.md`/`impact-map.md` se necessário.
+5. Revisar a estimativa de tokens para o novo nível.
 
 ### Medição de Custo por Tipo de Tarefa
 
@@ -195,7 +224,53 @@ A política de modelos habilitados para a organização deve ser configurada em
 modelos de alta capacidade (S3/S4) conforme o plano contratado, reforçando a
 escala acima no nível organizacional.
 
-## 6. Modelos do Copilot Agent prioritários — dá para declarar isso no preset?
+### Estimativa de tokens ANTES de codar vs. consumo REAL depois
+
+**Regra**: toda feature deve ter uma estimativa de tokens registrada no
+`plan.md` **antes** de `/speckit-tasks` (na mesma tabela de Classificação de
+Complexidade — ver
+[`plan-template.md`](../presets/vpndev-standards/templates/plan-template.md)),
+e o consumo real deve ser confrontado com ela ao final, no fechamento das
+tarefas em `tasks.md`.
+
+**Como estimar antes de codar** (heurística, não medição exata):
+
+1. Parta do nível de complexidade já declarado (S0–S4) e do multiplicador de
+   custo relativo da tabela acima.
+2. Calibre o "1×" (baseline de S0) com o histórico real do seu projeto — não
+   existe um número universal correto; um baseline inicial razoável para
+   calibrar (até haver histórico próprio) é **~30–60 mil tokens** para uma
+   tarefa S0 simples (ex.: atualizar um README curto).
+3. Ajuste o multiplicador para cima se a tarefa envolve muitos arquivos, muitas
+   iterações esperadas de correção, ou múltiplas chamadas de ferramenta
+   (leitura de código extensa, buscas repetidas).
+4. Registre o resultado como uma faixa (`~X–Y mil tokens`), não um número
+   único — estimativa não é compromisso exato.
+
+**Como medir o consumo real depois** (limitação importante a documentar com o
+time): a maioria dos agentes/IDEs **não expõe contagem exata de tokens por
+tarefa individual** em tempo real para o próprio agente ler. A fonte prática
+de "real" é:
+
+- **GitHub Copilot Premium Requests / uso da organização** (Settings →
+  Copilot → Usage, ou API de métricas do Copilot para Enterprise) — dá
+  consumo agregado por usuário/dia, não por tarefa isolada. Para aproximar por
+  tarefa, correlacione pelo período de tempo em que a tarefa foi trabalhada.
+- Se a ferramenta/agente usado expõe uso de tokens da sessão (alguns agentes
+  de terceiros mostram isso ao final da execução), registre esse valor
+  diretamente — é mais preciso que a aproximação por usage agregado.
+- Na ausência de qualquer medição, registre `"não disponível — sem telemetria
+  de tokens desta ferramenta"` em vez de inventar um número — a honestidade
+  sobre a lacuna é mais útil do que um dado real que os dados não sustentam.
+
+**Onde registrar a comparação**: no checklist de fechamento do `tasks.md`
+(seção "VPN Dev — Estimativa vs. Consumo Real de Tokens", adicionada pelo
+preset) — ver
+[`tasks-template.md`](../presets/vpndev-standards/templates/tasks-template.md).
+Variâncias grandes e recorrentes (ex.: real consistentemente >2× a estimativa)
+são sinal para recalibrar o baseline do projeto, não para ignorar a prática.
+
+## 7. Modelos do Copilot Agent prioritários — dá para declarar isso no preset?
 
 **Não diretamente no schema do Spec Kit.** `preset.yml`/`extension.yml`/
 `bundle.yml` não têm nenhum campo para "modelo de IA preferido" — isso não é
@@ -228,3 +303,61 @@ Esta tabela é apenas **orientação documentada** — para tornar algo disso
 "obrigatório" de fato, é a organização (via Enterprise/Org Settings → Copilot →
 Policies) que precisa restringir os modelos habilitados de acordo com esta
 priorização, não o bundle do Spec Kit.
+
+## 8. Modelo híbrido: agentes de IA + humanos codando juntos
+
+**Conceito**: na prática, quase nenhuma feature é 100% agente ou 100% humano.
+O padrão mais comum é **híbrido**: o agente (Copilot coding agent, ou um dev
+usando Copilot Chat/inline) gera a maior parte da implementação, e um humano
+entra em pontos específicos — revisão de PR, ajuste manual de um trecho que o
+agente não acertou, decisão de arquitetura (S4), ou simplesmente pareamento
+ativo durante a tarefa. Para ter **controle de custo real**, os dois lados do
+custo total precisam ser somados:
+
+```
+Custo real da tarefa = custo de tokens (agente) + (horas humanas × custo/hora do time)
+```
+
+Sem capturar o segundo termo, qualquer comparação "economizamos X% com IA" é
+enganosa — ela ignora o tempo humano que ainda foi gasto revisando, corrigindo
+ou pareando com o agente.
+
+### Onde lançar as horas humanas
+
+Não existe um campo nativo no Spec Kit para isso (specs/plans/tasks são
+markdown, não têm schema de apontamento de horas). O bundle resolve isso via
+**GitHub Project V2**, criado automaticamente pelo `bootstrap.sh`
+(`scripts/setup-github-project.sh`):
+
+1. O script cria um campo numérico customizado **"Horas Humanas"** no Project
+   V2 do repositório (ver [README — Bônus: GitHub Project criado
+   automaticamente](../README.md#bônus-github-project-criado-automaticamente)).
+2. Ao trabalhar em uma issue/PR em modo híbrido, quem faz a parte humana
+   (revisão, ajuste manual, pareamento) atualiza esse campo no card do Project
+   com o total de horas gastas — pode ser incremental (some ao valor existente
+   conforme mais trabalho humano entra na mesma issue).
+3. Para tarefas totalmente autônomas (`agent:autonomous-ok`, sem intervenção
+   humana além da aprovação do PR), o campo fica em `0` ou só com o tempo de
+   revisão do PR (registre também esse tempo — revisão de PR **é** custo
+   humano, mesmo que pequeno).
+4. Ao fechar a feature, o checklist de fechamento do `tasks.md` (seção "VPN
+   Dev — Estimativa vs. Consumo Real de Tokens", ver seção anterior) referencia
+   esse campo para compor o custo real total: tokens estimados/reais **+**
+   horas humanas do Project.
+
+### Por que não usar comentário de issue ou PR description em vez de um campo
+
+Comentário/descrição funciona para registrar contexto, mas não é **agregável
+nem filtrável** — o campo numérico do Project permite somar horas por
+`priority:*`, por `type:*`, por sprint/iteração, ou por pessoa, o que é o que
+de fato viabiliza um relatório de FinOps confiável. Use o campo do Project
+como fonte de verdade; comentários continuam úteis para justificar *por que*
+aquela quantidade de horas foi necessária, não *quanto* foi.
+
+### Taxa de conversão horas → custo
+
+Este bundle não define uma taxa de custo/hora padrão (varia por projeto,
+região e nível do time) — cada projeto deve documentar a sua própria taxa
+(ex.: custo médio carregado por hora do time) no próprio `README.md` ou em um
+ADR, para que o cálculo de custo real (`tokens + horas × taxa`) seja
+reproduzível por qualquer pessoa que audite depois.

@@ -4,9 +4,10 @@
 # setup-github-labels.sh
 #
 # Cria (ou atualiza) no repositório do projeto a taxonomia padrão de labels da
-# VPN Dev usada para PRIORIZAÇÃO/ORDENAMENTO de issues e PRs e para sinalizar
+# VPN Dev usada para PRIORIZAÇÃO/ORDENAMENTO de issues e PRs, para sinalizar
 # quais issues são candidatas a DESENVOLVIMENTO AUTÔNOMO por agente (ex.:
-# GitHub Copilot coding agent).
+# GitHub Copilot coding agent) e para correlacionar issues com os DOMÍNIOS DE
+# MÉTRICAS DORA (deployment frequency, lead time, change failure rate, MTTR).
 #
 # Uso:
 #   ./setup-github-labels.sh [--repo-owner owner] [--repo-name name]
@@ -114,6 +115,14 @@ declare -a LABELS=(
   # Status — controle de fluxo/ordenamento do backlog
   "status:needs-triage|ededed|Issue nova, ainda sem priority:*/complexity:* definidos — não deve ser puxada por agente autônomo"
   "status:blocked|5319e7|Bloqueada por dependência externa — pular na fila de priorização, mesmo que tenha priority:P0-blocker"
+
+  # DORA — domínio de métrica DevOps (Four Keys) que esta issue impacta.
+  # Usado para correlacionar issues fechadas com os indicadores DORA da equipe
+  # (ver docs/label-taxonomy-and-autonomous-dev.md, seção 5).
+  "dora:deployment-frequency|0052cc|Impacta a frequência de deploy (pipeline, automação de release, cadência de entrega)"
+  "dora:lead-time|1d76db|Impacta o lead time for changes (tempo do commit até produção)"
+  "dora:change-failure-rate|d93f0b|Impacta a taxa de falha de mudança (bug introduzido por deploy, hotfix corretivo, rollback)"
+  "dora:mttr|b60205|Impacta o tempo de restauração de serviço (incidente, correção emergencial, recovery)"
 )
 
 echo -e "${BLUE}[1/1]${NC} Criando/atualizando ${#LABELS[@]} labels..."
@@ -153,6 +162,8 @@ echo -e "     (requer o workflow .github/workflows/agent-auto-assign.yml e o sec
 echo -e "     COPILOT_AGENT_ASSIGN_TOKEN — ver docs/label-taxonomy-and-autonomous-dev.md)"
 echo -e "  3. Use a view \"Board por Prioridade\" do GitHub Project (setup-github-project.sh)"
 echo -e "     agrupada por priority:* para visualizar o ordenamento do backlog"
+echo -e "  4. Aplique dora:* nas issues que impactam métricas DORA (deploy frequency,"
+echo -e "     lead time, change failure rate, MTTR) para poder correlacioná-las depois"
 echo ""
 echo -e "Documentação: ${BLUE}docs/label-taxonomy-and-autonomous-dev.md${NC}"
 echo -e "${GREEN}═══════════════════════════════════════════════════════════════${NC}"

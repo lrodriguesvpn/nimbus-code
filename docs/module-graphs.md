@@ -200,5 +200,5 @@ Features S4 exigem:
 - Templates: `presets/vpndev-standards/templates/feature-artifacts/`
 - Copilot Instructions template: `presets/vpndev-standards/templates/project-root/copilot-instructions.md`
 - Graph Guard: `.github/workflows/graph-guard.yml`
-- Seleção de modelos S0–S4: [`docs/ai-code-quality-and-observability.md`](./ai-code-quality-and-observability.md#7-seleção-de-modelo-por-complexidade-s0s4)
+- Seleção de modelos S0–S4: [`docs/ai-code-quality-and-observability.md`](./ai-code-quality-and-observability.md#6-seleção-de-modelo-por-complexidade-s0s4)
 - Constituição VPN Dev: `presets/vpndev-standards/templates/constitution-template.md`

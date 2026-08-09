@@ -24,7 +24,10 @@
 #    - "Board por Epic" (board layout, sem filtro inicial — dev personaliza)
 #    - "Board por Prioridade" (board layout, sem filtro inicial — dev personaliza)
 #    - "Tabela — P0 Blocker" (table layout, filtro para P0-blocker)
-# 4. Retorna o link do projeto para referência
+# 4. Cria o campo customizado numérico "Horas Humanas", usado para controle de
+#    custo real em tarefas de modelo híbrido (agente + humano) — ver
+#    docs/ai-code-quality-and-observability.md seção 8
+# 5. Retorna o link do projeto para referência
 #
 ###############################################################################
 
@@ -240,9 +243,40 @@ mutation($projectId:ID!, $viewName:String!, $layout:ProjectV2ViewLayout!) {
   fi
 done
 
-# 4. Resumo final
+# 4. Criar campo customizado "Horas Humanas" (controle de custo em modelo híbrido)
 echo ""
-echo -e "${BLUE}[4/4]${NC} Setup concluído!"
+echo -e "${BLUE}[4/5]${NC} Criando campo customizado \"Horas Humanas\"..."
+
+FIELD_RESPONSE=$(GH_HOST="$GH_HOST" gh api graphql \
+  -f projectId="$PROJECT_ID" \
+  -f fieldName="Horas Humanas" \
+  -f query='
+mutation($projectId:ID!, $fieldName:String!) {
+  createProjectV2Field(input: {
+    projectId: $projectId
+    dataType: NUMBER
+    name: $fieldName
+  }) {
+    projectV2Field {
+      ... on ProjectV2Field {
+        id
+        name
+      }
+    }
+  }
+}' 2>&1)
+
+FIELD_NAME_RESULT=$(echo "$FIELD_RESPONSE" | jq -r '.data.createProjectV2Field.projectV2Field.name // empty' 2>/dev/null)
+
+if [[ -n "$FIELD_NAME_RESULT" ]]; then
+  echo -e "${GREEN}  ✓ Campo criado: Horas Humanas (número)${NC}"
+else
+  echo -e "${YELLOW}  ⚠ Campo pode já existir ou erro ao criar (crie manualmente se necessário): Horas Humanas${NC}"
+fi
+
+# 5. Resumo final
+echo ""
+echo -e "${BLUE}[5/5]${NC} Setup concluído!"
 echo ""
 echo -e "${GREEN}═══════════════════════════════════════════════════════════════${NC}"
 echo -e "GitHub Project configurado com sucesso!"
@@ -253,6 +287,12 @@ echo -e "Views criadas:"
 echo -e "  • Board por Epic"
 echo -e "  • Board por Prioridade"
 echo -e "  • Tabela — P0 Blocker"
+echo ""
+echo -e "Campo customizado criado:"
+echo -e "  • Horas Humanas (número) — para lançar horas de trabalho humano em"
+echo -e "    tarefas de modelo híbrido (agente + humano) e compor custo real"
+echo -e "    (tokens + horas × custo/hora). Ver docs/ai-code-quality-and-observability.md"
+echo -e "    seção 8."
 echo ""
 echo -e "Próximos passos:"
 echo -e "  1. Abra o projeto acima e customize as views conforme necessário"

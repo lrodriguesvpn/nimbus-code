@@ -1,17 +1,17 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-08-09T12:23:00Z",
+  "updated_at": "2026-08-09T12:45:00Z",
   "catalog_url": "https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/bundles/catalog.json",
   "bundles": {
     "vpndev-project-bundle": {
       "name": "VPN Dev — Modelo de Projeto",
       "id": "vpndev-project-bundle",
-      "version": "1.2.0",
+      "version": "1.3.0",
       "role": "all",
-      "description": "Bundle de bootstrap para novos repositórios da VPN Dev: preset de governança/DevSecOps (com taxonomia de labels de priorização/desenvolvimento autônomo), extensão de sincronização de backlog e workflow de ciclo completo com gate de segurança.",
+      "description": "Bundle de bootstrap para novos repositórios da VPN Dev: preset de governança/DevSecOps (com escala S0–S4 e estimativa de tokens, labels de priorização/desenvolvimento autônomo/DORA, e modelo híbrido humano+agente), extensão de sincronização de backlog e workflow de ciclo completo com gate de segurança.",
       "author": "VPN Dev",
       "license": "Proprietary",
-      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/releases/download/v1.2.0/vpndev-project-bundle-1.2.0.zip",
+      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/releases/download/v1.3.0/vpndev-project-bundle-1.3.0.zip",
       "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards",
       "requires": {
         "speckit_version": ">=0.16.0"
@@ -22,7 +22,7 @@
         "steps": 0,
         "workflows": 1
       },
-      "tags": ["vpndev", "governance", "bootstrap", "labels", "prioritization", "autonomous-development"]
+      "tags": ["vpndev", "governance", "bootstrap", "labels", "prioritization", "autonomous-development", "token-estimation", "dora-metrics", "finops"]
     }
   }
 }

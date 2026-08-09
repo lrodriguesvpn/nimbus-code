@@ -34,6 +34,28 @@ relevante ao artefato entregue pela tarefa.*
       foram corrigidos aqui foram abertos como Issue no GitHub e atribuídos ao
       Copilot coding agent
 
+## VPN Dev — Estimativa vs. Consumo Real de Tokens e Horas Humanas
+
+*Preencher no fechamento da feature (após a última tarefa desta lista),
+comparando com a estimativa registrada no `plan.md`. Ver metodologia completa
+em `docs/ai-code-quality-and-observability.md`, seções 6 e 8.*
+
+| Métrica | Estimado (`plan.md`) | Real | Variância | Fonte da medição |
+|---|---|---|---|---|
+| Tokens (input+output) | [ex.: ~80–120 mil] | [valor real ou "não disponível — sem telemetria desta ferramenta"] | [+/-N%] | [ex.: Copilot Usage da organização, uso reportado pelo agente, etc.] |
+| Horas humanas | — *(não estimado previamente; ver nota abaixo)* | [total lançado no campo "Horas Humanas" do GitHub Project] | — | GitHub Project — campo "Horas Humanas" |
+
+**Custo real total desta feature** (se a taxa custo/hora do time estiver
+documentada no README/ADR do projeto):
+`[tokens reais × preço do modelo] + [horas humanas × custo/hora do time] = [valor]`
+
+- [ ] Consumo real de tokens registrado e comparado com a estimativa do
+      `plan.md` — variância documentada acima
+- [ ] Horas humanas desta feature (revisão de PR, ajustes manuais,
+      pareamento) lançadas no campo "Horas Humanas" do GitHub Project
+- [ ] Se a variância de tokens for consistentemente alta (real >2× estimado),
+      revisar o baseline de estimativa do projeto para próximas features
+
 ## VPN Dev — Checklist de Qualidade para Tarefas de Infraestrutura/Deploy
 
 *Aplicável apenas às tarefas desta lista que envolvem infraestrutura, pipelines,
