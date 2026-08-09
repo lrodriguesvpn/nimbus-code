@@ -106,16 +106,16 @@ declare -a LABELS=(
   "type:feature|a2eeef|Nova funcionalidade ou capacidade"
   "type:chore|cfd3d7|Manutenção, refactor ou débito técnico sem mudança de comportamento visível"
   "type:docs|0075ca|Somente documentação (specs, ADRs, README, guias)"
-  "type:incident|b60205|Originada de uma ocorrência em produção/ambiente de cliente (ex.: N1 do CRM que virou mudança real de infra) — SEMPRE exige revisão humana, independente da complexidade S0–S4"
+  "type:incident|b60205|Ocorrência de produção/cliente (ex.: N1 do CRM) — SEMPRE exige revisão humana, mesmo complexidade S0"
 
   # Desenvolvimento autônomo — sinal de decisão + gatilho do workflow
   # .github/workflows/agent-auto-assign.yml (ver docs/label-taxonomy-and-autonomous-dev.md)
-  "agent:autonomous-ok|0e8a16|Seguro para um agente (ex.: Copilot coding agent) implementar sozinho — dispara auto-assign automático"
+  "agent:autonomous-ok|0e8a16|Seguro p/ agente (ex.: Copilot coding agent) implementar sozinho — dispara auto-assign"
   "agent:needs-human|e99695|Exige humano no loop antes/durante a implementação — NUNCA deve ser auto-atribuído a um agente"
 
   # Status — controle de fluxo/ordenamento do backlog
   "status:needs-triage|ededed|Issue nova, ainda sem priority:*/complexity:* definidos — não deve ser puxada por agente autônomo"
-  "status:blocked|5319e7|Bloqueada por dependência externa — pular na fila de priorização, mesmo que tenha priority:P0-blocker"
+  "status:blocked|5319e7|Bloqueada por dependência externa — pular na fila mesmo com priority:P0-blocker"
 
   # DORA — domínio de métrica DevOps (Four Keys) que esta issue impacta.
   # Usado para correlacionar issues fechadas com os indicadores DORA da equipe
