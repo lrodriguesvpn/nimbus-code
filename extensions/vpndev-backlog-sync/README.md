@@ -24,13 +24,13 @@ já que `specs/` é a fonte formal) simplesmente recusam o prompt.
 ## Instalação isolada (sem o bundle completo)
 
 ```bash
-specify extension add vpndev-backlog-sync --from https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/releases/download/vX.Y.Z/vpndev-backlog-sync-X.Y.Z.zip
+specify extension add vpndev-backlog-sync --from https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/vX.Y.Z/vpndev-backlog-sync-X.Y.Z.zip
 ```
 
 Ou em modo desenvolvimento:
 
 ```bash
-specify extension add --dev ./speckit-vpndev-standards/extensions/vpndev-backlog-sync
+specify extension add --dev ./nimbus-code-spec-kit-template/extensions/vpndev-backlog-sync
 ```
 
 Depois, copiar o template de configuração:

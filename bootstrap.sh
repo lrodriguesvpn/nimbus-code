@@ -2,9 +2,9 @@
 # Bootstrap: aplica o bundle vpndev-project-bundle num repositório novo ou existente.
 #
 # Uso:
-#   curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/bootstrap.sh | bash
+#   curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bootstrap.sh | bash
 # ou, com o repo já clonado localmente:
-#   ./bootstrap.sh --local /caminho/para/speckit-vpndev-standards
+#   ./bootstrap.sh --local /caminho/para/nimbus-code-spec-kit-template
 #
 # Este script existe porque, hoje, o bundle ainda não está publicado num catálogo
 # (specify preset/extension/workflow catalogs) — ver "Publicação e Catálogo" no
@@ -13,7 +13,7 @@
 #   specify bundle install vpndev-project-bundle --integration copilot
 set -euo pipefail
 
-STANDARDS_REPO="https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards"
+STANDARDS_REPO="https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
 LOCAL_PATH=""
 INTEGRATION="${SPECKIT_INTEGRATION_DEFAULT:-copilot}"
 

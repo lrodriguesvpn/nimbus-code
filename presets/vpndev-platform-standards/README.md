@@ -50,13 +50,13 @@ projeto separado, usando `vpndev-standards`.
 ## Instalação isolada
 
 ```bash
-specify preset add vpndev-platform-standards --from https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/releases/download/vX.Y.Z/vpndev-platform-standards-X.Y.Z.zip --priority 5
+specify preset add vpndev-platform-standards --from https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/vX.Y.Z/vpndev-platform-standards-X.Y.Z.zip --priority 5
 ```
 
 Ou, em modo desenvolvimento, a partir de um clone local:
 
 ```bash
-specify preset add --dev ./speckit-vpndev-standards/presets/vpndev-platform-standards --priority 5
+specify preset add --dev ./nimbus-code-spec-kit-template/presets/vpndev-platform-standards --priority 5
 ```
 
 ## Detalhamento completo

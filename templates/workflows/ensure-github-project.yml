@@ -70,12 +70,12 @@ jobs:
             echo "found=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Clonar scripts do speckit-vpndev-standards
+      - name: Clonar scripts do nimbus-code-spec-kit-template
         if: steps.check.outputs.found != 'true'
         env:
           VPNDEV_TOKEN: ${{ secrets.VPNDEV_STANDARDS_READ_TOKEN }}
         run: |
-          git clone --depth 1 "https://${VPNDEV_TOKEN}@venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards.git" /tmp/vpndev-standards
+          git clone --depth 1 "https://${VPNDEV_TOKEN}@venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template.git" /tmp/vpndev-standards
 
       - name: Criar GitHub Project (não existia)
         if: steps.check.outputs.found != 'true'

@@ -2,7 +2,7 @@
 
 Análise de quais extensões (oficiais do Spec Kit + customizadas da VPN Dev)
 fazem sentido como **repositório independente** vs. viver dentro deste
-monorepo (`speckit-vpndev-standards`).
+monorepo (`nimbus-code-spec-kit-template`).
 
 ## Extensões oficiais do Spec Kit (`bundled: true`) — não recriar
 

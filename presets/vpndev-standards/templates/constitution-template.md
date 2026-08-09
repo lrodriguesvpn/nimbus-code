@@ -4,7 +4,7 @@
   © Venha Pra Nuvem — Propriedade Intelectual Exclusiva.
   Uso restrito a colaboradores autorizados da organização venha-pra-nuvem.
   Cópia, redistribuição ou uso externo são proibidos — ver LICENSE no repositório
-  speckit-vpndev-standards. Alterações exigem aprovação do @vpndev-arch-board.
+  nimbus-code-spec-kit-template. Alterações exigem aprovação do @vpndev-arch-board.
 -->
 
 <!--
@@ -98,7 +98,7 @@
 - Toda feature deve ter uma **estimativa de tokens** registrada no `plan.md`
   antes de `/speckit-tasks`, e o consumo real comparado com ela no fechamento
   do `tasks.md` — ver metodologia em
-  [`docs/ai-code-quality-and-observability.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/ai-code-quality-and-observability.md), seção 6.
+  [`docs/ai-code-quality-and-observability.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/ai-code-quality-and-observability.md), seção 6.
 
 ## Reutilização de Conteúdo e Referência por Ponteiro
 
@@ -117,7 +117,7 @@
   do `tasks.md`.
 - Detalhamento completo (estrutura do catálogo, TL;DR em docs longos e
   integração com a estimativa de tokens) em
-  [`docs/ai-code-quality-and-observability.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/ai-code-quality-and-observability.md), seção 9.
+  [`docs/ai-code-quality-and-observability.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/ai-code-quality-and-observability.md), seção 9.
 
 ## Priorização e Desenvolvimento Autônomo (Labels)
 
@@ -145,7 +145,7 @@
   abertura e fechamento da issue é a métrica de restauração de serviço).
 - Ver detalhamento completo (taxonomia, guardrails do workflow de auto-assign
   e como evitar gatilhos duplicados) em
-  [`docs/label-taxonomy-and-autonomous-dev.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/label-taxonomy-and-autonomous-dev.md).
+  [`docs/label-taxonomy-and-autonomous-dev.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/label-taxonomy-and-autonomous-dev.md).
 
 ## Ocorrências (CRM) e Issues de Infraestrutura
 
@@ -175,7 +175,7 @@
   horas humanas × custo/hora do time. A taxa custo/hora é documentada pelo
   próprio projeto (README ou ADR) — este bundle não define uma taxa padrão.
 - Detalhamento completo em
-  [`docs/ai-code-quality-and-observability.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/ai-code-quality-and-observability.md), seção 8.
+  [`docs/ai-code-quality-and-observability.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/ai-code-quality-and-observability.md), seção 8.
 
 ## Release e Feature Flags
 
@@ -196,12 +196,12 @@
 - Decisões técnicas com impacto duradouro (>3 meses) ou que escolham entre
   alternativas reais devem ser registradas como ADR:
   - **Escopo organizacional** (afeta múltiplos projetos): `docs/adr/` neste
-    repositório (`speckit-vpndev-standards`).
+    repositório (`nimbus-code-spec-kit-template`).
   - **Escopo de projeto**: `docs/adr/` no repositório do projeto.
 - O Architecture Decision Log do `plan.md` captura decisões locais de feature;
   quando a decisão tiver impacto organizacional, adicionar link para o ADR
   correspondente.
-- Template e guia em [`docs/adr-guide.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/adr-guide.md).
+- Template e guia em [`docs/adr-guide.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/adr-guide.md).
 
 ## Qualidade e Processo
 
@@ -233,8 +233,8 @@
   nunca deixado apenas registrado em log/alerta sem rastreamento formal.
 
 Ver o detalhamento técnico de como aplicar estas regras em:
-- [`docs/ai-code-quality-and-observability.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/ai-code-quality-and-observability.md) — revisão por IA, seleção de modelos S0–S4, estimativa de tokens, modelo híbrido humano+agente, tracing, gestão de bugs
-- [`docs/module-graphs.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/module-graphs.md) — grafos de módulos, Graph Guard, templates
-- [`docs/adr-guide.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/adr-guide.md) — como criar e manter ADRs organizacionais
+- [`docs/ai-code-quality-and-observability.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/ai-code-quality-and-observability.md) — revisão por IA, seleção de modelos S0–S4, estimativa de tokens, modelo híbrido humano+agente, tracing, gestão de bugs
+- [`docs/module-graphs.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/module-graphs.md) — grafos de módulos, Graph Guard, templates
+- [`docs/adr-guide.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/adr-guide.md) — como criar e manter ADRs organizacionais
 
 {CORE_TEMPLATE}

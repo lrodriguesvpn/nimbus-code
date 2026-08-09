@@ -40,7 +40,7 @@ Já documentado em detalhe no [README raiz](../README.md#como-um-projeto-novo-j�
 Resumo:
 
 ```bash
-curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/bootstrap.sh | bash
+curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bootstrap.sh | bash
 ```
 
 Isso já deixa o projeto com `specify init` feito e o bundle
@@ -110,7 +110,7 @@ prompts/skills do Copilot). **Nada do código-fonte existente é tocado.**
 ### 2.2. Aplicar o bundle da VPN Dev por cima
 
 ```bash
-curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/bootstrap.sh | bash
+curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bootstrap.sh | bash
 ```
 
 O `bootstrap.sh` detecta que o `specify init` já rodou e só instala

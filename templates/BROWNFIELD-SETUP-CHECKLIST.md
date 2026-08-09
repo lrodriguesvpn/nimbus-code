@@ -9,7 +9,7 @@
   3. Use este checklist como guia para o primeiro ciclo Spec Kit num repo existente
   4. Após completado, deixe este arquivo versionado no git como parte do histórico de setup
   
-  Referência completa: https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/docs/brownfield-best-practices.md
+  Referência completa: https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/docs/brownfield-best-practices.md
 -->
 
 # Brownfield Setup Checklist — [PLACEHOLDER: nome do projeto]
@@ -25,7 +25,7 @@ Status: ⏳ Em andamento
 - [ ] Spec Kit CLI (`specify`) instalado localmente e validado com `specify check`
 - [ ] Repositório clonado em `[PLACEHOLDER: caminho local]`
 - [ ] Executado: `cd [PLACEHOLDER: caminho] && specify init --here --integration copilot --force`
-- [ ] Executado: `curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/bootstrap.sh | bash`
+- [ ] Executado: `curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bootstrap.sh | bash`
 - [ ] GitHub Project V2 criado automaticamente pelo bootstrap (URL: [PLACEHOLDER: link do project])
 - [ ] GitHub Project customizado conforme necessário (filtros, grupos, colunas)
 - [ ] `.specify/` adicionado ao `.gitignore`? (se necessário) — ou, preferência: versione `.specify/features/`, ignore `.specify/memory/`

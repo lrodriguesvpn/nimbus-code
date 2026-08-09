@@ -29,13 +29,13 @@ aditiva (`wrap`/`append`).
 ## Instalação isolada (sem o bundle completo)
 
 ```bash
-specify preset add vpndev-standards --from https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/releases/download/vX.Y.Z/vpndev-standards-X.Y.Z.zip --priority 5
+specify preset add vpndev-standards --from https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/vX.Y.Z/vpndev-standards-X.Y.Z.zip --priority 5
 ```
 
 Ou, em modo desenvolvimento, a partir de um clone local:
 
 ```bash
-specify preset add --dev ./speckit-vpndev-standards/presets/vpndev-standards --priority 5
+specify preset add --dev ./nimbus-code-spec-kit-template/presets/vpndev-standards --priority 5
 ```
 
 > Normalmente este preset não é instalado isoladamente — ele é instalado como parte
@@ -67,7 +67,7 @@ política de versionamento consolidada em [`../../README.md`](../../README.md).
 ```bash
 mkdir /tmp/vpndev-preset-smoke && cd /tmp/vpndev-preset-smoke
 specify init --here --integration copilot --ignore-agent-tools
-specify preset add --dev /path/to/speckit-vpndev-standards/presets/vpndev-standards --priority 5
+specify preset add --dev /path/to/nimbus-code-spec-kit-template/presets/vpndev-standards --priority 5
 specify preset resolve constitution-template
 specify preset resolve plan-template
 ```
@@ -76,13 +76,13 @@ specify preset resolve plan-template
 ## Instalação isolada (sem o bundle completo)
 
 ```bash
-specify preset add vpndev-standards --from https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/releases/download/vX.Y.Z/vpndev-standards-X.Y.Z.zip --priority 5
+specify preset add vpndev-standards --from https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/vX.Y.Z/vpndev-standards-X.Y.Z.zip --priority 5
 ```
 
 Ou, em modo desenvolvimento, a partir de um clone local:
 
 ```bash
-specify preset add --dev ./speckit-vpndev-standards/presets/vpndev-standards --priority 5
+specify preset add --dev ./nimbus-code-spec-kit-template/presets/vpndev-standards --priority 5
 ```
 
 > Normalmente este preset não é instalado isoladamente — ele é instalado como parte
@@ -100,7 +100,7 @@ política de versionamento consolidada em [`../../README.md`](../../README.md).
 ```bash
 mkdir /tmp/vpndev-preset-smoke && cd /tmp/vpndev-preset-smoke
 specify init --here --integration copilot --ignore-agent-tools
-specify preset add --dev /path/to/speckit-vpndev-standards/presets/vpndev-standards --priority 5
+specify preset add --dev /path/to/nimbus-code-spec-kit-template/presets/vpndev-standards --priority 5
 specify preset resolve constitution-template
 specify preset resolve plan-template
 ```

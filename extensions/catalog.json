@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "updated_at": "2026-08-09T19:47:22Z",
-  "catalog_url": "https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/extensions/catalog.json",
+  "catalog_url": "https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/extensions/catalog.json",
   "extensions": {
     "vpndev-backlog-sync": {
       "name": "VPN Dev — Sincronização de Backlog",
@@ -9,8 +9,8 @@
       "version": "1.1.0",
       "description": "Sincroniza specs/tasks do Spec Kit com JIRA ou Azure DevOps via MCP, como complemento opcional ao fluxo nativo baseado em specs/.",
       "author": "VPN Dev",
-      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/releases/download/v1.5.3/vpndev-backlog-sync-1.1.0.zip",
-      "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards",
+      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.5.3/vpndev-backlog-sync-1.1.0.zip",
+      "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template",
       "license": "Proprietary",
       "category": "integration",
       "effect": "read-write",

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "updated_at": "2026-08-09T19:47:22Z",
-  "catalog_url": "https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/presets/catalog.json",
+  "catalog_url": "https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/presets/catalog.json",
   "presets": {
     "vpndev-standards": {
       "name": "VPN Dev — Padrões de Governança",
@@ -9,8 +9,8 @@
       "version": "1.5.1",
       "description": "Constituição base, gate de segurança/DevSecOps, escala S0–S4 com estimativa de tokens, catálogo de reuso de conteúdo para reduzir custo de tokens, taxonomia de labels de priorização/desenvolvimento autônomo/DORA/incidente, modelo híbrido humano+agente com perfis de custo padrão, GitHub Project por repositório garantido continuamente (campos Horas Humanas/Oportunidade D365), Portfólio PMO consolidado entre repositórios e framework de decisões de arquitetura padrão da VPN Dev.",
       "author": "VPN Dev",
-      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/releases/download/v1.5.3/vpndev-standards-1.5.1.zip",
-      "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards",
+      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.5.3/vpndev-standards-1.5.1.zip",
+      "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template",
       "license": "Proprietary",
       "requires": {
         "speckit_version": ">=0.16.0"
@@ -38,8 +38,8 @@
       "version": "0.1.1",
       "description": "Constituição para repositórios de PLATAFORMA/CLIENTE/TENANT (ambientes, contas cloud, tenants M365/GWS/D365 e sistemas legados) — inventário multi-nuvem (Azure/AWS/GCP/GWS/M365/D365), regra de zero-diff como critério de verdade, proibição de aplicar mudança direta em produção, registro de schemas de bancos legados e grafo de 2 níveis (plataforma ↔ workload). Complementar ao vpndev-standards: repositórios de projeto/workload continuam usando vpndev-standards; um repositório de plataforma/cliente usa este preset.",
       "author": "VPN Dev",
-      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/releases/download/v1.5.3/vpndev-platform-standards-0.1.1.zip",
-      "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards",
+      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.5.3/vpndev-platform-standards-0.1.1.zip",
+      "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template",
       "license": "Proprietary",
       "requires": {
         "speckit_version": ">=0.16.0"
