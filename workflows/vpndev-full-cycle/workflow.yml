@@ -5,7 +5,7 @@ workflow:
   name: "VPN Dev — Ciclo Completo com Gate DevSecOps"
   version: "1.0.0"
   author: "VPN Dev"
-  description: "Ciclo SDD completo (specify -> plan -> tasks -> implement) com um gate explícito de avaliação DevSecOps/roteiro de implantação entre plan e tasks."
+  description: "Ciclo SDD completo (specify → plan → tasks → implement → converge) com gates de DevSecOps, grafo de módulos, release strategy e convergência pós-implementação."
 
 requires:
   speckit_version: ">=0.16.0"
@@ -72,6 +72,30 @@ steps:
   - id: implement
     command: speckit.implement
     integration: "{{ inputs.integration }}"
+
+  - id: converge
+    command: speckit.converge
+    integration: "{{ inputs.integration }}"
+    description: |
+      Compara o código implementado com spec.md, plan.md e tasks.md.
+      Detecta divergências, critérios de aceitação não cobertos e novas
+      decisões técnicas tomadas durante a implementação que precisam ser
+      registradas.
+
+  - id: converge-gate
+    type: gate
+    message: |
+      Pós-implementação — verificar antes de abrir o PR:
+      - Todas as divergências identificadas pelo converge foram resolvidas
+        ou documentadas no Architecture Decision Log do plan.md?
+      - graph.yaml e graph.md refletem o estado REAL do código implementado
+        (não apenas o planejado)?
+      - Para S3/S4: impact-map.md foi atualizado com os riscos descobertos
+        durante a implementação?
+      - SLOs medidos em staging estão dentro dos limites definidos no plan.md?
+      - Feature flags criadas têm critério de remoção documentado?
+    options: [approve, reject]
+    on_reject: abort
 
 tags:
   - "sdd"

@@ -75,6 +75,22 @@ Antes de `/speckit-tasks`, todos os seguintes gates devem estar aprovados no `pl
 
 ---
 
+## Estratégia de Release e Feature Flags
+
+- Toda feature S3/S4 deve chegar a produção atrás de feature flag, canary ou
+  blue-green — nunca deploy `direct` sem justificativa no `plan.md`.
+- Use OpenFeature SDK como abstração do provider de flags.
+- Toda flag criada deve ter critério de remoção ou data de expiração no `plan.md`.
+- Se encontrar uma flag sem critério de remoção ao revisar código, abrir Issue.
+
+## Decisões de Arquitetura (ADRs)
+
+- Quando uma tarefa exigir uma decisão com impacto duradouro, criar um ADR em
+  `docs/adr/NNNN-slug.md` usando o template em
+  `presets/vpndev-standards/templates/adr/NNNN-template.md`.
+- Referenciar o ADR no Architecture Decision Log do `plan.md`.
+- Ver guia completo em `docs/adr-guide.md`.
+
 ## Padrões de Código deste Projeto
 
 <!-- Adicionar aqui os padrões específicos do projeto -->

@@ -39,6 +39,43 @@ Para S3/S4, criar também `impact-map.md` na mesma pasta.*
 - [ ] Dependências externas (third-party, cloud) declaradas em `externals` no `graph.yaml`
 - [ ] Grafo será atualizado novamente após `/speckit-implement` se a implementação divergir do plano
 
+## VPN Dev — Estratégia de Release
+
+*Declarar antes de `/speckit-tasks`. Para S3/S4, esta escolha alimenta o
+`impact-map.md` (simplifica ou complica o plano de rollback).*
+
+| Campo | Valor |
+|---|---|
+| **Estratégia** | `flag` · `direct` · `canary` · `blue-green` *(marcar uma)* |
+| **Feature flag name** | `<nome-da-flag>` — ou `N/A` se não usar flag |
+| **Flag provider** | [ex.: LaunchDarkly, AWS AppConfig, OpenFeature] — ou `N/A` |
+| **Critério de ativação** | [ex.: 10% tráfego por 24h sem aumento de erro rate] |
+| **Critério de rollback** | [ex.: taxa de erro > 0,5% ou p99 > 500ms por 5 min] |
+
+> **Regra**: features S3/S4 **obrigam** estratégia `flag`, `canary` ou `blue-green`
+> — `direct` não é permitido sem justificativa explícita registrada aqui e no ADL.
+
+**Justificativa para deploy `direct` (se aplicável):**
+[Razão técnica para não usar flag/canary — ex.: migration de schema incompatível
+com flag, ou feature de infraestrutura sem plano de ativação incremental]
+
+## VPN Dev — SLO Gate
+
+*Preencher para todo componente novo ou alterado de forma relevante. Os valores
+aqui definidos são a referência para configuração de alertas (Observability Gate)
+e critérios de Go/No-Go do `impact-map.md` (S3/S4).*
+
+| Componente | Latência p99 | Taxa de erro máx. | Disponibilidade | RTO | RPO |
+|---|---|---|---|---|---|
+| `<serviço>` | [ex.: 200ms] | [ex.: 0,1%] | [ex.: 99,9%] | [ex.: 5 min] | [ex.: 1 min] |
+
+> Deixar `—` apenas quando o componente não expõe SLO mensurável (ex.: job batch
+> interno). Omissão sem justificativa bloqueia o Observability Gate.
+
+**SLOs não definidos nesta feature e justificativa:**
+[Listar componentes sem SLO e o motivo — ex.: "consumer Kafka assíncrono: sem
+SLO de latência, monitorado por lag de fila"]
+
 ## VPN Dev — Security & DevSecOps Gate
 
 *GATE adicional: deve ser preenchido e aprovado antes de `/speckit-tasks`, junto com

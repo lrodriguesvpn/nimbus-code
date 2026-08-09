@@ -79,6 +79,32 @@
 - Features S4 exigem label `complexity:S4` no PR e revisão humana — nunca
   apenas revisão automática.
 
+## Release e Feature Flags
+
+- **Deploy desacoplado de release é o padrão**: features S3/S4 devem chegar a
+  produção atrás de feature flag (`flag`), deploy canário (`canary`) ou
+  blue-green — nunca `direct` sem justificativa explícita registrada no
+  `plan.md`. Isso permite rollback imediato sem reverter código.
+- **Feature flags têm ciclo de vida**: toda flag criada deve ter data de expiração
+  ou critério de remoção definidos no `plan.md`. Flags não removidas após a
+  feature ser considerada estável são dívida técnica e devem ser registradas
+  como Issue.
+- **Provider de flags configurável por projeto**: usar OpenFeature SDK como
+  abstração — permite trocar o provider (LaunchDarkly, AWS AppConfig, etc.) sem
+  alterar o código de aplicação.
+
+## Decisões de Arquitetura (ADRs)
+
+- Decisões técnicas com impacto duradouro (>3 meses) ou que escolham entre
+  alternativas reais devem ser registradas como ADR:
+  - **Escopo organizacional** (afeta múltiplos projetos): `docs/adr/` neste
+    repositório (`speckit-vpndev-standards`).
+  - **Escopo de projeto**: `docs/adr/` no repositório do projeto.
+- O Architecture Decision Log do `plan.md` captura decisões locais de feature;
+  quando a decisão tiver impacto organizacional, adicionar link para o ADR
+  correspondente.
+- Template e guia em [`docs/adr-guide.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/adr-guide.md).
+
 ## Qualidade e Processo
 
 - Nenhuma implementação de feature relevante começa sem uma especificação formal
@@ -108,10 +134,9 @@
   automaticamente como Issue no GitHub e atribuído ao Copilot coding agent —
   nunca deixado apenas registrado em log/alerta sem rastreamento formal.
 
-Ver o detalhamento técnico de como aplicar estas regras (como solicitar a
-revisão do Copilot, padrão de correlation-id/tracing, e como automatizar a
-abertura/atribuição de bugs) em
-[`docs/ai-code-quality-and-observability.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/ai-code-quality-and-observability.md)
-do repositório `speckit-vpndev-standards`.
+Ver o detalhamento técnico de como aplicar estas regras em:
+- [`docs/ai-code-quality-and-observability.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/ai-code-quality-and-observability.md) — revisão por IA, seleção de modelos S0–S4, tracing, gestão de bugs
+- [`docs/module-graphs.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/module-graphs.md) — grafos de módulos, Graph Guard, templates
+- [`docs/adr-guide.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/adr-guide.md) — como criar e manter ADRs organizacionais
 
 {CORE_TEMPLATE}
