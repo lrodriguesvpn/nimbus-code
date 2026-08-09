@@ -111,3 +111,77 @@ A migração estará concluída quando:
 - as referências internas deste repositório estiverem no novo slug;
 - os repositórios consumidores tiverem migrado as referências operacionais;
 - nenhum nome técnico do Spec Kit tiver sido substituído.
+
+## 9. Execução prática (ordem recomendada)
+
+### 9.1 Validar o repositório-fonte (este repo)
+
+Rodar no root do repositório:
+
+```bash
+bash -n ./bootstrap.sh
+jq empty ./presets/catalog.json
+jq empty ./extensions/catalog.json
+jq empty ./workflows/catalog.json
+jq empty ./bundles/catalog.json
+rg -n "speckit-vpndev-standards" .
+```
+
+Esperado:
+
+- `bootstrap.sh` sem erro de sintaxe;
+- todos os `catalog.json` válidos;
+- nenhuma referência antiga operacional ativa (sobrando somente contexto histórico
+  de "de → para" neste documento).
+
+### 9.2 Varredura org-wide dos consumidores
+
+Rodar:
+
+```bash
+./scripts/scan-org-rename-references.sh
+```
+
+O script lista cada hit da organização com:
+
+- criticidade (`CRITICO`, `MEDIO`, `BAIXO`);
+- repositório + arquivo;
+- exatamente o que trocar (slug/URL antiga → nova).
+
+## 10. O que precisa ser mudado manualmente nos repositórios consumidores
+
+Para **cada ocorrência** que o script apontar:
+
+1. Trocar slug antigo:
+   - `speckit-vpndev-standards` → `nimbus-code-spec-kit-template`
+2. Trocar URL raw:
+   - `https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/...`
+   - `https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/...`
+3. Trocar URL web:
+   - `https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards`
+   - `https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template`
+4. Trocar caminhos locais:
+   - `./speckit-vpndev-standards/...` → `./nimbus-code-spec-kit-template/...`
+
+Prioridade:
+
+1. **CRITICO**: bootstrap/catálogos/release assets/workflows;
+2. **MEDIO**: templates e docs internas;
+3. **BAIXO**: menções textuais sem efeito operacional.
+
+## 11. Fluxo obrigatório de mudança (sem aprovação direta)
+
+Mudança de padrão/política **não é aprovada direto em arquivo**.
+Fluxo mínimo por repositório:
+
+1. branch
+2. commit
+3. PR
+4. revisão + aprovação (CODEOWNERS quando aplicável)
+5. CI verde
+6. merge
+
+Executar em lotes pequenos:
+
+- 1 PR por repositório consumidor;
+- só avançar para o próximo lote depois que CI/merge do lote atual estiverem OK.
