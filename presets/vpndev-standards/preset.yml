@@ -3,8 +3,8 @@ schema_version: "1.0"
 preset:
   id: "vpndev-standards"
   name: "VPN Dev — Padrões de Governança"
-  version: "1.4.0"
-  description: "Constituição base, grafos de módulos obrigatórios, escala S0–S4 com estimativa de tokens e ajuste por projeto, SLO Gate, estratégia de release, ADRs, taxonomia de labels de priorização/desenvolvimento autônomo/DORA, modelo híbrido humano+agente, e framework DevSecOps da VPN Dev, aplicados sobre os templates nativos do Spec Kit."
+  version: "1.5.0"
+  description: "Constituição base, grafos de módulos obrigatórios, escala S0–S4 com estimativa de tokens e ajuste por projeto, catálogo de reuso de conteúdo para reduzir custo de tokens, SLO Gate, estratégia de release, ADRs, taxonomia de labels de priorização/desenvolvimento autônomo/DORA, modelo híbrido humano+agente, e framework DevSecOps da VPN Dev, aplicados sobre os templates nativos do Spec Kit."
   author: "VPN Dev"
   repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards"
   license: "Proprietary"
@@ -89,6 +89,14 @@ provides:
       file: "templates/cost-profiles-and-rates.md"
       description: "Perfis de senioridade (Júnior/Pleno/Sênior) e taxa média de custo/hora para controle de custo real do modelo híbrido agente+humano."
 
+    # Índice de padrões/decisões reaproveitáveis — copiado para
+    # docs/reuse-catalog.yaml no projeto. Consultado pelo agente antes de
+    # re-derivar uma solução do zero, reduzindo custo de tokens.
+    - type: "artifact"
+      name: "reuse-catalog"
+      file: "templates/reuse-catalog.yaml"
+      description: "Catálogo machine-readable de padrões/ADRs reaproveitáveis por tag/bounded-context, referenciado por ponteiro em vez de duplicado — ver docs/ai-code-quality-and-observability.md, seção 9."
+
 tags:
   - "governance"
   - "security"
@@ -108,3 +116,4 @@ tags:
   - "pmo-portfolio"
   - "incident-management"
   - "d365"
+  - "reuse-catalog"

@@ -121,6 +121,23 @@ else
   echo "  ⚠ Template cost-profiles-and-rates.md não encontrado em $COST_PROFILES_SRC"
 fi
 
+echo ""
+echo "→ Instalando catálogo de reuso (docs/reuse-catalog.yaml)..."
+REUSE_CATALOG_SRC="$LOCAL_PATH/presets/vpndev-standards/templates/reuse-catalog.yaml"
+if [[ -f "$REUSE_CATALOG_SRC" ]]; then
+  mkdir -p "$WORKDIR/docs"
+  if [[ -f "$WORKDIR/docs/reuse-catalog.yaml" ]]; then
+    echo "  ℹ docs/reuse-catalog.yaml já existe — pulei (não sobrescrevo customização local)."
+  else
+    cp "$REUSE_CATALOG_SRC" "$WORKDIR/docs/reuse-catalog.yaml"
+    echo "  ✅ docs/reuse-catalog.yaml instalado (vazio — preencha conforme features"
+    echo "     introduzirem padrões reaproveitáveis; ver ai-code-quality-and-observability.md"
+    echo "     seção 9)."
+  fi
+else
+  echo "  ⚠ Template reuse-catalog.yaml não encontrado em $REUSE_CATALOG_SRC"
+fi
+
 BUNDLE_VERSION="$(grep -A4 '^bundle:' "$LOCAL_PATH/bundles/vpndev-project-bundle/bundle.yml" | grep -E '^\s*version:' | head -1 | sed -E 's/.*"([0-9.]+)".*/\1/')"
 echo ""
 echo "✅ Bundle vpndev-project-bundle v${BUNDLE_VERSION} aplicado com sucesso."

@@ -50,6 +50,7 @@ No início de cada tarefa (ou ao receber um `/speckit-implement`), declare:
 ```
 Complexidade desta tarefa: S<N> — <justificativa breve>
 Modelo selecionado: <modelo>
+Padrão reutilizado encontrado no catálogo de reuso (docs/reuse-catalog.yaml)? <Sim (tag: <tag>) / Não>
 Estimativa de tokens (input+output): ~<X>–<Y> mil tokens
 ```
 
@@ -116,6 +117,21 @@ humana constante. Instalada via `scripts/setup-github-labels.sh`.
 
 ---
 
+## Catálogo de Reuso (Reduzindo Custo de Tokens)
+
+- Antes de desenhar a solução de uma feature nova, **consulte
+  `docs/reuse-catalog.yaml`** por tags relacionadas ao problema — se houver
+  match, referencie a entrada por link no `plan.md` em vez de re-derivar a
+  solução do zero.
+- Nunca reexplique/copie o conteúdo de um ADR ou plano anterior dentro de um
+  novo `spec.md`/`plan.md` — sempre **referencie por ponteiro** (link direto).
+- Ao fechar uma feature que introduziu um padrão reaproveitável, adicione uma
+  entrada ao catálogo (`tag`, `bounded_context`, `description`, `source`).
+- Detalhamento completo:
+  `docs/ai-code-quality-and-observability.md`, seção 9.
+
+---
+
 ## Modelo Híbrido (Agente + Humano) e Controle de Custo
 
 Toda tarefa em modo híbrido (agente gera a maior parte, humano revisa/ajusta)
@@ -161,3 +177,4 @@ seção 8.
 - [Grafos de Módulos — Guia](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/module-graphs.md)
 - [Labels — Priorização e Desenvolvimento Autônomo](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/label-taxonomy-and-autonomous-dev.md)
 - [Modelo Híbrido e Estimativa de Tokens](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/ai-code-quality-and-observability.md#8-modelo-híbrido-agentes-de-ia--humanos-codando-juntos)
+- [Catálogo de Reuso](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/ai-code-quality-and-observability.md#9-catálogo-de-reuso--reduzindo-custo-de-tokens-com-conteúdo-já-existente)

@@ -4,15 +4,21 @@
   dogfooded aqui, seguindo o próprio spec-template.md do preset vpndev-standards.
 -->
 
-# STATUS: SPEC APENAS — NÃO INICIAR /speckit-plan SEM APROVAÇÃO HUMANA EXPLÍCITA
+# STATUS: APROVADO E IMPLEMENTADO (v1.5.0 do preset vpndev-standards)
 
-> Este arquivo é **somente a fase de especificação** (`/speckit-specify`), criado a
-> pedido para registrar o backlog da ideia discutida em conversa. **Nenhum `plan.md`,
-> `tasks.md` ou implementação deve começar** a partir deste spec até que um humano
-> aprove explicitamente (ex.: removendo este banner e aplicando `agent:autonomous-ok`
-> ou `priority:*` na issue de rastreamento correspondente). Ver
-> [`docs/label-taxonomy-and-autonomous-dev.md`](/Users/lrodrigues/projects/speckit-vpndev-standards.worktrees/branch-perdido-verificacao/docs/label-taxonomy-and-autonomous-dev.md)
-> para o guardrail de aprovação.
+> Aprovação humana recebida em conversa ("Pode seguir vamos usar suas
+> sugestões") — o escopo descrito abaixo (seção "Escopo") foi implementado
+> diretamente (sem passar por `/speckit-plan`/`/speckit-tasks` formais, dado
+> que o próprio pedido de aprovação já autorizou a execução direta do escopo
+> já detalhado aqui). Entregue como parte da v1.5.0 (MINOR) do preset
+> `vpndev-standards`: novo princípio "referenciar por ponteiro" na
+> constituição, artefato `templates/reuse-catalog.yaml` (instalado em
+> `docs/reuse-catalog.yaml` pelo `bootstrap.sh`), campo "Padrão reutilizado
+> encontrado?" no `plan-template.md`/`copilot-instructions.md`, e TL;DR no
+> topo de `ai-code-quality-and-observability.md` (nova seção 9),
+> `label-taxonomy-and-autonomous-dev.md`, `module-graphs.md` e
+> `developer-guide.md`. Este arquivo permanece como registro histórico da
+> spec original.
 
 ---
 
@@ -102,10 +108,22 @@ seção 6) que não precisariam do contexto completo.
 
 ## Próximos Passos (requer aprovação humana)
 
-1. Humano decide se esta ideia deve avançar — se sim, criar issue de
+~~1. Humano decide se esta ideia deve avançar — se sim, criar issue de
    rastreamento neste repositório com `priority:*` + `type:feature` e linkar
    aqui.
 2. Só então rodar `/speckit-plan` a partir deste `spec.md` para detalhar
    arquitetura, gates e `graph.yaml`/`graph.md` (S2 exige ambos).
 3. `/speckit-tasks` e implementação seguem o fluxo normal do bundle depois do
-   plano aprovado.
+   plano aprovado.~~
+
+**Atualização**: aprovado e implementado diretamente (ver banner de status no
+topo). Escolhas feitas nas perguntas em aberto acima:
+- Catálogo de reuso vive no bundle `vpndev-standards` (não como extensão
+  separada) — é aplicável a todo projeto consumidor, não um caso especial.
+- Preenchimento é **manual/curatorial** desde o início (não há automação de
+  indexação nesta versão — ver "Fora de Escopo").
+- Campo `reuse_tags` em `graph.yaml` **não** foi adicionado agora — o
+  catálogo (`reuse-catalog.yaml`) já cobre o caso de uso sem exigir mudança no
+  schema do grafo; pode ser revisitado se, na prática, a granularidade por
+  feature (graph.yaml) se mostrar necessária além da granularidade por
+  padrão/tag (reuse-catalog.yaml).

@@ -1,5 +1,14 @@
 # Qualidade de Código com IA, Testes Integrados, Observabilidade e Gestão de Bugs
 
+> **TL;DR** (para tarefas S0/S1 — leitura completa só é necessária para S2+ ou
+> quando a seção específica é citada em outro documento): Copilot revisa todo
+> PR além de humano (§1); critério de aceitação = teste de integração (§2);
+> observabilidade e correlation-id são obrigatórios (§3-4); bug não corrigido
+> na hora vira Issue (§5); classifique toda tarefa em S0–S4 e declare modelo +
+> estimativa de tokens antes de codar (§6); antes de estimar, **consulte o
+> catálogo de reuso** (§9) — pode reduzir a estimativa; horas humanas do modo
+> híbrido vão no campo do GitHub Project (§8).
+
 Este documento detalha **como aplicar na prática** as regras adicionadas pelo
 preset `vpndev-standards` à seção "Qualidade e Processo" da constituição (ver
 [`templates/constitution-template.md`](../presets/vpndev-standards/templates/constitution-template.md)),
@@ -189,9 +198,10 @@ O agente (Copilot ou equivalente) deve declarar explicitamente ao receber um
 ```
 Complexidade desta tarefa: S<N> — <justificativa em uma linha>
 Modelo selecionado: <modelo>
+Padrão reutilizado encontrado no catálogo de reuso? <Sim (tag: <tag>) / Não>
 Estimativa de tokens (input+output): ~<N> mil tokens — <racional: nº de
   arquivos/linhas de diff esperado, iterações previstas, baseado na tabela de
-  custo relativo abaixo>
+  custo relativo abaixo, com desconto se um padrão reutilizado foi encontrado>
 Artefatos de grafo necessários: graph.yaml [+ graph.md] [+ impact-map.md]
 ```
 
@@ -415,3 +425,84 @@ venda/negócio específico (deixe em branco para trabalho técnico interno sem
 vínculo comercial direto). Isso permite depois cruzar esforço técnico
 (tokens + horas humanas) com a oportunidade de origem, e é a mesma
 informação somada entre repositórios via `scripts/pmo-cost-rollup.sh` acima.
+
+## 9. Catálogo de Reuso — reduzindo custo de tokens com conteúdo já existente
+
+**Problema que resolve**: sem um mecanismo de reuso, cada feature nova
+reconstrói raciocínio/contexto do zero mesmo quando uma feature anterior já
+resolveu um problema equivalente (ex.: padrão de correlation-id, CRUD padrão,
+outbox pattern) — gastando tokens desnecessariamente, principalmente em
+tarefas S0/S1 (30–40% do volume, ver tabela de distribuição na seção 6).
+
+### 9.1 Princípio: referenciar por ponteiro, não por valor
+
+Regra da constituição (ver `constitution-template.md`, seção "Reutilização de
+Conteúdo e Referência por Ponteiro"): ao citar um ADR, uma decisão de plano
+anterior ou um padrão já documentado, **linkar o artefato original**
+(`docs/adr/NNNN-slug.md`, `specs/<feature>/plan.md#seção`) em vez de
+copiar/reexplicar o conteúdo dentro do novo `spec.md`/`plan.md`. Isso já é a
+convenção usada pelo próprio bundle — o `spec-template.md` do preset usa
+`{CORE_TEMPLATE}` como ponteiro para o template nativo do Spec Kit em vez de
+duplicá-lo (ver estratégia `prepend`/`wrap`/`append` no `preset.yml`).
+
+Benefício direto em tokens: um ponteiro custa poucas dezenas de tokens; o
+conteúdo completo que ele substitui pode custar milhares — e só precisa ser
+lido por inteiro quando alguém (humano ou agente) realmente abrir o link.
+
+### 9.2 Catálogo de reuso (`docs/reuse-catalog.yaml`)
+
+Índice machine-readable, instalado pelo `bootstrap.sh` em todo projeto novo
+(template em
+[`templates/reuse-catalog.yaml`](../presets/vpndev-standards/templates/reuse-catalog.yaml)),
+indexando padrões/decisões reaproveitáveis por `tag` e `bounded_context`, cada
+entrada apontando (por ponteiro) para o `spec.md`/`plan.md`/ADR original.
+
+**Como usar:**
+
+1. **Ao iniciar uma feature nova**: antes de desenhar a solução, buscar no
+   catálogo por tags relacionadas ao problema. Se houver match, referenciar a
+   entrada por ponteiro no novo `plan.md` (Architecture Decision Log ou seção
+   técnica correspondente) em vez de re-derivar a solução do zero.
+2. **Ao fechar uma feature** que introduziu um padrão reaproveitável (não
+   específico só dela), adicionar uma entrada ao catálogo como parte do
+   checklist de fechamento do `tasks.md` — incrementar `reuse_count` sempre
+   que uma feature futura reaproveitar essa entrada (sinal de ROI real do
+   catálogo ao longo do tempo).
+3. Preenchimento é **manual/curatorial** nesta versão — não há automação de
+   indexação (ex.: workflow que atualiza o catálogo sozinho ao fechar
+   `/speckit-tasks`); isso fica como possível evolução futura, registrada em
+   `specs/001-catalogo-conteudo-reutilizavel/spec.md` deste repositório.
+
+### 9.3 TL;DR em documentos longos (progressive disclosure alinhado a S0–S4)
+
+Documentos de referência extensos (ex.: este documento,
+`docs/label-taxonomy-and-autonomous-dev.md`, `docs/module-graphs.md`,
+`docs/developer-guide.md`) trazem um bloco **TL;DR** logo após o título,
+resumindo em poucas linhas o essencial de cada seção com link para a seção
+completa. Tarefas **S0/S1** normalmente só precisam do TL;DR; a leitura
+completa do documento fica reservada para tarefas **S2+**, que já usam modelo
+mais caro e se beneficiam mais da profundidade. Ao criar um novo documento de
+referência longo (>200 linhas) no bundle ou em um projeto consumidor, seguir a
+mesma convenção.
+
+### 9.4 Integração com a estimativa de tokens
+
+O campo **"Padrão reutilizado encontrado?"** (ver "Como declarar no início de
+cada tarefa", seção 6, e a tabela de Classificação de Complexidade do
+`plan-template.md`) registra se um match do catálogo foi usado. Quando sim, a
+estimativa de tokens declarada pode — e deve — ser reduzida em relação ao
+baseline puro do nível S0–S4, já que parte do raciocínio de design foi
+reaproveitado em vez de re-derivado. Com o tempo, comparar a variância
+estimativa-vs-real (seção 6) **separando** tarefas com e sem match de reuso é
+o dado que permite medir o ROI real do catálogo — não é preciso instrumentação
+nova além do que a seção 6 já pede.
+
+### 9.5 Evolução futura: RAG/índice semântico
+
+Um índice semântico via embeddings (RAG sobre `specs/*/spec.md` e
+`docs/adr/*.md`) é uma evolução natural do catálogo acima, mas **prematura**
+enquanto o corpus de specs/ADRs de um projeto for pequeno — o custo de manter
+a infraestrutura de embeddings supera o ganho até o catálogo em YAML se tornar
+difícil de buscar manualmente. Considerar essa evolução apenas quando o
+catálogo YAML tiver dezenas de entradas e a busca manual por tag deixar de ser
+suficiente.

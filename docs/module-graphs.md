@@ -1,5 +1,12 @@
 # Grafos de Módulos — Guia VPN Dev
 
+> **TL;DR** (S0/S1 — leitura completa reservada para S2+): todo `plan.md`
+> precisa de `specs/<feature>/graph.yaml` (fonte de verdade estruturada) +
+> `graph.md` (Mermaid, leitura humana); S3/S4 exigem também `impact-map.md`;
+> qualquer PR que altere `src/`/`services/`/`infrastructure/`/`modules/` sem
+> atualizar o grafo é bloqueado pelo Graph Guard. Ver seções abaixo para como
+> criar/manter e para os templates prontos.
+
 Este documento explica o sistema de grafos de módulos obrigatórios do preset
 `vpndev-standards`: o que são, por que existem, como criar e como manter.
 

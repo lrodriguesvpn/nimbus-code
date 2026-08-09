@@ -1,5 +1,14 @@
 # Labels — Priorização, Ordenamento e Desenvolvimento Autônomo
 
+> **TL;DR** (S0/S1 — leitura completa reservada para S2+ ou dúvida
+> específica): ordene o backlog por `priority:P0-blocker` > `P1-high` >
+> `P2-medium` > `P3-low`; desenvolvimento autônomo só com
+> `agent:autonomous-ok` **e sem** `agent:needs-human`/`complexity:S4`/
+> `type:incident`/`status:blocked`; `type:incident` e `complexity:S4` sempre
+> exigem revisão humana; `dora:*` só correlaciona métrica, não dispara
+> automação. Ver seções abaixo para o detalhamento e os guardrails do
+> workflow de auto-assign.
+
 Este documento descreve a taxonomia padrão de labels do bundle VPN Dev, criada
 via [`scripts/setup-github-labels.sh`](../scripts/setup-github-labels.sh), e
 como ela é usada para (1) **priorizar e ordenar** issues/PRs no backlog e (2)

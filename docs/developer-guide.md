@@ -1,5 +1,12 @@
 # Manual do Dev — Começando com GHE + Spec Kit na VPN Dev
 
+> **TL;DR** (S0/S1 — leitura completa reservada para primeira vez em cada
+> cenário ou dúvida específica): repo novo → `curl ... bootstrap.sh | bash`
+> (seção 1); repo existente sem Spec Kit → `specify init --here` + ler o
+> código/Boards antes de especificar (seção 2, brownfield); ponto de partida
+> a partir de um card do ADO/JIRA → prompt de importação pronto (seção 3).
+> Pré-requisitos (`specify` CLI, `uv`, Copilot) na tabela logo abaixo.
+
 Este é o manual **central** de como todo dev da VPN Dev deve usar o
 [GitHub Spec Kit](https://github.com/github/spec-kit) no dia a dia, com as
 ferramentas da empresa (GHE, Azure DevOps/JIRA, GitHub Copilot). Ele cobre três

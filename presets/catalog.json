@@ -1,21 +1,36 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-08-09T13:53:00Z",
+  "updated_at": "2026-08-09T16:44:22Z",
   "catalog_url": "https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/main/presets/catalog.json",
   "presets": {
     "vpndev-standards": {
       "name": "VPN Dev — Padrões de Governança",
       "id": "vpndev-standards",
-      "version": "1.4.0",
-      "description": "Constituição base, gate de segurança/DevSecOps, escala S0–S4 com estimativa de tokens, taxonomia de labels de priorização/desenvolvimento autônomo/DORA/incidente, modelo híbrido humano+agente com perfis de custo padrão, GitHub Project por repositório garantido continuamente (campos Horas Humanas/Oportunidade D365), Portfólio PMO consolidado entre repositórios e framework de decisões de arquitetura padrão da VPN Dev.",
+      "version": "1.5.0",
+      "description": "Constituição base, gate de segurança/DevSecOps, escala S0–S4 com estimativa de tokens, catálogo de reuso de conteúdo para reduzir custo de tokens, taxonomia de labels de priorização/desenvolvimento autônomo/DORA/incidente, modelo híbrido humano+agente com perfis de custo padrão, GitHub Project por repositório garantido continuamente (campos Horas Humanas/Oportunidade D365), Portfólio PMO consolidado entre repositórios e framework de decisões de arquitetura padrão da VPN Dev.",
       "author": "VPN Dev",
-      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/releases/download/v1.4.0/vpndev-standards-1.4.0.zip",
+      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/releases/download/v1.5.0/vpndev-standards-1.5.0.zip",
       "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards",
       "license": "Proprietary",
       "requires": {
         "speckit_version": ">=0.16.0"
       },
-      "tags": ["governance", "security", "devsecops", "vpndev", "labels", "prioritization", "autonomous-development", "token-estimation", "dora-metrics", "finops", "pmo-portfolio", "incident-management", "d365"]
+      "tags": [
+        "governance",
+        "security",
+        "devsecops",
+        "vpndev",
+        "labels",
+        "prioritization",
+        "autonomous-development",
+        "token-estimation",
+        "dora-metrics",
+        "finops",
+        "pmo-portfolio",
+        "incident-management",
+        "d365",
+        "reuse-catalog"
+      ]
     },
     "vpndev-platform-standards": {
       "name": "VPN Dev — Padrões de Plataforma/Cliente (Ambientes e Legado)",
@@ -23,13 +38,24 @@
       "version": "0.1.0",
       "description": "Constituição para repositórios de PLATAFORMA/CLIENTE/TENANT (ambientes, contas cloud, tenants M365/GWS/D365 e sistemas legados) — inventário multi-nuvem (Azure/AWS/GCP/GWS/M365/D365), regra de zero-diff como critério de verdade, proibição de aplicar mudança direta em produção, registro de schemas de bancos legados e grafo de 2 níveis (plataforma ↔ workload). Complementar ao vpndev-standards: repositórios de projeto/workload continuam usando vpndev-standards; um repositório de plataforma/cliente usa este preset.",
       "author": "VPN Dev",
-      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/releases/download/v1.4.0/vpndev-platform-standards-0.1.0.zip",
+      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/releases/download/v1.5.0/vpndev-platform-standards-0.1.0.zip",
       "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards",
       "license": "Proprietary",
       "requires": {
         "speckit_version": ">=0.16.0"
       },
-      "tags": ["governance", "platform", "multi-cloud", "legacy", "infrastructure-as-code", "terraform", "m365", "d365", "drift-detection", "vpndev"]
+      "tags": [
+        "governance",
+        "platform",
+        "multi-cloud",
+        "legacy",
+        "infrastructure-as-code",
+        "terraform",
+        "m365",
+        "d365",
+        "drift-detection",
+        "vpndev"
+      ]
     }
   }
 }

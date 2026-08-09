@@ -17,7 +17,8 @@ nível de revisão exigido.*
 | **Justificativa** | [ex.: cruza order-service e billing-service via evento] |
 | **Modelo de IA** | Auto / Reasoning / Modelo forte *(conforme tabela abaixo)* |
 | **Revisão humana obrigatória** | Sim (S4) · Não (S0–S3) |
-| **Estimativa de tokens (input+output)** | ~[X]–[Y] mil tokens — baseado no multiplicador de custo relativo do nível (ver `docs/ai-code-quality-and-observability.md` seção 6) |
+| **Padrão reutilizado encontrado?** | Sim (tag: `[tag do catálogo]`) · Não *(ver `docs/reuse-catalog.yaml` antes de preencher)* |
+| **Estimativa de tokens (input+output)** | ~[X]–[Y] mil tokens — baseado no multiplicador de custo relativo do nível (ver `docs/ai-code-quality-and-observability.md` seção 6), com desconto se um padrão reutilizado foi encontrado (seção 9) |
 
 > S0 = documentação · S1 = função isolada · S2 = módulo · S3 = múltiplos módulos ·
 > S4 = arquitetura, segurança, dados ou integração crítica

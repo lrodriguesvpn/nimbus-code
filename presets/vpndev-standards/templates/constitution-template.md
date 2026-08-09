@@ -100,6 +100,25 @@
   do `tasks.md` — ver metodologia em
   [`docs/ai-code-quality-and-observability.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/ai-code-quality-and-observability.md), seção 6.
 
+## Reutilização de Conteúdo e Referência por Ponteiro
+
+- **Referenciar por ponteiro, nunca duplicar por valor**: ao citar um ADR, uma
+  decisão de plano anterior ou um padrão já documentado, use um link para o
+  artefato original (`docs/adr/NNNN-slug.md`, `specs/<feature>/plan.md#seção`)
+  — nunca copie/reescreva o conteúdo inteiro dentro de um novo `spec.md`/
+  `plan.md`. Isso vale tanto para o texto gerado quanto para o contexto lido
+  por um agente ao planejar uma feature nova.
+- Todo projeto mantém um **catálogo de reuso** (`docs/reuse-catalog.yaml`,
+  instalado pelo `bootstrap.sh`) indexando padrões/decisões reaproveitáveis por
+  tag e bounded context. Ao iniciar uma feature nova, consultar esse catálogo
+  **antes** de desenhar uma solução do zero é parte do processo, não opcional.
+- Toda feature que introduzir um padrão reaproveitável (não específico só dela)
+  deve registrar uma entrada no catálogo como parte do checklist de fechamento
+  do `tasks.md`.
+- Detalhamento completo (estrutura do catálogo, TL;DR em docs longos e
+  integração com a estimativa de tokens) em
+  [`docs/ai-code-quality-and-observability.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/blob/main/docs/ai-code-quality-and-observability.md), seção 9.
+
 ## Priorização e Desenvolvimento Autônomo (Labels)
 
 - Todo projeto deve manter a taxonomia de labels do bundle VPN Dev criada por
