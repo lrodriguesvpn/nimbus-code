@@ -84,6 +84,7 @@ por domínio técnico.*
 
 | Domínio | Controles aplicáveis | Status | Observações |
 |---|---|---|---|
+| Autenticação (SSO) | Sistemas novos (greenfield) devem usar SSO; ausência de SSO deve estar formalmente declarada e registrada no Architecture Decision Log abaixo | | Se não usar SSO, registrar justificativa no ADL — caso contrário este gate é bloqueante |
 | Containers | Imagem base pinada, scan de vulnerabilidade, usuário não-root | | |
 | CI/CD | Segredos via cofre/CI secrets, least privilege no service account do pipeline | | |
 | IaC — provider(s) usado(s) | 100% da infra desta feature via IaC (nenhuma alteração manual); **Terraform** como framework padrão para AWS/GCP/Azure; `plan` revisado em PR, sem credenciais hardcoded, state remoto protegido | | Se usar ferramenta nativa do provedor (CDK/Bicep/Deployment Manager) em vez de Terraform, justificar no Architecture Decision Log abaixo |

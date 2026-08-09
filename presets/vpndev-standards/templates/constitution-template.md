@@ -17,6 +17,11 @@
 - Nenhum segredo (senha, token, chave de API, certificado) pode ser commitado em
   texto plano em qualquer artefato versionado (código, IaC, pipelines, configs).
   Usar cofre de segredos (Secret Manager, Key Vault, GitHub/Azure DevOps secrets).
+- **SSO é obrigatório para todo sistema novo** (greenfield): nenhum sistema novo
+  pode expor autenticação própria (usuário/senha local, auth ad-hoc) sem que o
+  caso de não uso de SSO esteja formalmente declarado e registrado no Architecture
+  Decision Log do `plan.md` da feature, com justificativa técnica explícita. Ausência
+  de SSO sem registro bloqueia o Security & DevSecOps Gate.
 - Toda conexão com banco de dados gerenciado exige TLS/mTLS obrigatório.
 - Toda instância de banco de dados relacional deve habilitar, no mínimo, logs de
   conexão/desconexão, auditoria de statements DDL e duração de query.
