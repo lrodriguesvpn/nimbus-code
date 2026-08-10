@@ -109,8 +109,8 @@ jobs:
 
             1. Identifique (ou crie) a feature em \`specs/<feature-slug>/\`.
             2. Copie os templates de:
-               - \`presets/vpndev-standards/templates/feature-artifacts/graph.yaml\`
-               - \`presets/vpndev-standards/templates/feature-artifacts/graph.md\`
+               - \`presets/nimbus-code-standards/templates/feature-artifacts/graph.yaml\`
+               - \`presets/nimbus-code-standards/templates/feature-artifacts/graph.md\`
             3. Preencha com os módulos e dependências reais desta PR.
             4. Para complexidade **S3 ou S4**, crie também \`impact-map.md\` no mesmo diretório.
             5. Commit os arquivos nesta mesma PR e faça push.
@@ -121,7 +121,7 @@ jobs:
             a cada PR garante rastreabilidade de dependências, análise de impacto e reduz o custo
             de onboarding e debugging. Ver [docs/module-graphs.md](../docs/module-graphs.md).
 
-            > _Gate definido pelo preset \`vpndev-standards\` — [saiba mais](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template)._
+            > _Gate definido pelo preset \`nimbus-code-standards\` — [saiba mais](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template)._
             `;
             await github.rest.issues.createComment({
               owner: context.repo.owner,

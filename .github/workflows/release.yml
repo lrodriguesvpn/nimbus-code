@@ -1,4 +1,4 @@
-name: Release componentes VPN Dev
+name: Release componentes Nimbus-Code
 
 # Empacota preset/extensão/workflow/bundle em .zip e publica como assets de uma
 # GitHub Release, na tag pushada. Os catalog.json (presets/, extensions/,
@@ -20,50 +20,50 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Empacotar preset vpndev-standards
+      - name: Empacotar preset nimbus-code-standards
         run: |
-          cd presets/vpndev-standards
+          cd presets/nimbus-code-standards
           VERSION=$(grep -m1 -E '^[[:space:]]*version:' preset.yml | sed -E 's/.*"([0-9.]+)".*/\1/')
-          zip -r "../../vpndev-standards-${VERSION}.zip" . -x ".*"
+          zip -r "../../nimbus-code-standards-${VERSION}.zip" . -x ".*"
 
-      - name: Empacotar preset vpndev-platform-standards
+      - name: Empacotar preset nimbus-code-platform-standards
         run: |
-          cd presets/vpndev-platform-standards
+          cd presets/nimbus-code-platform-standards
           VERSION=$(grep -m1 -E '^[[:space:]]*version:' preset.yml | sed -E 's/.*"([0-9.]+)".*/\1/')
-          zip -r "../../vpndev-platform-standards-${VERSION}.zip" . -x ".*"
+          zip -r "../../nimbus-code-platform-standards-${VERSION}.zip" . -x ".*"
 
-      - name: Empacotar extensão vpndev-backlog-sync
+      - name: Empacotar extensão nimbus-code-backlog-sync
         run: |
-          cd extensions/vpndev-backlog-sync
+          cd extensions/nimbus-code-backlog-sync
           VERSION=$(grep -m1 -E '^[[:space:]]*version:' extension.yml | sed -E 's/.*"([0-9.]+)".*/\1/')
-          zip -r "../../vpndev-backlog-sync-${VERSION}.zip" . -x ".*"
+          zip -r "../../nimbus-code-backlog-sync-${VERSION}.zip" . -x ".*"
 
-      - name: Empacotar workflow vpndev-full-cycle
+      - name: Empacotar workflow nimbus-code-full-cycle
         run: |
-          cd workflows/vpndev-full-cycle
+          cd workflows/nimbus-code-full-cycle
           VERSION=$(grep -m1 -E '^[[:space:]]*version:' workflow.yml | sed -E 's/.*"([0-9.]+)".*/\1/')
-          zip -r "../../vpndev-full-cycle-${VERSION}.zip" . -x ".*"
+          zip -r "../../nimbus-code-full-cycle-${VERSION}.zip" . -x ".*"
 
-      - name: Empacotar bundle vpndev-project-bundle
+      - name: Empacotar bundle nimbus-code-project-bundle
         run: |
-          cd bundles/vpndev-project-bundle
+          cd bundles/nimbus-code-project-bundle
           VERSION=$(grep -m1 -E '^[[:space:]]*version:' bundle.yml | sed -E 's/.*"([0-9.]+)".*/\1/')
-          zip -r "../../vpndev-project-bundle-${VERSION}.zip" . -x ".*"
+          zip -r "../../nimbus-code-project-bundle-${VERSION}.zip" . -x ".*"
 
-      - name: Empacotar bundle vpndev-platform-bundle
+      - name: Empacotar bundle nimbus-code-platform-bundle
         run: |
-          cd bundles/vpndev-platform-bundle
+          cd bundles/nimbus-code-platform-bundle
           VERSION=$(grep -m1 -E '^[[:space:]]*version:' bundle.yml | sed -E 's/.*"([0-9.]+)".*/\1/')
-          zip -r "../../vpndev-platform-bundle-${VERSION}.zip" . -x ".*"
+          zip -r "../../nimbus-code-platform-bundle-${VERSION}.zip" . -x ".*"
 
       - name: Publicar GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            vpndev-standards-*.zip
-            vpndev-platform-standards-*.zip
-            vpndev-backlog-sync-*.zip
-            vpndev-full-cycle-*.zip
-            vpndev-project-bundle-*.zip
-            vpndev-platform-bundle-*.zip
+            nimbus-code-standards-*.zip
+            nimbus-code-platform-standards-*.zip
+            nimbus-code-backlog-sync-*.zip
+            nimbus-code-full-cycle-*.zip
+            nimbus-code-project-bundle-*.zip
+            nimbus-code-platform-bundle-*.zip
           generate_release_notes: true

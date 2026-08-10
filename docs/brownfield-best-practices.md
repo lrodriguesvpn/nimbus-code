@@ -1,25 +1,25 @@
-# Boas Práticas Brownfield com Spec Kit
+# Boas Práticas Brownfield com Nimbus Code
 
-Este documento é uma **referência profunda** de como trabalhar com Spec Kit em
+Este documento é uma **referência profunda** de como trabalhar com Nimbus Code em
 repositórios já existentes (brownfield). Para um guia passo a passo rápido, ver
-[`docs/developer-guide.md`](developer-guide.md#2-repositório-existente-sem-spec-kit-brownfield).
+[`docs/developer-guide.md`](developer-guide.md#2-repositório-existente-sem-nimbus-code-brownfield).
 
 ## Por que brownfield é diferente
 
-A maioria dos walkthroughs do Spec Kit documenta greenfield: você começa do
+A maioria dos walkthroughs do Nimbus Code documenta greenfield: você começa do
 zero, escreve constituição + spec do zero, tudo é novo. Brownfield é o oposto:
 código já existe, padrões já estão estabelecidos (mesmo que implícitos), e
 freqüentemente há um backlog/histórico de decisões já tomadas.
 
-O Spec Kit **funciona em brownfield** (ver
-[walkthrough oficial do próprio time do Spec Kit](https://github.com/mnriem/spec-kit-aspnet-brownfield-demo)
+O Nimbus Code **funciona em brownfield** (ver
+[walkthrough oficial do próprio time do Nimbus Code](https://github.com/mnriem/nimbus-code-aspnet-brownfield-demo)
 aplicado a uma CMS .NET com ~307k linhas), mas o fluxo é **3 passos mais
 longo** que greenfield porque o agente precisa **aprender o código antes de
 especificar**.
 
 ## A Constituição é o passo crítico
 
-Em greenfield, `/speckit.constitution` é rápido: você define os princípios que
+Em greenfield, `/nimbus-code.constitution` é rápido: você define os princípios que
 quer ("TDD", "functional programming", etc.) e segue.
 
 Em brownfield, **a constituição é um ato de **escaneamento e derivação***:
@@ -76,19 +76,19 @@ Repos brownfield grandes frequentemente têm:
 Por isso, é muito comum:
 
 ```
-Pass 1: /speckit.implement → completa tarefas 1-5, agente marca tarefas 6-10
+Pass 1: /nimbus-code.implement → completa tarefas 1-5, agente marca tarefas 6-10
         como "requer validação do developer" ou encontra erro em compilação.
 Validar output do pass 1.
 
-Pass 2: /speckit.implement → completa tarefas 6-10.
+Pass 2: /nimbus-code.implement → completa tarefas 6-10.
 Validar output do pass 2.
 
-/speckit.converge → encontra 3 gaps (ex.: falta testes de integração).
+/nimbus-code.converge → encontra 3 gaps (ex.: falta testes de integração).
 Converge anexa essas 3 como novas tarefas.
 
-Pass 3: /speckit.implement → completa as 3 tarefas de gap.
+Pass 3: /nimbus-code.implement → completa as 3 tarefas de gap.
 
-/speckit.converge → ✅ Converged. Fim.
+/nimbus-code.converge → ✅ Converged. Fim.
 ```
 
 Isso **não é sinal de falha** — é esperado. O agente está explorando o código
@@ -96,7 +96,7 @@ real e identificando lacunas que a spec original não cobria. Converge é
 append-only (nunca edita/apaga código já escrito), então é seguro rodar
 quantas vezes for necessário.
 
-**Dica prática**: após cada pass de `implement`, sempre rode `/speckit.converge`
+**Dica prática**: após cada pass de `implement`, sempre rode `/nimbus-code.converge`
 antes de seguir para a próxima feature. Nunca deixe gaps pendentes.
 
 ## Quando editar artefatos SDD manualmente vs. regenerar
@@ -110,9 +110,9 @@ antes de seguir para a próxima feature. Nunca deixe gaps pendentes.
 
 ### Regenerar com o comando (recomendado):
 
-- **Mudar requisito** (parte da spec) → `/speckit.specify` de novo
-- **Mudar design/stack** (parte do plano) → `/speckit.plan` de novo
-- **Mudar dependências entre tarefas** → `/speckit.tasks` de novo
+- **Mudar requisito** (parte da spec) → `/nimbus-code.specify` de novo
+- **Mudar design/stack** (parte do plano) → `/nimbus-code.plan` de novo
+- **Mudar dependências entre tarefas** → `/nimbus-code.tasks` de novo
 
 Por quê? Porque a alteração propaga — se você muda spec manualmente mas o
 `plan.md` antigo fica, o `plan.md` fica inconsistente com a spec. Regenerar
@@ -126,7 +126,7 @@ mudanças manuais lá são seguras.
 Cenário comum: repo brownfield com lógica crítica não testada (ou testada só
 com testes frágeis).
 
-O Spec Kit **exige testes de integração** (ver
+O Nimbus Code **exige testes de integração** (ver
 [`docs/ai-code-quality-and-observability.md`](ai-code-quality-and-observability.md#2-testes-de-integração-cobrindo-os-critérios-de-aceitação)):
 cada critério de aceitação do `spec.md` deve ter um teste de integração
 automatizado correspondente.
@@ -154,9 +154,9 @@ cima.
 Brownfield frequentemente já tem um backlog cheio de cards — algumas features
 já em andamento, outras já fechadas.
 
-O Spec Kit não importa o backlog inteiro automaticamente, mas você pode:
+O Nimbus Code não importa o backlog inteiro automaticamente, mas você pode:
 
-1. **Ler contexto histórico**: antes de `/speckit.specify`, peça ao agente (via
+1. **Ler contexto histórico**: antes de `/nimbus-code.specify`, peça ao agente (via
    prompt manual) um resumo dos cards relacionados dos últimos meses (seção 2.4
    do `developer-guide.md`). Isso entra como contexto adicional.
 
@@ -165,30 +165,30 @@ O Spec Kit não importa o backlog inteiro automaticamente, mas você pode:
    `developer-guide.md`).
 
 3. **Sincronizar spec → board**: depois de gerar `spec.md` e `tasks.md`, a
-   extensão `vpndev-backlog-sync` pode sincronizar **para** o board (hooks
+   extensão `nimbus-code-backlog-sync` pode sincronizar **para** o board (hooks
    `after_specify`/`after_tasks`, opcionais). Isso é o caminho **oposto** ao
    import acima — você mantém a spec como source-of-truth, e o board fica
    espelhado (não é o contrário).
 
-**Ponto crítico**: em brownfield com backlog, a spec gerada pelo Spec Kit pode
-divergir do que o board esperava (porque o Spec Kit refinou requisitos com
+**Ponto crítico**: em brownfield com backlog, a spec gerada pelo Nimbus Code pode
+divergir do que o board esperava (porque o Nimbus Code refinou requisitos com
 clarify/checklist). Nesse caso, **a spec é a verdade** — o board é derivado
 dela, não o contrário. Comunique a divergência ao PO antes de sincronizar.
 
-## Branches e PRs com Spec Kit em brownfield
+## Branches e PRs com Nimbus Code em brownfield
 
-Em brownfield, suas features Spec Kit usualmente vão para PRs como qualquer
+Em brownfield, suas features Nimbus Code usualmente vão para PRs como qualquer
 outra mudança de código. Recomendação:
 
 ```
 1. Nova branch: git checkout -b feature/meu-card-123-descricao
 2. Rodaprincipal init --here se primeira feature, ou pule se já feito
-3. /speckit.specify → gera spec.md
-4. /speckit.plan → gera plan.md
-5. /speckit.tasks → gera tasks.md
+3. /nimbus-code.specify → gera spec.md
+4. /nimbus-code.plan → gera plan.md
+5. /nimbus-code.tasks → gera tasks.md
 6. Commit: git add .specify/features/ && git commit -m "spec: meu-card-123"
-7. /speckit.implement → implementa tarefas
-8. /speckit.converge → checa gaps
+7. /nimbus-code.implement → implementa tarefas
+8. /nimbus-code.converge → checa gaps
 9. Commit: git add . && git commit -m "implement: meu-card-123 — converged"
 10. git push origin feature/meu-card-123-descricao
 11. Abra PR normal
@@ -201,35 +201,35 @@ O `.specify/` fica versionado (incluindo `spec.md`, `plan.md`, `tasks.md`), ent�
 o histórico de decisões fica no git. Isso é útil para arqueologia futura
 ("por que fizemos X assim?").
 
-## Migrando incrementalmente um projeto brownfield para Spec Kit
+## Migrando incrementalmente um projeto brownfield para Nimbus Code
 
 Se o projeto tem **muitas features já em andamento** (não é dia 1), como
-integrar Spec Kit sem quebrar tudo?
+integrar Nimbus Code sem quebrar tudo?
 
 Abordagem **low-risk**:
 
-1. **Dia 1**: instale o Spec Kit (section 2.1-2.2 do `developer-guide.md`).
+1. **Dia 1**: instale o Nimbus Code (section 2.1-2.2 do `developer-guide.md`).
    Gere constituição profunda. Nenhuma feature nova ainda.
    - Execute também `bash ./scripts/setup-github-project.sh` para criar o
      GitHub Project com views padrão (facilita rastreamento de features).
-2. **Semana 1**: próxima feature que chegar, use Spec Kit completo (spec →
+2. **Semana 1**: próxima feature que chegar, use Nimbus Code completo (spec →
    plan → tasks → implement → converge). Essa se torna a "prova de conceito".
-3. **Dia 7 forward**: features subsequentes usam Spec Kit. As antigos features
-   já em andamento continuam sem Spec Kit (não vale retro-especificar).
-4. **3-6 meses after**: a maioria das features ativas usa Spec Kit. Histórico
-   do projeto agora é "pre-Spec Kit" (caótico) e "post-Spec Kit" (estruturado).
+3. **Dia 7 forward**: features subsequentes usam Nimbus Code. As antigos features
+   já em andamento continuam sem Nimbus Code (não vale retro-especificar).
+4. **3-6 meses after**: a maioria das features ativas usa Nimbus Code. Histórico
+   do projeto agora é "pre-Nimbus Code" (caótico) e "post-Nimbus Code" (estruturado).
 
 Isso é seguro e permite ramp-up gradual da equipe.
 
 ## Troubleshooting brownfield comum
 
-### Problema: `/speckit.constitution` leva muito tempo e o agente não converge
+### Problema: `/nimbus-code.constitution` leva muito tempo e o agente não converge
 
 **Causa**: repo muito grande ou estrutura interna complexa faz o agente perder
 o fio.
 
 **Solução**:
-- Reduza o escopo inicial: se o repo tem 50 módulos, focar `/speckit.constitution`
+- Reduza o escopo inicial: se o repo tem 50 módulos, focar `/nimbus-code.constitution`
   só nos 3-5 mais críticos inicialmente.
 - Parta de um "slice" do código (ex.: "considere como principais os módulos em
   `src/core/` e não se preocupe com o resto por agora").
@@ -241,9 +241,9 @@ o fio.
 **Causa**: feature especificada era grande demais; ou spec foi ambígua.
 
 **Solução**:
-- Reegere `/speckit.tasks` pedindo explicitamente phases menores ("separe em
+- Reegere `/nimbus-code.tasks` pedindo explicitamente phases menores ("separe em
   3 phases: Setup, Core, Polish, com máx 10 tarefas cada").
-- Ou volte a `/speckit.clarify` / `/speckit.specify` redefinindo escopo menor
+- Ou volte a `/nimbus-code.clarify` / `/nimbus-code.specify` redefinindo escopo menor
   ("só implementar leitura primeiro, escrita é v2").
 
 ### Problema: `implement` começou bem mas falhou no meio (compilação, erro de teste)
@@ -251,13 +251,13 @@ o fio.
 **Esperado** em brownfield grande. Opções:
 
 - Se erro é óbvio (typo, import faltando), corrija manualmente, commit, e rode
-  `/speckit.implement` de novo (vai continuar do próximo task).
-- Se erro é conceitual, volta a `/speckit.plan` ou `/speckit.tasks`, regenera,
-  rodeia `/speckit.implement` novamente.
+  `/nimbus-code.implement` de novo (vai continuar do próximo task).
+- Se erro é conceitual, volta a `/nimbus-code.plan` ou `/nimbus-code.tasks`, regenera,
+  rodeia `/nimbus-code.implement` novamente.
 
 Nunca force a conclusão se houver erro; converge vai pegar depois.
 
-### Problema: `/speckit.converge` acha muitos gaps mesmo depois de implement
+### Problema: `/nimbus-code.converge` acha muitos gaps mesmo depois de implement
 
 **Esperado** em brownfield. Gaps podem ser:
 
@@ -267,7 +267,7 @@ Nunca force a conclusão se houver erro; converge vai pegar depois.
   mais casos na prática).
 - Documentação faltando.
 
-Rode `/speckit.implement` novamente nas tarefas de gap, depois `/speckit.converge`
+Rode `/nimbus-code.implement` novamente nas tarefas de gap, depois `/nimbus-code.converge`
 de novo. Repita até converged.
 
 ## Referências
@@ -278,5 +278,5 @@ de novo. Repita até converged.
   workflow se compõem.
 - [`ai-code-quality-and-observability.md`](ai-code-quality-and-observability.md) —
   regras de qualidade que valem para todas as features (novo ou brownfield).
-- [Walkthrough oficial de brownfield do time do Spec Kit](https://github.com/mnriem/spec-kit-aspnet-brownfield-demo) —
+- [Walkthrough oficial de brownfield do time do Nimbus Code](https://github.com/mnriem/nimbus-code-aspnet-brownfield-demo) —
   demonstração real em ~307k linhas de C# .NET.

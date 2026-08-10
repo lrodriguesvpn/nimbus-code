@@ -1,4 +1,4 @@
-# Grafos de Módulos — Guia VPN Dev
+# Grafos de Módulos — Guia Nimbus-Code
 
 > **TL;DR** (S0/S1 — leitura completa reservada para S2+): todo `plan.md`
 > precisa de `specs/<feature>/graph.yaml` (fonte de verdade estruturada) +
@@ -8,7 +8,7 @@
 > criar/manter e para os templates prontos.
 
 Este documento explica o sistema de grafos de módulos obrigatórios do preset
-`vpndev-standards`: o que são, por que existem, como criar e como manter.
+`nimbus-code-standards`: o que são, por que existem, como criar e como manter.
 
 ## O que são os grafos de módulos?
 
@@ -34,7 +34,7 @@ Toda feature em `specs/<feature-slug>/` deve conter:
 | `impact-map.md` | S3, S4 | Análise de risco, dependências indiretas, rollback |
 
 Templates disponíveis em:
-`presets/vpndev-standards/templates/feature-artifacts/`
+`presets/nimbus-code-standards/templates/feature-artifacts/`
 
 ## Como criar os arquivos
 
@@ -43,10 +43,10 @@ Templates disponíveis em:
 ```bash
 FEATURE="minha-feature"
 mkdir -p specs/$FEATURE
-cp presets/vpndev-standards/templates/feature-artifacts/graph.yaml  specs/$FEATURE/
-cp presets/vpndev-standards/templates/feature-artifacts/graph.md    specs/$FEATURE/
+cp presets/nimbus-code-standards/templates/feature-artifacts/graph.yaml  specs/$FEATURE/
+cp presets/nimbus-code-standards/templates/feature-artifacts/graph.md    specs/$FEATURE/
 # Para S3/S4:
-cp presets/vpndev-standards/templates/feature-artifacts/impact-map.md specs/$FEATURE/
+cp presets/nimbus-code-standards/templates/feature-artifacts/impact-map.md specs/$FEATURE/
 ```
 
 ### 2. Preencher `graph.yaml`
@@ -204,8 +204,8 @@ Features S4 exigem:
 
 ## Referências
 
-- Templates: `presets/vpndev-standards/templates/feature-artifacts/`
-- Copilot Instructions template: `presets/vpndev-standards/templates/project-root/copilot-instructions.md`
+- Templates: `presets/nimbus-code-standards/templates/feature-artifacts/`
+- Copilot Instructions template: `presets/nimbus-code-standards/templates/project-root/copilot-instructions.md`
 - Graph Guard: `.github/workflows/graph-guard.yml`
 - Seleção de modelos S0–S4: [`docs/ai-code-quality-and-observability.md`](./ai-code-quality-and-observability.md#6-seleção-de-modelo-por-complexidade-s0s4)
-- Constituição VPN Dev: `presets/vpndev-standards/templates/constitution-template.md`
+- Constituição Nimbus-Code: `presets/nimbus-code-standards/templates/constitution-template.md`

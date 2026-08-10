@@ -1,0 +1,62 @@
+schema_version: "1.0"
+
+extension:
+  id: "nimbus-code-backlog-sync"
+  name: "Nimbus-Code — Sincronização de Backlog"
+  version: "1.1.1"
+  description: "Sincroniza specs/tasks do Nimbus Code com JIRA ou Azure DevOps via MCP, como complemento opcional ao fluxo nativo baseado em specs/."
+  category: "integration"
+  effect: "read-write"
+  author: "Nimbus-Code"
+  repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
+  license: "Proprietary"
+  homepage: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
+
+requires:
+  nimbus_code_version: ">=0.16.0"
+  # Declarativo/informativo: o Nimbus Code não instala nem gerencia servidores MCP.
+  # Este campo apenas avisa quem instala a extensão sobre a dependência externa —
+  # a configuração real do servidor MCP (ex.: em .vscode/mcp.json ou no host do
+  # agente) continua sendo responsabilidade de cada projeto/desenvolvedor.
+  mcp:
+    - "atlassian-rovo (JIRA) OU azure-devops (Boards)"
+
+provides:
+  commands:
+    - name: "speckit.nimbus-code-backlog-sync.sync"
+      file: "commands/sync.md"
+      description: "Cria/atualiza a User Story e as tarefas correspondentes no JIRA ou Azure DevOps a partir de specs/<feature>/spec.md e tasks.md"
+
+  config:
+    - name: "nimbus-code-backlog-sync-config.yml"
+      template: "config-template.yml"
+      description: "Ferramenta de backlog (jira|azure-devops), projeto/organização alvo e mapeamento de tipos de work item"
+      required: false
+
+hooks:
+  # Opcional por padrão: nem todo projeto da Nimbus-Code usa JIRA/Azure DevOps como
+  # backlog — quando não usar, o dev simplesmente recusa o hook e segue só com
+  # specs/ como fonte da verdade.
+  after_specify:
+    command: "speckit.nimbus-code-backlog-sync.sync"
+    optional: true
+    prompt: "Sincronizar esta spec com o backlog (JIRA/Azure DevOps) configurado?"
+    description: "Cria ou atualiza a User Story correspondente no backlog externo"
+
+  after_tasks:
+    command: "speckit.nimbus-code-backlog-sync.sync"
+    optional: true
+    prompt: "Sincronizar as tasks geradas com o backlog (JIRA/Azure DevOps) configurado?"
+    description: "Cria ou atualiza as tarefas filhas correspondentes no backlog externo"
+
+tags:
+  - "integration"
+  - "jira"
+  - "azure-devops"
+  - "backlog"
+  - "nimbus-code"
+
+defaults:
+  backlog:
+    tool: null # "jira" | "azure-devops" — definido em nimbus-code-backlog-sync-config.yml
+    create_parent_on_split: true

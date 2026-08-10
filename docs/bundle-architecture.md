@@ -10,20 +10,20 @@ que muda o `.yml` correspondente — ele não é gerado automaticamente.
 
 ## 1. Composição do bundle
 
-O `vpndev-project-bundle` não contém lógica própria: ele só **amarra três
+O `nimbus-code-project-bundle` não contém lógica própria: ele só **amarra três
 componentes independentes**, cada um publicado e versionado separadamente
-(ver [`bundle.yml`](../bundles/vpndev-project-bundle/bundle.yml)).
+(ver [`bundle.yml`](../bundles/nimbus-code-project-bundle/bundle.yml)).
 
 ```mermaid
 flowchart TB
-    subgraph BUNDLE["📦 bundle: vpndev-project-bundle (v1.0.0)"]
+    subgraph BUNDLE["📦 bundle: nimbus-code-project-bundle (v1.0.0)"]
         direction TB
-        PRESET["🧩 preset: vpndev-standards (v1.0.0)\nrole: governança/DevSecOps"]
-        EXT["🔌 extension: vpndev-backlog-sync (v1.0.0)\nrole: integração JIRA/Azure DevOps"]
-        WF["🔁 workflow: vpndev-full-cycle (v1.0.0)\nrole: orquestra o ciclo SDD"]
+        PRESET["🧩 preset: nimbus-code-standards (v1.0.0)\nrole: governança/DevSecOps"]
+        EXT["🔌 extension: nimbus-code-backlog-sync (v1.0.0)\nrole: integração JIRA/Azure DevOps"]
+        WF["🔁 workflow: nimbus-code-full-cycle (v1.0.0)\nrole: orquestra o ciclo SDD"]
     end
 
-    BUNDLE -->|"specify bundle install\nvpndev-project-bundle"| PROJ["📁 Projeto consumidor\n(specs/, .specify/, .github/)"]
+    BUNDLE -->|"specify bundle install\nnimbus-code-project-bundle"| PROJ["📁 Projeto consumidor\n(specs/, .specify/, .github/)"]
 
     PRESET -. "usado pelos steps plan/tasks" .-> WF
     EXT -. "hooks after_specify/after_tasks\nchamados pelos steps" .-> WF
@@ -38,28 +38,28 @@ workflow nas versões exatas pinadas no `bundle.yml` (nunca ranges — ver
 (templates alterados) e a extensão (hooks) em tempo de execução, mas os três
 são artefatos versionados de forma independente.
 
-## 2. Como o preset altera os templates nativos do Spec Kit
+## 2. Como o preset altera os templates nativos do Nimbus Code
 
-O preset `vpndev-standards` nunca substitui os templates do Spec Kit por
+O preset `nimbus-code-standards` nunca substitui os templates do Nimbus Code por
 inteiro — ele aplica duas estratégias diferentes, item por item (ver
-[`preset.yml`](../presets/vpndev-standards/preset.yml)):
+[`preset.yml`](../presets/nimbus-code-standards/preset.yml)):
 
 ```mermaid
 flowchart LR
-    subgraph NATIVO["Spec Kit nativo"]
+    subgraph NATIVO["Nimbus Code nativo"]
         CT["constitution-template.md"]
         PT["plan-template.md"]
         TT["tasks-template.md"]
     end
 
-    subgraph PRESET["preset vpndev-standards"]
+    subgraph PRESET["preset nimbus-code-standards"]
         CTP["constitution-template.md\n(wrap)"]
         PTP["plan-template.md\n(append)"]
         TTP["tasks-template.md\n(append)"]
     end
 
     CT -->|"strategy: wrap\n{CORE_TEMPLATE} preservado por baixo"| CTP
-    CTP --> CTOUT["constitution.md final\nprincípios VPN Dev + projeto"]
+    CTP --> CTOUT["constitution.md final\nprincípios Nimbus-Code + projeto"]
 
     PT -->|"strategy: append\nseções nativas intactas"| PTP
     PTP --> PTOUT["plan.md final\n+ Security/DevSecOps Gate\n+ Architecture Decision Log"]
@@ -70,27 +70,27 @@ flowchart LR
 
 **Leitura**: `wrap` envolve o conteúdo nativo (que continua existindo, só que
 "por dentro"); `append` só acrescenta seções novas ao final. Em nenhum caso o
-preset remove algo que o Spec Kit já oferece nativamente.
+preset remove algo que o Nimbus Code já oferece nativamente.
 
-## 3. Fluxo do workflow `vpndev-full-cycle`
+## 3. Fluxo do workflow `nimbus-code-full-cycle`
 
 Ciclo SDD completo com dois gates humanos explícitos, um deles específico de
-DevSecOps (ver [`workflow.yml`](../workflows/vpndev-full-cycle/workflow.yml)):
+DevSecOps (ver [`workflow.yml`](../workflows/nimbus-code-full-cycle/workflow.yml)):
 
 ```mermaid
 flowchart TD
-    START(["Início: inputs.spec"]) --> SPECIFY["speckit.specify"]
-    SPECIFY --> HOOK1{{"extensão vpndev-backlog-sync\nhook after_specify (opcional)"}}
+    START(["Início: inputs.spec"]) --> SPECIFY["nimbus-code.specify"]
+    SPECIFY --> HOOK1{{"extensão nimbus-code-backlog-sync\nhook after_specify (opcional)"}}
     HOOK1 --> GATE1{"Gate: review-spec\napprove/reject"}
     GATE1 -- reject --> ABORT1(["abort"])
-    GATE1 -- approve --> PLAN["speckit.plan\n(preset injeta Security/DevSecOps Gate\n+ Architecture Decision Log no plan.md)"]
+    GATE1 -- approve --> PLAN["nimbus-code.plan\n(preset injeta Security/DevSecOps Gate\n+ Architecture Decision Log no plan.md)"]
     PLAN --> GATE2{"Gate: devsecops-gate\nroteiro de implantação\navaliado e aprovado?"}
     GATE2 -- reject --> ABORT2(["abort"])
-    GATE2 -- approve --> TASKS["speckit.tasks\n(preset anexa checklist\nde qualidade infra/deploy)"]
-    TASKS --> HOOK2{{"extensão vpndev-backlog-sync\nhook after_tasks (opcional)"}}
+    GATE2 -- approve --> TASKS["nimbus-code.tasks\n(preset anexa checklist\nde qualidade infra/deploy)"]
+    TASKS --> HOOK2{{"extensão nimbus-code-backlog-sync\nhook after_tasks (opcional)"}}
     HOOK2 --> GATE3{"Gate: review-tasks\napprove/reject"}
     GATE3 -- reject --> ABORT3(["abort"])
-    GATE3 -- approve --> IMPLEMENT["speckit.implement"]
+    GATE3 -- approve --> IMPLEMENT["nimbus-code.implement"]
     IMPLEMENT --> END(["Fim"])
 
     style GATE1 fill:#ffd,stroke:#a90
@@ -102,7 +102,7 @@ flowchart TD
 **opcionais** — se o projeto não usa JIRA/Azure DevOps, o dev simplesmente
 recusa o prompt e o ciclo segue normalmente usando só `specs/` como fonte da
 verdade. O `devsecops-gate` (em vermelho) é o ponto que distingue este
-workflow do ciclo padrão do Spec Kit.
+workflow do ciclo padrão do Nimbus Code.
 
 ## 4. Instalação e política de atualização
 
@@ -117,7 +117,7 @@ sequenceDiagram
     Dev->>Boot: curl bootstrap.sh | bash
     Boot->>CLI: specify init (se necessário)
     Boot->>Repo: instala preset + extensão + workflow\n(versão mais recente da main)
-    Note over Dev,Repo: alternativa: specify bundle install<br/>vpndev-project-bundle (requer catálogos registrados)
+    Note over Dev,Repo: alternativa: specify bundle install<br/>nimbus-code-project-bundle (requer catálogos registrados)
 
     loop Semanalmente
         Repo->>Dev: issue automática (update-speckit-and-bundle.yml)\ncompara versão instalada vs. publicada
@@ -128,21 +128,21 @@ sequenceDiagram
 
 **Leitura**: a issue semanal **nunca aplica** a atualização sozinha — toda
 mudança de versão do bundle vira um PR revisado, seguindo a mesma política de
-aprovação formal usada para mudar a versão do próprio Spec Kit CLI (ver
+aprovação formal usada para mudar a versão do próprio Nimbus Code CLI (ver
 [Versão do Bundle em uso — Política de Atualização](../README.md#versão-do-bundle-em-uso--política-de-atualização)).
 
 ## 5. Ecossistema de MCP servers candidatos
 
-O Spec Kit **nunca instala** servidores MCP — `requires.mcp` é só um aviso em
+O Nimbus Code **nunca instala** servidores MCP — `requires.mcp` é só um aviso em
 texto na hora da instalação (ver
 [`docs/mcp-and-bundles.md`](mcp-and-bundles.md)). O diagrama abaixo situa a
 declaração atual da extensão (`atlassian-rovo`/`azure-devops`) ao lado de outros
 servidores MCP relevantes por plataforma, pesquisados como candidatos para
-futuras extensões da VPN Dev — nenhum deles provisionado pelo bundle:
+futuras extensões da Nimbus-Code — nenhum deles provisionado pelo bundle:
 
 ```mermaid
 flowchart LR
-    EXT["🔌 extension: vpndev-backlog-sync\nrequires.mcp (aviso informativo)"]
+    EXT["🔌 extension: nimbus-code-backlog-sync\nrequires.mcp (aviso informativo)"]
 
     subgraph HOJE["Declarado hoje"]
         JIRA["Atlassian Rovo (JIRA)"]

@@ -1,4 +1,4 @@
-# Architecture Decision Records (ADRs) — Guia VPN Dev
+# Architecture Decision Records (ADRs) — Guia Nimbus-Code
 
 ADRs capturam **por que** uma decisão técnica foi tomada, não apenas **o que**
 foi decidido. São a memória organizacional que evita rediscutir as mesmas
@@ -8,7 +8,7 @@ escolhas a cada nova feature ou novo membro do time.
 
 | Escopo | Localização |
 |---|---|
-| **Organizacional** (afeta múltiplos projetos da VPN Dev) | `docs/adr/` neste repositório (`nimbus-code-spec-kit-template`) |
+| **Organizacional** (afeta múltiplos projetos da Nimbus-Code) | `docs/adr/` neste repositório (`nimbus-code-spec-kit-template`) |
 | **De projeto** (afeta só um repositório) | `docs/adr/` no repositório do projeto |
 
 Regra de decisão: se a decisão *puder* afetar um segundo projeto no futuro,
@@ -31,7 +31,7 @@ Criar um ADR para qualquer decisão que:
 
 ## Fluxo de criação
 
-### 1. Durante /speckit-plan
+### 1. Durante /nimbus-code-plan
 
 O Architecture Decision Log do `plan.md` captura decisões **locais** da feature
 em uma tabela simples. Se a decisão tiver impacto organizacional, adicionar uma
@@ -44,7 +44,7 @@ linha na coluna "ADR" apontando para um novo arquivo.
 ls docs/adr/ | tail -1
 
 # Copie o template
-cp presets/vpndev-standards/templates/adr/NNNN-template.md \
+cp presets/nimbus-code-standards/templates/adr/NNNN-template.md \
    docs/adr/0042-mensageria-entre-servicos.md
 ```
 

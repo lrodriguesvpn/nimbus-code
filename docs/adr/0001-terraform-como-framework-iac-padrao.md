@@ -2,15 +2,15 @@
 
 - **Status:** Aceita
 - **Data:** 2024-01-01
-- **Autores:** @vpndev-platform-team
-- **Contexto:** Organizacional (todos os projetos VPN Dev em AWS, GCP e Azure)
-- **Revisores:** @vpndev-arch-board
+- **Autores:** @nimbus-code-platform-team
+- **Contexto:** Organizacional (todos os projetos Nimbus-Code em AWS, GCP e Azure)
+- **Revisores:** @nimbus-code-arch-board
 
 ---
 
 ## Contexto e Problema
 
-A VPN Dev opera em múltiplos provedores de nuvem (AWS, GCP e Azure). Sem um
+A Nimbus-Code opera em múltiplos provedores de nuvem (AWS, GCP e Azure). Sem um
 framework IaC padrão, cada time escolhia a ferramenta com que estava mais
 familiarizado: CDK em projetos AWS-only, Bicep em projetos Azure, YAML direto
 em GCP. Isso resultou em:
@@ -23,7 +23,7 @@ em GCP. Isso resultou em:
 ## Drivers de Decisão
 
 - Portabilidade: módulos de IaC reaproveitáveis entre AWS, GCP e Azure
-- Legibilidade: qualquer engenheiro da VPN Dev deve conseguir revisar um PR de IaC
+- Legibilidade: qualquer engenheiro da Nimbus-Code deve conseguir revisar um PR de IaC
 - Maturidade: suporte ativo, registry público, ecossistema de providers robusto
 - Integração com ferramentas de segurança: Checkov, tfsec, tflint têm suporte nativo
 
@@ -61,7 +61,7 @@ em GCP. Isso resultou em:
 ### Opção D — CDKTF
 
 - ✅ Combina expressividade de código com runtime Terraform
-- ❌ Adiciona uma camada de abstração sem ganho claro para o perfil da VPN Dev
+- ❌ Adiciona uma camada de abstração sem ganho claro para o perfil da Nimbus-Code
 - ❌ Comunidade menor, risco de suporte reduzido
 
 ## Decisão
@@ -78,7 +78,7 @@ do `plan.md` da feature que a introduziu.
 
 ### Positivas
 
-- Qualquer engenheiro da VPN Dev pode revisar IaC de qualquer projeto
+- Qualquer engenheiro da Nimbus-Code pode revisar IaC de qualquer projeto
 - Módulos Terraform compartilháveis via registry interno
 - Pipeline de segurança (Checkov + tflint) aplicado uniformemente
 

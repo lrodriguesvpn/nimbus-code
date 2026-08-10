@@ -12,7 +12,7 @@
 # única vez por organização, não por repositório.
 #
 # Uso:
-#   ./setup-pmo-org-project.sh --org venha-pra-nuvem [--project-title "VPN Dev — Portfólio PMO"]
+#   ./setup-pmo-org-project.sh --org venha-pra-nuvem [--project-title "Nimbus-Code — Portfólio PMO"]
 #
 # Requer um usuário com permissão de owner/admin na organização (criar
 # ProjectV2 a nível de organização exige isso) e `gh auth login --scopes project`.
@@ -59,7 +59,7 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 GH_HOST="${GH_HOST:-venha-pra-nuvem.ghe.com}"
-PROJECT_TITLE="VPN Dev — Portfólio PMO"
+PROJECT_TITLE="Nimbus-Code — Portfólio PMO"
 ORG=""
 
 while [[ $# -gt 0 ]]; do
@@ -85,7 +85,7 @@ if [[ -z "$ORG" ]]; then
 fi
 
 echo -e "${BLUE}═══════════════════════════════════════════════════════════════${NC}"
-echo -e "${BLUE}GitHub Project (Portfólio PMO) — Spec Kit${NC}"
+echo -e "${BLUE}GitHub Project (Portfólio PMO) — Nimbus Code${NC}"
 echo -e "${BLUE}═══════════════════════════════════════════════════════════════${NC}"
 echo -e "Organização: ${GREEN}${ORG}${NC}"
 echo -e "Título: ${PROJECT_TITLE}"

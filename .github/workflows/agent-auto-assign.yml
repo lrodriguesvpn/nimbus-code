@@ -22,10 +22,10 @@ name: Agent Auto-Assign — Desenvolvimento Autônomo por Label
 # Guardrails (ver docs/label-taxonomy-and-autonomous-dev.md):
 #   - NUNCA atribui se a issue também tiver o label `agent:needs-human`.
 #   - NUNCA atribui se a issue tiver `complexity:S4` (exige revisão humana
-#     por princípio da constituição VPN Dev — S4 nunca é 100% autônomo).
+#     por princípio da constituição Nimbus-Code — S4 nunca é 100% autônomo).
 #   - NUNCA atribui se a issue tiver `type:incident` (originada de ocorrência
 #     em produção/ambiente de cliente — exige revisão humana obrigatória,
-#     independente da complexidade S0–S4, por princípio da constituição VPN Dev).
+#     independente da complexidade S0–S4, por princípio da constituição Nimbus-Code).
 #   - NUNCA atribui se a issue já tiver algum assignee (evita reatribuir
 #     trabalho que já está em andamento, humano ou agente).
 #   - NUNCA atribui se a issue tiver `status:blocked`.
@@ -70,9 +70,9 @@ jobs:
           if echo ",$LABELS," | grep -q ",agent:needs-human,"; then
             SKIP="a issue tem agent:needs-human (exige humano no loop)"
           elif echo ",$LABELS," | grep -q ",complexity:S4,"; then
-            SKIP="a issue tem complexity:S4 (revisão humana obrigatória pela constituição VPN Dev)"
+            SKIP="a issue tem complexity:S4 (revisão humana obrigatória pela constituição Nimbus-Code)"
           elif echo ",$LABELS," | grep -q ",type:incident,"; then
-            SKIP="a issue tem type:incident (originada de ocorrência/produção — revisão humana obrigatória independente da complexidade, pela constituição VPN Dev)"
+            SKIP="a issue tem type:incident (originada de ocorrência/produção — revisão humana obrigatória independente da complexidade, pela constituição Nimbus-Code)"
           elif echo ",$LABELS," | grep -q ",status:blocked,"; then
             SKIP="a issue tem status:blocked"
           elif [[ -n "$ASSIGNEES" ]]; then
@@ -119,7 +119,7 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/assignees" \
             -f "assignees[]=copilot-swe-agent[bot]" \
-            -f "agent_assignment[custom_instructions]=Prioridade desta issue no backlog: ${{ steps.priority.outputs.value }}. Siga os gates obrigatórios do preset vpndev-standards (Security/DevSecOps Gate, Module Dependency Graph, SLO Gate) descritos em copilot-instructions.md antes de abrir o PR."
+            -f "agent_assignment[custom_instructions]=Prioridade desta issue no backlog: ${{ steps.priority.outputs.value }}. Siga os gates obrigatórios do preset nimbus-code-standards (Security/DevSecOps Gate, Module Dependency Graph, SLO Gate) descritos em copilot-instructions.md antes de abrir o PR."
 
       - name: Confirmar atribuição
         if: steps.guard.outputs.skip == ''

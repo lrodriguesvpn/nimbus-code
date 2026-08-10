@@ -5,11 +5,11 @@
 > padrões de governança e documentação) são propriedade exclusiva da **Venha Pra Nuvem**.
 > Cópia, redistribuição ou uso fora da organização são expressamente proibidos — ver
 > [`LICENSE`](LICENSE). Qualquer alteração em arquivos de padrão exige aprovação do
-> `@vpndev-arch-board` via Pull Request (ver [`.github/CODEOWNERS`](.github/CODEOWNERS)).
+> `@nimbus-code-arch-board` via Pull Request (ver [`.github/CODEOWNERS`](.github/CODEOWNERS)).
 
 Repositório-base do **NIMBUS CODE™ AI Delivery System** para bootstrap,
 templates, presets, workflows, catálogos e documentação operacional.
-Tecnicamente, ele continua sendo construído **sobre o GitHub Spec Kit** e
+Tecnicamente, ele continua sendo construído **sobre o GitHub Nimbus Code** e
 preserva os nomes operacionais do modelo (`specify`, `plan`, `tasks`,
 `implement`, `converge`) para que futuras atualizações do upstream possam ser
 absorvidas sem retrabalho conceitual.
@@ -26,16 +26,16 @@ absorvidas sem retrabalho conceitual.
 - **product/marketing repo** = como o NIMBUS CODE é apresentado e vendido.
 
 O **nome comercial do sistema** é **NIMBUS CODE™ AI Delivery System**. O
-**nome técnico base** continua sendo **Spec Kit**.
+**nome técnico base** continua sendo **Nimbus Code**.
 
 ## O que este repositório contém
 
 | Componente | Pasta | O que faz |
 |---|---|---|
-| **Preset** `vpndev-standards` | [`presets/vpndev-standards/`](presets/vpndev-standards/) | Injeta os princípios não-negociáveis da empresa na constituição (`wrap`) e acrescenta o Security/DevSecOps Gate + Architecture Decision Log ao `plan.md` e o checklist de qualidade ao `tasks.md` (`append`) — sem remover nada do Spec Kit nativo. |
-| **Extensão** `vpndev-backlog-sync` | [`extensions/vpndev-backlog-sync/`](extensions/vpndev-backlog-sync/) | Sincroniza specs/tasks com JIRA ou Azure DevOps via MCP, como hook opcional após `/speckit-specify` e `/speckit-tasks`. |
-| **Workflow** `vpndev-full-cycle` | [`workflows/vpndev-full-cycle/`](workflows/vpndev-full-cycle/) | Ciclo SDD completo com um gate explícito de DevSecOps entre `plan` e `tasks`. |
-| **Bundle** `vpndev-project-bundle` | [`bundles/vpndev-project-bundle/`](bundles/vpndev-project-bundle/) | Amarra as três peças acima numa "receita" instalável de uma vez, com versões pinadas. |
+| **Preset** `nimbus-code-standards` | [`presets/nimbus-code-standards/`](presets/nimbus-code-standards/) | Injeta os princípios não-negociáveis da empresa na constituição (`wrap`) e acrescenta o Security/DevSecOps Gate + Architecture Decision Log ao `plan.md` e o checklist de qualidade ao `tasks.md` (`append`) — sem remover nada do Nimbus Code nativo. |
+| **Extensão** `nimbus-code-backlog-sync` | [`extensions/nimbus-code-backlog-sync/`](extensions/nimbus-code-backlog-sync/) | Sincroniza specs/tasks com JIRA ou Azure DevOps via MCP, como hook opcional após `/nimbus-code-specify` e `/nimbus-code-tasks`. |
+| **Workflow** `nimbus-code-full-cycle` | [`workflows/nimbus-code-full-cycle/`](workflows/nimbus-code-full-cycle/) | Ciclo SDD completo com um gate explícito de DevSecOps entre `plan` e `tasks`. |
+| **Bundle** `nimbus-code-project-bundle` | [`bundles/nimbus-code-project-bundle/`](bundles/nimbus-code-project-bundle/) | Amarra as três peças acima numa "receita" instalável de uma vez, com versões pinadas. |
 
 Cada peça é independentemente versionada (SemVer) e pode ser instalada isolada —
 ver o README de cada pasta.
@@ -46,15 +46,15 @@ Se você está conduzindo a migração do nome do repositório ou atualizando
 projetos consumidores, veja também
 [`docs/repository-rename-migration.md`](docs/repository-rename-migration.md).
 
-Se você é dev e vai usar o Spec Kit no dia a dia (repo novo, repo existente
-sem Spec Kit, ou importar um card do Azure DevOps/JIRA para começar uma
+Se você é dev e vai usar o Nimbus Code no dia a dia (repo novo, repo existente
+sem Nimbus Code, ou importar um card do Azure DevOps/JIRA para começar uma
 feature), o documento central é
 [`docs/developer-guide.md`](docs/developer-guide.md) — cobre os três cenários
 passo a passo, com os prompts exatos a usar.
 
 ### 🔶 Brownfield: boas práticas, DOs e DONTs
 
-Se você está rodando Spec Kit em um **repositório já existente** (brownfield),
+Se você está rodando Nimbus Code em um **repositório já existente** (brownfield),
 leia **obrigatoriamente** [`docs/brownfield-best-practices.md`](docs/brownfield-best-practices.md)
 — é referência profunda sobre:
 
@@ -64,23 +64,23 @@ leia **obrigatoriamente** [`docs/brownfield-best-practices.md`](docs/brownfield-
 - Integração com backlog externo (Azure DevOps/JIRA).
 - Troubleshooting comum e estratégias de migração incremental.
 
-**TL;DR do brownfield**: sempre rode `/speckit.constitution` **antes** de qualquer
+**TL;DR do brownfield**: sempre rode `/nimbus-code.constitution` **antes** de qualquer
 feature (análise profunda do código existente é essencial); use
-`/speckit.converge` **sempre** após `implement`; aceite múltiplos passes e
+`/nimbus-code.converge` **sempre** após `implement`; aceite múltiplos passes e
 documentar exceções no Architecture Decision Log.
 
 ## Modelo visual do bundle
 
 ```mermaid
 flowchart TB
-    subgraph BUNDLE["📦 bundle: vpndev-project-bundle (v1.0.0)"]
+    subgraph BUNDLE["📦 bundle: nimbus-code-project-bundle (v1.0.0)"]
         direction TB
-        PRESET["🧩 preset: vpndev-standards (v1.0.0)\nrole: governança/DevSecOps"]
-        EXT["🔌 extension: vpndev-backlog-sync (v1.0.0)\nrole: integração JIRA/Azure DevOps"]
-        WF["🔁 workflow: vpndev-full-cycle (v1.0.0)\nrole: orquestra o ciclo SDD"]
+        PRESET["🧩 preset: nimbus-code-standards (v1.0.0)\nrole: governança/DevSecOps"]
+        EXT["🔌 extension: nimbus-code-backlog-sync (v1.0.0)\nrole: integração JIRA/Azure DevOps"]
+        WF["🔁 workflow: nimbus-code-full-cycle (v1.0.0)\nrole: orquestra o ciclo SDD"]
     end
 
-    BUNDLE -->|"specify bundle install\nvpndev-project-bundle"| PROJ["📁 Projeto consumidor\n(specs/, .specify/, .github/)"]
+    BUNDLE -->|"specify bundle install\nnimbus-code-project-bundle"| PROJ["📁 Projeto consumidor\n(specs/, .specify/, .github/)"]
 
     PRESET -. "usado pelos steps plan/tasks" .-> WF
     EXT -. "hooks after_specify/after_tasks\nchamados pelos steps" .-> WF
@@ -118,11 +118,11 @@ IOX-CROWDFUNDINGPAAS) e 2 campos customizados:
   modelo híbrido (agente + humano) e compor o custo real da tarefa (tokens do
   agente + horas humanas × taxa do perfil) — ver
   [`docs/ai-code-quality-and-observability.md`](docs/ai-code-quality-and-observability.md#8-modelo-híbrido-agentes-de-ia--humanos-codando-juntos)
-  e [`docs/cost-profiles-and-rates.md`](presets/vpndev-standards/templates/cost-profiles-and-rates.md)
+  e [`docs/cost-profiles-and-rates.md`](presets/nimbus-code-standards/templates/cost-profiles-and-rates.md)
 - **Campo "Oportunidade D365"** (texto) — cole a URL completa da Oportunidade
   no Dynamics 365 para vincular a issue/PR à venda/negócio de origem
 
-O project é criado com o nome `{repo-name} — Spec Kit Roadmap` e fica
+O project é criado com o nome `{repo-name} — Nimbus Code Roadmap` e fica
 imediatamente acessível para customize (adicionar/remover filtros, agrupar
 por campos, etc.).
 
@@ -193,18 +193,18 @@ Para criar/atualizar os labels manualmente em qualquer repositório:
 bash ./scripts/setup-github-labels.sh --repo-owner venha-pra-nuvem --repo-name meu-projeto
 ```
 
-### Bônus: verificação automática de atualização do Spec Kit/bundle
+### Bônus: verificação automática de atualização do Nimbus Code/bundle
 
 O `bootstrap.sh` também copia
 [`templates/workflows/update-speckit-and-bundle.yml`](templates/workflows/update-speckit-and-bundle.yml)
 para `.github/workflows/` do projeto consumidor. Esse workflow roda
 semanalmente + sob demanda e abre/atualiza uma issue avisando quando há uma
-versão mais nova do Spec Kit CLI ou do bundle — nunca aplica a atualização
+versão mais nova do Nimbus Code CLI ou do bundle — nunca aplica a atualização
 sozinho (ver [Versão do Bundle em uso — Política de Atualização](#versão-do-bundle-em-uso--política-de-atualização)).
 Requer o secret `VPNDEV_STANDARDS_READ_TOKEN` configurado no projeto
 consumidor.
 
-> **Nota sobre `specify bundle install`**: o CLI do Spec Kit resolve os
+> **Nota sobre `specify bundle install`**: o CLI do Nimbus Code resolve os
 > componentes de um bundle (`provides.presets/extensions/workflows`) **somente
 > através de um catálogo registrado** — o campo `source` do `bundle.yml` é só
 > metadado de proveniência, não um mecanismo de download. Por isso este repo
@@ -212,12 +212,12 @@ consumidor.
 > cada tipo (`presets/catalog.json`, `extensions/catalog.json`,
 > `workflows/catalog.json`, `bundles/catalog.json`). Depois de registrar os
 > catálogos uma vez (ver [Publicação e Catálogo](#publicação-e-catálogo)),
-> `specify bundle install vpndev-project-bundle` funciona como um comando único.
+> `specify bundle install nimbus-code-project-bundle` funciona como um comando único.
 
 ## Versão do Bundle em uso — Política de Atualização
 
 **A versão do bundle instalada em um projeto só muda mediante aprovação
-formal** — da mesma forma que a versão do próprio Spec Kit CLI. Isso existe
+formal** — da mesma forma que a versão do próprio Nimbus Code CLI. Isso existe
 para que nenhum projeto tenha seu `plan.md`/`constitution.md`/workflow
 alterados silenciosamente por uma atualização de política organizacional no
 meio de uma feature em andamento.
@@ -244,12 +244,12 @@ versão instalada — ver o modelo em
 
 ## Templates Reutilizáveis para Projetos Consumidores
 
-Este repositório fornece arquivos prontos para copiar em projetos que usam o Spec Kit:
+Este repositório fornece arquivos prontos para copiar em projetos que usam o Nimbus Code:
 
 | Template | Propósito | Onde copiar |
 |---|---|---|
 | [`templates/README-bundle-section.md`](templates/README-bundle-section.md) | Seção do README do projeto documentando versão do bundle | `README.md` do projeto (adapte para seu contexto) |
-| [`templates/BROWNFIELD-SETUP-CHECKLIST.md`](templates/BROWNFIELD-SETUP-CHECKLIST.md) | Checklist interativo para setup de Spec Kit em repo existente | `.specify/BROWNFIELD-SETUP-CHECKLIST.md` (brownfield) |
+| [`templates/BROWNFIELD-SETUP-CHECKLIST.md`](templates/BROWNFIELD-SETUP-CHECKLIST.md) | Checklist interativo para setup de Nimbus Code em repo existente | `.specify/BROWNFIELD-SETUP-CHECKLIST.md` (brownfield) |
 | [`templates/workflows/update-speckit-and-bundle.yml`](templates/workflows/update-speckit-and-bundle.yml) | GitHub Action automática para notificar atualizações do bundle | `.github/workflows/update-speckit-and-bundle.yml` (todos os projetos) |
 
 **Para brownfield especificamente**: depois de rodar `specify init` e o
@@ -262,7 +262,7 @@ git add .specify/BROWNFIELD-SETUP-CHECKLIST.md
 ```
 
 Depois, siga as fases do checklist como um roadmap de setup — lê-o enquanto trabalha
-com o Spec Kit. Após completado, o arquivo fica versionado como parte do histórico
+com o Nimbus Code. Após completado, o arquivo fica versionado como parte do histórico
 de decisões do projeto.
 
 ## Versionamento
@@ -270,11 +270,11 @@ de decisões do projeto.
 Cada componente (preset, extensão, workflow, bundle) segue
 [SemVer](https://semver.org/) de forma independente, mas o **bundle sempre pina
 versões exatas** dos componentes que referencia (nunca ranges) — para que
-`vpndev-project-bundle vX.Y.Z` seja sempre reproduzível.
+`nimbus-code-project-bundle vX.Y.Z` seja sempre reproduzível.
 
 Mudar qualquer arquivo em `presets/`, `extensions/` ou `workflows/` é uma
 **mudança de política organizacional**: requer PR revisado pelo time responsável
-pelos padrões da VPN Dev antes de publicar uma nova versão de bundle. Não é
+pelos padrões da Nimbus-Code antes de publicar uma nova versão de bundle. Não é
 uma decisão de projeto individual.
 
 ## Publicação e Catálogo
@@ -291,22 +291,22 @@ Para registrar os catálogos uma vez por projeto (ou uma vez por máquina, em
 ```bash
 specify preset catalog add \
   https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/presets/catalog.json \
-  --name vpndev --priority 5 --install-allowed
+  --name nimbus-code --priority 5 --install-allowed
 
 specify extension catalog add \
   https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/extensions/catalog.json \
-  --name vpndev --install-allowed
+  --name nimbus-code --install-allowed
 
 specify workflow catalog add \
   https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/workflows/catalog.json \
-  --name vpndev
+  --name nimbus-code
 
 specify bundle catalog add \
   https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bundles/catalog.json \
-  --id vpndev --priority 5 --policy install-allowed
+  --id nimbus-code --priority 5 --policy install-allowed
 ```
 
-Depois disso, `specify bundle install vpndev-project-bundle --integration copilot`
+Depois disso, `specify bundle install nimbus-code-project-bundle --integration copilot`
 funciona como um comando único, em qualquer diretório (novo ou existente).
 
 > ℹ️ **Este repositório é interno** (visível a todos os membros da organização
@@ -330,7 +330,7 @@ Ver análise completa em [`docs/extension-candidates.md`](docs/extension-candida
 
 ## MCP Servers no bundle?
 
-O Spec Kit **não instala nem gerencia** servidores MCP — o bundle/extensão só
+O Nimbus Code **não instala nem gerencia** servidores MCP — o bundle/extensão só
 pode **declarar** uma dependência informativa (`requires.mcp` em `extension.yml`),
 que aparece como aviso na instalação, mas não provisiona nada. Ver detalhes em
 [`docs/mcp-and-bundles.md`](docs/mcp-and-bundles.md), incluindo uma tabela de
@@ -342,10 +342,10 @@ deles instalado pelo bundle hoje.
 
 ```text
 nimbus-code-spec-kit-template/
-├── presets/vpndev-standards/           # preset.yml + templates/
-├── extensions/vpndev-backlog-sync/     # extension.yml + commands/
-├── workflows/vpndev-full-cycle/        # workflow.yml
-├── bundles/vpndev-project-bundle/      # bundle.yml
+├── presets/nimbus-code-standards/           # preset.yml + templates/
+├── extensions/nimbus-code-backlog-sync/     # extension.yml + commands/
+├── workflows/nimbus-code-full-cycle/        # workflow.yml
+├── bundles/nimbus-code-project-bundle/      # bundle.yml
 ├── scripts/
 │   ├── setup-github-project.sh         # cria GitHub Project V2 com views padrão
 │   └── setup-github-labels.sh          # cria/atualiza taxonomia de labels (priority/complexity/type/agent/status)

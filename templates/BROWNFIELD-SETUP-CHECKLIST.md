@@ -6,7 +6,7 @@
   Instruções:
   1. Copie este arquivo para: .specify/BROWNFIELD-SETUP-CHECKLIST.md
   2. Preencha os espaços [PLACEHOLDER] com valores do seu projeto
-  3. Use este checklist como guia para o primeiro ciclo Spec Kit num repo existente
+  3. Use este checklist como guia para o primeiro ciclo Nimbus Code num repo existente
   4. Após completado, deixe este arquivo versionado no git como parte do histórico de setup
   
   Referência completa: https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/docs/brownfield-best-practices.md
@@ -20,16 +20,16 @@ Status: ⏳ Em andamento
 
 ---
 
-## Fase 1: Instalação do Spec Kit
+## Fase 1: Instalação do Nimbus Code
 
-- [ ] Spec Kit CLI (`specify`) instalado localmente e validado com `specify check`
+- [ ] Nimbus Code CLI (`specify`) instalado localmente e validado com `specify check`
 - [ ] Repositório clonado em `[PLACEHOLDER: caminho local]`
 - [ ] Executado: `cd [PLACEHOLDER: caminho] && specify init --here --integration copilot --force`
 - [ ] Executado: `curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bootstrap.sh | bash`
 - [ ] GitHub Project V2 criado automaticamente pelo bootstrap (URL: [PLACEHOLDER: link do project])
 - [ ] GitHub Project customizado conforme necessário (filtros, grupos, colunas)
 - [ ] `.specify/` adicionado ao `.gitignore`? (se necessário) — ou, preferência: versione `.specify/features/`, ignore `.specify/memory/`
-- [ ] README do projeto atualizado com a seção de Spec Kit (copie de [`templates/README-bundle-section.md`](../../templates/README-bundle-section.md))
+- [ ] README do projeto atualizado com a seção de Nimbus Code (copie de [`templates/README-bundle-section.md`](../../templates/README-bundle-section.md))
 
 ## Fase 2: Análise do Código Existente (Derivar a Constituição)
 
@@ -39,7 +39,7 @@ Status: ⏳ Em andamento
   - [ ] Padrões de testes observados: [PLACEHOLDER: ex.: pytest, Jest, GoTest]
   - [ ] Estrutura de módulos/pacotes: [PLACEHOLDER: ex.: monorepo, mono package, microserviços]
 
-- [ ] Executado `/speckit.constitution` com o prompt de análise profunda (seção 2.3 do [developer-guide.md](../../docs/developer-guide.md))
+- [ ] Executado `/nimbus-code.constitution` com o prompt de análise profunda (seção 2.3 do [developer-guide.md](../../docs/developer-guide.md))
 - [ ] Agente completou múltiplas iterações de análise (quantas: [PLACEHOLDER: 1-5])
 - [ ] `constitution.md` gerado e revisado
 - [ ] Ajustes manuais aplicados em `constitution.md`, se necessário (escreva resumo abaixo se sim)
@@ -60,22 +60,22 @@ Status: ⏳ Em andamento
     [PLACEHOLDER: card ID, título, status]
     ```
 
-## Fase 4: Primeira Feature com Spec Kit
+## Fase 4: Primeira Feature com Nimbus Code
 
 - [ ] Feature/card escolhido: [PLACEHOLDER: ex.: "PROJ-123 — Add user role management"]
-- [ ] Executado `/speckit.specify` (com contexto de cards/constituição)
+- [ ] Executado `/nimbus-code.specify` (com contexto de cards/constituição)
 - [ ] `spec.md` gerado e revisado
-- [ ] Executado `/speckit.plan` e revisado `plan.md`
+- [ ] Executado `/nimbus-code.plan` e revisado `plan.md`
   - [ ] Architecture Decision Log incluído com decisões-chave?
-- [ ] Executado `/speckit.tasks` e revisado `tasks.md`
+- [ ] Executado `/nimbus-code.tasks` e revisado `tasks.md`
   - [ ] Tarefas estão em ordem de dependência?
   - [ ] Checklist de qualidade do preset incluído?
   - [ ] Itens de IaC obrigatório incluídos?
 
-- [ ] Executado `/speckit.implement` — primeiras tarefas completadas
+- [ ] Executado `/nimbus-code.implement` — primeiras tarefas completadas
   - [ ] Quantos passes foram necessários? [PLACEHOLDER: 1-5]
   - [ ] Houve erros de compilação/teste? [PLACEHOLDER: Sim/Não — descreva se sim]
-- [ ] Executado `/speckit.converge` — gaps identificados
+- [ ] Executado `/nimbus-code.converge` — gaps identificados
   - [ ] Quantos gaps novos foram anexados? [PLACEHOLDER: número]
   - [ ] Natureza dos gaps (ex.: testes faltando, docs, edge cases): [PLACEHOLDER: resumo]
 
@@ -96,7 +96,7 @@ Status: ⏳ Em andamento
 ## Aprendizados e Observações
 
 Use esta seção para anotar o que foi aprendido durante o setup, armadilhas encontradas,
-ou notas para o próximo desenvolvedor que trabalhar neste projeto com Spec Kit.
+ou notas para o próximo desenvolvedor que trabalhar neste projeto com Nimbus Code.
 
 ```
 [PLACEHOLDER: notas de equipe]
@@ -111,12 +111,12 @@ Exemplo:
 
 ## Próximas Features
 
-Após este setup, o próximo ciclo de Spec Kit será:
+Após este setup, o próximo ciclo de Nimbus Code será:
 
 1. Nova branch: `git checkout -b feature/[ID]-[descrição]`
-2. `/speckit.specify` (usando contexto já aprendido em `constitution.md`)
-3. `/speckit.plan` → `/speckit.tasks`
-4. `/speckit.implement` → `/speckit.converge` (ciclos até ✅)
+2. `/nimbus-code.specify` (usando contexto já aprendido em `constitution.md`)
+3. `/nimbus-code.plan` → `/nimbus-code.tasks`
+4. `/nimbus-code.implement` → `/nimbus-code.converge` (ciclos até ✅)
 5. PR → Merge
 
 Ver [`docs/developer-guide.md`](../../docs/developer-guide.md) seção 3 para o passo a passo de importação de card, se aplicável.

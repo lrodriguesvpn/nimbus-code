@@ -1,0 +1,137 @@
+schema_version: "1.0"
+
+workflow:
+  id: "nimbus-code-full-cycle"
+  name: "Nimbus-Code — Ciclo Completo com Gate DevSecOps"
+  version: "1.3.0"
+  author: "Nimbus-Code"
+  description: >
+    Ciclo SDD completo (discovery → specify → plan → tasks → implement → converge)
+    com gates de DevSecOps, grafo de módulos, release strategy e convergência
+    pós-implementação. Branch criado APENAS na fase implement — as fases
+    discovery/specify/plan/tasks são artefatos de planejamento sem branch.
+
+requires:
+  nimbus_code_version: ">=0.16.0"
+  integrations:
+    any:
+      - "copilot"
+
+inputs:
+  spec:
+    type: string
+    required: true
+    prompt: "Descreva o que você quer construir"
+  integration:
+    type: string
+    default: "auto"
+    prompt: "Integração a usar ('auto' usa a integração já inicializada no projeto)"
+
+# ────────────────────────────────────────────────────────────────────────────
+# FASES SEM BRANCH (planejamento — sem commit, sem branch, sem PR)
+# ────────────────────────────────────────────────────────────────────────────
+
+steps:
+  - id: discovery
+    type: note
+    message: |
+      FASE: Discovery — sem branch.
+      Esta fase produz entendimento do problema, não artefatos de código.
+      Nenhum branch deve ser criado aqui.
+
+  - id: specify
+    command: nimbus-code.specify
+    integration: "{{ inputs.integration }}"
+    input:
+      args: "{{ inputs.spec }}"
+    note: "Sem branch — gera specs/<feature>/spec.md apenas."
+
+  - id: review-spec
+    type: gate
+    message: "Revisar a spec gerada antes de planejar. Ainda sem branch."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: plan
+    command: nimbus-code.plan
+    integration: "{{ inputs.integration }}"
+    input:
+      args: "{{ inputs.spec }}"
+    note: "Sem branch — gera specs/<feature>/plan.md apenas."
+
+  - id: devsecops-gate
+    type: gate
+    message: "Roteiro de implantação e avaliação DevSecOps (seção 'Nimbus-Code — Security & DevSecOps Gate' do plan.md, preenchida via /devops-planning ou manualmente) foram revisados e aprovados?"
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: graph-gate
+    type: gate
+    message: |
+      Grafo de módulos obrigatório:
+      - specs/<feature>/graph.yaml existe e está atualizado?
+      - specs/<feature>/graph.md existe e está atualizado?
+      - Para S3/S4: specs/<feature>/impact-map.md existe?
+      - Complexidade da feature foi classificada (S0–S4) no plan.md?
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: tasks
+    command: nimbus-code.tasks
+    integration: "{{ inputs.integration }}"
+    note: "Sem branch — gera specs/<feature>/tasks.md apenas."
+
+  - id: review-tasks
+    type: gate
+    message: |
+      Revisar as tasks geradas (incluindo o checklist de qualidade de
+      infraestrutura/deploy anexado pelo preset nimbus-code-standards) antes
+      de implementar.
+      ATENÇÃO: apenas após esta aprovação o agente criará o branch de implementação.
+    options: [approve, reject]
+    on_reject: abort
+
+# ────────────────────────────────────────────────────────────────────────────
+# FASE COM BRANCH (implementação — branch criado aqui)
+# ────────────────────────────────────────────────────────────────────────────
+
+  - id: create-branch
+    type: note
+    message: |
+      FASE: Implement — branch criado agora.
+      O agente deve criar o branch feature/fase-{N}-{slug} antes de iniciar
+      qualquer commit. Nenhum código foi alterado antes deste ponto.
+
+  - id: implement
+    command: nimbus-code.implement
+    integration: "{{ inputs.integration }}"
+    note: "Branch criado aqui — feature/fase-{N}-{slug} → develop."
+
+  - id: converge
+    command: nimbus-code.converge
+    integration: "{{ inputs.integration }}"
+    description: |
+      Compara o código implementado com spec.md, plan.md e tasks.md.
+      Detecta divergências, critérios de aceitação não cobertos e novas
+      decisões técnicas tomadas durante a implementação que precisam ser
+      registradas.
+
+  - id: converge-gate
+    type: gate
+    message: |
+      Pós-implementação — verificar antes de abrir o PR:
+      - Todas as divergências identificadas pelo converge foram resolvidas
+        ou documentadas no Architecture Decision Log do plan.md?
+      - graph.yaml e graph.md refletem o estado REAL do código implementado
+        (não apenas o planejado)?
+      - Para S3/S4: impact-map.md foi atualizado com os riscos descobertos
+        durante a implementação?
+      - SLOs medidos em staging estão dentro dos limites definidos no plan.md?
+      - Feature flags criadas têm critério de remoção documentado?
+    options: [approve, reject]
+    on_reject: abort
+
+tags:
+  - "sdd"
+  - "devsecops"
+  - "nimbus-code"

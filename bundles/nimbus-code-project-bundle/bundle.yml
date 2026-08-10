@@ -1,0 +1,48 @@
+schema_version: "1.0"
+
+bundle:
+  id: "nimbus-code-project-bundle"
+  name: "Nimbus-Code — Modelo de Projeto"
+  version: "1.5.4"
+  role: "all"
+  description: "Bundle de bootstrap para novos repositórios da Nimbus-Code: aplica o preset de governança/DevSecOps (incluindo grafos de módulos obrigatórios, escala S0–S4 com estimativa de tokens, catálogo de reuso de conteúdo para reduzir custo de tokens, taxonomia de labels de priorização/desenvolvimento autônomo/DORA/incidente, modelo híbrido humano+agente com perfis de custo padrão, GitHub Project por repositório garantido continuamente com campos de Horas Humanas/Oportunidade D365, e Portfólio PMO consolidado entre repositórios), a extensão de sincronização de backlog e o workflow de ciclo completo com gate de segurança."
+  author: "Nimbus-Code"
+  license: "Proprietary"
+
+requires:
+  nimbus_code_version: ">=0.16.0"
+
+provides:
+  presets:
+    - id: "nimbus-code-standards"
+      version: "1.5.2"
+      source: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
+      priority: 5
+      strategy: "wrap"
+
+  extensions:
+    - id: "nimbus-code-backlog-sync"
+      version: "1.1.1"
+      source: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
+
+  workflows:
+    - id: "nimbus-code-full-cycle"
+      version: "1.2.0"
+      source: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
+
+tags:
+  - "nimbus-code"
+  - "governance"
+  - "bootstrap"
+  - "module-graph"
+  - "complexity-scale"
+  - "labels"
+  - "prioritization"
+  - "autonomous-development"
+  - "token-estimation"
+  - "dora-metrics"
+  - "finops"
+  - "pmo-portfolio"
+  - "incident-management"
+  - "d365"
+  - "reuse-catalog"

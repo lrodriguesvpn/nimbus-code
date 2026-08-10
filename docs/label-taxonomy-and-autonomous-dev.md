@@ -9,7 +9,7 @@
 > automação. Ver seções abaixo para o detalhamento e os guardrails do
 > workflow de auto-assign.
 
-Este documento descreve a taxonomia padrão de labels do bundle VPN Dev, criada
+Este documento descreve a taxonomia padrão de labels do bundle Nimbus-Code, criada
 via [`scripts/setup-github-labels.sh`](../scripts/setup-github-labels.sh), e
 como ela é usada para (1) **priorizar e ordenar** issues/PRs no backlog e (2)
 decidir quais issues são candidatas a **desenvolvimento autônomo** por agente
@@ -22,7 +22,7 @@ Nasce junto com todo projeto novo que roda `bootstrap.sh` (ver
 
 ## 1. Por que um processo de labels formal?
 
-Sem uma taxonomia compartilhada, cada projeto da VPN Dev acaba reinventando (ou
+Sem uma taxonomia compartilhada, cada projeto da Nimbus-Code acaba reinventando (ou
 não tendo) uma forma consistente de responder a duas perguntas recorrentes:
 
 1. **Em que ordem o time (humano ou agente) deve puxar o próximo item do
@@ -81,10 +81,10 @@ acompanhar cada etapa) quando:
 
 - Tem o label `agent:autonomous-ok` **e**
 - **Não** tem `agent:needs-human` **e**
-- **Não** tem `complexity:S4` (regra da constituição VPN Dev: S4 sempre exige
+- **Não** tem `complexity:S4` (regra da constituição Nimbus-Code: S4 sempre exige
   revisão humana, nunca é autônomo — ver
-  [`constitution-template.md`](../presets/vpndev-standards/templates/constitution-template.md)) **e**
-- **Não** tem `type:incident` (regra da constituição VPN Dev: issues originadas
+  [`constitution-template.md`](../presets/nimbus-code-standards/templates/constitution-template.md)) **e**
+- **Não** tem `type:incident` (regra da constituição Nimbus-Code: issues originadas
   de ocorrência em produção/ambiente de cliente sempre exigem revisão humana,
   independente da complexidade S0–S4 — ver seção 6) **e**
 - **Não** tem `status:blocked` **e**
@@ -134,7 +134,7 @@ passo de configuração.
 Isso não é uma decisão do workflow — é a aplicação técnica de uma regra que já
 existe na constituição do preset (`Features S4 exigem label complexity:S4 no
 PR e revisão humana`, ver
-[`constitution-template.md`](../presets/vpndev-standards/templates/constitution-template.md)).
+[`constitution-template.md`](../presets/nimbus-code-standards/templates/constitution-template.md)).
 O workflow apenas garante que essa regra não pode ser contornada
 acidentalmente aplicando `agent:autonomous-ok` numa issue S4.
 
@@ -188,7 +188,7 @@ e dashboards que correlacionem issues fechadas com os **4 indicadores DORA**
 
 Times que hoje gerenciam atendimento inicial (N1) de ocorrências num CRM (ex.:
 Dynamics 365) e querem trazer o trabalho de infraestrutura resultante para o
-Spec Kit seguem este fluxo:
+Nimbus Code seguem este fluxo:
 
 ```mermaid
 flowchart LR
@@ -224,7 +224,7 @@ algo que provavelmente vai se repetir se não for corrigido na causa raiz),
   (e então também exige `graph.yaml`/`graph.md`, e S3/S4 exige `impact-map.md`).
 
 **Infraestrutura sem Terraform (ou sem IaC formal):** isso não é bloqueio
-para usar o Spec Kit. A classificação S0–S4, o Module Dependency Graph e o
+para usar o Nimbus Code. A classificação S0–S4, o Module Dependency Graph e o
 `impact-map.md` (S3/S4) não presumem nenhuma ferramenta específica de IaC —
 o `impact-map.md` fica, na verdade, **mais crítico** quando não há
 `terraform plan` como rede de segurança, pois passa a ser o único artefato
@@ -289,7 +289,7 @@ Antes de habilitar `agent-auto-assign.yml` num repositório:
   gestão de bugs e atribuição ao Copilot (contexto mais amplo).
 - [`module-graphs.md`](module-graphs.md) — por que `complexity:S4` exige
   `impact-map.md` e revisão humana.
-- [`constitution-template.md`](../presets/vpndev-standards/templates/constitution-template.md) —
+- [`constitution-template.md`](../presets/nimbus-code-standards/templates/constitution-template.md) —
   a regra organizacional da qual a guardrail de S4 deste workflow deriva.
 - [`developer-guide.md`](developer-guide.md) — manual do dev, cenários de uso
   ponta a ponta.
