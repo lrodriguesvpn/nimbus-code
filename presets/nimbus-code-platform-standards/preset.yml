@@ -10,7 +10,7 @@ preset:
   license: "Proprietary"
 
 requires:
-  nimbus_code_version: ">=0.16.0"
+  speckit_version: ">=0.16.0"
 
 provides:
   templates:

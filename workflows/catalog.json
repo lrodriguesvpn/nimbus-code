@@ -13,7 +13,7 @@
       "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template",
       "license": "Proprietary",
       "requires": {
-        "nimbus_code_version": ">=0.16.0"
+        "speckit_version": ">=0.16.0"
       },
       "tags": [
         "sdd",

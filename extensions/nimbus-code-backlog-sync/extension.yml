@@ -13,7 +13,7 @@ extension:
   homepage: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
 
 requires:
-  nimbus_code_version: ">=0.16.0"
+  speckit_version: ">=0.16.0"
   # Declarativo/informativo: o Nimbus Code não instala nem gerencia servidores MCP.
   # Este campo apenas avisa quem instala a extensão sobre a dependência externa —
   # a configuração real do servidor MCP (ex.: em .vscode/mcp.json ou no host do

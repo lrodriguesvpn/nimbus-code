@@ -12,7 +12,7 @@ workflow:
     discovery/specify/plan/tasks são artefatos de planejamento sem branch.
 
 requires:
-  nimbus_code_version: ">=0.16.0"
+  speckit_version: ">=0.16.0"
   integrations:
     any:
       - "copilot"
