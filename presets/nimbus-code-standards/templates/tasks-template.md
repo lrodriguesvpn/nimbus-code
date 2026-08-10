@@ -34,6 +34,15 @@ relevante ao artefato entregue pela tarefa.*
       foram corrigidos aqui foram abertos como Issue no GitHub e atribuídos ao
       Copilot coding agent
 
+- [ ] Se esta feature introduziu um padrão reaproveitável (não específico só dela),
+      uma entrada foi adicionada ao `docs/reuse-catalog.yaml` com `tag`,
+      `bounded_context`, `description` e `source` — ver checklist de fechamento
+      acima e `docs/ai-code-quality-and-observability.md`, seção 9
+- [ ] `retro-template.md` preenchido em `specs/<feature-slug>/retro.md` quando
+      a implementação divergiu do plano (grafo mudou, SLO não atingido, bug
+      inesperado encontrado) — ver template em
+      `presets/nimbus-code-standards/templates/feature-artifacts/retro-template.md`
+
 ## Nimbus-Code — Métricas de Branches e Saúde do Repositório (PMO)
 
 *Preencher semanalmente pelo Dev responsável pelo repositório. Métrica de

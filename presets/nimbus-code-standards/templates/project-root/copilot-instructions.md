@@ -43,6 +43,7 @@ Branch: feature/fase-{N}-{slug}
 Arquivos em escopo: {lista}
 Complexidade desta tarefa: S{N} — {justificativa breve}
 Modelo selecionado: {modelo}
+Bounded Context: {slug de docs/bounded-contexts.yaml — verificar antes de preencher}
 Padrão reutilizado encontrado (docs/reuse-catalog.yaml)? Sim (tag: {tag}) / Não
 Estimativa de tokens (input+output): ~{X}–{Y} mil tokens
 ```
@@ -98,12 +99,11 @@ no `constitution.md` do projeto ou no ADL.
 
 ### Regras de escalonamento
 
-- **S0 e S1**: use sempre o modelo mais rápido disponível (Auto ou modo inline). Não solicite reasoning.
-- **S2**: use Auto. Se encontrar ambiguidade arquitetural, escale para S3 e documente no ADL.
-- **S3**: ative reasoning. Documente a decisão no Architecture Decision Log do `plan.md`.
-  Atualize `graph.yaml` e `graph.md` antes de implementar.
-- **S4**: use o modelo mais forte disponível. **Requerer revisão humana no PR é obrigatório**
-  (não opcional). Criar `impact-map.md`. Sinalizar no PR com label `complexity:S4`.
+- **S0 e S1**: use sempre o modelo mais rápido disponível (Auto ou modo inline). Não solicite reasoning. **Execute e abra PR diretamente.**
+- **S2**: use Auto. Apresente a estrutura de módulos proposta antes de implementar — aguarde confirmação do Dev. Se encontrar ambiguidade arquitetural, escale para S3 e documente no ADL.
+- **S3**: ative reasoning. Apresente design detalhado (módulos, dependências, estratégia de release) e aguarde aprovação explícita antes de escrever código. Documente no Architecture Decision Log do `plan.md`. Atualize `graph.yaml` e `graph.md` antes de implementar.
+- **S4**: use o modelo mais forte disponível. **Entregue somente o plano** (`plan.md` completo + `impact-map.md`) — não escreva código sem aprovação humana explícita. **Requerer revisão humana no PR é obrigatório** (não opcional). Sinalizar no PR com label `complexity:S4`.
+- **Escalonamento ativo**: se durante a execução de um nível menor você descobrir que a tarefa é na verdade S3 ou S4, **pare imediatamente**, reclassifique e informe o Dev — nunca continue silenciosamente num nível errado.
 
 ---
 
@@ -152,6 +152,12 @@ humana constante. Instalada via `scripts/setup-github-labels.sh`.
 ---
 
 ## Catálogo de Reuso (Reduzindo Custo de Tokens)
+
+> **Passo obrigatório antes de qualquer `/nimbus-code-plan`**: consulte
+> `docs/reuse-catalog.yaml` buscando por tags relacionadas ao domínio da
+> feature. **Se encontrar match, declare-o na tabela de Classificação de
+> Complexidade do `plan.md`** (campo "Padrão reutilizado encontrado?") e
+> referencie por ponteiro — nunca re-derive ou re-explique a solução do zero.
 
 - Antes de desenhar a solução de uma feature nova, **consulte
   `docs/reuse-catalog.yaml`** por tags relacionadas ao problema — se houver

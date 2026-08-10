@@ -203,6 +203,40 @@
   correspondente.
 - Template e guia em [`docs/adr-guide.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/adr-guide.md).
 
+## Bounded Contexts
+
+- Todo projeto mantém um arquivo `docs/bounded-contexts.yaml` (instalado pelo
+  `bootstrap.sh` via template) com a lista oficial dos bounded contexts —
+  slugs em kebab-case, cada um com descrição, owner e repositórios associados.
+- Ao preencher o campo "Bounded Context" em qualquer `spec.md`, o Dev ou agente
+  **deve usar um slug desta lista**. Usar um nome não listado exige adicionar
+  a entrada ao arquivo primeiro (via PR), não improvsar um nome ad-hoc.
+- Bounded contexts novos têm impacto organizacional: a adição de um novo slug
+  deve ser registrada no Architecture Decision Log do `plan.md` ou em um ADR
+  dedicado em `docs/adr/`.
+- O agente verifica o arquivo antes de propor o preenchimento do campo
+  "Bounded Context" — se não encontrar match, informa o Dev e propõe a adição
+  em vez de usar um nome inventado.
+
+## Modo de Operação do Agente por Complexidade (S0–S4)
+
+*Regras de comportamento do agente Copilot de acordo com o nível de complexidade
+da tarefa — complementam a escala S0–S4 da Constituição com expectativas
+operacionais concretas.*
+
+| Nível | Modo do agente | O agente deve… | O agente **não deve**… |
+|---|---|---|---|
+| **S0** | Autônomo direto | Executar e abrir PR sem pedir confirmação intermediária | Solicitar aprovação de estrutura antes de agir |
+| **S1** | Autônomo direto | Executar e abrir PR sem pedir confirmação intermediária | Solicitar aprovação de estrutura antes de agir |
+| **S2** | Autônomo com proposta | Apresentar a estrutura de módulos proposta antes de implementar; aguardar "ok" do Dev antes de escrever código | Implementar sem exibir o design de alto nível primeiro |
+| **S3** | Proposta + reasoning | Apresentar design detalhado (módulos, dependências, estratégia de release) e aguardar aprovação explícita; usar modelo de reasoning | Começar a implementação sem aprovação do design |
+| **S4** | Plano apenas | Entregar **somente o plano** (`plan.md` completo + `impact-map.md`) para revisão humana; **não escrever código** sem aprovação explícita do Dev | Escrever qualquer linha de código antes de aprovação; nunca merge direto |
+
+> **Regra de escalonamento**: se durante a execução de um nível menor o agente
+> descobrir que a tarefa é na verdade S3 ou S4 (ex.: módulo novo tem dependência
+> não prevista com serviço de autenticação), ele **para imediatamente**, reclassifica
+> a tarefa e informa o Dev — nunca continua silenciosamente num nível errado.
+
 ## Sessões de Agente, Branches e Isolamento de Código
 
 - **1 agente = 1 branch = 1 fase = conjunto fechado de arquivos**: nunca dois

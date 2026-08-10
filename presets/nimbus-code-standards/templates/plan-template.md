@@ -28,6 +28,21 @@ nível de revisão exigido.*
 > Consumo Real de Tokens"). Não é um compromisso exato — é uma faixa para
 > permitir comparar depois.
 
+## Nimbus-Code — Rastreabilidade AC → Teste → Módulo
+
+*Preencher antes de `/nimbus-code-tasks`. Cada critério de aceitação do `spec.md`
+deve ter ao menos um teste de integração planejado e o módulo que o implementa
+identificado — assim o Dev entra no `/nimbus-code-implement` sem surpresas.*
+
+| ID AC | Critério (resumo) | Tipo de teste planejado | Arquivo/módulo do teste | Justificativa de ausência (se N/A) |
+|---|---|---|---|---|
+| AC-1 | [resumo do critério] | integração / unitário / e2e | `tests/<caminho>` | — |
+| AC-2 | [resumo do critério] | integração / unitário / e2e | `tests/<caminho>` | — |
+
+> Linha com **Tipo: N/A** exige justificativa explícita (ex.: dependência externa
+> indisponível em CI). Critérios sem entrada nesta tabela são tratados como sem
+> cobertura — o Qualidade Gate bloqueará o `plan.md`.
+
 ## Nimbus-Code — Module Dependency Graph
 
 *OBRIGATÓRIO — deve estar presente e atualizado antes de `/nimbus-code-tasks`.
