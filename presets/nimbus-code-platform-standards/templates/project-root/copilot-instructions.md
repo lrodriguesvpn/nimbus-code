@@ -83,6 +83,24 @@ estado real confirmado com diff-zero. Nenhum artefato em `landing-zone/` executa
 - Se receber uma tarefa pedindo configurar credenciais de escrita neste repositório:
   **pare e sinalize** — isso viola a Regra de Ouro.
 
+## Regra: nunca impor uma decisão de arquitetura silenciosamente
+
+Ao planejar (`/nimbus-code-plan`), se você (agente) identificar que uma decisão —
+sua ou do usuário — diverge do padrão institucional deste preset, **não
+implemente a preferência silenciosamente em nenhuma direção**:
+
+1. Documente a divergência no Architecture Decision Log do `plan.md`.
+2. Explique objetivamente por que considera a decisão fora do padrão.
+3. Verifique a tabela do Gate de Não-Negociáveis: se o item está marcado
+   **"Não-Negociável"** (ex.: backup do estado original, nunca aplicar
+   mudança direta, credencial de escrita, schema sem dado real, remediação
+   automática de drift), não há exceção possível — pare e informe que o
+   controle precisa existir de fato. Se está marcado **"Escapável via ADL"**
+   (ex.: firewall/segmentação, IaC não-Terraform, prazo de regularização), o
+   usuário pode manter a decisão fora do padrão, mas você deve pedir
+   explicitamente a justificativa e registrar quem aprovou.
+- Lista completa: `docs/ai-code-quality-and-observability.md`, seção 11.
+
 ## Antes de Fechar Qualquer Tarefa
 
 1. Confirme que nenhum comando de escrita foi executado contra o ambiente real.

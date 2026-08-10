@@ -1,0 +1,129 @@
+name: Gate de aprovação — Terraform destroy
+
+# Bloqueia qualquer `terraform apply` que envolva destruição de recursos até
+# aprovação manual do OWNER do repositório, via GitHub Environment protegido
+# com Required Reviewers.
+#
+# Por que este workflow existe: nenhum gate do bundle Nimbus-Code garantia
+# até aqui que um `terraform plan` com QUALQUER destroy fosse revisado por um
+# humano antes do apply — mesmo com o Security & DevSecOps Gate do plan.md já
+# exigindo "plan revisado em PR", nada impedia um apply automático de
+# executar destroys sem revisão explícita e dedicada a esse risco específico.
+#
+# Como funciona:
+#   1. Roda `terraform plan` e converte o resultado para JSON.
+#   2. Verifica se algum resource_change tem a ação "delete" (ou "delete,create"
+#      — replace destrutivo).
+#   3. Se houver qualquer destroy: o job de apply roda sob o GitHub Environment
+#      "infra-approval-owner", que bloqueia até um required reviewer aprovar.
+#   4. Se não houver destroy: o apply segue o fluxo normal (ainda sob revisão
+#      de PR, mas sem o gate adicional de Environment).
+#
+# Pré-requisitos (configuração manual, uma vez por repositório):
+#   1. Criar o Environment "infra-approval-owner" em Settings → Environments,
+#      com "Required reviewers" = o owner do repositório (ou time do
+#      CODEOWNERS responsável por infraestrutura). GitHub Environments com
+#      required reviewers não podem ser criados via workflow/API básica —
+#      é configuração manual do administrador do repositório.
+#   2. Ajustar os passos "Terraform Init"/"Terraform Plan" abaixo para o
+#      diretório/backend real deste repositório (este arquivo é um template
+#      genérico — adapte working-directory, backend config e variáveis).
+#   3. Instalar este workflow apenas em repositórios que de fato usam
+#      Terraform (não é instalado automaticamente pelo bootstrap.sh — copie
+#      manualmente quando aplicável):
+#        cp templates/workflows/terraform-plan-gate.yml <repo>/.github/workflows/
+#
+# Este workflow NÃO se aplica a repositórios de plataforma
+# (nimbus-code-platform-standards): esses nunca rodam `apply` — a "Regra de
+# Ouro" da constituição já proíbe isso inteiramente. Lá, "0 to destroy" é
+# critério de SAÍDA de fase (ver Gate `imported → plan_diff_zero`), não algo
+# que se aprova para prosseguir.
+
+on:
+  pull_request:
+    paths:
+      - "**/*.tf"
+      - "**/*.tfvars"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  terraform-plan:
+    name: Terraform Plan
+    runs-on: ubuntu-latest
+    outputs:
+      has_destroy: ${{ steps.check-destroy.outputs.has_destroy }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      # ADAPTE: ajuste working-directory para o diretório real do seu Terraform
+      - name: Terraform Init
+        run: terraform init
+        working-directory: .
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan -input=false
+        working-directory: .
+
+      - name: Converter plan para JSON
+        run: terraform show -json tfplan > tfplan.json
+        working-directory: .
+
+      - name: Verificar se há destroy no plan
+        id: check-destroy
+        working-directory: .
+        run: |
+          HAS_DESTROY=$(python3 -c "
+          import json
+          with open('tfplan.json') as f:
+              plan = json.load(f)
+          changes = plan.get('resource_changes', [])
+          destructive = [
+              c for c in changes
+              if 'delete' in c.get('change', {}).get('actions', [])
+          ]
+          print('true' if destructive else 'false')
+          if destructive:
+              print('---DESTRUCTIVE_RESOURCES---')
+              for c in destructive:
+                  print(f\"  - {c.get('address')}: {c.get('change', {}).get('actions')}\")
+          ")
+          echo "has_destroy=$(echo "$HAS_DESTROY" | head -1)" >> "$GITHUB_OUTPUT"
+          echo "$HAS_DESTROY"
+
+      - name: Comentar no PR se houver destroy
+        if: steps.check-destroy.outputs.has_destroy == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr comment "${{ github.event.pull_request.number }}" --body "⚠️ **Este \`terraform plan\` inclui destruição de recursos.** O apply requer aprovação explícita do owner do repositório via o Environment \`infra-approval-owner\` antes de prosseguir — ver \`templates/workflows/terraform-plan-gate.yml\`."
+
+  terraform-apply-gate:
+    name: Terraform Apply (aprovação obrigatória se houver destroy)
+    needs: terraform-plan
+    if: needs.terraform-plan.outputs.has_destroy == 'true'
+    runs-on: ubuntu-latest
+    # Requer o Environment "infra-approval-owner" configurado manualmente com
+    # Required Reviewers = owner do repositório. O job FICA PENDENTE até
+    # aprovação manual — não roda sozinho.
+    environment: infra-approval-owner
+    steps:
+      - name: Aprovação confirmada — prosseguir com apply
+        run: echo "Aprovação do owner confirmada via Environment infra-approval-owner. Prossiga com o apply no pipeline de deploy real deste repositório."
+
+  terraform-apply-direct:
+    name: Terraform Apply (sem destroy — segue fluxo normal)
+    needs: terraform-plan
+    if: needs.terraform-plan.outputs.has_destroy == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sem destroy detectado
+        run: echo "Nenhum destroy detectado no plan — segue o fluxo normal de apply deste repositório (ainda sob revisão de PR padrão)."

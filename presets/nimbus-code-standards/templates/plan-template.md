@@ -104,19 +104,38 @@ SLO de latência, monitorado por lag de fila"]
 o Constitution Check nativo. Cobre lacunas que a constituição sozinha não detalha
 por domínio técnico.*
 
-| Domínio | Controles aplicáveis | Status | Observações |
-|---|---|---|---|
-| Autenticação (SSO) | Sistemas novos (greenfield) devem usar SSO; ausência de SSO deve estar formalmente declarada e registrada no Architecture Decision Log abaixo | | Se não usar SSO, registrar justificativa no ADL — caso contrário este gate é bloqueante |
-| Containers | Imagem base pinada, scan de vulnerabilidade, usuário não-root | | |
-| CI/CD | Segredos via cofre/CI secrets, least privilege no service account do pipeline | | |
-| IaC — provider(s) usado(s) | 100% da infra desta feature via IaC (nenhuma alteração manual); **Terraform** como framework padrão para AWS/GCP/Azure; `plan` revisado em PR, sem credenciais hardcoded, state remoto protegido | | Se usar ferramenta nativa do provedor (CDK/Bicep/Deployment Manager) em vez de Terraform, justificar no Architecture Decision Log abaixo |
-| Banco de dados | TLS/mTLS obrigatório, flags de auditoria mínimas, backup/retenção definidos | | |
-| Rede | Regras de firewall/least exposure, sem exposição pública desnecessária | | |
-| Observabilidade | Logs, métricas e alertas mínimos definidos para os componentes críticos | | |
+**Regra de decisões de arquitetura — não impor, documentar e pedir aprovação**:
+se durante o planejamento o agente identificar uma decisão de arquitetura (do
+usuário ou proposta por ele mesmo) que diverge do padrão institucional, o
+agente **não implementa silenciosamente a preferência dele nem a do usuário**.
+Ele registra a divergência no Architecture Decision Log abaixo, explica
+objetivamente por que considera fora do padrão, e:
+- Se o item estiver marcado **Bloqueante** na tabela abaixo: não há exceção
+  possível — o gate falha até o controle existir de fato (ex.: não existe
+  "justificativa" que substitua ter um backup).
+- Se o item estiver marcado **Escapável (ADL)**: o usuário pode manter a
+  decisão fora do padrão, mas precisa justificar explicitamente no ADL e essa
+  justificativa precisa de aprovação (do owner do repo ou de quem a
+  constituição designar) antes do gate ser considerado satisfeito.
+
+| Domínio | Controles aplicáveis | Escapável via ADL? | Status | Observações |
+|---|---|---|---|---|
+| **Backup & Disaster Recovery** | Todo datastore com dado real (produção) tem backup automatizado, retenção definida e restore testado/documentado ao menos uma vez | **Não — bloqueante** | | Perda de dado não se justifica, se previne. Sem exceção mesmo com aprovação do owner |
+| Autenticação (SSO) | Sistemas novos (greenfield) devem usar SSO | Sim, com justificativa no ADL | | Se não usar SSO, registrar justificativa no ADL — caso contrário este gate é bloqueante |
+| Segredos no código/repositório | Nunca em texto plano; secret scanning bloqueia merge se detectar | **Não — bloqueante** | | Vazamento de credencial é irreversível, sem escape hatch |
+| Branch/merge protegido | PR obrigatório + revisão antes de merge em branch protegida; nenhum merge com CI vermelho ou check obrigatório pulado | **Não — bloqueante** | | Convenção já vigente neste bundle; formalizado aqui como gate explícito |
+| Isolamento de ambiente | Credencial de produção nunca usada em ambiente de dev/test | **Não — bloqueante** | | |
+| Containers | Imagem base pinada, scan de vulnerabilidade, usuário não-root | Sim, com justificativa no ADL | | |
+| CI/CD | Segredos via cofre/CI secrets, least privilege no service account do pipeline | Sim, com justificativa no ADL | | |
+| IaC — provider(s) usado(s) | 100% da infra desta feature via IaC (nenhuma alteração manual); **Terraform** como framework padrão para AWS/GCP/Azure; `plan` revisado em PR, sem credenciais hardcoded, state remoto protegido; qualquer `destroy` no `terraform plan` requer aprovação do owner via GitHub Environment protegido (ver `templates/workflows/terraform-plan-gate.yml`) | Sim, com justificativa no ADL | | Se usar ferramenta nativa do provedor (CDK/Bicep/Deployment Manager) em vez de Terraform, justificar no Architecture Decision Log abaixo. O gate de `destroy` em si **não** é escapável — todo destroy detectado exige aprovação, independente do provider de IaC |
+| Banco de dados | TLS/mTLS obrigatório para dado sensível em trânsito | **Não — bloqueante** | | |
+| **Firewall / Segmentação de rede** | Regras de firewall/least exposure, sem exposição pública desnecessária | Sim, com justificativa no ADL | | Fortemente recomendado — aceitar ausência exige justificativa explícita e aprovação do owner, não é silencioso |
+| Observabilidade | Logs, métricas e alertas mínimos definidos para os componentes críticos | Sim, com justificativa no ADL | | Pode ser adiado para fase seguinte com data definida, mas precisa estar registrado |
 
 **Riscos identificados e decisão:**
 [Lista de riscos relevantes encontrados durante o planejamento e a decisão tomada:
-endurecer agora / mitigar em fase seguinte (com data) / aceitar risco documentado]
+endurecer agora / mitigar em fase seguinte (com data) / aceitar risco documentado
+— aplicável apenas aos itens marcados "Escapável via ADL"]
 
 ## Nimbus-Code — Qualidade de Código, Testes e Observabilidade Gate
 
@@ -140,10 +159,12 @@ e o motivo técnico — ex.: dependência externa indisponível em CI]
 
 ## Nimbus-Code — Architecture Decision Log
 
-*Preencher apenas para decisões técnicas relevantes desta feature (não é
-necessário registrar decisões triviais/óbvias).*
+*Preencher para decisões técnicas relevantes desta feature, e **obrigatoriamente**
+para qualquer item marcado "Escapável via ADL" nos gates acima que não seguiu o
+padrão institucional. Decisões triviais/óbvias não precisam de entrada aqui.*
 
-| Decisão | Alternativas consideradas | Opção escolhida | Trade-off assumido |
-|---|---|---|---|
-| [ex.: estratégia de mensageria] | [ex.: Pub/Sub vs Kafka vs polling] | [opção] | [o que se perde/ganha com a escolha] |
-| [ex.: framework de IaC, apenas se diferente do padrão Terraform] | [ex.: Terraform vs Bicep] | [ex.: Bicep, por exigência de compliance nativo do Azure Policy neste workload] | [ex.: perde padronização multi-cloud com os demais projetos, ganha integração nativa com Azure Policy/Defender] |
+| Decisão | Alternativas consideradas | Opção escolhida | Trade-off assumido | Justificativa do desvio (se aplicável) | Aprovado por |
+|---|---|---|---|---|---|
+| [ex.: estratégia de mensageria] | [ex.: Pub/Sub vs Kafka vs polling] | [opção] | [o que se perde/ganha com a escolha] | N/A — não é desvio de padrão | — |
+| [ex.: framework de IaC, apenas se diferente do padrão Terraform] | [ex.: Terraform vs Bicep] | [ex.: Bicep, por exigência de compliance nativo do Azure Policy neste workload] | [ex.: perde padronização multi-cloud com os demais projetos, ganha integração nativa com Azure Policy/Defender] | [justificativa explícita do owner] | [nome/handle do owner] |
+| [ex.: sem Firewall/segmentação de rede nesta fase] | [ex.: WAF completo vs. lançar sem, por prazo] | [ex.: lançar sem, com endurecimento no sprint seguinte] | [ex.: janela de exposição maior até a data X] | [ex.: prazo comercial inegociável, ver Issue #NNN] | [nome/handle do owner] |

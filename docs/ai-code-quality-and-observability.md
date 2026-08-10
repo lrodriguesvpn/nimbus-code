@@ -506,3 +506,100 @@ a infraestrutura de embeddings supera o ganho até o catálogo em YAML se tornar
 difícil de buscar manualmente. Considerar essa evolução apenas quando o
 catálogo YAML tiver dezenas de entradas e a busca manual por tag deixar de ser
 suficiente.
+
+## 10. Gate de Terraform Destroy — Aprovação Obrigatória do Owner
+
+**Problema que resolve**: até esta seção, nenhum gate do bundle garantia que
+um `terraform plan` com qualquer destruição de recurso fosse revisado
+especificamente por esse risco antes do `apply` — o Security & DevSecOps Gate
+já exigia "`plan` revisado em PR", mas revisão de PR genérica não é o mesmo
+que um bloqueio dedicado a "isto vai destruir algo".
+
+**Mecanismo**: `templates/workflows/terraform-plan-gate.yml` (novo, opt-in —
+copiar manualmente em repositórios que usam Terraform). Roda `terraform plan`,
+converte para JSON e verifica `resource_changes[].change.actions` por
+qualquer ação `delete`. Se houver destroy, o job de apply passa a rodar sob
+um **GitHub Environment protegido** (`infra-approval-owner`) com *Required
+Reviewers* configurado manualmente pelo administrador do repositório —
+GitHub Environments com aprovadores obrigatórios não podem ser criados via
+API/workflow, é configuração de Settings feita uma vez por humano. Sem
+destroy detectado, o `apply` segue o fluxo normal.
+
+**Escopo**: aplica-se a repositórios de projeto (`nimbus-code-standards`),
+onde `apply` de fato acontece. **Não se aplica** a repositórios de plataforma
+(`nimbus-code-platform-standards`) — esses nunca rodam `apply` (ver "Regra de
+Ouro" em `docs/platform-standards-and-legacy-infra.md`); lá, "0 to destroy"
+já é o critério de **saída** de fase (`imported → plan_diff_zero`), não algo
+que se aprova para prosseguir.
+
+**Este gate não é escapável via Architecture Decision Log** — qualquer
+destroy detectado exige aprovação, independentemente de qual framework de IaC
+o projeto usa (Terraform, CDK, Bicep) ou de outras decisões de arquitetura já
+justificadas no ADL.
+
+## 11. Não-Negociáveis vs. Decisões Justificáveis — Como o Agente Trata Divergências de Arquitetura
+
+**Princípio central**: o agente (durante `/nimbus-code.plan`) nunca impõe
+silenciosamente sua própria preferência de arquitetura, nem aceita
+silenciosamente uma preferência do usuário que divirja do padrão
+institucional. Quando uma divergência é identificada, o agente:
+
+1. **Documenta** a divergência no Architecture Decision Log do `plan.md`.
+2. **Explica objetivamente** por que considera a decisão fora do padrão.
+3. Classifica o item conforme a tabela do Security & DevSecOps Gate
+   (`plan-template.md`) em uma das duas categorias abaixo — e só prossegue
+   conforme a regra de cada uma.
+
+### 11.1 Categoria A — Não-Negociáveis (bloqueantes, sem escape via ADL)
+
+Não existe justificativa que satisfaça este gate — o controle precisa existir
+de fato. Nem aprovação do owner substitui a ausência do controle em si.
+
+**`nimbus-code-standards` (projeto/código):**
+
+| # | Item | Por que é hard-block |
+|---|---|---|
+| 1 | **Backup & Disaster Recovery** — todo datastore com dado real tem backup automatizado, retenção definida e restore testado/documentado | Perda de dado não se justifica, se previne |
+| 2 | Segredos nunca em texto plano no código/git — secret scanning bloqueia merge se detectar | Vazamento de credencial é irreversível |
+| 3 | Nenhum merge sem PR + revisão; nenhum merge com CI vermelho ou check obrigatório pulado | Convenção já vigente neste bundle, formalizada como gate explícito |
+| 4 | TLS/mTLS obrigatório para dado sensível em trânsito | Elevado da linha "Banco de dados" do Security Gate |
+| 5 | Credencial de produção nunca usada em ambiente de dev/test | Isolamento de ambiente |
+| 6 | Qualquer `destroy` detectado em `terraform plan` requer aprovação do owner (ver seção 10) | Independe do framework de IaC escolhido |
+
+**`nimbus-code-platform-standards` (plataforma/legado):**
+
+| # | Item | Por que é hard-block |
+|---|---|---|
+| 1 | **Backup do estado original** antes de qualquer discovery/import de sistema legado | Garante ponto de retorno antes de auditar/exportar |
+| 2 | Nunca aplicar mudança direta — sem exceção, nem para a produção da própria VPN | Já é a "Regra de Ouro" da constituição de plataforma |
+| 3 | Nenhuma credencial de escrita configurada neste tipo de repositório | Reforça a natureza somente-leitura |
+| 4 | Schema de banco legado: nunca extrair dado, só DDL/metadata | Já existente na constituição, tornado verificável como gate |
+| 5 | Nenhuma remediação automática de drift sem revisão humana | Auto-fix em ambiente legado é estruturalmente arriscado |
+
+### 11.2 Categoria B — Recomendado mas Justificável (usa o ADL)
+
+O item pode ficar fora do padrão, mas exige justificativa explícita
+registrada no Architecture Decision Log **e** aprovação de quem a
+constituição designar (normalmente o owner do repositório ou arquiteto
+responsável) — nunca fica implícito ou silencioso.
+
+**`nimbus-code-standards`**: Firewall/segmentação de rede, SSO, framework de
+IaC diferente de Terraform, observabilidade completa antes do primeiro
+release, correlation-id/tracing distribuído, containers/CI-CD hardening.
+
+**`nimbus-code-platform-standards`**: Firewall/segmentação da plataforma
+antes de declarar `iac_status: completo`, uso de IaC não-Terraform (ver
+matriz de ferramentas em `docs/platform-standards-and-legacy-infra.md`
+seção 4), prazo de regularização de superfícies `parcial`.
+
+### 11.3 Onde isso vive nos artefatos SDD
+
+- **`plan-template.md`** (ambos os presets): tabela do Security & DevSecOps
+  Gate / Gate de Não-Negociáveis com a coluna "Escapável via ADL?".
+- **Architecture Decision Log** (ambos os presets, final do `plan-template.md`):
+  colunas "Justificativa do desvio" e "Aprovado por" — preenchimento
+  obrigatório para qualquer linha marcada "Escapável via ADL" que não seguiu
+  o padrão.
+- Isso não substitui o Constitution Check nativo do Nimbus Code — é um gate
+  **adicional**, específico de segurança/infraestrutura/arquitetura, que a
+  constituição sozinha não detalha por domínio técnico.

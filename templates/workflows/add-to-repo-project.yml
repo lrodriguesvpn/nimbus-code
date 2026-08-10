@@ -1,0 +1,76 @@
+name: Adicionar issues/PRs à board do repositório
+
+# Garante que toda issue/PR nova deste repositório seja adicionada
+# automaticamente à board do PROJETO deste mesmo repositório (criada por
+# scripts/setup-github-project.sh / garantida por ensure-github-project.yml).
+#
+# Por que este workflow existe: setup-github-project.sh só cria a board com
+# suas views e campos customizados ("Horas Humanas", "Oportunidade D365",
+# "Ocorrência CRM") — mas nada, até este workflow, adicionava issues/PRs a
+# ela. Resultado observado: a board existe mas fica sempre vazia. Este
+# workflow é o equivalente, para a board DESTE repositório, do que
+# add-to-pmo-project.yml já faz para o Portfólio PMO (nível de organização).
+#
+# Diferente de add-to-pmo-project.yml, a URL da board deste repositório não é
+# fixa (o nome é dinâmico: "<repo> — Nimbus Code Roadmap") — por isso este
+# workflow primeiro descobre a URL via GraphQL (mesma lógica usada por
+# ensure-github-project.yml) antes de chamar actions/add-to-project.
+#
+# Instalar este workflow em cada repositório do projeto:
+#   cp .github/workflows/add-to-repo-project.yml <repo>/.github/workflows/
+#
+# Requer o secret VPNDEV_PROJECT_TOKEN (mesmo já usado por
+# ensure-github-project.yml): um Personal Access Token (classic, escopos
+# `repo` + `project`, ou fine-grained com permissão de leitura/escrita em
+# "Projects"). O GITHUB_TOKEN padrão do workflow nunca tem escopo `project`,
+# por isso este secret é obrigatório — sem ele, este workflow falha
+# explicitamente (não em silêncio).
+
+on:
+  issues:
+    types:
+      - opened
+  pull_request:
+    types:
+      - opened
+
+permissions:
+  contents: read
+
+jobs:
+  add-to-repo-project:
+    name: Adicionar à board do repositório
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar secret obrigatório
+        run: |
+          if [ -z "${{ secrets.VPNDEV_PROJECT_TOKEN }}" ]; then
+            echo "::error::Secret VPNDEV_PROJECT_TOKEN não configurado. Crie um PAT (escopos repo+project) e configure em Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+
+      - name: Descobrir URL da board deste repositório
+        id: discover
+        env:
+          GH_TOKEN: ${{ secrets.VPNDEV_PROJECT_TOKEN }}
+        run: |
+          URL=$(gh api graphql -f owner="${{ github.repository_owner }}" -f name="${{ github.event.repository.name }}" -f query='
+            query($owner:String!, $name:String!) {
+              repository(owner:$owner, name:$name) {
+                projectsV2(first: 10) { nodes { title url } }
+              }
+            }' -q '.data.repository.projectsV2.nodes[] | select(.title | test(" — Nimbus Code Roadmap$")) | .url' 2>/dev/null | head -1 || true)
+          if [ -z "$URL" ]; then
+            echo "::warning::Board deste repositório ainda não existe (nome esperado: '<repo> — Nimbus Code Roadmap'). Rode 'ensure-github-project.yml' ou 'scripts/setup-github-project.sh' primeiro. Este item não foi adicionado a nenhuma board."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "url=$URL" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Adicionar item à board
+        if: steps.discover.outputs.found == 'true'
+        uses: actions/add-to-project@v2.0.0
+        with:
+          project-url: ${{ steps.discover.outputs.url }}
+          github-token: ${{ secrets.VPNDEV_PROJECT_TOKEN }}

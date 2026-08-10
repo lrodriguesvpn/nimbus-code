@@ -1,17 +1,17 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-08-10T01:38:00Z",
+  "updated_at": "2026-08-10T21:26:23Z",
   "catalog_url": "https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bundles/catalog.json",
   "bundles": {
     "nimbus-code-project-bundle": {
       "name": "Nimbus-Code — Modelo de Projeto",
       "id": "nimbus-code-project-bundle",
-      "version": "1.5.4",
+      "version": "1.6.0",
       "role": "all",
       "description": "Bundle de bootstrap para novos repositórios da Nimbus-Code: preset de governança/DevSecOps (com escala S0–S4 e estimativa de tokens, catálogo de reuso de conteúdo para reduzir custo de tokens, labels de priorização/desenvolvimento autônomo/DORA/incidente, modelo híbrido humano+agente com perfis de custo padrão, GitHub Project por repositório garantido continuamente e Portfólio PMO consolidado), extensão de sincronização de backlog e workflow de ciclo completo com gate de segurança.",
       "author": "Nimbus-Code",
       "license": "Proprietary",
-      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.5.4/nimbus-code-project-bundle-1.5.4.zip",
+      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.6.0/nimbus-code-project-bundle-1.6.0.zip",
       "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template",
       "requires": {
         "speckit_version": ">=0.16.0"
@@ -41,12 +41,12 @@
     "nimbus-code-platform-bundle": {
       "name": "Nimbus-Code — Modelo de Plataforma/Cliente",
       "id": "nimbus-code-platform-bundle",
-      "version": "0.1.2",
+      "version": "0.3.0",
       "role": "all",
       "description": "Bundle de bootstrap para repositórios de PLATAFORMA/CLIENTE/TENANT da Nimbus-Code: aplica o preset nimbus-code-platform-standards (inventário multi-nuvem Azure/AWS/GCP/GWS/M365/D365, grafo de superfícies de plataforma, registro de schemas de sistemas legados e regra de zero-diff como critério de verdade — nunca aplica mudança direta em ambiente). Distinto do nimbus-code-project-bundle, que é para repositórios de projeto/workload.",
       "author": "Nimbus-Code",
       "license": "Proprietary",
-      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.5.4/nimbus-code-platform-bundle-0.1.2.zip",
+      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.6.0/nimbus-code-platform-bundle-0.3.0.zip",
       "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template",
       "requires": {
         "speckit_version": ">=0.16.0"

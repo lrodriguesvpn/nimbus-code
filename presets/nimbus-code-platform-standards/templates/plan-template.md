@@ -107,3 +107,48 @@ confirmar o critério de saída antes de marcar este plan como pronto para merge
 | **Modelo de IA** | Auto / Reasoning / Modelo mais forte *(ver constituição)* |
 | **Revisão humana obrigatória** | Sim, sempre para S3/S4 — importação/reconciliação de legado nunca é autônoma |
 | **Label `type:legacy-import` aplicado?** | Sim/Não |
+
+## Nimbus-Code (Plataforma) — Gate de Não-Negociáveis e Decisões de Arquitetura
+
+*GATE adicional: deve ser preenchido e aprovado antes de qualquer avanço de fase
+(`iac_lifecycle_stage`). Cobre riscos específicos de trabalhar com ambiente real
+de cliente/legado que os gates de fase acima não detalham por domínio técnico.*
+
+**Regra de decisões de arquitetura — não impor, documentar e pedir aprovação**:
+se durante o planejamento o agente identificar uma decisão (do usuário ou
+proposta por ele mesmo) que diverge do padrão institucional deste preset, o
+agente **não implementa silenciosamente a preferência dele nem a do usuário**.
+Ele registra a divergência no Architecture Decision Log abaixo, explica
+objetivamente por que considera fora do padrão, e:
+- Se o item estiver marcado **Bloqueante**: não há exceção possível — o gate
+  falha até o controle existir de fato, mesmo para a produção da própria VPN.
+- Se o item estiver marcado **Escapável (ADL)**: o usuário pode manter a
+  decisão fora do padrão, mas precisa justificar explicitamente no ADL e essa
+  justificativa precisa de aprovação do owner/arquiteto responsável antes do
+  gate ser considerado satisfeito.
+
+| Domínio | Controles aplicáveis | Escapável via ADL? | Status | Observações |
+|---|---|---|---|---|
+| **Backup do estado original** | Antes de qualquer discovery/import de um sistema legado, backup/snapshot do estado original confirmado e acessível | **Não — bloqueante** | | Garante ponto de retorno antes de auditar/exportar; sem isso, a auditoria em si vira risco |
+| **Nunca aplicar mudança direta** | Nenhuma automação deste repositório executa `apply`/escrita contra ambiente real, em nenhuma circunstância | **Não — bloqueante** | | Vale integralmente também para a produção da própria VPN — ver "Regra de Ouro" da constituição |
+| **Credencial de escrita** | Nenhum secret/credencial com permissão de escrita configurado neste tipo de repositório | **Não — bloqueante** | | Reforça a natureza somente-leitura do repositório |
+| **Schema de banco legado** | Extração é sempre somente-leitura (DDL/metadata); nunca extrai dado real | **Não — bloqueante** | | |
+| **Remediação automática de drift** | Nenhuma automação corrige drift sozinha — todo drift detectado abre item para revisão humana | **Não — bloqueante** | | Auto-fix em ambiente legado é estruturalmente arriscado |
+| Firewall / segmentação de rede da plataforma | Revisado antes de declarar `iac_status: completo` para uma superfície | Sim, com justificativa no ADL | | Fortemente recomendado — aceitar ausência exige justificativa explícita e aprovação do owner/arquiteto |
+| IaC não-Terraform (CDK/Bicep/nativo do provedor) | Terraform é o padrão desta matriz de ferramentas (ver `docs/platform-standards-and-legacy-infra.md` seção 4) | Sim, com justificativa no ADL | | |
+| Prazo de regularização (modo somente-observação → IaC completo) | Toda superfície `parcial` tem data-alvo de correção definida | Sim, com justificativa no ADL | | Ausência de prazo não é aceitável silenciosamente — se não houver prazo definido, registrar o motivo |
+
+**Riscos identificados e decisão:**
+[Lista de riscos relevantes encontrados durante o planejamento e a decisão tomada
+— aplicável apenas aos itens marcados "Escapável via ADL"]
+
+## Nimbus-Code (Plataforma) — Architecture Decision Log
+
+*Preencher para decisões técnicas relevantes desta feature, e **obrigatoriamente**
+para qualquer item marcado "Escapável via ADL" no gate acima que não seguiu o
+padrão institucional.*
+
+| Decisão | Alternativas consideradas | Opção escolhida | Trade-off assumido | Justificativa do desvio (se aplicável) | Aprovado por |
+|---|---|---|---|---|---|
+| [ex.: ferramenta de reconciliação de um domínio específico] | [ex.: `terraformer` vs. script próprio] | [opção] | [o que se perde/ganha] | N/A — não é desvio de padrão | — |
+| [ex.: sem firewall revisado nesta superfície ainda] | [ex.: revisar agora vs. registrar como `parcial` com prazo] | [ex.: `parcial`, revisão agendada] | [ex.: janela de exposição maior até a data X] | [ex.: superfície legada sem dono técnico definido ainda] | [nome/handle do owner/arquiteto] |

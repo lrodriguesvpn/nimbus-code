@@ -97,6 +97,21 @@ else
 fi
 
 echo ""
+echo "→ Instalando GitHub Action que popula a board do repositório..."
+ADD_TO_REPO_PROJECT_SRC="$LOCAL_PATH/templates/workflows/add-to-repo-project.yml"
+if [[ -f "$ADD_TO_REPO_PROJECT_SRC" ]]; then
+  mkdir -p "$WORKDIR/.github/workflows"
+  cp "$ADD_TO_REPO_PROJECT_SRC" "$WORKDIR/.github/workflows/add-to-repo-project.yml"
+  echo "  ✅ .github/workflows/add-to-repo-project.yml instalado."
+  echo "  ℹ Adiciona automaticamente toda issue/PR nova à board deste repositório em"
+  echo "    tempo real — sem isso, a board fica criada mas sempre vazia (o"
+  echo "    setup-github-project.sh só cria a board, nunca populava sozinho)."
+  echo "    Requer o secret VPNDEV_PROJECT_TOKEN (mesmo já usado acima)."
+else
+  echo "  ⚠ Template add-to-repo-project.yml não encontrado em $ADD_TO_REPO_PROJECT_SRC"
+fi
+
+echo ""
 echo "ℹ Workflows OPT-IN (copie manualmente quando os pré-requisitos existirem):"
 echo "  • templates/workflows/add-to-pmo-project.yml — conecta este repo ao Portfólio"
 echo "    PMO (1x por organização, ver scripts/setup-pmo-org-project.sh)."
@@ -104,6 +119,10 @@ echo "  • templates/workflows/sync-priority-field.yml — mantém o campo nati
 echo "    \"Priority\" sincronizado com o label priority:* em qualquer GitHub Project"
 echo "    ao qual a issue/PR pertença (por-repositório e/ou Portfólio PMO). Sem"
 echo "    edição manual após copiar. Ambos requerem o secret ADD_TO_PROJECT_PAT."
+echo "  • templates/workflows/terraform-plan-gate.yml — bloqueia terraform apply com"
+echo "    destroy até aprovação do owner via GitHub Environment protegido. Copie só"
+echo "    em repositórios que usam Terraform, adapte o working-directory e crie o"
+echo "    Environment 'infra-approval-owner' manualmente (Settings → Environments)."
 
 echo ""
 echo "→ Instalando doc de perfis de custo humano (Júnior/Pleno/Sênior)..."

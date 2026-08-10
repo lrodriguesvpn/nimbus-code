@@ -3,7 +3,7 @@ schema_version: "1.0"
 bundle:
   id: "nimbus-code-platform-bundle"
   name: "Nimbus-Code — Modelo de Plataforma/Cliente"
-  version: "0.1.2"
+  version: "0.3.0"
   role: "all"
   description: "Bundle de bootstrap para repositórios de PLATAFORMA/CLIENTE/TENANT da Nimbus-Code: aplica o preset nimbus-code-platform-standards (inventário multi-nuvem Azure/AWS/GCP/GWS/M365/D365, grafo de superfícies de plataforma, registro de schemas de sistemas legados e regra de zero-diff como critério de verdade — nunca aplica mudança direta em ambiente). Distinto do nimbus-code-project-bundle, que é para repositórios de projeto/workload."
   author: "Nimbus-Code"
@@ -15,7 +15,7 @@ requires:
 provides:
   presets:
     - id: "nimbus-code-platform-standards"
-      version: "0.1.2"
+      version: "0.3.0"
       source: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
       priority: 5
       strategy: "wrap"

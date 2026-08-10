@@ -111,11 +111,18 @@ no `constitution.md` do projeto ou no ADL.
 
 Antes de `/nimbus-code-tasks`, todos os seguintes gates devem estar aprovados no `plan.md`:
 
-- [ ] **Security & DevSecOps Gate** preenchido
+- [ ] **Security & DevSecOps Gate** preenchido — inclui itens **Não-Negociáveis**
+      (backup & DR, segredos, branch protegida, TLS, isolamento de ambiente,
+      destroy de Terraform aprovado — sem exceção, ver seção 10/11 de
+      `docs/ai-code-quality-and-observability.md`) e itens **Escapáveis via ADL**
+      (firewall, SSO, IaC não-Terraform, observabilidade — aceitáveis fora do
+      padrão só com justificativa explícita registrada no ADL)
 - [ ] **Qualidade de Código, Testes e Observabilidade Gate** preenchido
 - [ ] **Module Dependency Graph** (graph.yaml + graph.md) presente e atualizado
 - [ ] **Impact Map** presente para S3/S4
-- [ ] **Architecture Decision Log** com entradas para decisões relevantes
+- [ ] **Architecture Decision Log** com entradas para decisões relevantes e para
+      todo item Escapável via ADL que não seguiu o padrão (com justificativa e
+      aprovação registradas)
 
 ---
 
@@ -199,6 +206,23 @@ seção 8.
   `presets/nimbus-code-standards/templates/adr/NNNN-template.md`.
 - Referenciar o ADR no Architecture Decision Log do `plan.md`.
 - Ver guia completo em `docs/adr-guide.md`.
+
+### Regra: nunca impor uma decisão de arquitetura silenciosamente
+
+Ao planejar (`/nimbus-code-plan`), se você (agente) identificar que uma decisão de
+arquitetura — sua ou do usuário — diverge do padrão institucional deste
+preset, **não implemente a preferência silenciosamente em nenhuma direção**:
+
+1. Documente a divergência no Architecture Decision Log do `plan.md`.
+2. Explique objetivamente por que considera a decisão fora do padrão.
+3. Verifique a tabela do Security & DevSecOps Gate: se o item está marcado
+   **"Não-Negociável"**, não há exceção possível — pare e informe que o
+   controle precisa existir de fato (ex.: backup, segredo em cofre, TLS).
+   Se está marcado **"Escapável via ADL"**, o usuário pode manter a decisão
+   fora do padrão, mas você deve pedir explicitamente a justificativa e
+   registrar quem aprovou antes de considerar o gate satisfeito.
+- Lista completa de itens Não-Negociáveis vs. Escapáveis para este preset:
+  `docs/ai-code-quality-and-observability.md`, seção 11.
 
 ## Padrões de Código deste Projeto
 
