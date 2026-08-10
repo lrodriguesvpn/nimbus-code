@@ -50,6 +50,55 @@ usado para validar esta feature.*
 - [ ] Para S3/S4: `impact-map.md` **neste** repositório de plataforma também
       criado/atualizado
 
+## Nimbus-Code (Plataforma) — Gate de Fase
+
+*Preencher com a fase atual da plataforma no pipeline (`iac_lifecycle_stage`) e
+confirmar o critério de saída antes de marcar este plan como pronto para merge.*
+
+| Campo | Valor |
+|---|---|
+| **Fase atual (`iac_lifecycle_stage`)** | discovery · imported · plan_diff_zero · landing_zone_generated · managed |
+| **Fase alvo após este trabalho** | [fase seguinte — ou mesma se não houver avanço de fase] |
+| **Critério de saída desta fase** | [descrever o critério específico — ver tabela na constituição] |
+
+### Gate: `discovery → imported`
+
+*Preencher apenas se este trabalho avança a plataforma para `imported`.*
+
+- [ ] `nimbus-discovery-report.md` preenchido e referenciado no `platform-graph.yaml`
+- [ ] Revisão por arquiteto ou analista sênior feita (não apenas agente)
+- [ ] Lacunas priorizadas no discovery report com responsável e ferramenta definidos
+
+### Gate: `imported → plan_diff_zero`
+
+*Preencher apenas se este trabalho avança a plataforma para `plan_diff_zero`.*
+
+- [ ] IaC gerado e versionado (`aztfexport`, `terraformer`, exportação M365DSC/GAM/pac)
+- [ ] `terraform plan` (ou equivalente do domínio) executado sem erro — output colado abaixo
+- [ ] Resultado: **`Plan: 0 to add, 0 to change, 0 to destroy`** (ou equivalente de diff-zero)
+
+```
+# Colar aqui o output completo do terraform plan / Test-M365DSCConfiguration / diff equivalente
+# que comprova diff-zero. Obrigatório antes de merge.
+```
+
+### Gate: `plan_diff_zero → landing_zone_generated`
+
+*Preencher apenas se este trabalho avança a plataforma para `landing_zone_generated`.*
+
+- [ ] `landing-zone/<platform-id>/design.md` criado/atualizado com topologia real
+- [ ] `landing-zone/<platform-id>/checklist-caf.md` preenchido por nuvem
+- [ ] Gaps registrados no `design.md` com responsável e data alvo
+- [ ] Landing Zone revisada por arquiteto (S3 mínimo)
+
+### Gate: `landing_zone_generated → managed`
+
+*Preencher apenas se este trabalho estabelece gestão contínua da plataforma.*
+
+- [ ] Drift-check agendado (workflow periódico de `terraform plan` ou equivalente) configurado
+- [ ] Alerta de drift configurado (notificação para o time responsável)
+- [ ] Responsável técnico pela plataforma definido e registrado na constituição
+
 ## Nimbus-Code (Plataforma) — Classificação e Modelo de IA
 
 | Campo | Valor |

@@ -116,6 +116,49 @@
   Well-Architected (segurança, custo, confiabilidade) deve ser validado contra
   as 5 pilares antes de ser aceito como padrão — não apenas "aplica e funciona".
 
+## Ciclo de Vida de Plataforma — Fases e Gates
+
+Todo repositório de plataforma percorre estas fases **em ordem, sem pular nenhuma**. O campo
+`iac_lifecycle_stage` em `platform-graph.yaml` registra a fase atual de cada plataforma.
+Avançar de fase exige o cumprimento do critério de saída documentado abaixo — o critério
+é verificado via Pull Request e nunca depende apenas de aprovação automática.
+
+| # | Fase | `iac_lifecycle_stage` | Entrada | Critério de saída (gate) |
+|---|---|---|---|---|
+| 1 | **Discovery** | `discovery` | Repositório criado, identidade do cliente preenchida na constituição | `nimbus-discovery-report.md` preenchido, revisado por arquiteto ou analista sênior, e referenciado no `platform-graph.yaml` |
+| 2 | **Importação / IaC Gerado** | `imported` | Discovery aprovado | Código Terraform/DSC/pac gerado (via `aztfexport`, `terraformer`, exportação M365DSC etc.) e versionado; `terraform plan` ou equivalente executado — pode ter diff, mas precisa rodar sem erro |
+| 3 | **Diff-Zero Confirmado** | `plan_diff_zero` | IaC gerado e versionado | `terraform plan` (ou equivalente por domínio) reporta **0 to add, 0 to change, 0 to destroy** — evidência (output do comando) anexada ao PR que avança a fase |
+| 4 | **Landing Zone Gerada** | `landing_zone_generated` | Diff-zero confirmado | `landing-zone/<platform-id>/design.md` e `landing-zone/<platform-id>/checklist-caf.md` criados/atualizados e revisados; gaps registrados no `design.md` |
+| 5 | **Gestão Contínua** | `managed` | Landing Zone documentada | Drift-check agendado ativo; qualquer drift detectado reabre automaticamente a fase anterior (`plan_diff_zero`) até nova reconciliação |
+
+**Regras de progressão:**
+- Nenhuma fase pode ser declarada concluída sem o critério de saída cumprido e evidenciado no PR.
+- Toda mudança em ambiente que altere o estado real de uma plataforma **retrocede** a fase
+  correspondente para `plan_diff_zero` (ou `discovery` se a mudança for estrutural) —
+  nunca silenciar o retrocesso.
+- A Landing Zone (`landing_zone_generated`) é **regenerada a cada mudança que afete a topologia**
+  (nova plataforma, nova superfície crítica, mudança de ferramenta de reconciliação ou de
+  modelo de identidade). Não é um artefato "gerado uma vez e esquecido".
+- Fase `managed` não é permanente: drift detectado retrocede a plataforma para `plan_diff_zero`
+  automaticamente até nova reconciliação confirmada.
+
+## Isolamento de Credenciais por Cliente/Tenant
+
+- **Cada plataforma de cliente usa credenciais próprias e exclusivas** — nunca reutilizar a
+  mesma Service Principal, App Registration, Service Account ou Access Key entre clientes ou
+  tenants diferentes. Reutilizar credenciais entre clientes é risco de cross-tenant e tratado
+  como incidente de segurança.
+- Credenciais deste repositório têm permissão **somente leitura** (Reader, Viewer, Reader-only
+  equivalente). Nunca configurar permissões de escrita (`apply`, `Contributor`, `Editor`) neste
+  repositório de plataforma — lembrar: mudanças nascem em repositórios de projeto.
+- Rotacionar credenciais de leitura ao menos anualmente ou imediatamente após mudança de
+  responsável técnico pelo cliente.
+- Nomear as credenciais com convenção rastreável: `spn-<cliente>-<nuvem>-<ambiente>-ro`
+  (ex.: `spn-clientex-azure-prod-ro`) — sem nomes genéricos como `spn-terraform` que não
+  deixam claro o escopo.
+- Registrar no `platform-graph.yaml` (campo `account_ref`) o `tenant_id` / `account_id` de
+  cada plataforma — facilita auditar qual credencial pertence a qual escopo.
+
 ## Schemas de Bancos de Dados do Legado
 
 - Todo banco de dados de sistema legado identificado no `legacy-inventory.md`

@@ -35,10 +35,10 @@
     "nimbus-code-platform-standards": {
       "name": "Nimbus-Code — Padrões de Plataforma/Cliente (Ambientes e Legado)",
       "id": "nimbus-code-platform-standards",
-      "version": "0.1.2",
-      "description": "Constituição para repositórios de PLATAFORMA/CLIENTE/TENANT (ambientes, contas cloud, tenants M365/GWS/D365 e sistemas legados) — inventário multi-nuvem (Azure/AWS/GCP/GWS/M365/D365), regra de zero-diff como critério de verdade, proibição de aplicar mudança direta em produção, registro de schemas de bancos legados e grafo de 2 níveis (plataforma ↔ workload). Complementar ao nimbus-code-standards: repositórios de projeto/workload continuam usando nimbus-code-standards; um repositório de plataforma/cliente usa este preset.",
+      "version": "0.2.0",
+      "description": "Constituição para repositórios de PLATAFORMA/CLIENTE/TENANT (ambientes, contas cloud, tenants M365/GWS/D365 e sistemas legados) — inventário multi-nuvem (Azure/AWS/GCP/GWS/M365/D365), hierarquia de plataformas por cliente, pipeline de ciclo de vida (discovery → imported → plan_diff_zero → landing_zone_generated → managed), Nimbus Discovery Report, Landing Zone + CAF automático por plataforma, regra de zero-diff como critério de verdade, proibição de aplicar mudança direta em produção, registro de schemas de bancos legados e grafo de 2 níveis (plataforma ↔ workload). Complementar ao nimbus-code-standards: repositórios de projeto/workload continuam usando nimbus-code-standards; um repositório de plataforma/cliente usa este preset.",
       "author": "Nimbus-Code",
-      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.5.4/nimbus-code-platform-standards-0.1.2.zip",
+      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.5.4/nimbus-code-platform-standards-0.2.0.zip",
       "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template",
       "license": "Proprietary",
       "requires": {
@@ -54,7 +54,11 @@
         "m365",
         "d365",
         "drift-detection",
-        "nimbus-code"
+        "nimbus-code",
+        "landing-zone",
+        "caf",
+        "discovery",
+        "lifecycle"
       ]
     }
   }

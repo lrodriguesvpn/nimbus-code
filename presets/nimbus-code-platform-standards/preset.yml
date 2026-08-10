@@ -3,8 +3,8 @@ schema_version: "1.0"
 preset:
   id: "nimbus-code-platform-standards"
   name: "Nimbus-Code — Padrões de Plataforma/Cliente (Ambientes e Legado)"
-  version: "0.1.2"
-  description: "Constituição para repositórios de PLATAFORMA/CLIENTE/TENANT (ambientes, contas cloud, tenants M365/GWS/D365 e sistemas legados) — inventário multi-nuvem, regra de zero-diff como critério de verdade, proibição de aplicar mudança direta em produção, registro de schemas de bancos legados e o grafo de 2 níveis (plataforma ↔ workload). Complementar ao `nimbus-code-standards`: um repositório de plataforma usa ESTE preset; repositórios de projeto/workload continuam usando `nimbus-code-standards`."
+  version: "0.2.0"
+  description: "Constituição para repositórios de PLATAFORMA/CLIENTE/TENANT (ambientes, contas cloud, tenants M365/GWS/D365 e sistemas legados) — inventário multi-nuvem, hierarquia de plataformas por cliente, pipeline de ciclo de vida (discovery → imported → plan_diff_zero → landing_zone_generated → managed), Nimbus Discovery Report, Landing Zone + CAF automático por plataforma, regra de zero-diff como critério de verdade, proibição de aplicar mudança direta em produção, registro de schemas de bancos legados e grafo de 2 níveis (plataforma ↔ workload). Complementar ao `nimbus-code-standards`: um repositório de plataforma usa ESTE preset; repositórios de projeto/workload continuam usando `nimbus-code-standards`."
   author: "Nimbus-Code"
   repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
   license: "Proprietary"
@@ -52,17 +52,30 @@ provides:
       replaces: "tasks-template"
       description: "Checklist de reconciliação zero-diff, extração read-only de schema e confirmação de que a tarefa não aplicou mudança direta em ambiente."
 
-    # Grafo de 2 níveis: recursos de plataforma (contas/tenants/assinaturas)
-    # e quais repositórios de workload dependem de cada superfície.
+    - type: "template"
+      name: "nimbus-discovery-report"
+      file: "templates/feature-artifacts/nimbus-discovery-report.md"
+      description: "Relatório formal da fase de Discovery: grafo de recursos descobertos, ferramentas usadas, lacunas identificadas, relacionamentos entre plataformas do mesmo cliente. Pré-requisito para avançar de `discovery` para `imported`."
+
+    - type: "template"
+      name: "landing-zone-design"
+      file: "templates/feature-artifacts/landing-zone/design.md"
+      description: "Topologia da Landing Zone derivada do estado real (diff-zero confirmado), seguindo o CAF da nuvem correspondente. Gerado/atualizado quando `iac_lifecycle_stage` avança para `landing_zone_generated`."
+
+    - type: "template"
+      name: "landing-zone-checklist-caf"
+      file: "templates/feature-artifacts/landing-zone/checklist-caf.md"
+      description: "Checklist de aderência ao CAF por nuvem (Azure CAF, AWS Well-Architected/Control Tower, GCP Cloud Foundation, CIS M365, Power Platform ALM). Preenchido junto com o design.md da Landing Zone."
+
     - type: "template"
       name: "platform-graph-yaml"
       file: "templates/feature-artifacts/platform-graph.yaml"
-      description: "Grafo estruturado de recursos de plataforma, status de cobertura IaC e workloads dependentes."
+      description: "Grafo estruturado de plataformas (hierarquia platforms[] → surfaces[]) com iac_lifecycle_stage por plataforma e iac_status por superfície, ciclo de vida do pipeline e workloads dependentes."
 
     - type: "template"
       name: "platform-graph-md"
       file: "templates/feature-artifacts/platform-graph.md"
-      description: "Grafo de plataforma em Mermaid para leitura humana (por nuvem/domínio e por workload dependente)."
+      description: "Grafo de plataforma em Mermaid para leitura humana — visão por plataforma/fase de ciclo de vida e por dependência workload → superfície."
 
     # Auditoria "as-is" por nuvem/domínio (Azure, AWS, GCP, GWS, M365, D365).
     - type: "template"
@@ -92,3 +105,7 @@ tags:
   - "m365"
   - "d365"
   - "drift-detection"
+  - "landing-zone"
+  - "caf"
+  - "discovery"
+  - "lifecycle"

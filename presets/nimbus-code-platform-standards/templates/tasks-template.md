@@ -16,6 +16,13 @@
       recurso mudou
 - [ ] `db-schema-registry.md` atualizado se algum schema de banco legado foi
       extraído/re-extraído nesta tarefa
+- [ ] **Se esta tarefa avança o `iac_lifecycle_stage` de alguma plataforma:**
+  - [ ] Gate de fase preenchido no `plan.md` com evidência do critério de saída
+  - [ ] `platform-graph.yaml` atualizado com o novo `iac_lifecycle_stage`
+  - [ ] Se avança para `landing_zone_generated`: `landing-zone/<platform-id>/design.md` e
+        `checklist-caf.md` criados/atualizados e referenciados no `platform-graph.yaml`
+  - [ ] Se avança para `discovery`: `nimbus-discovery-report.md` criado e referenciado
+        em `platform-graph.yaml` (`discovery_report_ref`)
 - [ ] Se esta tarefa é importação/reconciliação de legado: label
       `type:legacy-import` aplicado, complexidade **S3 ou S4**, e
       **revisão humana** solicitada explicitamente (nunca mesclar apenas com

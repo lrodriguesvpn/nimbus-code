@@ -40,6 +40,49 @@ própria VPN (Venha Pra Nuvem) — não existe exceção "porque é a gente".
 | Customização de D365 (entidade, form, plugin) | Power Platform CLI (`pac`) + Solutions |
 | Schema de banco legado | Extração read-only (`pg_dump --schema-only`, `SqlPackage /Action:Extract`, etc.) |
 
+## Ciclo de Vida de Plataforma (fases obrigatórias)
+
+O pipeline de uma plataforma percorre estas fases em ordem. **Nunca pular uma fase.**
+
+```
+discovery → imported → plan_diff_zero → landing_zone_generated → managed
+```
+
+| Fase | O que produz | Critério de saída |
+|---|---|---|
+| `discovery` | `nimbus-discovery-report.md` (por plataforma) | Relatório revisado por arquiteto; lacunas priorizadas |
+| `imported` | IaC gerado e versionado (aztfexport / terraformer / M365DSC export) | `terraform plan` roda sem erro (pode ter diff ainda) |
+| `plan_diff_zero` | Output do `terraform plan` zerado | `0 to add, 0 to change, 0 to destroy` — evidência no PR |
+| `landing_zone_generated` | `landing-zone/<platform-id>/design.md` + `checklist-caf.md` | Landing Zone revisada por arquiteto; gaps registrados |
+| `managed` | Drift-check ativo | Alerta de drift configurado; responsável técnico definido |
+
+**Quando regenerar a Landing Zone:**
+- Toda vez que `iac_lifecycle_stage` avança para `landing_zone_generated` ou superior.
+- Toda vez que uma nova plataforma é adicionada ao `platform-graph.yaml`.
+- Toda vez que a topologia muda estruturalmente: nova superfície crítica, mudança de
+  modelo de identidade, mudança de ferramenta de reconciliação.
+- A Landing Zone não é "gerada uma vez e esquecida" — é um espelho do estado real.
+
+**Checklist CAF por nuvem** — usar `landing-zone/<platform-id>/checklist-caf.md`:
+- Azure → Azure CAF (Management Groups, Hub-Spoke, Defender, Policies)
+- AWS → Well-Architected + Control Tower (Organizations, SCPs, Security Hub)
+- GCP → Cloud Foundation Toolkit (Org, Folders, Shared VPC, Security Command Center)
+- M365 → CIS M365 Benchmark via Microsoft365DSC
+- D365 → Power Platform ALM guidance + CoE Starter Kit
+
+**A Landing Zone não é uma configuração aplicável** — é documentação derivada do
+estado real confirmado com diff-zero. Nenhum artefato em `landing-zone/` executa
+`terraform apply` ou equivalente.
+
+## Isolamento de Credenciais
+
+- Cada cliente/tenant tem credenciais de leitura **exclusivas** (nunca compartilhar
+  entre clientes ou tenants diferentes).
+- Nomear com padrão rastreável: `spn-<cliente>-<nuvem>-<ambiente>-ro`.
+- Somente leitura neste repositório — nunca permissão de escrita/apply.
+- Se receber uma tarefa pedindo configurar credenciais de escrita neste repositório:
+  **pare e sinalize** — isso viola a Regra de Ouro.
+
 ## Antes de Fechar Qualquer Tarefa
 
 1. Confirme que nenhum comando de escrita foi executado contra o ambiente real.

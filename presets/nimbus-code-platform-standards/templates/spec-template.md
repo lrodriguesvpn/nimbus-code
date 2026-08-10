@@ -13,6 +13,7 @@ platform-graph.yaml.*
 | Campo | Valor |
 |---|---|
 | **Feature slug** | `<kebab-case-slug>` — usado como nome da pasta em `specs/` |
+| **Tipo de spec** | `forward` (mudança futura) · `reverse` (formalizar mudança já feita no ambiente / legado) |
 | **Cliente/Tenant** | [ex.: Venha Pra Nuvem (piloto interno), Cliente X] |
 | **Ambiente(s)** | prod · hml · dev |
 | **Nuvem(ns)/plataforma(s) envolvidas** | Azure · AWS · GCP · GWS · M365 · D365 |
@@ -23,6 +24,14 @@ platform-graph.yaml.*
 > Se a resposta de "aplica mudança direta" for "Sim", esta spec está no
 > repositório errado — mudanças reais nascem em um repositório de projeto
 > (`nimbus-code-standards`), nunca aqui.
+
+> **Spec do tipo `reverse`**: quando a mudança já aconteceu no ambiente (legado,
+> intervenção manual de arquiteto/analista), esta spec existe para formalizar
+> retroativamente o estado atual. Os critérios de aceitação (AC) abaixo devem
+> ser escritos no formato: *"Quando o Discovery/terraform plan rodar, o estado
+> documentado coincide com o estado real (zero-diff)"* — não no formato
+> "quando aplicado, terá o efeito X". Uma spec `reverse` só pode ser fechada
+> quando o diff-zero for confirmado e evidenciado.
 
 ## Nimbus-Code (Plataforma) — Objetivo e Contexto
 
