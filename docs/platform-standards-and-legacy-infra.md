@@ -1,15 +1,15 @@
 # Padrões de Plataforma/Cliente e Infraestrutura Legada
 
 Este documento detalha o preset
-[`vpndev-platform-standards`](../presets/vpndev-platform-standards) — o par
-complementar do [`vpndev-standards`](../presets/vpndev-standards) para
+[`nimbus-code-platform-standards`](../presets/nimbus-code-platform-standards) — o par
+complementar do [`nimbus-code-standards`](../presets/nimbus-code-standards) para
 repositórios que representam o **ambiente real de um cliente/tenant**
 (contas cloud, tenants M365/GWS, ambiente D365, sistemas legados), em vez de
 um projeto/feature de software isolado.
 
 ## 1. Por que dois presets?
 
-Um repositório de projeto (`vpndev-standards`) modela **módulos de código** e
+Um repositório de projeto (`nimbus-code-standards`) modela **módulos de código** e
 muda um sistema através de deploys revisados em PR. Um repositório de
 plataforma modela **o ambiente real de um cliente** — que muitas vezes tem
 partes não-Terraformadas (legado), é compartilhado por múltiplos projetos, e
@@ -27,7 +27,7 @@ recorrentes:
 
 Por isso: **um repositório usa um dos dois presets, nunca os dois.**
 
-| | `vpndev-standards` | `vpndev-platform-standards` |
+| | `nimbus-code-standards` | `nimbus-code-platform-standards` |
 |---|---|---|
 | Representa | Projeto/feature de software | Ambiente real de um cliente/tenant |
 | Muda o ambiente? | Sim, via IaC revisado em PR | **Nunca** — somente observação/inventário |
@@ -47,7 +47,7 @@ um ambiente real — nem mesmo credenciais de escrita são configuradas nele.
 Nuvem)**, quando este preset for aplicado ao repositório piloto interno — não
 existe exceção "porque é a gente". Se uma tarefa neste tipo de repositório
 pedir uma mudança real em qualquer ambiente, ela está no repositório errado:
-a mudança nasce em um repositório de projeto (`vpndev-standards`) e,
+a mudança nasce em um repositório de projeto (`nimbus-code-standards`) e,
 quando o sistema/ambiente afetado ainda não tem um projeto responsável,
 **um novo projeto nasce especificamente para essa mudança**.
 
@@ -118,7 +118,7 @@ causa mais comum de state bloat e drift silencioso.
 
 ## 5. Modelo de IA por Tarefa de Plataforma/Legado
 
-Reaproveita a régua S0–S4 já usada em `vpndev-standards`
+Reaproveita a régua S0–S4 já usada em `nimbus-code-standards`
 (ver [`ai-code-quality-and-observability.md`](ai-code-quality-and-observability.md#6-seleção-de-modelo-por-complexidade-s0s4)),
 com o seguinte mapeamento específico:
 
@@ -174,7 +174,7 @@ completa.
 
 **Sequenciamento confirmado:** o repositório piloto de plataforma da própria
 Venha Pra Nuvem **só é criado depois que os dois presets
-(`vpndev-standards` e `vpndev-platform-standards`) estiverem prontos e
+(`nimbus-code-standards` e `nimbus-code-platform-standards`) estiverem prontos e
 publicados** — não antes, e não como um repositório de teste isolado. Isso
 garante que o piloto já nasce usando a versão estável da governança, em vez
 de virar um caso especial que diverge do padrão.
@@ -186,11 +186,11 @@ exceção.
 ## 9. Instalação e Relação com Outros Documentos
 
 ```bash
-specify preset add --dev ./nimbus-code-spec-kit-template/presets/vpndev-platform-standards --priority 5
+specify preset add --dev ./nimbus-code-spec-kit-template/presets/nimbus-code-platform-standards --priority 5
 ```
 
 Ver também:
-- [`presets/vpndev-platform-standards/README.md`](../presets/vpndev-platform-standards/README.md) — detalhes de instalação do preset
+- [`presets/nimbus-code-platform-standards/README.md`](../presets/nimbus-code-platform-standards/README.md) — detalhes de instalação do preset
 - [`docs/label-taxonomy-and-autonomous-dev.md`](label-taxonomy-and-autonomous-dev.md) — taxonomia de labels (inclui `type:legacy-import`)
 - [`docs/ai-code-quality-and-observability.md`](ai-code-quality-and-observability.md) — régua S0–S4, estimativa de tokens, modelo híbrido
 - [`docs/module-graphs.md`](module-graphs.md) — grafo de módulos de código (nível de workload)

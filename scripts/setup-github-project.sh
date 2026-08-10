@@ -19,7 +19,7 @@
 #
 # O script:
 # 1. Valida que o repo existe
-# 2. Cria um ProjectV2 com o nome: "{repo-name} — Spec Kit Roadmap"
+# 2. Cria um ProjectV2 com o nome: "{repo-name} — Nimbus Code Roadmap"
 # 3. Cria 3 views padrão (copiadas do IOX-CROWDFUNDINGPAAS):
 #    - "Board por Epic" (board layout, sem filtro inicial — dev personaliza)
 #    - "Board por Prioridade" (board layout, sem filtro inicial — dev personaliza)
@@ -97,7 +97,7 @@ if [[ -z "$REPO_OWNER" || -z "$REPO_NAME" ]]; then
 fi
 
 echo -e "${BLUE}═══════════════════════════════════════════════════════════════${NC}"
-echo -e "${BLUE}GitHub Project Setup — Spec Kit${NC}"
+echo -e "${BLUE}GitHub Project Setup — Nimbus Code${NC}"
 echo -e "${BLUE}═══════════════════════════════════════════════════════════════${NC}"
 echo -e "Repository: ${GREEN}${REPO_OWNER}/${REPO_NAME}${NC}"
 echo -e "Host: ${REPO_OWNER}@${GH_HOST}"
@@ -116,7 +116,7 @@ echo -e "${GREEN}✓ Repositório encontrado${NC}"
 echo ""
 echo -e "${BLUE}[2/7]${NC} Verificando se o project já existe..."
 
-PROJECT_TITLE="${REPO_NAME} — Spec Kit Roadmap"
+PROJECT_TITLE="${REPO_NAME} — Nimbus Code Roadmap"
 
 # IMPORTANTE: checar existência ANTES de criar. createProjectV2 sempre tem
 # sucesso mesmo com título duplicado (a API não impõe unicidade de título) —

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Bootstrap: aplica o bundle vpndev-project-bundle num repositório novo ou existente.
+# Bootstrap: aplica o bundle nimbus-code-project-bundle num repositório novo ou existente.
 #
 # Uso:
 #   curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bootstrap.sh | bash
@@ -10,7 +10,7 @@
 # (specify preset/extension/workflow catalogs) — ver "Publicação e Catálogo" no
 # README.md raiz. Enquanto isso, o bootstrap usa `--dev`/paths locais diretamente.
 # Quando o catálogo estiver publicado, este script pode ser trocado por:
-#   specify bundle install vpndev-project-bundle --integration copilot
+#   specify bundle install nimbus-code-project-bundle --integration copilot
 set -euo pipefail
 
 STANDARDS_REPO="https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
@@ -35,7 +35,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if ! command -v specify >/dev/null 2>&1; then
-  echo "❌ 'specify' CLI não encontrado. Instale primeiro: https://github.com/github/spec-kit#-get-started" >&2
+  echo "❌ 'specify' CLI não encontrado. Instale primeiro: https://github.com/github/nimbus-code#-get-started" >&2
   exit 1
 fi
 
@@ -49,22 +49,22 @@ if [[ -z "$LOCAL_PATH" ]]; then
   LOCAL_PATH="$TMP_CLONE"
 fi
 
-echo "→ Inicializando projeto Spec Kit em $WORKDIR (integração: $INTEGRATION)..."
+echo "→ Inicializando projeto Nimbus Code em $WORKDIR (integração: $INTEGRATION)..."
 specify init --here --integration "$INTEGRATION" --force
 
-echo "→ Instalando preset vpndev-standards..."
-specify preset add --dev "$LOCAL_PATH/presets/vpndev-standards" --priority 5 \
-  || echo "  (preset já instalado — pulei; use 'specify preset remove vpndev-standards' antes para reinstalar)"
+echo "→ Instalando preset nimbus-code-standards..."
+specify preset add --dev "$LOCAL_PATH/presets/nimbus-code-standards" --priority 5 \
+  || echo "  (preset já instalado — pulei; use 'specify preset remove nimbus-code-standards' antes para reinstalar)"
 
-echo "→ Instalando extensão vpndev-backlog-sync..."
-specify extension add --dev "$LOCAL_PATH/extensions/vpndev-backlog-sync" \
-  || echo "  (extensão já instalada — pulei; use 'specify extension remove vpndev-backlog-sync' antes para reinstalar)"
+echo "→ Instalando extensão nimbus-code-backlog-sync..."
+specify extension add --dev "$LOCAL_PATH/extensions/nimbus-code-backlog-sync" \
+  || echo "  (extensão já instalada — pulei; use 'specify extension remove nimbus-code-backlog-sync' antes para reinstalar)"
 
-echo "→ Instalando workflow vpndev-full-cycle..."
-specify workflow add "$LOCAL_PATH/workflows/vpndev-full-cycle" \
-  || echo "  (workflow já instalado — pulei; use 'specify workflow remove vpndev-full-cycle' antes para reinstalar)"
+echo "→ Instalando workflow nimbus-code-full-cycle..."
+specify workflow add "$LOCAL_PATH/workflows/nimbus-code-full-cycle" \
+  || echo "  (workflow já instalado — pulei; use 'specify workflow remove nimbus-code-full-cycle' antes para reinstalar)"
 
-echo "→ Instalando GitHub Action de verificação de atualização (Spec Kit + bundle VPN Dev)..."
+echo "→ Instalando GitHub Action de verificação de atualização (Nimbus Code + bundle Nimbus-Code)..."
 UPDATE_CHECK_SRC="$LOCAL_PATH/templates/workflows/update-speckit-and-bundle.yml"
 if [[ -f "$UPDATE_CHECK_SRC" ]]; then
   mkdir -p "$WORKDIR/.github/workflows"
@@ -107,7 +107,7 @@ echo "    edição manual após copiar. Ambos requerem o secret ADD_TO_PROJECT_P
 
 echo ""
 echo "→ Instalando doc de perfis de custo humano (Júnior/Pleno/Sênior)..."
-COST_PROFILES_SRC="$LOCAL_PATH/presets/vpndev-standards/templates/cost-profiles-and-rates.md"
+COST_PROFILES_SRC="$LOCAL_PATH/presets/nimbus-code-standards/templates/cost-profiles-and-rates.md"
 if [[ -f "$COST_PROFILES_SRC" ]]; then
   mkdir -p "$WORKDIR/docs"
   if [[ -f "$WORKDIR/docs/cost-profiles-and-rates.md" ]]; then
@@ -123,7 +123,7 @@ fi
 
 echo ""
 echo "→ Instalando catálogo de reuso (docs/reuse-catalog.yaml)..."
-REUSE_CATALOG_SRC="$LOCAL_PATH/presets/vpndev-standards/templates/reuse-catalog.yaml"
+REUSE_CATALOG_SRC="$LOCAL_PATH/presets/nimbus-code-standards/templates/reuse-catalog.yaml"
 if [[ -f "$REUSE_CATALOG_SRC" ]]; then
   mkdir -p "$WORKDIR/docs"
   if [[ -f "$WORKDIR/docs/reuse-catalog.yaml" ]]; then
@@ -140,7 +140,7 @@ fi
 
 echo ""
 echo "→ Instalando instruções do Copilot (.github/copilot-instructions.md)..."
-COPILOT_INSTRUCTIONS_SRC="$LOCAL_PATH/presets/vpndev-standards/templates/project-root/copilot-instructions.md"
+COPILOT_INSTRUCTIONS_SRC="$LOCAL_PATH/presets/nimbus-code-standards/templates/project-root/copilot-instructions.md"
 if [[ -f "$COPILOT_INSTRUCTIONS_SRC" ]]; then
   mkdir -p "$WORKDIR/.github"
   if [[ -f "$WORKDIR/.github/copilot-instructions.md" ]]; then
@@ -155,10 +155,10 @@ else
   echo "  ⚠ Template copilot-instructions.md não encontrado em $COPILOT_INSTRUCTIONS_SRC"
 fi
 
-BUNDLE_VERSION="$(grep -A4 '^bundle:' "$LOCAL_PATH/bundles/vpndev-project-bundle/bundle.yml" | grep -E '^\s*version:' | head -1 | sed -E 's/.*"([0-9.]+)".*/\1/')"
+BUNDLE_VERSION="$(grep -A4 '^bundle:' "$LOCAL_PATH/bundles/nimbus-code-project-bundle/bundle.yml" | grep -E '^\s*version:' | head -1 | sed -E 's/.*"([0-9.]+)".*/\1/')"
 echo ""
-echo "✅ Bundle vpndev-project-bundle v${BUNDLE_VERSION} aplicado com sucesso."
-echo "   Registre a versão instalada no README do projeto (ver seção 'Bundle VPN Dev' do template de README)."
+echo "✅ Bundle nimbus-code-project-bundle v${BUNDLE_VERSION} aplicado com sucesso."
+echo "   Registre a versão instalada no README do projeto (ver seção 'Bundle Nimbus-Code' do template de README)."
 echo ""
 
 # Criar GitHub Project com as views padrão (opcional, requer GH CLI autenticado)

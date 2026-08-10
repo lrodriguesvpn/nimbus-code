@@ -1,0 +1,147 @@
+schema_version: "1.0"
+
+preset:
+  id: "nimbus-code-standards"
+  name: "Nimbus-Code — Padrões de Governança"
+  version: "1.7.0"
+  description: "Constituição base, grafos de módulos obrigatórios, escala S0–S4 com estimativa de tokens e ajuste por projeto, catálogo de reuso de conteúdo para reduzir custo de tokens, SLO Gate, estratégia de release, ADRs, taxonomia de labels de priorização/desenvolvimento autônomo/DORA, modelo híbrido humano+agente, framework DevSecOps, regras de isolamento de sessões de agente (1 agente por arquivo, fases, limpeza de branches perdidas) e manual operacional de uso de agentes remotos da Nimbus-Code, aplicados sobre os templates nativos do Nimbus Code."
+  author: "Nimbus-Code"
+  repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
+  license: "Proprietary"
+
+requires:
+  speckit_version: ">=0.16.0"
+
+provides:
+  templates:
+    # Envolve o template nativo de constituição com os princípios não-negociáveis
+    # da empresa. {CORE_TEMPLATE} preserva a estrutura de fábrica do Nimbus Code por
+    # baixo — o preset só adiciona, nunca remove, o que o Nimbus Code já oferece.
+    - type: "template"
+      name: "constitution-template"
+      file: "templates/constitution-template.md"
+      strategy: "wrap"
+      replaces: "constitution-template"
+      description: "Princípios não-negociáveis da Nimbus-Code, incluindo regras de grafos de módulos e escala de complexidade S0–S4."
+
+    # Acrescenta o Security/DevSecOps Gate, a classificação de complexidade S0–S4,
+    # o Module Dependency Graph, o SLO Gate e a Estratégia de Release obrigatórios
+    # ao final do plan-template.md nativo.
+    - type: "template"
+      name: "plan-template"
+      file: "templates/plan-template.md"
+      strategy: "append"
+      replaces: "plan-template"
+      description: "Classificação S0–S4, Module Dependency Graph, SLO Gate, Estratégia de Release, Security/DevSecOps Gate e Architecture Decision Log padrão da Nimbus-Code."
+
+    # Acrescenta cabeçalho obrigatório (S0–S4, bounded context, SLO alvo) e
+    # critérios de aceitação no formato BDD ao spec-template nativo.
+    - type: "template"
+      name: "spec-template"
+      file: "templates/spec-template.md"
+      strategy: "prepend"
+      replaces: "spec-template"
+      description: "Cabeçalho obrigatório com complexidade, bounded context, SLO alvo e critérios de aceitação BDD."
+
+    # Acrescenta o checklist DevSecOps + grafo + feature flag + SLO por tarefa.
+    - type: "template"
+      name: "tasks-template"
+      file: "templates/tasks-template.md"
+      strategy: "append"
+      replaces: "tasks-template"
+      description: "Checklist de qualidade/segurança, grafo, feature flag e SLO por tarefa."
+
+    # Template de graph.yaml para features — gerado em specs/<feature>/graph.yaml.
+    - type: "template"
+      name: "graph-yaml"
+      file: "templates/feature-artifacts/graph.yaml"
+      description: "Grafo de módulos estruturado (fonte de verdade para o Graph Guard)."
+
+    # Template de graph.md para features — gerado em specs/<feature>/graph.md.
+    - type: "template"
+      name: "graph-md"
+      file: "templates/feature-artifacts/graph.md"
+      description: "Grafo de módulos em Mermaid para leitura humana (código + business)."
+
+    # Template de impact-map.md para features S3/S4 — gerado em specs/<feature>/impact-map.md.
+    - type: "template"
+      name: "impact-map"
+      file: "templates/feature-artifacts/impact-map.md"
+      description: "Mapa de impacto e análise de risco — obrigatório para S3 e S4."
+
+    # Template de retrospectiva leve por feature — gerado em specs/<feature>/retro.md.
+    # Preencher quando a implementação divergiu do plano: grafo mudou, SLO não atingido,
+    # bug inesperado. Alimenta o reuse-catalog.yaml com aprendizados negativos também.
+    - type: "template"
+      name: "retro-template"
+      file: "templates/feature-artifacts/retro-template.md"
+      description: "Retrospectiva leve por feature: divergências do plano, causa raiz e ação para o próximo ciclo."
+
+    # Template ADR — copiado para docs/adr/NNNN-slug.md no projeto ou neste repo.
+    - type: "template"
+      name: "adr-template"
+      file: "templates/adr/NNNN-template.md"
+      description: "Template de Architecture Decision Record (formato MADR)."
+
+    # Template de copilot-instructions.md para o repositório do projeto.
+    - type: "template"
+      name: "copilot-instructions"
+      file: "templates/project-root/copilot-instructions.md"
+      description: "Instruções do Copilot com regras de grafo, escala S0–S4 e feature flags pré-configuradas."
+
+    # Lista oficial dos bounded contexts do projeto — copiado para
+    # docs/bounded-contexts.yaml (ou raiz do projeto). O agente verifica este
+    # arquivo antes de preencher o campo "Bounded Context" numa spec nova,
+    # evitando nomes ad-hoc e divergências entre features.
+    - type: "template"
+      name: "bounded-contexts"
+      file: "templates/project-root/bounded-contexts.yaml"
+      description: "Fonte de verdade dos bounded contexts do projeto — validada pelo agente ao criar novas specs."
+
+    # Perfis de custo humano (Júnior/Pleno/Sênior) e taxa/hora — copiado para
+    # docs/cost-profiles-and-rates.md no projeto, usado para compor o custo
+    # real do modelo híbrido (agente + humano).
+    - type: "template"
+      name: "cost-profiles-and-rates"
+      file: "templates/cost-profiles-and-rates.md"
+      description: "Perfis de senioridade (Júnior/Pleno/Sênior) e taxa média de custo/hora para controle de custo real do modelo híbrido agente+humano."
+
+    # Manual operacional de uso de sessões remotas de agente, branches e
+    # governança de branches perdidas — copiado para docs/agent-session-manual.md
+    # no projeto. Explica o comportamento esperado de sessões, ciclo de vida de
+    # branches e o que o Dev não deve fazer.
+    - type: "template"
+      name: "agent-session-manual"
+      file: "templates/agent-session-manual.md"
+      description: "Manual de uso de sessões remotas Copilot: isolamento de agentes, ciclo de vida de branches, controle de branches perdidas e regras para o Dev."
+
+    # Índice de padrões/decisões reaproveitáveis — copiado para
+    # docs/reuse-catalog.yaml no projeto. Consultado pelo agente antes de
+    # re-derivar uma solução do zero, reduzindo custo de tokens.
+    - type: "template"
+      name: "reuse-catalog"
+      file: "templates/reuse-catalog.yaml"
+      description: "Catálogo machine-readable de padrões/ADRs reaproveitáveis por tag/bounded-context, referenciado por ponteiro em vez de duplicado — ver docs/ai-code-quality-and-observability.md, seção 9."
+
+tags:
+  - "governance"
+  - "security"
+  - "devsecops"
+  - "nimbus-code"
+  - "module-graph"
+  - "complexity-scale"
+  - "feature-flags"
+  - "slo"
+  - "adr"
+  - "labels"
+  - "prioritization"
+  - "autonomous-development"
+  - "token-estimation"
+  - "dora-metrics"
+  - "finops"
+  - "pmo-portfolio"
+  - "incident-management"
+  - "d365"
+  - "reuse-catalog"
+  - "agent-session-governance"
+  - "branch-hygiene"

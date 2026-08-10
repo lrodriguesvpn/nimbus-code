@@ -8,7 +8,7 @@
 ## 📧 EMAIL TÉCNICO (pronto para enviar)
 
 Veja abaixo o email de comunicação para liderança técnica sobre a implementação 
-obrigatória do Spec Kit em toda a VPN Dev.
+obrigatória do Nimbus Code em toda a Nimbus-Code.
 
 ### Para: Tech Leads, CTOs, Engineering Managers
 
@@ -17,7 +17,7 @@ obrigatória do Spec Kit em toda a VPN Dev.
 Pessoal,
 
 Finalizei a implementação de um **padrão obrigatório para todo desenvolvimento**
-na VPN Dev. Temos que rodar isso a partir de segunda, começando por novos projetos,
+na Nimbus-Code. Temos que rodar isso a partir de segunda, começando por novos projetos,
 e quero fazer o rollout correto para não quebrar nada.
 
 ---
@@ -46,22 +46,22 @@ Precisamos de FinOps + policies imediato.
 ## ✅ SOLUÇÃO: NIMBUS CODE™ AI Delivery System
 
 Implementei uma base técnica do **NIMBUS CODE™ AI Delivery System**, construída
-sobre o **GitHub Spec Kit**, que padroniza SDD (Spec-Driven Development) com:
+sobre o **GitHub Nimbus Code**, que padroniza SDD (Spec-Driven Development) com:
 
 ### Componentes
 
 ```
-vpndev-project-bundle v1.0.0
-├── preset: vpndev-standards v1.0.0
+nimbus-code-project-bundle v1.0.0
+├── preset: nimbus-code-standards v1.0.0
 │   ├── Constitution template (wrap strategy)
 │   ├── Plan template com Security/DevSecOps Gate
 │   └── Tasks template com quality checklist
 │
-├── extension: vpndev-backlog-sync v1.0.0
+├── extension: nimbus-code-backlog-sync v1.0.0
 │   ├── Hook after_specify → sincroniza spec para JIRA/AzureDevOps
 │   └── Hook after_tasks → sincroniza tasks para board
 │
-└── workflow: vpndev-full-cycle v1.0.0
+└── workflow: nimbus-code-full-cycle v1.0.0
     ├── Gate: Security/DevSecOps antes de tasks
     └── Integra com GitHub Actions
 ```
@@ -114,7 +114,7 @@ Implementei o bundle 100% automático no IOX. Estatísticas reais:
   5. Docs Freshness (daily)
   6. Copilot cloud agent
   7. Auto-merge Copilot PRs
-  8. Verify Spec Kit bundle
+  8. Verify Nimbus Code bundle
 
 📋 GitHub Projects V2:
   ├── Project: "IOX-CROWDFUNDINGPAAS — DevOps & DevSecOps Roadmap"
@@ -125,7 +125,7 @@ Implementei o bundle 100% automático no IOX. Estatísticas reais:
 ### Impacto
 
 ```
-❌ Antes (sem Spec Kit):
+❌ Antes (sem Nimbus Code):
   Setup novo componente: 3-4 dias
   Test coverage: ~50-60% (não obrigatório)
   Code review: 2-3 dias
@@ -134,7 +134,7 @@ Implementei o bundle 100% automático no IOX. Estatísticas reais:
   Infrastructure: 40% manual, 60% Terraform
   DevSecOps gates: não-bloqueador
 
-✅ Depois (com Spec Kit):
+✅ Depois (com Nimbus Code):
   Setup novo componente: 15 min
   Test coverage: 80%+ (obrigatório)
   Code review: <4h (IA + human)
@@ -148,12 +148,12 @@ Implementei o bundle 100% automático no IOX. Estatísticas reais:
 
 ```
 Per feature:
-  /speckit.constitution: 80k
-  /speckit.specify: 60k
-  /speckit.plan: 150k
-  /speckit.tasks: 80k
-  /speckit.implement: 250k
-  /speckit.converge: 100k
+  /nimbus-code.constitution: 80k
+  /nimbus-code.specify: 60k
+  /nimbus-code.plan: 150k
+  /nimbus-code.tasks: 80k
+  /nimbus-code.implement: 250k
+  /nimbus-code.converge: 100k
   ─────────────────
   TOTAL: 720k tokens = USD 1.30 (Haiku)
 
@@ -191,15 +191,15 @@ Projeção Anual (40 devs, 5 features/semana):
 
 ### IMEDIATO (Esta semana)
 - Tech leads recebem walkthrough (1h)
-- Spec Kit Bundle publicado em catalog.json
+- Nimbus Code Bundle publicado em catalog.json
 - FinOps policies ativadas
 - Budgets configurados por projeto
-- #spec-kit-help criado (Slack)
+- #nimbus-code-help criado (Slack)
 
 ### Semana 1-2
-- TODOS novos projetos: obrigatório Spec Kit
-- Brownfield: primeira feature com Spec Kit
-- Treinamento: "Spec Kit em 15 min"
+- TODOS novos projetos: obrigatório Nimbus Code
+- Brownfield: primeira feature com Nimbus Code
+- Treinamento: "Nimbus Code em 15 min"
 - FinOps dashboard live
 
 ### Semana 3-4
@@ -260,21 +260,21 @@ https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template
   - GitHub Projects automáticos
 
 **Suporte:**
-- Slack: #spec-kit-help
-- GitHub Issues: spec-kit-vpndev-standards/issues
+- Slack: #nimbus-code-help
+- GitHub Issues: nimbus-code-nimbus-code-standards/issues
 - Weekly Sync: toda terça 2pm
 
 ---
 
 ## RESUMO
 
-A VPN Dev precisa de:
+A Nimbus-Code precisa de:
 1. Padronização (cada projeto = seu padrão = débito acumulado)
 2. Automação (setup manual = 3-4 dias perdidos por projeto)
 3. Rastreabilidade (decisões em Slack = perda de contexto)
 4. Controle de custos (USD 500/FDS de tokens = insustentável)
 
-**Spec Kit resolve tudo isso.**
+**Nimbus Code resolve tudo isso.**
 **IOX prova que funciona** (30 commits em 24h, 100% IaC, 8 workflows, zero manual sync).
 
 **Começa segunda.**
@@ -284,7 +284,7 @@ A VPN Dev precisa de:
 Abraços,
 
 [SEU NOME]
-Presidente, VPN Dev
+Presidente, Nimbus-Code
 
 P.S. — Qualquer bloqueador técnico ou orçamentário, me avisa hoje.
 P.P.S — IOX está em produção desde ontem (07 ago). Code review pode acessar o projeto e os workflows em ação.

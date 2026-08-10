@@ -1,7 +1,7 @@
-name: Verificar atualizações do Spec Kit e do bundle VPN Dev
+name: Verificar atualizações do Nimbus Code e do bundle Nimbus-Code
 
-# Roda semanalmente e sob demanda. Compara a versão do Spec Kit CLI e do bundle
-# vpndev-project-bundle instaladas neste projeto com a versão mais recente
+# Roda semanalmente e sob demanda. Compara a versão do Nimbus Code CLI e do bundle
+# nimbus-code-project-bundle instaladas neste projeto com a versão mais recente
 # publicada, e abre/atualiza uma issue com o diagnóstico e os comandos exatos
 # para atualizar manualmente. NUNCA aplica a atualização sozinho — a versão só
 # muda quando alguém rodar os comandos e abrir um PR revisado normalmente,
@@ -35,13 +35,13 @@ jobs:
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
+          uv tool install specify-cli --from git+https://github.com/github/nimbus-code.git
 
       - name: Ler versões instaladas
         id: current
         run: |
           CURRENT_SPECKIT=$(python3 -c "import json;print(json.load(open('.specify/integration.json'))['version'])")
-          CURRENT_BUNDLE=$(grep -A5 'Bundle .vpndev-project-bundle.' README.md | grep -oE '\`[0-9]+\.[0-9]+\.[0-9]+\`' | head -1 | tr -d '\`' || echo "desconhecida")
+          CURRENT_BUNDLE=$(grep -A5 'Bundle .nimbus-code-project-bundle.' README.md | grep -oE '\`[0-9]+\.[0-9]+\.[0-9]+\`' | head -1 | tr -d '\`' || echo "desconhecida")
           echo "speckit=$CURRENT_SPECKIT" >> "$GITHUB_OUTPUT"
           echo "bundle=$CURRENT_BUNDLE" >> "$GITHUB_OUTPUT"
 
@@ -53,7 +53,7 @@ jobs:
           LATEST_SPECKIT=$(specify self check --json 2>/dev/null | python3 -c "import json,sys;print(json.load(sys.stdin).get('latest_version',''))" || true)
           LATEST_BUNDLE=$(curl -fsSL -H "Authorization: token ${VPNDEV_TOKEN}" \
             https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bundles/catalog.json \
-            | python3 -c "import json,sys;print(json.load(sys.stdin)['bundles']['vpndev-project-bundle']['version'])")
+            | python3 -c "import json,sys;print(json.load(sys.stdin)['bundles']['nimbus-code-project-bundle']['version'])")
           echo "speckit=$LATEST_SPECKIT" >> "$GITHUB_OUTPUT"
           echo "bundle=$LATEST_BUNDLE" >> "$GITHUB_OUTPUT"
 
@@ -61,22 +61,22 @@ jobs:
         id: body
         run: |
           {
-            echo "## Verificação semanal — Spec Kit / Bundle VPN Dev"
+            echo "## Verificação semanal — Nimbus Code / Bundle Nimbus-Code"
             echo ""
             echo "| Item | Instalada | Disponível |"
             echo "| --- | --- | --- |"
-            echo "| Spec Kit CLI | \`${{ steps.current.outputs.speckit }}\` | \`${{ steps.latest.outputs.speckit }}\` |"
-            echo "| Bundle \`vpndev-project-bundle\` | \`${{ steps.current.outputs.bundle }}\` | \`${{ steps.latest.outputs.bundle }}\` |"
+            echo "| Nimbus Code CLI | \`${{ steps.current.outputs.speckit }}\` | \`${{ steps.latest.outputs.speckit }}\` |"
+            echo "| Bundle \`nimbus-code-project-bundle\` | \`${{ steps.current.outputs.bundle }}\` | \`${{ steps.latest.outputs.bundle }}\` |"
             echo ""
             echo "**Esta verificação não aplica nenhuma mudança.** Se a atualização for aprovada, rodar localmente:"
             echo ""
             echo '```bash'
             echo "specify self upgrade --tag v${{ steps.latest.outputs.speckit }}"
-            echo "specify bundle update vpndev-project-bundle"
+            echo "specify bundle update nimbus-code-project-bundle"
             echo '```'
             echo ""
             echo "Depois de aplicar e testar, abrir um PR normal com o diff e atualizar a tabela"
-            echo "de versões na seção 'Spec Kit — Padrões VPN Dev' do README (ver"
+            echo "de versões na seção 'Nimbus Code — Padrões Nimbus-Code' do README (ver"
             echo "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/templates/README-bundle-section.md)."
           } > /tmp/issue-body.md
 
@@ -85,13 +85,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          EXISTING=$(gh issue list --search "Verificação semanal — Spec Kit / Bundle VPN Dev in:title" --state open --json number -q '.[0].number' || true)
+          EXISTING=$(gh issue list --search "Verificação semanal — Nimbus Code / Bundle Nimbus-Code in:title" --state open --json number -q '.[0].number' || true)
           if [ -n "$EXISTING" ]; then
             gh issue comment "$EXISTING" --body-file /tmp/issue-body.md
           else
             # Tenta com a taxonomia completa (requer scripts/setup-github-labels.sh já
             # aplicado); se os labels type:chore/status:needs-triage ainda não existirem
             # neste repositório, cai para o label padrão "dependencies" apenas.
-            gh issue create --title "Verificação semanal — Spec Kit / Bundle VPN Dev" --body-file /tmp/issue-body.md --label "dependencies,type:chore,status:needs-triage" \
-              || gh issue create --title "Verificação semanal — Spec Kit / Bundle VPN Dev" --body-file /tmp/issue-body.md --label "dependencies"
+            gh issue create --title "Verificação semanal — Nimbus Code / Bundle Nimbus-Code" --body-file /tmp/issue-body.md --label "dependencies,type:chore,status:needs-triage" \
+              || gh issue create --title "Verificação semanal — Nimbus Code / Bundle Nimbus-Code" --body-file /tmp/issue-body.md --label "dependencies"
           fi

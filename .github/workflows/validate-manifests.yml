@@ -1,0 +1,176 @@
+name: Validate Manifests — Schema dos Componentes Nimbus-Code
+
+# Valida que preset.yml, bundle.yml, extension.yml e workflow.yml e os
+# catalog.json respeitam o schema esperado pelo specify CLI (campo obrigatório
+# speckit_version, estrutura mínima de id/name/version/author).
+#
+# Previne que renomeações ou refatorações quebrem silenciosamente a
+# compatibilidade com o specify CLI — problema identificado quando o campo
+# speckit_version foi renomeado para nimbus_code_version sem gate de CI.
+#
+# Instalar neste repositório (nimbus-code-spec-kit-template):
+#   Já instalado. Não copiar para repositórios de projeto — este gate é
+#   exclusivo do repositório de templates/presets.
+
+on:
+  pull_request:
+    branches: ["**"]
+    paths:
+      - "presets/**/*.yml"
+      - "presets/**/*.yaml"
+      - "presets/**/catalog.json"
+      - "extensions/**/*.yml"
+      - "extensions/**/*.yaml"
+      - "extensions/**/catalog.json"
+      - "workflows/**/*.yml"
+      - "workflows/**/*.yaml"
+      - "workflows/**/catalog.json"
+      - "bundles/**/*.yml"
+      - "bundles/**/*.yaml"
+      - "bundles/**/catalog.json"
+  push:
+    branches: ["main"]
+    paths:
+      - "presets/**"
+      - "extensions/**"
+      - "workflows/**"
+      - "bundles/**"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  validate-manifests:
+    name: Validar Schema dos Manifests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Python e PyYAML
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependências
+        run: pip install pyyaml
+
+      - name: Validar manifests de preset, bundle, extension e workflow
+        id: validate
+        run: |
+          python3 - <<'EOF'
+          import os, sys, yaml, json, glob
+
+          ERRORS = []
+
+          # ── Campos obrigatórios por tipo de manifest ────────────────────────
+          REQUIRED_FIELDS = {
+              "preset.yml":    ["id", "name", "version", "author", "speckit_version"],
+              "bundle.yml":    ["id", "name", "version", "author", "speckit_version"],
+              "extension.yml": ["id", "name", "version", "author", "speckit_version"],
+              "workflow.yml":  ["id", "name", "version", "author", "speckit_version"],
+          }
+
+          CATALOG_REQUIRED = ["speckit_version"]
+
+          def check_yaml_manifest(path, required_keys):
+              try:
+                  with open(path) as f:
+                      data = yaml.safe_load(f)
+              except Exception as e:
+                  ERRORS.append(f"[PARSE ERROR] {path}: {e}")
+                  return
+
+              # Os manifests têm uma chave raiz (preset: / bundle: / etc.)
+              # que contém os campos; ou os campos estão na raiz diretamente.
+              root = data
+              for key in ["preset", "bundle", "extension", "workflow"]:
+                  if key in data and isinstance(data[key], dict):
+                      root = data[key]
+                      break
+
+              # speckit_version pode estar em requires: ou na raiz de requires
+              # (preset.yml usa requires: { speckit_version: "..." })
+              effective = dict(root)
+              if "requires" in data and isinstance(data["requires"], dict):
+                  effective.update(data["requires"])
+
+              for field in required_keys:
+                  if field not in effective:
+                      ERRORS.append(
+                          f"[MISSING FIELD] {path}: campo obrigatório '{field}' ausente. "
+                          f"Verifique se não foi renomeado (ex.: speckit_version → outro nome)."
+                      )
+
+          def check_catalog_json(path):
+              try:
+                  with open(path) as f:
+                      data = json.load(f)
+              except Exception as e:
+                  ERRORS.append(f"[PARSE ERROR] {path}: {e}")
+                  return
+
+              # Percorre todos os objetos do catalog procurando por speckit_version
+              raw = json.dumps(data)
+              if "nimbus_code_version" in raw:
+                  ERRORS.append(
+                      f"[WRONG FIELD] {path}: campo 'nimbus_code_version' encontrado. "
+                      f"O campo correto do Spec Kit é 'speckit_version'."
+                  )
+
+          # ── Verificar manifests ─────────────────────────────────────────────
+          for manifest_name, required in REQUIRED_FIELDS.items():
+              for path in glob.glob(f"**/{manifest_name}", recursive=True):
+                  check_yaml_manifest(path, required)
+
+          # ── Verificar catalog.json ──────────────────────────────────────────
+          for path in glob.glob("**/catalog.json", recursive=True):
+              check_catalog_json(path)
+
+          if ERRORS:
+              print("❌ Erros de validação de schema encontrados:\n")
+              for err in ERRORS:
+                  print(f"  • {err}")
+              sys.exit(1)
+          else:
+              print("✅ Todos os manifests estão com schema correto.")
+          EOF
+
+      - name: Comentar na PR com erros (se houver)
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `## ❌ Validate Manifests — Schema Inválido
+
+            Esta PR alterou arquivos de manifest (\`preset.yml\`, \`bundle.yml\`,
+            \`extension.yml\`, \`workflow.yml\` ou \`catalog.json\`) e um ou mais campos
+            obrigatórios estão ausentes ou com nome incorreto.
+
+            ### O que verificar
+
+            1. O campo \`speckit_version\` deve estar presente em \`requires:\` de todo
+               manifest — **nunca renomeado** para \`nimbus_code_version\` ou outro nome.
+            2. Os campos \`id\`, \`name\`, \`version\` e \`author\` devem estar presentes
+               na seção raiz do manifest (\`preset:\` / \`bundle:\` / \`extension:\` / \`workflow:\`).
+            3. Nos \`catalog.json\`, a propriedade deve ser \`speckit_version\` — não
+               \`nimbus_code_version\` nem qualquer variante.
+
+            ### Por que isso é validado?
+
+            O campo \`speckit_version\` é o nome padrão do framework Spec Kit.
+            Renomeá-lo quebra a compatibilidade com o \`specify\` CLI ao instalar
+            presets/bundles/extensões — o CLI ignora a restrição de versão mínima
+            silenciosamente, podendo causar incompatibilidades em runtime.
+
+            > _Gate definido pelo workflow \`validate-manifests.yml\` do repositório
+            > \`nimbus-code-spec-kit-template\`._
+            `;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body
+            });

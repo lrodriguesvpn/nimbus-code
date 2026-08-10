@@ -1,0 +1,43 @@
+# Bounded Contexts — <project-name>
+#
+# Lista oficial dos bounded contexts deste projeto.
+# Usada como fonte de verdade para o campo "Bounded Context" do spec-template.md
+# e validada pelo agente ao criar uma nova spec.
+#
+# Como usar:
+#   1. Ao preencher o cabeçalho obrigatório do spec-template.md, escolha um
+#      slug desta lista — não invente novos nomes sem adicionar aqui primeiro.
+#   2. Para adicionar um novo bounded context: abra uma PR com a nova entrada
+#      e justificativa. A revisão de bounded contexts novos segue o mesmo fluxo
+#      de ADR (pode ser uma decisão registrada em docs/adr/).
+#   3. O agente deve verificar esta lista antes de preencher o campo
+#      "Bounded Context" na spec — se não encontrar match, propor ao Dev
+#      a adição de uma nova entrada em vez de usar um nome ad-hoc.
+#
+# Convenção de slug: kebab-case, substantivo no singular.
+#   Exemplos: order-management, identity, billing, notification, platform
+
+version: 1
+contexts:
+  []
+
+# Exemplo (remova os comentários e ajuste):
+#
+# contexts:
+#   - slug: "order-management"
+#     description: "Ciclo de vida de pedidos: criação, atualização, cancelamento e histórico."
+#     owner: "<time-ou-dev-responsavel>"
+#     repos:
+#       - "<org>/<repo-de-servico>"
+#
+#   - slug: "identity"
+#     description: "Autenticação, autorização, SSO e gestão de identidades de usuário."
+#     owner: "<time-ou-dev-responsavel>"
+#     repos:
+#       - "<org>/<repo-de-identidade>"
+#
+#   - slug: "billing"
+#     description: "Faturamento, cobranças, integração com gateways de pagamento."
+#     owner: "<time-ou-dev-responsavel>"
+#     repos:
+#       - "<org>/<repo-de-billing>"

@@ -96,7 +96,7 @@ for REPO in "${REPOS[@]}"; do
   echo -e "${BLUE}→${NC} Lendo $REPO..." >&2
 
   # Paginação simples: busca até 500 itens (5 páginas de 100) do primeiro
-  # Project V2 do repositório cujo título termine em "Spec Kit Roadmap".
+  # Project V2 do repositório cujo título termine em "Nimbus Code Roadmap".
   CURSOR="null"
   ITEMS_JSON="[]"
   for _ in 1 2 3 4 5; do
@@ -127,7 +127,7 @@ query($owner:String!, $name:String!, $cursor:String) {
   }
 }' 2>&1)
 
-    PROJECT_NODE=$(echo "$PAGE" | jq -c '.data.repository.projectsV2.nodes[]? | select(.title | test(" — Spec Kit Roadmap$"))' 2>/dev/null | head -1)
+    PROJECT_NODE=$(echo "$PAGE" | jq -c '.data.repository.projectsV2.nodes[]? | select(.title | test(" — Nimbus Code Roadmap$"))' 2>/dev/null | head -1)
 
     if [[ -z "$PROJECT_NODE" ]]; then
       echo -e "${YELLOW}  ⚠ Nenhum Project V2 encontrado em $REPO (pulando)${NC}" >&2

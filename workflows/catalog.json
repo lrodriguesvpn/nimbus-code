@@ -1,15 +1,15 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-08-09T20:36:04Z",
+  "updated_at": "2026-08-10T01:38:00Z",
   "catalog_url": "https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/workflows/catalog.json",
   "workflows": {
-    "vpndev-full-cycle": {
-      "name": "VPN Dev — Ciclo Completo com Gate DevSecOps",
-      "id": "vpndev-full-cycle",
-      "version": "1.2.0",
-      "description": "Ciclo SDD completo (specify → plan → tasks → implement → converge) com gates de DevSecOps, grafo de módulos, release strategy e convergência pós-implementação.",
-      "author": "VPN Dev",
-      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.5.4/vpndev-full-cycle-1.2.0.zip",
+    "nimbus-code-full-cycle": {
+      "name": "Nimbus-Code — Ciclo Completo com Gate DevSecOps",
+      "id": "nimbus-code-full-cycle",
+      "version": "1.3.0",
+      "description": "Ciclo SDD completo (discovery → specify → plan → tasks → implement → converge) com branch criado apenas na fase implement, gates de DevSecOps, grafo de módulos, release strategy e convergência pós-implementação.",
+      "author": "Nimbus-Code",
+      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.5.4/nimbus-code-full-cycle-1.3.0.zip",
       "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template",
       "license": "Proprietary",
       "requires": {
@@ -18,7 +18,7 @@
       "tags": [
         "sdd",
         "devsecops",
-        "vpndev"
+        "nimbus-code"
       ]
     }
   }

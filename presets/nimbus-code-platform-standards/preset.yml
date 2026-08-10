@@ -1,0 +1,111 @@
+schema_version: "1.0"
+
+preset:
+  id: "nimbus-code-platform-standards"
+  name: "Nimbus-Code — Padrões de Plataforma/Cliente (Ambientes e Legado)"
+  version: "0.2.0"
+  description: "Constituição para repositórios de PLATAFORMA/CLIENTE/TENANT (ambientes, contas cloud, tenants M365/GWS/D365 e sistemas legados) — inventário multi-nuvem, hierarquia de plataformas por cliente, pipeline de ciclo de vida (discovery → imported → plan_diff_zero → landing_zone_generated → managed), Nimbus Discovery Report, Landing Zone + CAF automático por plataforma, regra de zero-diff como critério de verdade, proibição de aplicar mudança direta em produção, registro de schemas de bancos legados e grafo de 2 níveis (plataforma ↔ workload). Complementar ao `nimbus-code-standards`: um repositório de plataforma usa ESTE preset; repositórios de projeto/workload continuam usando `nimbus-code-standards`."
+  author: "Nimbus-Code"
+  repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
+  license: "Proprietary"
+
+requires:
+  speckit_version: ">=0.16.0"
+
+provides:
+  templates:
+    # Envolve o template nativo de constituição com os princípios não-negociáveis
+    # de um repositório de PLATAFORMA/CLIENTE — não usar junto com o `wrap` de
+    # nimbus-code-standards no mesmo repositório (são presets mutuamente exclusivos
+    # por tipo de repositório).
+    - type: "template"
+      name: "constitution-template"
+      file: "templates/constitution-template.md"
+      strategy: "wrap"
+      replaces: "constitution-template"
+      description: "Regra de não tocar produção diretamente, critério de verdade por zero-diff, cobertura multi-nuvem (Azure/AWS/GCP/GWS/M365/D365), registro de schemas de legado e grafo de 2 níveis."
+
+    # Acrescenta a classificação de ambiente/cliente, cobertura de IaC por
+    # domínio e o checklist de reconciliação zero-diff ao plan-template nativo.
+    - type: "template"
+      name: "plan-template"
+      file: "templates/plan-template.md"
+      strategy: "append"
+      replaces: "plan-template"
+      description: "Classificação de ambiente/cliente/nuvem, ferramenta de reconciliação por domínio, checklist de zero-diff e impacto em superfícies de plataforma compartilhadas."
+
+    # Acrescenta cabeçalho obrigatório (cliente/tenant, ambiente, nuvens
+    # envolvidas, sistema legado sim/não) ao spec-template nativo.
+    - type: "template"
+      name: "spec-template"
+      file: "templates/spec-template.md"
+      strategy: "prepend"
+      replaces: "spec-template"
+      description: "Cabeçalho obrigatório com cliente/tenant, ambiente, nuvens envolvidas e classificação de legado."
+
+    # Acrescenta o checklist de reconciliação, extração de schema e
+    # verificação de que nenhuma mudança foi aplicada diretamente.
+    - type: "template"
+      name: "tasks-template"
+      file: "templates/tasks-template.md"
+      strategy: "append"
+      replaces: "tasks-template"
+      description: "Checklist de reconciliação zero-diff, extração read-only de schema e confirmação de que a tarefa não aplicou mudança direta em ambiente."
+
+    - type: "template"
+      name: "nimbus-discovery-report"
+      file: "templates/feature-artifacts/nimbus-discovery-report.md"
+      description: "Relatório formal da fase de Discovery: grafo de recursos descobertos, ferramentas usadas, lacunas identificadas, relacionamentos entre plataformas do mesmo cliente. Pré-requisito para avançar de `discovery` para `imported`."
+
+    - type: "template"
+      name: "landing-zone-design"
+      file: "templates/feature-artifacts/landing-zone/design.md"
+      description: "Topologia da Landing Zone derivada do estado real (diff-zero confirmado), seguindo o CAF da nuvem correspondente. Gerado/atualizado quando `iac_lifecycle_stage` avança para `landing_zone_generated`."
+
+    - type: "template"
+      name: "landing-zone-checklist-caf"
+      file: "templates/feature-artifacts/landing-zone/checklist-caf.md"
+      description: "Checklist de aderência ao CAF por nuvem (Azure CAF, AWS Well-Architected/Control Tower, GCP Cloud Foundation, CIS M365, Power Platform ALM). Preenchido junto com o design.md da Landing Zone."
+
+    - type: "template"
+      name: "platform-graph-yaml"
+      file: "templates/feature-artifacts/platform-graph.yaml"
+      description: "Grafo estruturado de plataformas (hierarquia platforms[] → surfaces[]) com iac_lifecycle_stage por plataforma e iac_status por superfície, ciclo de vida do pipeline e workloads dependentes."
+
+    - type: "template"
+      name: "platform-graph-md"
+      file: "templates/feature-artifacts/platform-graph.md"
+      description: "Grafo de plataforma em Mermaid para leitura humana — visão por plataforma/fase de ciclo de vida e por dependência workload → superfície."
+
+    # Auditoria "as-is" por nuvem/domínio (Azure, AWS, GCP, GWS, M365, D365).
+    - type: "template"
+      name: "legacy-inventory"
+      file: "templates/feature-artifacts/legacy-inventory.md"
+      description: "Checklist de auditoria as-is por nuvem/domínio: recurso, ambiente, ferramenta usada hoje, status de IaC, criticidade, dono."
+
+    # Registro de schemas de bancos de dados de sistemas legados.
+    - type: "template"
+      name: "db-schema-registry"
+      file: "templates/feature-artifacts/db-schema-registry.md"
+      description: "Catálogo de schemas (DDL, somente leitura) de bancos de sistemas legados versionados neste repositório."
+
+    - type: "template"
+      name: "copilot-instructions"
+      file: "templates/project-root/copilot-instructions.md"
+      description: "Instruções do Copilot para repositório de plataforma: regra de nunca aplicar mudança em produção, matriz de ferramentas por nuvem/domínio e fluxo de reconciliação."
+
+tags:
+  - "governance"
+  - "platform"
+  - "multi-cloud"
+  - "legacy"
+  - "infrastructure-as-code"
+  - "nimbus-code"
+  - "terraform"
+  - "m365"
+  - "d365"
+  - "drift-detection"
+  - "landing-zone"
+  - "caf"
+  - "discovery"
+  - "lifecycle"

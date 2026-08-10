@@ -10,12 +10,12 @@
 > híbrido vão no campo do GitHub Project (§8).
 
 Este documento detalha **como aplicar na prática** as regras adicionadas pelo
-preset `vpndev-standards` à seção "Qualidade e Processo" da constituição (ver
-[`templates/constitution-template.md`](../presets/vpndev-standards/templates/constitution-template.md)),
+preset `nimbus-code-standards` à seção "Qualidade e Processo" da constituição (ver
+[`templates/constitution-template.md`](../presets/nimbus-code-standards/templates/constitution-template.md)),
 ao **Qualidade de Código, Testes e Observabilidade Gate** do `plan.md` (ver
-[`templates/plan-template.md`](../presets/vpndev-standards/templates/plan-template.md))
+[`templates/plan-template.md`](../presets/nimbus-code-standards/templates/plan-template.md))
 e ao checklist correspondente do `tasks.md` (ver
-[`templates/tasks-template.md`](../presets/vpndev-standards/templates/tasks-template.md)).
+[`templates/tasks-template.md`](../presets/nimbus-code-standards/templates/tasks-template.md)).
 
 ## 1. Revisão de código por IA (GitHub Copilot) obrigatória
 
@@ -90,7 +90,7 @@ quando a feature envolver mais de um serviço):
 - **Trace-id/span-id**: adotar o padrão [W3C Trace Context](https://www.w3.org/TR/trace-context/)
   (`traceparent`/`tracestate`) propagado via headers HTTP/mensageria entre
   serviços, instrumentado com [OpenTelemetry](https://opentelemetry.io/) (SDK
-  disponível para a maioria das linguagens/plataformas usadas na VPN Dev).
+  disponível para a maioria das linguagens/plataformas usadas na Nimbus-Code).
 - **Correlation-id de negócio**: além do trace técnico, manter um
   `X-Correlation-Id` (ou equivalente) estável por transação/requisição de
   negócio, propagado nos logs de todos os serviços envolvidos — permite
@@ -169,7 +169,7 @@ fraco que o necessário (risco técnico).
 
 A **régua de complexidade S0–S4 em si é não-negociável** (todo projeto do
 bundle usa a mesma escala e a mesma exigência de revisão humana obrigatória em
-S4 — isso é o que permite comparar custo/qualidade entre projetos da VPN Dev).
+S4 — isso é o que permite comparar custo/qualidade entre projetos da Nimbus-Code).
 
 O que **pode** ser ajustado por projeto é a coluna **"Modelo no Copilot"**: a
 tabela acima é a recomendação padrão do bundle, mas cada projeto pode adaptar
@@ -193,7 +193,7 @@ remova a exigência de revisão humana em S4 como parte desse ajuste — isso n�
 ### Como declarar no início de cada tarefa
 
 O agente (Copilot ou equivalente) deve declarar explicitamente ao receber um
-`/speckit-implement` ou iniciar trabalho em qualquer task:
+`/nimbus-code-implement` ou iniciar trabalho em qualquer task:
 
 ```
 Complexidade desta tarefa: S<N> — <justificativa em uma linha>
@@ -237,9 +237,9 @@ escala acima no nível organizacional.
 ### Estimativa de tokens ANTES de codar vs. consumo REAL depois
 
 **Regra**: toda feature deve ter uma estimativa de tokens registrada no
-`plan.md` **antes** de `/speckit-tasks` (na mesma tabela de Classificação de
+`plan.md` **antes** de `/nimbus-code-tasks` (na mesma tabela de Classificação de
 Complexidade — ver
-[`plan-template.md`](../presets/vpndev-standards/templates/plan-template.md)),
+[`plan-template.md`](../presets/nimbus-code-standards/templates/plan-template.md)),
 e o consumo real deve ser confrontado com ela ao final, no fechamento das
 tarefas em `tasks.md`.
 
@@ -274,23 +274,23 @@ de "real" é:
   sobre a lacuna é mais útil do que um dado real que os dados não sustentam.
 
 **Onde registrar a comparação**: no checklist de fechamento do `tasks.md`
-(seção "VPN Dev — Estimativa vs. Consumo Real de Tokens", adicionada pelo
+(seção "Nimbus-Code — Estimativa vs. Consumo Real de Tokens", adicionada pelo
 preset) — ver
-[`tasks-template.md`](../presets/vpndev-standards/templates/tasks-template.md).
+[`tasks-template.md`](../presets/nimbus-code-standards/templates/tasks-template.md).
 Variâncias grandes e recorrentes (ex.: real consistentemente >2× a estimativa)
 são sinal para recalibrar o baseline do projeto, não para ignorar a prática.
 
 ## 7. Modelos do Copilot Agent prioritários — dá para declarar isso no preset?
 
-**Não diretamente no schema do Spec Kit.** `preset.yml`/`extension.yml`/
+**Não diretamente no schema do Nimbus Code.** `preset.yml`/`extension.yml`/
 `bundle.yml` não têm nenhum campo para "modelo de IA preferido" — isso não é
 uma configuração de projeto, é uma **política de organização/enterprise do
-GitHub Copilot**, configurada fora do Spec Kit em:
+GitHub Copilot**, configurada fora do Nimbus Code em:
 
 - **Organization/Enterprise Settings → Copilot → Policies** — permite habilitar
   ou desabilitar modelos específicos para todos os membros (ex.: bloquear
   certos modelos por política de compliance/custo). Isso é o mecanismo real de
-  "obrigatoriedade" — o Spec Kit não tem visibilidade nem controle sobre isso.
+  "obrigatoriedade" — o Nimbus Code não tem visibilidade nem controle sobre isso.
 - **Model picker do Copilot Chat** — cada dev escolhe o modelo por sessão,
   dentro do conjunto habilitado pela política acima. "Auto" deixa o próprio
   Copilot escolher o modelo mais adequado à tarefa (com desconto de custo).
@@ -304,7 +304,7 @@ GitHub Copilot](https://docs.github.com/en/copilot/reference/ai-models/model-com
 | Tipo de tarefa | Modelo recomendado (prioridade) |
 | --- | --- |
 | Uso geral / tarefas agenticas do dia a dia | GPT-5.6 Terra ou GPT-5 mini |
-| Trabalho agentico de longa duração (ex.: `/speckit-implement` de features grandes) | GPT-5.3-Codex ou Claude Fable 5 |
+| Trabalho agentico de longa duração (ex.: `/nimbus-code-implement` de features grandes) | GPT-5.3-Codex ou Claude Fable 5 |
 | Raciocínio profundo, debugging complexo, análise arquitetural | GPT-5.4 / GPT-5.5 / GPT-5.6 Sol ou Claude Opus 4.7 |
 | Exploração de codebase (grep-style, navegação) | GPT-5.4 mini |
 | Tarefas simples/repetitivas, respostas rápidas e baratas | GPT-5.6 Luna ou Claude Haiku 4.5 |
@@ -312,7 +312,7 @@ GitHub Copilot](https://docs.github.com/en/copilot/reference/ai-models/model-com
 Esta tabela é apenas **orientação documentada** — para tornar algo disso
 "obrigatório" de fato, é a organização (via Enterprise/Org Settings → Copilot →
 Policies) que precisa restringir os modelos habilitados de acordo com esta
-priorização, não o bundle do Spec Kit.
+priorização, não o bundle do Nimbus Code.
 
 ## 8. Modelo híbrido: agentes de IA + humanos codando juntos
 
@@ -334,7 +334,7 @@ ou pareando com o agente.
 
 ### Onde lançar as horas humanas
 
-Não existe um campo nativo no Spec Kit para isso (specs/plans/tasks são
+Não existe um campo nativo no Nimbus Code para isso (specs/plans/tasks são
 markdown, não têm schema de apontamento de horas). O bundle resolve isso via
 **GitHub Project V2**, criado automaticamente pelo `bootstrap.sh`
 (`scripts/setup-github-project.sh`):
@@ -367,7 +367,7 @@ aquela quantidade de horas foi necessária, não *quanto* foi.
 ### Taxa de conversão horas → custo
 
 Este bundle define uma tabela **padrão** de perfis e taxa/hora — ver
-[`docs/cost-profiles-and-rates.md`](../presets/vpndev-standards/templates/cost-profiles-and-rates.md)
+[`docs/cost-profiles-and-rates.md`](../presets/nimbus-code-standards/templates/cost-profiles-and-rates.md)
 (copiado automaticamente para `docs/cost-profiles-and-rates.md` de cada
 projeto pelo `bootstrap.sh`): **Júnior R$ 40/h, Pleno R$ 60/h (padrão),
 Sênior R$ 90/h** — classificados por senioridade, não por tecnologia. Esses
@@ -442,7 +442,7 @@ anterior ou um padrão já documentado, **linkar o artefato original**
 (`docs/adr/NNNN-slug.md`, `specs/<feature>/plan.md#seção`) em vez de
 copiar/reexplicar o conteúdo dentro do novo `spec.md`/`plan.md`. Isso já é a
 convenção usada pelo próprio bundle — o `spec-template.md` do preset usa
-`{CORE_TEMPLATE}` como ponteiro para o template nativo do Spec Kit em vez de
+`{CORE_TEMPLATE}` como ponteiro para o template nativo do Nimbus Code em vez de
 duplicá-lo (ver estratégia `prepend`/`wrap`/`append` no `preset.yml`).
 
 Benefício direto em tokens: um ponteiro custa poucas dezenas de tokens; o
@@ -453,7 +453,7 @@ lido por inteiro quando alguém (humano ou agente) realmente abrir o link.
 
 Índice machine-readable, instalado pelo `bootstrap.sh` em todo projeto novo
 (template em
-[`templates/reuse-catalog.yaml`](../presets/vpndev-standards/templates/reuse-catalog.yaml)),
+[`templates/reuse-catalog.yaml`](../presets/nimbus-code-standards/templates/reuse-catalog.yaml)),
 indexando padrões/decisões reaproveitáveis por `tag` e `bounded_context`, cada
 entrada apontando (por ponteiro) para o `spec.md`/`plan.md`/ADR original.
 
@@ -470,7 +470,7 @@ entrada apontando (por ponteiro) para o `spec.md`/`plan.md`/ADR original.
    catálogo ao longo do tempo).
 3. Preenchimento é **manual/curatorial** nesta versão — não há automação de
    indexação (ex.: workflow que atualiza o catálogo sozinho ao fechar
-   `/speckit-tasks`); isso fica como possível evolução futura, registrada em
+   `/nimbus-code-tasks`); isso fica como possível evolução futura, registrada em
    `specs/001-catalogo-conteudo-reutilizavel/spec.md` deste repositório.
 
 ### 9.3 TL;DR em documentos longos (progressive disclosure alinhado a S0–S4)

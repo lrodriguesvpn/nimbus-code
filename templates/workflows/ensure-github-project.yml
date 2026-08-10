@@ -1,11 +1,11 @@
 name: Garantir GitHub Project do repositório
 
 # Garante que este repositório sempre tenha o GitHub Project V2 padrão do
-# bundle VPN Dev (views + campos "Horas Humanas" e "Oportunidade D365" — ver
+# bundle Nimbus-Code (views + campos "Horas Humanas" e "Oportunidade D365" — ver
 # scripts/setup-github-project.sh). Roda semanalmente e sob demanda.
 #
 # Comportamento:
-#   - Se o Project já existir (título terminando em "— Spec Kit Roadmap"),
+#   - Se o Project já existir (título terminando em "— Nimbus Code Roadmap"),
 #     o workflow só confirma e não faz nada.
 #   - Se NÃO existir — por exemplo, porque o bootstrap.sh rodou numa máquina
 #     sem `gh` CLI instalado, ou porque alguém apagou o Project por engano —
@@ -62,7 +62,7 @@ jobs:
               repository(owner:$owner, name:$name) {
                 projectsV2(first: 10) { nodes { title url } }
               }
-            }' -q '.data.repository.projectsV2.nodes[] | select(.title | test(" — Spec Kit Roadmap$")) | .url' 2>/dev/null | head -1 || true)
+            }' -q '.data.repository.projectsV2.nodes[] | select(.title | test(" — Nimbus Code Roadmap$")) | .url' 2>/dev/null | head -1 || true)
           if [ -n "$EXISTING" ]; then
             echo "found=true" >> "$GITHUB_OUTPUT"
             echo "url=$EXISTING" >> "$GITHUB_OUTPUT"
@@ -75,14 +75,14 @@ jobs:
         env:
           VPNDEV_TOKEN: ${{ secrets.VPNDEV_STANDARDS_READ_TOKEN }}
         run: |
-          git clone --depth 1 "https://${VPNDEV_TOKEN}@venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template.git" /tmp/vpndev-standards
+          git clone --depth 1 "https://${VPNDEV_TOKEN}@venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template.git" /tmp/nimbus-code-standards
 
       - name: Criar GitHub Project (não existia)
         if: steps.check.outputs.found != 'true'
         env:
           GH_TOKEN: ${{ secrets.VPNDEV_PROJECT_TOKEN }}
         run: |
-          bash /tmp/vpndev-standards/scripts/setup-github-project.sh \
+          bash /tmp/nimbus-code-standards/scripts/setup-github-project.sh \
             --repo-owner "${{ github.repository_owner }}" \
             --repo-name "${{ github.event.repository.name }}"
 

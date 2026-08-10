@@ -1,4 +1,4 @@
-# MCP Servers e Bundles do Spec Kit
+# MCP Servers e Bundles do Nimbus Code
 
 ## Pergunta
 
@@ -29,31 +29,31 @@ if manifest.requires.mcp:
 Ou seja: `specify bundle install`/`specify extension add` apenas **exibe um
 aviso em texto** listando os servidores MCP necessários — não instala, não
 configura, não verifica se estão disponíveis, e não tem qualquer outro efeito
-runtime. O Spec Kit não tem (e não pretende ter) um sistema de gestão de
+runtime. O Nimbus Code não tem (e não pretende ter) um sistema de gestão de
 lifecycle de servidores MCP; isso é responsabilidade de cada agente/host
 (Copilot CLI, Claude Code, etc.), tipicamente via `.vscode/mcp.json` ou
 configuração equivalente do host.
 
-## O que isso significa na prática para o bundle da VPN Dev
+## O que isso significa na prática para o bundle da Nimbus-Code
 
-- A extensão `vpndev-backlog-sync` **declara** `requires.mcp` (ver
-  [`extensions/vpndev-backlog-sync/extension.yml`](../extensions/vpndev-backlog-sync/extension.yml))
+- A extensão `nimbus-code-backlog-sync` **declara** `requires.mcp` (ver
+  [`extensions/nimbus-code-backlog-sync/extension.yml`](../extensions/nimbus-code-backlog-sync/extension.yml))
   para que quem instalar veja o aviso e saiba que precisa configurar o MCP da
   Atlassian Rovo ou do Azure DevOps antes de usar o hook de sincronização.
 - **Não é possível** shipar a configuração real do servidor MCP (endpoint,
-  credenciais, modo de autenticação) dentro do bundle de forma que o Spec Kit
+  credenciais, modo de autenticação) dentro do bundle de forma que o Nimbus Code
   a aplique automaticamente.
-- Se quisermos padronizar a configuração de MCP entre projetos da VPN Dev, a
+- Se quisermos padronizar a configuração de MCP entre projetos da Nimbus-Code, a
   forma correta é **shipar um arquivo de configuração de exemplo** (ex.:
   `.vscode/mcp.json.example`) como um arquivo comum dentro do preset ou da
   extensão — copiado manualmente pelo desenvolvedor, mas nunca "instalado" pelo
-  mecanismo de pacotes do Spec Kit.
+  mecanismo de pacotes do Nimbus Code.
 
 ## Servidores MCP relevantes por plataforma (referência para `requires.mcp`)
 
 Levantamento (pesquisado em ago/2026) dos servidores MCP mais relevantes por
 plataforma, para uso como referência ao declarar `requires.mcp` em futuras
-extensões da VPN Dev ou ao preencher `.vscode/mcp.json` em cada projeto. **Nenhum
+extensões da Nimbus-Code ou ao preencher `.vscode/mcp.json` em cada projeto. **Nenhum
 destes é instalado pelo bundle** — a tabela é só um catálogo de candidatos
 avaliados, na mesma lógica descrita acima para Atlassian Rovo/Azure DevOps.
 
@@ -71,7 +71,7 @@ avaliados, na mesma lógica descrita acima para Atlassian Rovo/Azure DevOps.
 mantidos pelos próprios fornecedores; o servidor de Microsoft 365 (Graph) e o de
 Google Workspace mais adotados hoje são **projetos de comunidade** — avalie
 segurança/suporte antes de declarar como dependência obrigatória em qualquer
-extensão da VPN Dev.
+extensão da Nimbus-Code.
 
 Ver também o diagrama do ecossistema MCP em
 [`docs/bundle-architecture.md`](bundle-architecture.md#5-ecossistema-de-mcp-servers-candidatos).

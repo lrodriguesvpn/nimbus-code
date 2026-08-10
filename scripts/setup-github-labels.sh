@@ -4,7 +4,7 @@
 # setup-github-labels.sh
 #
 # Cria (ou atualiza) no repositório do projeto a taxonomia padrão de labels da
-# VPN Dev usada para PRIORIZAÇÃO/ORDENAMENTO de issues e PRs, para sinalizar
+# Nimbus-Code usada para PRIORIZAÇÃO/ORDENAMENTO de issues e PRs, para sinalizar
 # quais issues são candidatas a DESENVOLVIMENTO AUTÔNOMO por agente (ex.:
 # GitHub Copilot coding agent) e para correlacionar issues com os DOMÍNIOS DE
 # MÉTRICAS DORA (deployment frequency, lead time, change failure rate, MTTR).
@@ -94,7 +94,7 @@ declare -a LABELS=(
   "priority:P3-low|0e8a16|Baixa prioridade — nice-to-have, entra quando não há P0/P1/P2 pendente"
 
   # Complexidade S0–S4 — já usado como gate obrigatório para S4 na constituição
-  # e no copilot-instructions.md do preset vpndev-standards.
+  # e no copilot-instructions.md do preset nimbus-code-standards.
   "complexity:S0|c2e0c6|Documentação/texto — sem lógica de negócio"
   "complexity:S1|bfd4f2|Função isolada, sem dependência externa"
   "complexity:S2|fef2c0|Módulo completo, com testes — sem cruzar serviços"

@@ -18,7 +18,7 @@ base.
 - O **repo de produto/marketing** não deve publicar catálogos, bootstrap ou
   templates consumidos por outros projetos.
 - O **nome comercial** é **NIMBUS CODE™ AI Delivery System**.
-- O **substrato técnico** continua sendo **GitHub Spec Kit**.
+- O **substrato técnico** continua sendo **GitHub Nimbus Code**.
 - Os nomes técnicos do modelo (`specify`, `plan`, `tasks`, `implement`,
   `converge`, `spec.md`, `plan.md`) **não mudam**.
 
@@ -26,7 +26,7 @@ base.
 
 Troca-se o slug do repositório-base:
 
-- **de:** `speckit-vpndev-standards`
+- **de:** `speckit-nimbus-code-standards`
 - **para:** `nimbus-code-spec-kit-template`
 
 Isso afeta:
@@ -85,9 +85,9 @@ Executar após a Frente A estar validada:
 
 Em cada repositório consumidor, procurar e atualizar:
 
-- `https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/...`
-- `https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards`
-- caminhos locais `./speckit-vpndev-standards/...`
+- `https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-nimbus-code-standards/...`
+- `https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-nimbus-code-standards`
+- caminhos locais `./speckit-nimbus-code-standards/...`
 - referências ao README/template deste repositório
 - workflows que clonam o repo antigo para rodar scripts
 
@@ -110,7 +110,7 @@ A migração estará concluída quando:
   **produto/marketing**;
 - as referências internas deste repositório estiverem no novo slug;
 - os repositórios consumidores tiverem migrado as referências operacionais;
-- nenhum nome técnico do Spec Kit tiver sido substituído.
+- nenhum nome técnico do Nimbus Code tiver sido substituído.
 
 ## 9. Execução prática (ordem recomendada)
 
@@ -124,7 +124,7 @@ jq empty ./presets/catalog.json
 jq empty ./extensions/catalog.json
 jq empty ./workflows/catalog.json
 jq empty ./bundles/catalog.json
-rg -n "speckit-vpndev-standards" .
+rg -n "speckit-nimbus-code-standards" .
 ```
 
 Esperado:
@@ -153,15 +153,15 @@ O script lista cada hit da organização com:
 Para **cada ocorrência** que o script apontar:
 
 1. Trocar slug antigo:
-   - `speckit-vpndev-standards` → `nimbus-code-spec-kit-template`
+   - `speckit-nimbus-code-standards` → `nimbus-code-spec-kit-template`
 2. Trocar URL raw:
-   - `https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards/...`
+   - `https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-nimbus-code-standards/...`
    - `https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/...`
 3. Trocar URL web:
-   - `https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-vpndev-standards`
+   - `https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-nimbus-code-standards`
    - `https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template`
 4. Trocar caminhos locais:
-   - `./speckit-vpndev-standards/...` → `./nimbus-code-spec-kit-template/...`
+   - `./speckit-nimbus-code-standards/...` → `./nimbus-code-spec-kit-template/...`
 
 Prioridade:
 
