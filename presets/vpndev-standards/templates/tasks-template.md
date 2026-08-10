@@ -34,6 +34,28 @@ relevante ao artefato entregue pela tarefa.*
       foram corrigidos aqui foram abertos como Issue no GitHub e atribuídos ao
       Copilot coding agent
 
+## VPN Dev — Métricas de Branches e Saúde do Repositório (PMO)
+
+*Preencher semanalmente pelo Dev responsável pelo repositório. Métrica de
+governança do uso de agentes — branches perdidas são sinal de sessões
+não-finalizadas ou PRs abandonados.*
+
+| Métrica | Esta semana | Semana anterior | Tendência |
+|---|---|---|---|
+| Branches ativas (com PR aberto) | | | |
+| **Branches perdidas** (sem PR, inativas ≥ 3 dias) | | | ↑ / ↓ / = |
+| Branches mergeadas e não-deletadas | | | |
+| PRs abertos por agente há > 5 dias sem revisão | | | |
+
+**Ação obrigatória quando "Branches perdidas" > 0:**
+- [ ] Listar as branches perdidas (ver `docs/agent-session-manual.md`, seção 7)
+- [ ] Para cada branch perdida: deletar ou abrir PR justificando a continuidade
+- [ ] Registrar a causa raiz (sessão não finalizada? instrução vaga? escopo grande?)
+  como comentário na tabela acima para rastrear padrões ao longo do tempo
+
+> **Referência:** para o comando de auditoria de branches e o protocolo completo
+> de limpeza, ver [`docs/agent-session-manual.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/agent-session-manual.md#7-controle-de-branches-perdidas).
+
 ## VPN Dev — Estimativa vs. Consumo Real de Tokens e Horas Humanas
 
 *Preencher no fechamento da feature (após a última tarefa desta lista),

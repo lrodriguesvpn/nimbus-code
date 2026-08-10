@@ -15,6 +15,40 @@
 
 ---
 
+## Isolamento de Sessão e Regras de Branch
+
+Você está executando como agente numa **sessão de escopo fechado**. As seguintes
+regras são não-negociáveis:
+
+1. **Edite apenas os arquivos listados no prompt de início da sessão.** Se
+   precisar alterar um arquivo fora dessa lista para concluir a tarefa, **pare**
+   e informe o Dev — nunca edite silenciosamente fora do escopo.
+2. **Não faça merge.** Ao finalizar, abra um PR para `develop` com o checklist
+   da fase preenchido. O merge é decisão exclusiva do Dev após revisão.
+3. **1 branch por sessão.** Não crie branches adicionais além do declarado no
+   início da sessão. Se a tarefa exigir mais do que o escopo permite, **pare e
+   informe** — não subdivida por conta própria em novos branches.
+4. **Não altere configurações de CI/CD, workflows ou arquivos de infraestrutura**
+   a menos que estejam explicitamente listados no escopo da fase.
+5. **Não apague testes existentes** que não sejam relacionados diretamente aos
+   arquivos do escopo desta fase.
+6. Se encontrar um bug fora do escopo durante a implementação, **abra uma Issue**
+   em vez de corrigir inline — corrigir fora do escopo invalida o isolamento.
+
+### Formato obrigatório de declaração no início de cada tarefa
+
+```
+Fase: {N} — {descrição}
+Branch: feature/fase-{N}-{slug}
+Arquivos em escopo: {lista}
+Complexidade desta tarefa: S{N} — {justificativa breve}
+Modelo selecionado: {modelo}
+Padrão reutilizado encontrado (docs/reuse-catalog.yaml)? Sim (tag: {tag}) / Não
+Estimativa de tokens (input+output): ~{X}–{Y} mil tokens
+```
+
+---
+
 ## Regras Obrigatórias de Grafo
 
 Todo trabalho neste repositório que cria ou altera módulos **deve**:
@@ -172,6 +206,7 @@ seção 8.
 
 ## Referências
 
+- [Manual de Sessões Remotas e Branches](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/agent-session-manual.md)
 - [Guia do Dev VPN Dev](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/developer-guide.md)
 - [Seleção de Modelos por Complexidade](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/ai-code-quality-and-observability.md#6-seleção-de-modelo-por-complexidade-s0s4)
 - [Grafos de Módulos — Guia](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/module-graphs.md)

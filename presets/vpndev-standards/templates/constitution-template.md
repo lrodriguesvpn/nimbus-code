@@ -203,6 +203,30 @@
   correspondente.
 - Template e guia em [`docs/adr-guide.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/adr-guide.md).
 
+## Sessões de Agente, Branches e Isolamento de Código
+
+- **1 agente = 1 branch = 1 fase = conjunto fechado de arquivos**: nunca dois
+  agentes editam o mesmo arquivo ao mesmo tempo. Se duas fases planejadas tocam
+  no mesmo arquivo, elas são sequenciais — a segunda fase só começa após o PR da
+  primeira ser aprovado e mergeado.
+- **Planejamento em fases é obrigatório antes de qualquer sessão de agente**: a
+  feature deve ser dividida em fases no `plan.md`, cada fase com lista explícita
+  de arquivos de escopo (máximo 5 arquivos, 1 responsabilidade, máximo S2 por
+  fase), antes de iniciar a primeira sessão.
+- **Toda sessão de agente recebe um escopo fechado explicitamente**: o prompt de
+  início da sessão deve declarar os arquivos que o agente pode criar ou editar.
+  O agente **não deve editar** nenhum arquivo fora dessa lista — se o fizer, o
+  PR é rejeitado e uma nova sessão é iniciada com instrução mais precisa.
+- **Nada muda sem aprovação via PR**: agentes nunca fazem merge diretamente.
+  Todo trabalho produzido por agente chega a `develop` ou `main` exclusivamente
+  via Pull Request revisado e aprovado pelo Dev.
+- **Branches perdidas são dívida técnica**: qualquer branch sem PR aberto
+  associado ou sem commit há mais de 3 dias deve ser deletada. Branch mergeada
+  é deletada imediatamente após o merge. A contagem de branches perdidas é uma
+  métrica de PMO auditada semanalmente (ver `tasks-template.md`).
+- Ver manual operacional completo em
+  [`docs/agent-session-manual.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/agent-session-manual.md).
+
 ## Qualidade e Processo
 
 - Nenhuma implementação de feature relevante começa sem uma especificação formal

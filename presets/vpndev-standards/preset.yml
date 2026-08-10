@@ -3,8 +3,8 @@ schema_version: "1.0"
 preset:
   id: "vpndev-standards"
   name: "VPN Dev — Padrões de Governança"
-  version: "1.5.2"
-  description: "Constituição base, grafos de módulos obrigatórios, escala S0–S4 com estimativa de tokens e ajuste por projeto, catálogo de reuso de conteúdo para reduzir custo de tokens, SLO Gate, estratégia de release, ADRs, taxonomia de labels de priorização/desenvolvimento autônomo/DORA, modelo híbrido humano+agente, e framework DevSecOps da VPN Dev, aplicados sobre os templates nativos do Spec Kit."
+  version: "1.6.0"
+  description: "Constituição base, grafos de módulos obrigatórios, escala S0–S4 com estimativa de tokens e ajuste por projeto, catálogo de reuso de conteúdo para reduzir custo de tokens, SLO Gate, estratégia de release, ADRs, taxonomia de labels de priorização/desenvolvimento autônomo/DORA, modelo híbrido humano+agente, framework DevSecOps, regras de isolamento de sessões de agente (1 agente por arquivo, fases, limpeza de branches perdidas) e manual operacional de uso de agentes remotos da VPN Dev, aplicados sobre os templates nativos do Spec Kit."
   author: "VPN Dev"
   repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
   license: "Proprietary"
@@ -89,6 +89,15 @@ provides:
       file: "templates/cost-profiles-and-rates.md"
       description: "Perfis de senioridade (Júnior/Pleno/Sênior) e taxa média de custo/hora para controle de custo real do modelo híbrido agente+humano."
 
+    # Manual operacional de uso de sessões remotas de agente, branches e
+    # governança de branches perdidas — copiado para docs/agent-session-manual.md
+    # no projeto. Explica o comportamento esperado de sessões, ciclo de vida de
+    # branches e o que o Dev não deve fazer.
+    - type: "template"
+      name: "agent-session-manual"
+      file: "templates/agent-session-manual.md"
+      description: "Manual de uso de sessões remotas Copilot: isolamento de agentes, ciclo de vida de branches, controle de branches perdidas e regras para o Dev."
+
     # Índice de padrões/decisões reaproveitáveis — copiado para
     # docs/reuse-catalog.yaml no projeto. Consultado pelo agente antes de
     # re-derivar uma solução do zero, reduzindo custo de tokens.
@@ -117,3 +126,5 @@ tags:
   - "incident-management"
   - "d365"
   - "reuse-catalog"
+  - "agent-session-governance"
+  - "branch-hygiene"
