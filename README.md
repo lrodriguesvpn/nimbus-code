@@ -28,6 +28,48 @@ absorvidas sem retrabalho conceitual.
 O **nome comercial do sistema** é **NIMBUS CODE™ AI Delivery System**. O
 **nome técnico base** continua sendo **Nimbus Code**.
 
+## Framework NIMBUS em passos (Business → Código)
+
+1. **Business Goal**
+   Definir problema, objetivo, KPI e valor de negócio.
+
+2. **Contexto e Regras**
+   Mapear stakeholders, restrições, riscos e critérios de sucesso.
+
+3. **Necessidades do Usuário**
+   Transformar objetivos em jornadas, dores e resultados esperados.
+
+4. **Especificação Funcional**
+   Converter necessidades em requisitos claros (escopo, regras, fluxos).
+
+5. **Especificação Técnica**
+   Traduzir requisitos para arquitetura, contratos, dados e integrações.
+
+6. **Plano de Entrega**
+   Quebrar em épicos, histórias e tarefas priorizadas.
+
+7. **Implementação (Código)**
+   Desenvolver incrementalmente, com padrões e qualidade.
+
+8. **Validação**
+   Testar (funcional, integração, aceitação) e verificar KPI de negócio.
+
+9. **Release e Aprendizado**
+   Publicar, monitorar métricas e retroalimentar o ciclo.
+
+```mermaid
+flowchart TD
+    A[Business Goal] --> B[Contexto e Regras]
+    B --> C[Necessidades do Usuário]
+    C --> D[Especificação Funcional]
+    D --> E[Especificação Técnica]
+    E --> F[Plano de Entrega]
+    F --> G[Implementação Código]
+    G --> H[Validação e Testes]
+    H --> I[Release e Monitoramento]
+    I --> A
+```
+
 ## O que este repositório contém
 
 | Componente | Pasta | O que faz |
