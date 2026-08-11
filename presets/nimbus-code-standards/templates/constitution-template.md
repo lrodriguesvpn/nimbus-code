@@ -183,10 +183,16 @@
   produção atrás de feature flag (`flag`), deploy canário (`canary`) ou
   blue-green — nunca `direct` sem justificativa explícita registrada no
   `plan.md`. Isso permite rollback imediato sem reverter código.
+- **Toda flag deve ter metadados mínimos obrigatórios** no `plan.md`: nome,
+  owner, ambiente(s), tipo (`release` · `ops` · `experiment`), valor default,
+  critério de ativação, critério de rollback e critério/data de remoção.
 - **Feature flags têm ciclo de vida**: toda flag criada deve ter data de expiração
   ou critério de remoção definidos no `plan.md`. Flags não removidas após a
   feature ser considerada estável são dívida técnica e devem ser registradas
   como Issue.
+- **Cenários com múltiplas homologações concorrentes** (3+ frentes tocando arquivos
+  sobrepostos) devem usar flag com default seguro (**OFF**) e ativação progressiva
+  por ambiente/cliente para evitar acoplamento de release.
 - **Provider de flags configurável por projeto**: usar OpenFeature SDK como
   abstração — permite trocar o provider (LaunchDarkly, AWS AppConfig, etc.) sem
   alterar o código de aplicação.

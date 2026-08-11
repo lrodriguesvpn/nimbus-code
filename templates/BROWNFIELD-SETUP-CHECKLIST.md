@@ -24,12 +24,13 @@ Status: ⏳ Em andamento
 
 - [ ] Nimbus Code CLI (`specify`) instalado localmente e validado com `specify check`
 - [ ] Repositório clonado em `[PLACEHOLDER: caminho local]`
-- [ ] Executado: `cd [PLACEHOLDER: caminho] && specify init --here --integration copilot --force`
-- [ ] Executado: `curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bootstrap.sh | bash`
+- [ ] Executado: `cd [PLACEHOLDER: caminho] && curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bootstrap.sh | bash`
+- [ ] Confirmado que o bootstrap criou `.specify/` e instalou o bundle padrão
+- [ ] Se optamos por separar a inicialização: `specify init --here --integration copilot --force` executado antes do bootstrap
 - [ ] GitHub Project V2 criado automaticamente pelo bootstrap (URL: [PLACEHOLDER: link do project])
 - [ ] GitHub Project customizado conforme necessário (filtros, grupos, colunas)
 - [ ] `.specify/` adicionado ao `.gitignore`? (se necessário) — ou, preferência: versione `.specify/features/`, ignore `.specify/memory/`
-- [ ] README do projeto atualizado com a seção de Nimbus Code (copie de [`templates/README-bundle-section.md`](../../templates/README-bundle-section.md))
+- [ ] README do projeto atualizado com a seção de Nimbus Code (copie de [`templates/README-bundle-section.md`](README-bundle-section.md))
 
 ## Fase 2: Análise do Código Existente (Derivar a Constituição)
 
@@ -39,7 +40,7 @@ Status: ⏳ Em andamento
   - [ ] Padrões de testes observados: [PLACEHOLDER: ex.: pytest, Jest, GoTest]
   - [ ] Estrutura de módulos/pacotes: [PLACEHOLDER: ex.: monorepo, mono package, microserviços]
 
-- [ ] Executado `/nimbus-code.constitution` com o prompt de análise profunda (seção 2.3 do [developer-guide.md](../../docs/developer-guide.md))
+- [ ] Executado `/nimbus-code.constitution` com o prompt de análise profunda (seção 2.3 do [developer-guide.md](../docs/developer-guide.md))
 - [ ] Agente completou múltiplas iterações de análise (quantas: [PLACEHOLDER: 1-5])
 - [ ] `constitution.md` gerado e revisado
 - [ ] Ajustes manuais aplicados em `constitution.md`, se necessário (escreva resumo abaixo se sim)
@@ -119,9 +120,9 @@ Após este setup, o próximo ciclo de Nimbus Code será:
 4. `/nimbus-code.implement` → `/nimbus-code.converge` (ciclos até ✅)
 5. PR → Merge
 
-Ver [`docs/developer-guide.md`](../../docs/developer-guide.md) seção 3 para o passo a passo de importação de card, se aplicável.
+Ver [`docs/developer-guide.md`](../docs/developer-guide.md) seção 3 para o passo a passo de importação de card, se aplicável.
 
-Para referência completa de boas práticas e troubleshooting, ver [`docs/brownfield-best-practices.md`](../../docs/brownfield-best-practices.md).
+Para referência completa de boas práticas e troubleshooting, ver [`docs/brownfield-best-practices.md`](../docs/brownfield-best-practices.md).
 
 ---
 

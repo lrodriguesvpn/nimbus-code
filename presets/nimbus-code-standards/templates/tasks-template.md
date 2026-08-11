@@ -19,6 +19,11 @@ relevante ao artefato entregue pela tarefa.*
       (ex.: `test_AC1_<descricao>`) — ou exceção justificada no `plan.md`
 - [ ] Feature flag configurada e ativa para esta feature, conforme estratégia
       de release definida no `plan.md` (ou "N/A — deploy direct justificado")
+- [ ] Testes contemplam os dois caminhos da flag (ON/OFF) ou exceção foi
+      justificada no `plan.md`
+- [ ] Estratégia de rollout progressivo executada em homologação (canário,
+      cliente piloto ou equivalente) com evidência anexada ao PR
+- [ ] Tarefa/issue de remoção da flag criada com prazo e owner definidos
 - [ ] SLO medido em staging dentro dos limites definidos no SLO Gate do `plan.md`
       (ou "N/A — sem ambiente de staging disponível para esta tarefa")
 - [ ] Revisão de código por IA (GitHub Copilot code review) solicitada no PR e

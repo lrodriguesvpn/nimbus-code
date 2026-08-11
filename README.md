@@ -28,6 +28,48 @@ absorvidas sem retrabalho conceitual.
 O **nome comercial do sistema** é **NIMBUS CODE™ AI Delivery System**. O
 **nome técnico base** continua sendo **Nimbus Code**.
 
+## Framework NIMBUS em passos (Business → Código)
+
+1. **Business Goal**
+   Definir problema, objetivo, KPI e valor de negócio.
+
+2. **Contexto e Regras**
+   Mapear stakeholders, restrições, riscos e critérios de sucesso.
+
+3. **Necessidades do Usuário**
+   Transformar objetivos em jornadas, dores e resultados esperados.
+
+4. **Especificação Funcional**
+   Converter necessidades em requisitos claros (escopo, regras, fluxos).
+
+5. **Especificação Técnica**
+   Traduzir requisitos para arquitetura, contratos, dados e integrações.
+
+6. **Plano de Entrega**
+   Quebrar em épicos, histórias e tarefas priorizadas.
+
+7. **Implementação (Código)**
+   Desenvolver incrementalmente, com padrões e qualidade.
+
+8. **Validação**
+   Testar (funcional, integração, aceitação) e verificar KPI de negócio.
+
+9. **Release e Aprendizado**
+   Publicar, monitorar métricas e retroalimentar o ciclo.
+
+```mermaid
+flowchart TD
+    A[Business Goal] --> B[Contexto e Regras]
+    B --> C[Necessidades do Usuário]
+    C --> D[Especificação Funcional]
+    D --> E[Especificação Técnica]
+    E --> F[Plano de Entrega]
+    F --> G[Implementação Código]
+    G --> H[Validação e Testes]
+    H --> I[Release e Monitoramento]
+    I --> A
+```
+
 ## O que este repositório contém
 
 | Componente | Pasta | O que faz |
@@ -62,12 +104,18 @@ leia **obrigatoriamente** [`docs/brownfield-best-practices.md`](docs/brownfield-
 - Múltiplos passes de `implement` → `converge` (esperado, não erro).
 - Artefatos SDD como documentos vivos (quando editar vs. regenerar).
 - Integração com backlog externo (Azure DevOps/JIRA).
+- Estratégia para múltiplas homologações com Feature Toggle.
 - Troubleshooting comum e estratégias de migração incremental.
 
 **TL;DR do brownfield**: sempre rode `/nimbus-code.constitution` **antes** de qualquer
 feature (análise profunda do código existente é essencial); use
 `/nimbus-code.converge` **sempre** após `implement`; aceite múltiplos passes e
 documentar exceções no Architecture Decision Log.
+
+Para o cenário de branches concorrentes (3+ homologações ativas), veja também
+[`docs/feature-toggle-multi-homologacoes.md`](docs/feature-toggle-multi-homologacoes.md).
+Para adoção de LaunchDarkly no processo atual, veja
+[`docs/launchdarkly-no-processo-nimbus.md`](docs/launchdarkly-no-processo-nimbus.md).
 
 ## Modelo visual do bundle
 
@@ -358,6 +406,8 @@ nimbus-code-spec-kit-template/
 │   ├── brownfield-best-practices.md
 │   ├── developer-guide.md
 │   ├── extension-candidates.md
+│   ├── feature-toggle-multi-homologacoes.md
+│   ├── launchdarkly-no-processo-nimbus.md
 │   ├── ai-code-quality-and-observability.md
 │   ├── label-taxonomy-and-autonomous-dev.md
 │   └── mcp-and-bundles.md

@@ -27,6 +27,8 @@
       `type:legacy-import` aplicado, complexidade **S3 ou S4**, e
       **revisão humana** solicitada explicitamente (nunca mesclar apenas com
       aprovação automática)
+- [ ] Se houve estratégia de toggle: matriz de ativação por tenant/surface no
+      `plan.md` preenchida, com evidência de rollout/rollback controlado
 - [ ] Se alguma superfície de plataforma tocada aqui é compartilhada por
       repositórios de workload, os donos desses repositórios foram
       notificados (issue ou menção) para atualizar seus `impact-map.md`

@@ -10,9 +10,11 @@ sem exigir que cada projeto reescreva as mesmas regras:
   escala de complexidade S0–S4) *antes* do template nativo.
 - **`plan-template.md`** (`append`) — acrescenta a **classificação S0–S4**, o
   **Module Dependency Graph obrigatório**, o **Security & DevSecOps Gate** e o
-  **Architecture Decision Log** ao final do plano gerado por `/nimbus-code-plan`.
+  **Architecture Decision Log** ao final do plano gerado por `/nimbus-code-plan`,
+  incluindo plano obrigatório de toggle/rollout para cenários concorrentes.
 - **`tasks-template.md`** (`append`) — acrescenta o checklist de qualidade
-  (incluindo item de atualização do grafo) ao final do `tasks.md`.
+  (incluindo item de atualização do grafo e ciclo de vida da feature flag) ao final
+  do `tasks.md`.
 
 **Artefatos de feature (templates):**
 - `templates/feature-artifacts/graph.yaml` — fonte de verdade estruturada do grafo (obrigatório S2+)

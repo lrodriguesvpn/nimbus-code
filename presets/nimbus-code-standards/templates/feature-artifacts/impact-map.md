@@ -35,6 +35,19 @@ Módulos **não modificados por esta feature** que podem ser afetados por efeito
 
 ---
 
+## 2.1 Conflitos entre homologações (quando houver frentes concorrentes)
+
+| Item | Descrição |
+|---|---|
+| Branches/homologações concorrentes | [listar branches que tocam arquivos sobrepostos] |
+| Estratégia de coexistência | [ex.: feature flag default OFF + ativação progressiva por segmento] |
+| Decisor de conflito funcional | [Product/Arquitetura responsável por decisão de precedência] |
+| Critério de limpeza da flag | [data/condição para remoção definitiva] |
+
+> Se não houver frentes concorrentes, preencher com `N/A`.
+
+---
+
 ## 3. Análise de risco
 
 | Risco | Probabilidade | Severidade | Score | Mitigação |

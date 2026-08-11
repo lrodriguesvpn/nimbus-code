@@ -2,9 +2,11 @@
 
 > **TL;DR** (S0/S1 — leitura completa reservada para primeira vez em cada
 > cenário ou dúvida específica): repo novo → `curl ... bootstrap.sh | bash`
-> (seção 1); repo existente sem Nimbus Code → `specify init --here` + ler o
-> código/Boards antes de especificar (seção 2, brownfield); ponto de partida
-> a partir de um card do ADO/JIRA → prompt de importação pronto (seção 3).
+> (seção 1); repo existente sem Nimbus Code/sem Spec Kit → `curl ... bootstrap.sh | bash`
+> no próprio repo (ou `specify init --here` + bootstrap, se quiser separar) e
+> só depois ler o código/Boards antes de especificar (seção 2, brownfield);
+> ponto de partida a partir de um card do ADO/JIRA → prompt de importação pronto
+> (seção 3).
 > Pré-requisitos (`specify` CLI, `uv`, Copilot) na tabela logo abaixo.
 
 Este é o manual **central** de como todo dev da Nimbus-Code deve usar o
@@ -96,28 +98,37 @@ código real, talvez com um board no Azure DevOps/JIRA cheio de cards, mas
 entender o contexto por **duas fontes**: o código já escrito e o histórico do
 board — antes de escrever a primeira spec.
 
-### 2.1. Instalar o Nimbus Code no repo (sem tocar no código existente)
+> **Ordem recomendada para brownfield sem Spec Kit:** 1) rode o `bootstrap.sh`
+> no próprio repositório para inicializar o Nimbus Code; 2) confirme que a
+> pasta `.specify/` e o bundle foram instalados; 3) só então derive a
+> constituição e leia o backlog/boards.
+
+### 2.1. Inicializar o brownfield com o bootstrap da Nimbus-Code (recomendado)
+
+```bash
+cd meu-repo-existente
+curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bootstrap.sh | bash
+```
+
+Para **repo brownfield que ainda não tem Spec Kit/Nimbus Code**, este é o ponto
+de partida mais simples e correto: o `bootstrap.sh` já executa
+`specify init --here --integration copilot --force` e, na sequência, instala o
+bundle `nimbus-code-project-bundle` (preset + extensão + workflow). Ou seja: se
+o projeto ainda não foi inicializado, **o bootstrap já faz a inicialização e o
+bootstrap complementar da Nimbus-Code no mesmo fluxo**.
+
+### 2.2. Separar `specify init` do bootstrap (opcional)
 
 ```bash
 cd meu-repo-existente
 specify init --here --integration copilot --force
-```
-
-`--here` inicializa dentro do diretório atual em vez de criar um novo — isso só
-adiciona a pasta `.specify/` e os arquivos de comando do agente (ex.:
-prompts/skills do Copilot). **Nada do código-fonte existente é tocado.**
-
-### 2.2. Aplicar o bundle da Nimbus-Code por cima
-
-```bash
 curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bootstrap.sh | bash
 ```
 
-O `bootstrap.sh` detecta que o `specify init` já rodou e só instala
-preset + extensão + workflow (ver [`bootstrap.sh`](../bootstrap.sh)). Isso
-garante que, desde o primeiro dia, o repo já tem o Security/DevSecOps Gate, o
-checklist de qualidade e a extensão de backlog — mesmo sendo um projeto
-"antigo".
+Use esta variação só se você **quiser separar conscientemente** a criação da
+`.specify/` da aplicação do bundle. Nesse caso, o `bootstrap.sh` detecta que o
+`specify init` já rodou e só instala preset + extensão + workflow (ver
+[`bootstrap.sh`](../bootstrap.sh)). O resultado final é o mesmo da seção 2.1.
 
 ### 2.3. Varrer o código existente — gerar a constituição a partir do que já está implementado
 
@@ -195,14 +206,17 @@ para a variante com gate de DevSecOps da Nimbus-Code):
 existir implementação parcial/legada na mesma área da feature nova — ele é
 **append-only** (nunca edita/apaga código, só pode adicionar tarefas).
 
-## 2.6. DOs e DONTs — padrão brownfield (crítico para sucesso)
+### 2.6. DOs e DONTs — padrão brownfield (crítico para sucesso)
 
 ### ✅ DOs — boas práticas brownfield
 
-- **DO** rodar `/nimbus-code.constitution` como o passo **1**, antes de qualquer
-  feature nova, com o prompt de análise profunda — deixar o agente entender o
-  código existente custa iterações iniciais mas economiza em toda feature
-  subsequente.
+- **DO** começar pelo `bootstrap.sh` quando o repo brownfield ainda não tem
+  Spec Kit/Nimbus Code — ele já faz o `specify init --here` e instala o bundle
+  padrão da Nimbus-Code no mesmo fluxo.
+- **DO** rodar `/nimbus-code.constitution` como o passo **1 da primeira feature**,
+  depois da inicialização do ambiente, com o prompt de análise profunda —
+  deixar o agente entender o código existente custa iterações iniciais mas
+  economiza em toda feature subsequente.
 - **DO** manter `constitution.md`, `spec.md` e `plan.md` como **artefatos vivos**
   — eles são sempre reescritos/atualizados conforme a realidade muda, não são
   cópia estática do que foi feito uma vez.
@@ -256,11 +270,12 @@ existir implementação parcial/legada na mesma área da feature nova — ele é
   Se o agente gera código ruim, a spec estava ambígua; volte e clarifique (via
   `/nimbus-code.clarify` ou `/nimbus-code.specify`), não culpe o Nimbus Code.
 
-### Checklist pré-primeiro-ciclo para brownfield
+### 2.7. Checklist pré-primeiro-ciclo para brownfield
 
 Antes de rodar a primeira feature em um brownfield, valide:
 
-- [ ] `specify init --here` rodou com sucesso
+- [ ] `bootstrap.sh` rodou com sucesso no repo brownfield
+- [ ] `.specify/` foi criado (via `bootstrap.sh` ou via `specify init --here`, se você optou por separar)
 - [ ] Bundle `nimbus-code-project-bundle` instalado (veja `.specify/presets/` e `.specify/extensions/`)
 - [ ] `/nimbus-code.constitution` executado com o prompt de **análise profunda** (seção 2.3)
 - [ ] `constitution.md` revisado/editado manualmente se necessário
