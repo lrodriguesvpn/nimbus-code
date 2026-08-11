@@ -1,0 +1,278 @@
+name: DEVSTATS corporativo — integração híbrida Nimbus-Code
+
+# Integração padrão para projetos Nimbus-Code:
+# - camada local (repositório): emite eventos semânticos de issue/PR;
+# - camada corporativa (DEVSTATS): reconciliação central, histórico cross-repo,
+#   deduplicação e analytics final.
+#
+# Modelo híbrido aplicado:
+#   1) Evento em tempo real (issues/pull_request)
+#   2) Snapshot periódico (schedule) para reconciliação
+#   3) Reprocessamento manual (workflow_dispatch)
+#
+# Pré-requisitos organizacionais (Secrets/Variables de organização):
+# - Secret obrigatório: DEVSTATS_TOKEN
+# - Secret opcional: DEVSTATS_CLIENT_ID
+# - Variable obrigatória: DEVSTATS_ENDPOINT
+# - Variables opcionais: DEVSTATS_ENV, DEVSTATS_ENABLED
+#
+# Comportamento:
+# - Falha explícita quando credenciais/config obrigatórias faltam.
+# - Envio com retries e backoff.
+# - Idempotência por event_id; correlation_id canônico.
+# - Falhas de envio são observáveis, mas não bloqueiam o fluxo principal do
+#   projeto (job continua com warning para troubleshooting).
+
+on:
+  issues:
+    types: [opened, reopened, closed, labeled, unlabeled]
+  pull_request:
+    types: [opened, synchronize, closed, labeled, unlabeled]
+  schedule:
+    - cron: "30 2 * * *" # reconciliação diária (UTC)
+  workflow_dispatch:
+    inputs:
+      force_snapshot:
+        description: "Enviar snapshot de reconciliação mesmo sem evento de issue/PR"
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  emit-devstats:
+    name: Emitir payload para DEVSTATS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar habilitação da integração
+        run: |
+          ENABLED="${{ vars.DEVSTATS_ENABLED }}"
+          if [ -z "$ENABLED" ]; then
+            ENABLED="true"
+          fi
+          if [ "$ENABLED" != "true" ]; then
+            echo "DEVSTATS_ENABLED=$ENABLED. Integração desabilitada por opt-out."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+        id: gate
+
+      - name: Validar configuração obrigatória
+        if: steps.gate.outputs.skip != 'true'
+        run: |
+          if [ -z "${{ vars.DEVSTATS_ENDPOINT }}" ]; then
+            echo "::error::Variable DEVSTATS_ENDPOINT não configurada no nível organizacional."
+            exit 1
+          fi
+          if [ -z "${{ secrets.DEVSTATS_TOKEN }}" ]; then
+            echo "::error::Secret DEVSTATS_TOKEN não configurado no nível organizacional."
+            exit 1
+          fi
+
+      - name: Montar payload canônico
+        if: steps.gate.outputs.skip != 'true'
+        id: payload
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const eventName = context.eventName;
+            const action = context.payload.action || "snapshot";
+            const repo = context.repo;
+            const now = new Date().toISOString();
+            const bundleVersion = "1.7.0";
+            const forceSnapshotInput = String(context.payload?.inputs?.force_snapshot ?? "true").toLowerCase();
+            const isSnapshot = eventName === "schedule" || (eventName === "workflow_dispatch" && forceSnapshotInput === "true");
+            const artifact = context.payload.issue || context.payload.pull_request || null;
+
+            const labels = (artifact?.labels || []).map((l) => l.name);
+            const governancePrefixes = ["priority:", "complexity:", "type:", "agent:", "status:", "dora:"];
+            const governanceLabels = labels.filter((name) => governancePrefixes.some((prefix) => name.startsWith(prefix)));
+            const artifactType = context.payload.issue ? "issue" : (context.payload.pull_request ? "pull_request" : "snapshot");
+            const artifactId = artifact?.number || 0;
+            const occurrence = artifact?.updated_at || artifact?.created_at || now;
+            const eventId = [
+              repo.owner,
+              repo.repo,
+              artifactType,
+              artifactId,
+              action,
+              occurrence
+            ].join(":");
+            const correlationId = `${repo.owner}/${repo.repo}:${artifactType}:${artifactId}:${action}:${occurrence}`;
+
+            const projectFields = [];
+            if (artifact?.node_id && (artifactType === "issue" || artifactType === "pull_request")) {
+              const query = `
+                query($id: ID!) {
+                  node(id: $id) {
+                    ... on Issue {
+                      projectItems(first: 20, includeArchived: false) {
+                        nodes {
+                          id
+                          project { id title url }
+                          fieldValues(first: 30) {
+                            nodes {
+                              ... on ProjectV2ItemFieldTextValue { text field { ... on ProjectV2FieldCommon { name } } }
+                              ... on ProjectV2ItemFieldNumberValue { number field { ... on ProjectV2FieldCommon { name } } }
+                            }
+                          }
+                        }
+                      }
+                    }
+                    ... on PullRequest {
+                      projectItems(first: 20, includeArchived: false) {
+                        nodes {
+                          id
+                          project { id title url }
+                          fieldValues(first: 30) {
+                            nodes {
+                              ... on ProjectV2ItemFieldTextValue { text field { ... on ProjectV2FieldCommon { name } } }
+                              ... on ProjectV2ItemFieldNumberValue { number field { ... on ProjectV2FieldCommon { name } } }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }`;
+              const res = await github.graphql(query, { id: artifact.node_id });
+              const items = res?.node?.projectItems?.nodes || [];
+              for (const item of items) {
+                const fields = {};
+                for (const fv of item.fieldValues.nodes || []) {
+                  const fieldName = fv?.field?.name;
+                  if (!fieldName) continue;
+                  if (fieldName === "Horas Humanas") fields[fieldName] = fv.number ?? null;
+                  if (fieldName === "Oportunidade D365") fields[fieldName] = fv.text ?? "";
+                  if (fieldName === "Ocorrência CRM (N1)") fields[fieldName] = fv.text ?? "";
+                }
+                if (Object.keys(fields).length > 0) {
+                  projectFields.push({
+                    project_id: item.project.id,
+                    project_title: item.project.title,
+                    project_url: item.project.url,
+                    fields
+                  });
+                }
+              }
+            }
+
+            const payload = {
+              contract_version: "2026-08-devstats-hybrid-v1",
+              source: "nimbus-code-workflow",
+              event: {
+                id: eventId,
+                name: eventName,
+                action,
+                occurred_at: now,
+                is_snapshot: isSnapshot
+              },
+              correlation_id: correlationId,
+              repository: {
+                owner: repo.owner,
+                name: repo.repo,
+                full_name: `${repo.owner}/${repo.repo}`,
+                url: context.payload.repository?.html_url || `${process.env.GITHUB_SERVER_URL}/${repo.owner}/${repo.repo}`
+              },
+              artifact: artifact ? {
+                type: artifactType,
+                number: artifact.number,
+                id: artifact.id,
+                node_id: artifact.node_id,
+                state: artifact.state || null,
+                title: artifact.title || null,
+                url: artifact.html_url || null
+              } : null,
+              pull_request: context.payload.pull_request ? {
+                merged: !!context.payload.pull_request.merged,
+                merged_at: context.payload.pull_request.merged_at || null,
+                base_ref: context.payload.pull_request.base?.ref || null,
+                head_ref: context.payload.pull_request.head?.ref || null
+              } : null,
+              labels: {
+                all: labels,
+                governance: governanceLabels
+              },
+              project_fields: projectFields,
+              bundle: {
+                id: "nimbus-code-project-bundle",
+                version: bundleVersion
+              },
+              environment: {
+                devstats_env: process.env.DEVSTATS_ENV || "prod"
+              },
+              links: {
+                issue_url: context.payload.issue?.html_url || null,
+                pull_request_url: context.payload.pull_request?.html_url || null
+              }
+            };
+
+            core.setOutput("event_id", eventId);
+            core.setOutput("correlation_id", correlationId);
+            core.setOutput("payload_json", JSON.stringify(payload));
+            core.info(`Payload pronto para envio. event_id=${eventId}`);
+        env:
+          DEVSTATS_ENV: ${{ vars.DEVSTATS_ENV }}
+
+      - name: Enviar para DEVSTATS (retry/backoff)
+        if: steps.gate.outputs.skip != 'true'
+        id: dispatch
+        continue-on-error: true
+        env:
+          DEVSTATS_ENDPOINT: ${{ vars.DEVSTATS_ENDPOINT }}
+          DEVSTATS_TOKEN: ${{ secrets.DEVSTATS_TOKEN }}
+          DEVSTATS_CLIENT_ID: ${{ secrets.DEVSTATS_CLIENT_ID }}
+          PAYLOAD_JSON: ${{ steps.payload.outputs.payload_json }}
+          EVENT_ID: ${{ steps.payload.outputs.event_id }}
+          CORRELATION_ID: ${{ steps.payload.outputs.correlation_id }}
+        run: |
+          set -euo pipefail
+
+          if [ -n "${DEVSTATS_CLIENT_ID}" ]; then
+            CLIENT_HEADER="X-Devstats-Client-Id: ${DEVSTATS_CLIENT_ID}"
+          else
+            CLIENT_HEADER=""
+          fi
+
+          ATTEMPTS=(1 2 3)
+          for attempt in "${ATTEMPTS[@]}"; do
+            echo "Tentativa ${attempt}/3 para enviar evento ${EVENT_ID}"
+            HTTP_CODE=$(
+              curl -sS -o /tmp/devstats-response.json -w "%{http_code}" \
+                -X POST "${DEVSTATS_ENDPOINT}" \
+                -H "Content-Type: application/json" \
+                -H "X-Devstats-Token: ${DEVSTATS_TOKEN}" \
+                -H "X-Event-Id: ${EVENT_ID}" \
+                -H "X-Correlation-Id: ${CORRELATION_ID}" \
+                ${CLIENT_HEADER:+-H "${CLIENT_HEADER}"} \
+                --data "${PAYLOAD_JSON}" || true
+            )
+
+            if [ "${HTTP_CODE}" -ge 200 ] && [ "${HTTP_CODE}" -lt 300 ]; then
+              echo "✅ Envio concluído com sucesso (HTTP ${HTTP_CODE})."
+              exit 0
+            fi
+
+            echo "::warning::Falha no envio ao DEVSTATS (HTTP ${HTTP_CODE}) na tentativa ${attempt}. Resposta:"
+            cat /tmp/devstats-response.json || true
+
+            if [ "${attempt}" -lt 3 ]; then
+              SLEEP_SECS=$((attempt * 10))
+              echo "Aguardando ${SLEEP_SECS}s para retry com backoff..."
+              sleep "${SLEEP_SECS}"
+            fi
+          done
+
+          echo "::error::Falha após 3 tentativas no envio ao DEVSTATS."
+          exit 1
+
+      - name: Marcar envio não bloqueante com observabilidade
+        if: steps.dispatch.outcome == 'failure'
+        run: |
+          echo "::warning::Integração DEVSTATS falhou, mas o fluxo principal do projeto segue sem bloqueio."
+          echo "::warning::Use workflow_dispatch para reprocessamento/troubleshooting."

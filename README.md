@@ -187,6 +187,8 @@ IOX-CROWDFUNDINGPAAS) e 2 campos customizados:
   e [`docs/cost-profiles-and-rates.md`](presets/nimbus-code-standards/templates/cost-profiles-and-rates.md)
 - **Campo "Oportunidade D365"** (texto) — cole a URL completa da Oportunidade
   no Dynamics 365 para vincular a issue/PR à venda/negócio de origem
+- **Campo "Ocorrência CRM (N1)"** (texto) — cole a URL/ID do atendimento N1 no
+  CRM para incidentes e reconciliação operacional
 
 O project é criado com o nome `{repo-name} — Nimbus Code Roadmap` e fica
 imediatamente acessível para customize (adicionar/remover filtros, agrupar
@@ -224,7 +226,8 @@ consolidados):
    [`templates/workflows/add-to-pmo-project.yml`](templates/workflows/add-to-pmo-project.yml)
    apontando para a URL do project criado acima — toda issue/PR nova é
    adicionada automaticamente (via [`actions/add-to-project`](https://github.com/actions/add-to-project)).
-3. Para **custo real (Horas Humanas) e Oportunidades D365 consolidados**
+3. Para **custo real (Horas Humanas), Oportunidades D365 e Ocorrências CRM (N1)
+   consolidados**
    entre repositórios — que não somam sozinhos no board de portfólio, pois
    são campos por-projeto no GitHub Projects V2 — rode:
    ```bash
@@ -270,6 +273,30 @@ sozinho (ver [Versão do Bundle em uso — Política de Atualização](#versão-
 Com o secret `VPNDEV_STANDARDS_READ_TOKEN` configurado no projeto consumidor,
 também compara a versão mais recente do bundle; sem esse secret, o workflow
 continua e compara apenas a versão do Nimbus Code CLI.
+
+### Bônus: integração híbrida com DEVSTATS corporativo
+
+O `bootstrap.sh` também copia
+[`templates/workflows/devstats-corporate-integration.yml`](templates/workflows/devstats-corporate-integration.yml)
+para `.github/workflows/` do projeto consumidor. Esse workflow publica eventos
+semânticos de `issues`/`pull_request` em tempo real, além de um snapshot diário
+de reconciliação (e execução manual para troubleshooting/reprocessamento),
+seguindo o modelo híbrido **repo emissor + DEVSTATS reconciliador corporativo**.
+
+Pré-requisitos corporativos (nível de organização do GitHub, não por repo):
+
+- Secret obrigatório: `DEVSTATS_TOKEN`
+- Secret opcional: `DEVSTATS_CLIENT_ID`
+- Variable obrigatória: `DEVSTATS_ENDPOINT`
+- Variables opcionais: `DEVSTATS_ENV`, `DEVSTATS_ENABLED` (opt-out temporário
+  com `false`)
+
+Sem `DEVSTATS_TOKEN`/`DEVSTATS_ENDPOINT`, o workflow falha explicitamente para
+garantir observabilidade operacional.
+
+Para repositórios já existentes (retrofit), copie manualmente o template para
+`.github/workflows/`, configure os Secrets/Variables organizacionais acima e
+dispare `workflow_dispatch` para validar ingestão inicial.
 
 > **Nota sobre `specify bundle install`**: o CLI do Nimbus Code resolve os
 > componentes de um bundle (`provides.presets/extensions/workflows`) **somente
@@ -319,6 +346,7 @@ Este repositório fornece arquivos prontos para copiar em projetos que usam o Ni
 | [`templates/README-bundle-section.md`](templates/README-bundle-section.md) | Seção do README do projeto documentando versão do bundle | `README.md` do projeto (adapte para seu contexto) |
 | [`templates/BROWNFIELD-SETUP-CHECKLIST.md`](templates/BROWNFIELD-SETUP-CHECKLIST.md) | Checklist interativo para setup de Nimbus Code em repo existente | `.specify/BROWNFIELD-SETUP-CHECKLIST.md` (brownfield) |
 | [`templates/workflows/update-speckit-and-bundle.yml`](templates/workflows/update-speckit-and-bundle.yml) | GitHub Action automática para notificar atualizações do bundle | `.github/workflows/update-speckit-and-bundle.yml` (todos os projetos) |
+| [`templates/workflows/devstats-corporate-integration.yml`](templates/workflows/devstats-corporate-integration.yml) | GitHub Action padrão de integração híbrida com DEVSTATS corporativo (evento + snapshot + reprocessamento manual) | `.github/workflows/devstats-corporate-integration.yml` (todos os projetos Nimbus-Code) |
 
 **Para brownfield especificamente**: depois de rodar `specify init` e o
 `bootstrap.sh`, copie o checklist para o seu `.specify/`:
