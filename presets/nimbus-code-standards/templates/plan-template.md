@@ -81,6 +81,29 @@ Para S3/S4, criar também `impact-map.md` na mesma pasta.*
 [Razão técnica para não usar flag/canary — ex.: migration de schema incompatível
 com flag, ou feature de infraestrutura sem plano de ativação incremental]
 
+## Nimbus-Code — Plano de Toggle e Rollout (obrigatório com `flag`)
+
+*Preencher para toda feature que usar toggle. Obrigatório para S3/S4 quando
+houver homologações concorrentes.*
+
+| Campo | Valor |
+|---|---|
+| **Flag key** | `<dominio>.<feature>.<acao>` |
+| **Tipo de flag** | `release` · `ops` · `experiment` |
+| **Owner da flag** | [squad/pessoa responsável] |
+| **Ambiente(s)** | dev · hml · prod |
+| **Default por ambiente** | [ex.: dev=off, hml=off, prod=off] |
+| **Segmentos de ativação** | [ex.: cliente-piloto, canary-10, interno] |
+| **Estratégia de rollout** | [ex.: hml interno → hml cliente piloto → prod canary 10% → prod 100%] |
+| **Kill switch definido?** | Sim/Não — [chave/caminho de operação] |
+| **Critério de limpeza** | [ex.: remover até D+14 após 100% rollout estável] |
+| **Issue/tarefa de remoção criada?** | Sim/Não — [ID] |
+
+**Conflitos funcionais entre homologações (quando aplicável):**
+- Decisor de negócio/arquitetura: [nome/time]
+- Regra de precedência entre frentes: [qual comportamento vence em conflito]
+- Evidência registrada no ADL: [link/âncora da decisão]
+
 ## Nimbus-Code — SLO Gate
 
 *Preencher para todo componente novo ou alterado de forma relevante. Os valores

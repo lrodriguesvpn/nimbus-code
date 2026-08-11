@@ -44,9 +44,11 @@ discovery → imported → plan_diff_zero → landing_zone_generated → managed
 - **`plan-template.md`** (`append`) — classificação de ambiente/cliente/nuvem, gate de fase
   com evidência obrigatória, ferramenta de reconciliação por domínio e checklist de zero-diff.
 - **`spec-template.md`** (`prepend`) — cabeçalho com cliente/tenant, ambiente,
-  classificação de legado e tipo de spec (`forward` / `reverse`).
+  classificação de legado, convivência temporária por toggle e tipo de spec
+  (`forward` / `reverse`).
 - **`tasks-template.md`** (`append`) — checklist de fechamento com confirmação de que nenhuma
-  mudança foi aplicada diretamente e gate de avanço de fase.
+  mudança foi aplicada diretamente, gate de avanço de fase e evidências de
+  rollout/rollback controlado quando houver toggle.
 
 **Artefatos de feature (templates):**
 - `templates/feature-artifacts/platform-graph.yaml` — grafo com hierarquia `platforms[] → surfaces[]` e `iac_lifecycle_stage` por plataforma
@@ -101,4 +103,3 @@ responsável pelos padrões da Nimbus-Code antes de publicar uma nova versão.
 **v0.2.0** — Publicado no `presets/catalog.json`. Inclui hierarquia de plataformas,
 pipeline de ciclo de vida com 5 fases, Nimbus Discovery Report, Landing Zone + CAF
 automático, spec `reverse`, isolamento de credenciais e gates formais por fase.
-

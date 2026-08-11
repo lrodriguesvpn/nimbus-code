@@ -18,6 +18,7 @@ platform-graph.yaml.*
 | **Ambiente(s)** | prod · hml · dev |
 | **Nuvem(ns)/plataforma(s) envolvidas** | Azure · AWS · GCP · GWS · M365 · D365 |
 | **Sistema legado (não-Terraformado hoje)?** | Sim/Não — se Sim, referenciar `legacy-inventory.md` |
+| **Convivência temporária de comportamento por toggle?** | Sim/Não — se Sim, informar flag e escopo (tenant/surface/ambiente) |
 | **Esta feature aplica mudança direta em algum ambiente?** | **Não** *(sempre "Não" neste repositório)* |
 | **PR de referência / Issue** | [link — ou "novo" se não existir] |
 

@@ -114,6 +114,8 @@ documentar exceções no Architecture Decision Log.
 
 Para o cenário de branches concorrentes (3+ homologações ativas), veja também
 [`docs/feature-toggle-multi-homologacoes.md`](docs/feature-toggle-multi-homologacoes.md).
+Para adoção de LaunchDarkly no processo atual, veja
+[`docs/launchdarkly-no-processo-nimbus.md`](docs/launchdarkly-no-processo-nimbus.md).
 
 ## Modelo visual do bundle
 
@@ -405,6 +407,7 @@ nimbus-code-spec-kit-template/
 │   ├── developer-guide.md
 │   ├── extension-candidates.md
 │   ├── feature-toggle-multi-homologacoes.md
+│   ├── launchdarkly-no-processo-nimbus.md
 │   ├── ai-code-quality-and-observability.md
 │   ├── label-taxonomy-and-autonomous-dev.md
 │   └── mcp-and-bundles.md

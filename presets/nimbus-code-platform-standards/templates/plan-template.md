@@ -19,6 +19,18 @@ usado para validar esta feature.*
 | **Ferramenta de reconciliação** | `terraform plan` · `Test-M365DSCConfiguration` · export GAM · `pac solution` diff · extração de schema |
 | **Este trabalho aplica mudança direta em algum ambiente?** | **Não** *(deve ser sempre "Não" neste repositório — se "Sim", está no repositório errado; mover para um repositório de projeto)* |
 
+## Nimbus-Code (Plataforma) — Matriz de Ativação por Tenant/Surface (quando usar toggle)
+
+*Preencher quando houver convivência temporária de comportamento entre homologações
+ou tenants. Este repositório continua sem `apply`; a matriz orienta rollout no
+repositório de workload relacionado.*
+
+| Tenant/Plataforma | Surface/Componente | Flag | Ambiente | Segmento | Estado inicial | Critério de avanço | Critério de rollback |
+|---|---|---|---|---|---|---|---|
+| `<tenant>` | `<surface>` | `<flag-key>` | dev/hml/prod | piloto/canary/interno | OFF | [métrica/validação] | [limiar de erro] |
+
+> Se não houver toggle neste trabalho, preencher com `N/A`.
+
 ## Nimbus-Code (Plataforma) — Checklist de Zero-Diff
 
 *Obrigatório antes de marcar qualquer recurso como `iac_status: completo` no
