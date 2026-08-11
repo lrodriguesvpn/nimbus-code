@@ -104,12 +104,16 @@ leia **obrigatoriamente** [`docs/brownfield-best-practices.md`](docs/brownfield-
 - Múltiplos passes de `implement` → `converge` (esperado, não erro).
 - Artefatos SDD como documentos vivos (quando editar vs. regenerar).
 - Integração com backlog externo (Azure DevOps/JIRA).
+- Estratégia para múltiplas homologações com Feature Toggle.
 - Troubleshooting comum e estratégias de migração incremental.
 
 **TL;DR do brownfield**: sempre rode `/nimbus-code.constitution` **antes** de qualquer
 feature (análise profunda do código existente é essencial); use
 `/nimbus-code.converge` **sempre** após `implement`; aceite múltiplos passes e
 documentar exceções no Architecture Decision Log.
+
+Para o cenário de branches concorrentes (3+ homologações ativas), veja também
+[`docs/feature-toggle-multi-homologacoes.md`](docs/feature-toggle-multi-homologacoes.md).
 
 ## Modelo visual do bundle
 
@@ -400,6 +404,7 @@ nimbus-code-spec-kit-template/
 │   ├── brownfield-best-practices.md
 │   ├── developer-guide.md
 │   ├── extension-candidates.md
+│   ├── feature-toggle-multi-homologacoes.md
 │   ├── ai-code-quality-and-observability.md
 │   ├── label-taxonomy-and-autonomous-dev.md
 │   └── mcp-and-bundles.md
