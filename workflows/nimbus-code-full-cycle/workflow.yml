@@ -32,13 +32,6 @@ inputs:
 # ────────────────────────────────────────────────────────────────────────────
 
 steps:
-  - id: discovery
-    type: note
-    message: |
-      FASE: Discovery — sem branch.
-      Esta fase produz entendimento do problema, não artefatos de código.
-      Nenhum branch deve ser criado aqui.
-
   - id: specify
     command: nimbus-code.specify
     integration: "{{ inputs.integration }}"
@@ -94,13 +87,6 @@ steps:
 # ────────────────────────────────────────────────────────────────────────────
 # FASE COM BRANCH (implementação — branch criado aqui)
 # ────────────────────────────────────────────────────────────────────────────
-
-  - id: create-branch
-    type: note
-    message: |
-      FASE: Implement — branch criado agora.
-      O agente deve criar o branch feature/fase-{N}-{slug} antes de iniciar
-      qualquer commit. Nenhum código foi alterado antes deste ponto.
 
   - id: implement
     command: nimbus-code.implement
