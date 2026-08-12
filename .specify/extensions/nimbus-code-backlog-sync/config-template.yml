@@ -1,0 +1,14 @@
+schema_version: "1.0"
+integration: "jira" # ou "azure-devops"
+
+jira:
+  project_key: "" # ex.: DEV, PROD
+  epic_link_field: "customfield_10014" # ajustar conforme instância JIRA
+
+azure_devops:
+  organization: ""
+  project: ""
+  parent_work_item_type: "Feature" # ou "Epic"
+  child_work_item_type: "Task"
+
+create_parent_on_split: true

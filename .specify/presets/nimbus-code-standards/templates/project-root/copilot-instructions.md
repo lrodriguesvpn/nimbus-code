@@ -13,20 +13,6 @@
 - **Nimbus Code workflow:** `nimbus-code-full-cycle` (specify → plan → tasks → implement)
 - **Plano ativo:** `specs/<feature-slug>/plan.md` (atualizar este link na feature em andamento)
 
-## Governança de IA da Empresa
-
-- **Ferramentas oficiais**: Microsoft Copilot para produtividade/negócio e
-  GitHub Enterprise Copilot para engenharia.
-- **Política única**: toda IA usada pela empresa segue a mesma constituição
-  corporativa. Não crie políticas paralelas por ferramenta.
-- **M365**: agentes criados no Microsoft 365 seguem a mesma constituição e
-  devem respeitar compartilhamento, publicação, acesso e ownership definidos
-  pela governança corporativa.
-- **Ferramentas legadas**: Claude Enterprise e ChatGPT só são válidos se
-  descritos como usos sujeitos à mesma constituição.
-- **Aliases Nimbus**: os comandos Nimbus são apenas apelidos operacionais do
-  Spec Kit; os comandos originais continuam válidos e compatíveis.
-
 ---
 
 ## Isolamento de Sessão e Regras de Branch

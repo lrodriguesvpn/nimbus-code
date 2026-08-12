@@ -1,0 +1,92 @@
+name: Garantir GitHub Project do repositório
+
+# Garante que este repositório sempre tenha o GitHub Project V2 padrão do
+# bundle Nimbus-Code (views + campos "Horas Humanas" e "Oportunidade D365" — ver
+# scripts/setup-github-project.sh). Roda semanalmente e sob demanda.
+#
+# Comportamento:
+#   - Se o Project já existir (título terminando em "— Nimbus Code Roadmap"),
+#     o workflow só confirma e não faz nada.
+#   - Se NÃO existir — por exemplo, porque o bootstrap.sh rodou numa máquina
+#     sem `gh` CLI instalado, ou porque alguém apagou o Project por engano —
+#     este workflow recria automaticamente, com as mesmas views/campos do
+#     bootstrap original. Isso é o que GARANTE que todo repositório com este
+#     bundle sempre tenha um Project, mesmo que o passo automático do
+#     bootstrap tenha sido pulado originalmente.
+#
+# Instalar este workflow em cada repositório do projeto:
+#   cp .github/workflows/ensure-github-project.yml <repo>/.github/workflows/
+#
+# Pré-requisitos (2 secrets):
+#   1. VPNDEV_PROJECT_TOKEN: um Personal Access Token (classic, escopos
+#      `repo` + `project`, ou fine-grained com permissão de leitura/escrita
+#      em "Projects") de um usuário com acesso de escrita ao repositório e ao
+#      Project. Obrigatório porque a API de Projects V2 (GraphQL) exige
+#      escopo `project`, que o GITHUB_TOKEN padrão do workflow NUNCA tem —
+#      sem esse secret, este workflow falha explicitamente (não em silêncio).
+#   2. VPNDEV_STANDARDS_READ_TOKEN: o mesmo secret já usado por
+#      update-speckit-and-bundle.yml (PAT de qualquer membro da organização
+#      venha-pra-nuvem) — usado só para clonar scripts/setup-github-project.sh
+#      deste repositório de padrões.
+
+on:
+  schedule:
+    - cron: "0 13 * * 3" # toda quarta-feira, 10h BRT (dia diferente da verificação semanal de versão, que roda segunda)
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  ensure-project:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar secrets obrigatórios
+        run: |
+          if [ -z "${{ secrets.VPNDEV_PROJECT_TOKEN }}" ]; then
+            echo "::error::Secret VPNDEV_PROJECT_TOKEN não configurado. Crie um PAT (escopos repo+project) e configure em Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+          if [ -z "${{ secrets.VPNDEV_STANDARDS_READ_TOKEN }}" ]; then
+            echo "::error::Secret VPNDEV_STANDARDS_READ_TOKEN não configurado (mesmo secret usado por update-speckit-and-bundle.yml)."
+            exit 1
+          fi
+
+      - name: Verificar se o Project já existe
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.VPNDEV_PROJECT_TOKEN }}
+        run: |
+          EXISTING=$(gh api graphql -f owner="${{ github.repository_owner }}" -f name="${{ github.event.repository.name }}" -f query='
+            query($owner:String!, $name:String!) {
+              repository(owner:$owner, name:$name) {
+                projectsV2(first: 10) { nodes { title url } }
+              }
+            }' -q '.data.repository.projectsV2.nodes[] | select(.title | test(" — Nimbus Code Roadmap$")) | .url' 2>/dev/null | head -1 || true)
+          if [ -n "$EXISTING" ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "url=$EXISTING" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Clonar scripts do nimbus-code-spec-kit-template
+        if: steps.check.outputs.found != 'true'
+        env:
+          VPNDEV_TOKEN: ${{ secrets.VPNDEV_STANDARDS_READ_TOKEN }}
+        run: |
+          git clone --depth 1 "https://${VPNDEV_TOKEN}@venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template.git" /tmp/nimbus-code-standards
+
+      - name: Criar GitHub Project (não existia)
+        if: steps.check.outputs.found != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.VPNDEV_PROJECT_TOKEN }}
+        run: |
+          bash /tmp/nimbus-code-standards/scripts/setup-github-project.sh \
+            --repo-owner "${{ github.repository_owner }}" \
+            --repo-name "${{ github.event.repository.name }}"
+
+      - name: Confirmar (já existia)
+        if: steps.check.outputs.found == 'true'
+        run: |
+          echo "✅ Project já existe: ${{ steps.check.outputs.url }} — nada a fazer."

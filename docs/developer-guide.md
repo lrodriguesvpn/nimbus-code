@@ -36,6 +36,22 @@ verdade — abra um PR corrigindo, não crie um manual paralelo em outro lugar.
 
 Rode `specify check` a qualquer momento para validar se o ambiente está OK.
 
+## 0. Governança corporativa de IA (leitura obrigatória)
+
+Antes de criar ou revisar qualquer feature relacionada a IA, leia:
+
+- [`docs/ai-governance/README.md`](ai-governance/README.md) — índice central da
+  constituição corporativa e dos guias por ferramenta
+- [`docs/ai-governance/corporate-constitution.md`](ai-governance/corporate-constitution.md)
+- [`docs/ai-governance/m365-governance.md`](ai-governance/m365-governance.md)
+- [`docs/ai-governance/legacy-tool-guidance.md`](ai-governance/legacy-tool-guidance.md)
+- [`docs/ai-governance/nimbus-aliases.md`](ai-governance/nimbus-aliases.md)
+
+**Regra oficial**: Microsoft Copilot é a ferramenta oficial de IA para
+produtividade/negócio e GitHub Enterprise Copilot é a ferramenta oficial para
+engenharia. Claude Enterprise e ChatGPT só devem ser usados sob a mesma
+constituição corporativa, sem política paralela.
+
 ## 1. Repositório novo
 
 Já documentado em detalhe no [README raiz](../README.md#como-um-projeto-novo-já-nasce-com-isso).
@@ -201,6 +217,18 @@ para a variante com gate de DevSecOps da Nimbus-Code):
                       e anexa o que faltar como novas tarefas — repita
                       implement → converge até sair "✅ Converged"
 ```
+
+**Camada de aliases Nimbus**: os nomes abaixo são equivalentes operacionais dos
+comandos do Spec Kit. O comando original continua válido.
+
+- `constitution` → `nimbus.constitution`
+- `specify` → `nimbus.discovery`
+- `clarify` → `nimbus.refinement`
+- `plan` → `nimbus.plan`
+- `tasks` → `nimbus.backlog`
+- `implement` → `nimbus.build`
+- `analyze` → `nimbus.validate`
+- `converge` → `nimbus.release`
 
 `/nimbus-code.converge` é especialmente útil em brownfield porque é comum já
 existir implementação parcial/legada na mesma área da feature nova — ele é

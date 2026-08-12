@@ -449,6 +449,12 @@ Benefício direto em tokens: um ponteiro custa poucas dezenas de tokens; o
 conteúdo completo que ele substitui pode custar milhares — e só precisa ser
 lido por inteiro quando alguém (humano ou agente) realmente abrir o link.
 
+Para governança de IA corporativa, a referência canônica é
+[`docs/ai-governance/README.md`](docs/ai-governance/README.md): a mesma
+constituição vale para Microsoft Copilot, GitHub Enterprise Copilot e, quando
+aplicável, para Claude Enterprise e ChatGPT. Não duplique a política em docs
+específicos de ferramenta; apenas aponte para a constituição única.
+
 ### 9.2 Catálogo de reuso (`docs/reuse-catalog.yaml`)
 
 Índice machine-readable, instalado pelo `bootstrap.sh` em todo projeto novo

@@ -28,6 +28,22 @@ absorvidas sem retrabalho conceitual.
 O **nome comercial do sistema** é **NIMBUS CODE™ AI Delivery System**. O
 **nome técnico base** continua sendo **Nimbus Code**.
 
+## Governança corporativa de IA
+
+Esta organização usa uma única constituição corporativa para toda IA. A
+implementação documental desta política vive em
+[`docs/ai-governance/README.md`](docs/ai-governance/README.md) e define:
+
+- **Ferramentas oficiais de IA**: Microsoft Copilot para produtividade/negócio
+  e GitHub Enterprise Copilot para engenharia.
+- **Governança M365**: qualquer agente criado no Microsoft 365 segue a mesma
+  constituição, com regras próprias de publicação, compartilhamento e uso de
+  dados.
+- **Ferramentas legadas**: Claude Enterprise e ChatGPT só devem ser usadas sob
+  a mesma constituição corporativa, sem política paralela.
+- **Nomenclatura Nimbus**: os nomes Nimbus são uma camada de aliases sobre o
+  Spec Kit; os comandos originais continuam válidos e suportados.
+
 ## Framework NIMBUS em passos (Business → Código)
 
 1. **Business Goal**

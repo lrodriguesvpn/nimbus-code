@@ -22,13 +22,6 @@ Cada sessão consome tokens. Sessões mal-delimitadas (escopo grande, instruçã
 vaga) desperdiçam tokens e geram PRs difíceis de revisar. A regra é: **quanto
 menor e mais preciso o escopo, melhor o resultado e menor o custo.**
 
-**Regra de IA corporativa**: quando a sessão envolver conteúdo de IA, use a
-constituição corporativa única em [`docs/ai-governance/README.md`](../docs/ai-governance/README.md).
-As ferramentas oficiais da empresa são Microsoft Copilot e GitHub Enterprise
-Copilot; Claude Enterprise e ChatGPT seguem a mesma constituição quando ainda
-forem usados. Os nomes Nimbus são apenas aliases do Spec Kit; os comandos
-originais continuam válidos.
-
 ---
 
 ## 2. Modelo de Branches
@@ -231,7 +224,6 @@ semanalmente pelo Dev responsável.
 
 - [Constituição Nimbus-Code](../presets/nimbus-code-standards/templates/constitution-template.md) — regras não-negociáveis de isolamento e fases
 - [Copilot Instructions](../presets/nimbus-code-standards/templates/project-root/copilot-instructions.md) — regras operacionais injetadas no agente
-- [Governança corporativa de IA](../docs/ai-governance/README.md) — constituição única, ferramentas oficiais e aliases Nimbus
 - [Taxonomia de Labels](label-taxonomy-and-autonomous-dev.md) — como sinalizar issues para agentes autônomos
 - [Modelo Híbrido e Custo](ai-code-quality-and-observability.md) — tokens, horas humanas e custo real
 - [Grafos de Módulos](module-graphs.md) — graph.yaml, graph.md e Graph Guard

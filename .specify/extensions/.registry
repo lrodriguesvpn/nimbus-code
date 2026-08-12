@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "extensions": {
+    "nimbus-code-backlog-sync": {
+      "version": "1.1.1",
+      "source": "local",
+      "manifest_hash": "sha256:749256709d3bad1a16578143b7e0ba25d64b195c370e53af4f5e152c430472ea",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {},
+      "registered_skills": [
+        "speckit-nimbus-code-backlog-sync-sync"
+      ],
+      "installed_at": "2026-08-12T14:30:07.397003+00:00"
+    }
+  }
+}

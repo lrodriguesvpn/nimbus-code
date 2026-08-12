@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "presets": {
+    "nimbus-code-standards": {
+      "version": "1.8.0",
+      "source": "local",
+      "manifest_hash": "sha256:2751b2543910ff1e80eb99e096a42ea2d80406590bb4bf4b402132e65be20fc1",
+      "enabled": true,
+      "priority": 5,
+      "registered_commands": {},
+      "registered_skills": {},
+      "installed_at": "2026-08-12T14:30:07.251791+00:00"
+    }
+  }
+}
