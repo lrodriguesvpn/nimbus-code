@@ -1,0 +1,121 @@
+apiVersion: "1.0"
+kind: "ModuleGraph"
+metadata:
+  name: "platform-cmdb-dsc-model"
+  version: "004"
+  created: "2026-08-12"
+  updated: "2026-08-12"
+
+modules:
+  - name: "identity-access-gateway"
+    type: "service"
+    layer: "security"
+    description: "SSO entrypoint and execution context issuer"
+
+  - name: "multi-cloud-discovery-orchestrator"
+    type: "service"
+    layer: "backend"
+    description: "Coordinates inventory collection for Azure/AWS/GCP"
+
+  - name: "cmdb-core"
+    type: "service"
+    layer: "data"
+    description: "Consolidates assets, relationships, and evidence for governance and AI"
+
+  - name: "baseline-engine"
+    type: "service"
+    layer: "backend"
+    description: "Evaluates baseline controls and policy state"
+
+  - name: "dsc-composer"
+    type: "service"
+    layer: "backend"
+    description: "Builds and versions desired state configuration profiles"
+
+  - name: "governance-validation-api"
+    type: "service"
+    layer: "api"
+    description: "Advisory validation interface for infrastructure governance"
+
+externals:
+  - name: "corporate-idp"
+    criticality: "high"
+    protocol: "OIDC/SAML"
+  - name: "azure-control-plane"
+    criticality: "high"
+    protocol: "HTTPS"
+  - name: "aws-control-plane"
+    criticality: "high"
+    protocol: "HTTPS"
+  - name: "gcp-control-plane"
+    criticality: "high"
+    protocol: "HTTPS"
+  - name: "m365-admin-apis"
+    criticality: "high"
+    protocol: "HTTPS"
+  - name: "terraform-pipelines"
+    criticality: "medium"
+    protocol: "HTTPS"
+
+dependencies:
+  - from: "identity-access-gateway"
+    to: "corporate-idp"
+    type: "auth"
+    protocol: "OIDC/SAML"
+
+  - from: "multi-cloud-discovery-orchestrator"
+    to: "identity-access-gateway"
+    type: "trust"
+    protocol: "token-context"
+
+  - from: "multi-cloud-discovery-orchestrator"
+    to: "azure-control-plane"
+    type: "read-inventory"
+    protocol: "HTTPS"
+
+  - from: "multi-cloud-discovery-orchestrator"
+    to: "aws-control-plane"
+    type: "read-inventory"
+    protocol: "HTTPS"
+
+  - from: "multi-cloud-discovery-orchestrator"
+    to: "gcp-control-plane"
+    type: "read-inventory"
+    protocol: "HTTPS"
+
+  - from: "multi-cloud-discovery-orchestrator"
+    to: "cmdb-core"
+    type: "write"
+    protocol: "internal-api"
+
+  - from: "baseline-engine"
+    to: "m365-admin-apis"
+    type: "read-policy-state"
+    protocol: "HTTPS"
+
+  - from: "baseline-engine"
+    to: "cmdb-core"
+    type: "read-write"
+    protocol: "internal-api"
+
+  - from: "dsc-composer"
+    to: "cmdb-core"
+    type: "read"
+    protocol: "internal-api"
+
+  - from: "dsc-composer"
+    to: "baseline-engine"
+    type: "read"
+    protocol: "internal-api"
+
+  - from: "governance-validation-api"
+    to: "cmdb-core"
+    type: "read"
+    protocol: "internal-api"
+
+  - from: "governance-validation-api"
+    to: "terraform-pipelines"
+    type: "advisory-feedback"
+    protocol: "HTTPS"
+
+implementationRoot: "platform-governance/src"

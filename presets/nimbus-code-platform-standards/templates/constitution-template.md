@@ -142,6 +142,119 @@ Avançar de fase exige o cumprimento do critério de saída documentado abaixo �
 - Fase `managed` não é permanente: drift detectado retrocede a plataforma para `plan_diff_zero`
   automaticamente até nova reconciliação confirmada.
 
+## Brownfield e CMDB de Plataforma
+
+- A constituição do preset **não** executa descoberta por conta própria. Ela **consome** o
+  snapshot/consulta do CMDB de plataforma (runtime externo) para decidir se um repositório é
+  greenfield ou brownfield.
+- Quando o CMDB indicar recursos, tenants, assinaturas, políticas, schemas ou superfícies já
+  existentes, o preset deve classificar o repositório como **brownfield** e iniciar o fluxo
+  adequado de derivação: `legacy-inventory.md`, `nimbus-discovery-report.md` e `platform-graph.yaml`.
+- Se o CMDB ainda não existir ou estiver incompleto, a constituição deve registrar a lacuna e
+  exigir bootstrap do runtime antes de avançar para planejamento.
+- Nenhum repositório de workload recebe decisão de brownfield sem evidência rastreável do CMDB ou
+  do inventário de plataforma reconciliado.
+
+## Inicialização do CMDB ao Criar um Novo Repositório de Plataforma
+
+Quando um novo repositório de plataforma é criado (novo cliente, novo ambiente, novo tenant),
+o CMDB runtime deve ser inicializado **antes** de qualquer decisão de greenfield/brownfield.
+
+### Fluxo de Inicialização (primeira execução apenas)
+
+```bash
+# 1. Clonar este template e customizar credenciais
+git clone <este-template> acme-corp/platform
+cd acme-corp/platform
+
+# 2. Configurar .env com credenciais cloud (Azure/AWS/GCP)
+cp .env.example .env
+# Editar .env com:
+# - AZURE_SUBSCRIPTION_ID=xxxxxxx
+# - AWS_ACCOUNT_ID=yyyyyyy
+# - GCP_PROJECT_ID=zzzzzzz
+# - IdP corporativo (OAuth2 tenant, SAML endpoint, etc.)
+
+# 3. Inicializar escopo de plataforma e CMDB
+platform-governance init \
+  --providers azure,aws \
+  --tenant acme-prod \
+  --region us-east-1,eastus
+
+# Este comando:
+# - Autentica operador via SSO corporativo
+# - Cria .state/execution-scope.json (git-ignored) com escopo aprovado
+# - Dispara primeira coleta de inventário (Azure + AWS)
+# - Consolida CMDB com ativos descobertos, relacionamentos, evidências
+# - Gera baseline comparado contra políticas corporativas M365
+# - Cria profile DSC v1.0.0 com estado desejado de segurança/compliance
+
+# 4. Aguardar conclusão (típico: 3-5 minutos)
+# Saída esperada:
+#   ✓ Execution created: exec-2026-08-12-001
+#   ✓ CMDB consolidated: 1,234 records
+#   ✓ DSC v1.0.0 generated
+#   ✓ Baseline comparison: 98% compliant
+
+# 5. Verificar CMDB consolidado
+platform-governance validate --cmdb-freshness
+# Output: Last consolidation: 2 minutes ago | Status: FRESH
+
+# 6. Revisar baseline de conformidade
+platform-governance validate --baseline-summary
+# Output:
+#   Policy Compliance: 98%
+#   M365 Controls Compliant: 312/318
+#   Customizations Detected: 6 (requiring exceptions)
+#   Critical Findings: 0
+```
+
+### Posterior: Refresh Automático (a cada 24h)
+
+Após o init, o scheduler roda automaticamente:
+
+- **02:00 UTC diariamente**: refresh completo de CMDB + baseline + DSC
+- **SLA**: p95 latency < 10 min (< 30 min timeout)
+- **Freshness window**: CMDB é considerado FRESCO se < 24h desde última coleta
+
+```bash
+# Operador pode também disparar coleta manual:
+platform-governance validate --refresh-now --providers azure,aws
+
+# Ou consultar CMDB atual:
+platform-governance query --cmdb-records --filter 'provider=azure,criticality>=high'
+```
+
+### Checklist Pré-Init
+
+Antes de rodar `platform-governance init`, garantir que:
+
+- [ ] **Autenticação SSO**: operador consegue fazer login com identidade corporativa
+- [ ] **Credenciais cloud**: Service Principals / Access Keys configurados em `.env` com **leitura apenas**
+  (conforme seção "Isolamento de Credenciais")
+- [ ] **Conectividade**: acesso às APIs de Azure, AWS, GCP (ex.: `az account list` funciona)
+- [ ] **Network**: runtime consegue alcançar IdP corporativo (SSO endpoint)
+- [ ] **Escopo validado**: stakeholder confirmou quais providers incluir (não adicionar GCP se não em uso)
+
+### Troubleshooting: Init Falha
+
+Se init falhar, verificar:
+
+1. **Autenticação**: `platform-governance auth --check` (retorna identidade e grupos)
+2. **Credenciais cloud**: `platform-governance validate --cloud-creds` (testa leitura em Azure/AWS/GCP)
+3. **Connectividade runtime**: `platform-governance health --api` (checa se API está online)
+4. **Logs**: `tail -f .logs/execution-<exec-id>.log` (detalhes de erro)
+
+Se CMDB init falhar após 3 retries, contatar time de governança — não prosseguir sem CMDB consolidado.
+
+### Referências
+
+- **Arquitetura**: ver ADRs `docs/adr/0002-*.md` (Preset + Runtime separation),
+  `docs/adr/0003-*.md` (1:N multicloud), `docs/adr/0005-*.md` (24h refresh SLO)
+- **Escopo 1:N**: ver [Multi-Cloud Selection](#0003)
+- **Brownfield detection**: ver seção acima "Brownfield e CMDB de Plataforma"
+- **Operação contínua**: ver `docs/GOVERNANCE.md` e `docs/RUNBOOK.md`
+
 ## Isolamento de Credenciais por Cliente/Tenant
 
 - **Cada plataforma de cliente usa credenciais próprias e exclusivas** — nunca reutilizar a
