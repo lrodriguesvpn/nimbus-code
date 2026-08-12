@@ -9,3 +9,17 @@
 # Arquivos de sistema do macOS/Windows
 .DS_Store
 Thumbs.db
+
+# Node / platform-governance scaffold
+node_modules/
+coverage/
+dist/
+build/
+*.log
+.env
+.env.*
+platform-governance/node_modules/
+platform-governance/coverage/
+platform-governance/dist/
+platform-governance/build/
+platform-governance/.state/

@@ -1,0 +1,615 @@
+openapi: "3.0.0"
+info:
+  title: VPN-SKILLS API
+  description: |
+    Central API for skill discovery, versioning, and compliance management.
+    This is the primary programmatic interface for bootstrap templates and
+    CI/CD pipelines to query available skills, validate compatibility, and
+    generate compliance reports.
+  version: "1.0.0"
+  contact:
+    name: "VPN Skills Team"
+    url: "https://github.com/org/vpn-skills"
+
+servers:
+  - url: "https://vpn-skills.org/api/v1"
+    description: "Production API"
+  - url: "http://localhost:8080/api/v1"
+    description: "Local development"
+
+paths:
+  /skills:
+    get:
+      summary: "List all available skills"
+      operationId: "listSkills"
+      tags:
+        - "Skills"
+      parameters:
+        - name: "status"
+          in: "query"
+          description: "Filter by status (active, beta, deprecated)"
+          schema:
+            type: "string"
+            enum: ["active", "beta", "deprecated"]
+        - name: "category"
+          in: "query"
+          description: "Filter by category (infrastructure, security, compliance, deployment, documentation)"
+          schema:
+            type: "string"
+        - name: "tag"
+          in: "query"
+          description: "Filter by tag (repeatable)"
+          schema:
+            type: "array"
+            items:
+              type: "string"
+        - name: "limit"
+          in: "query"
+          schema:
+            type: "integer"
+            default: 50
+        - name: "offset"
+          in: "query"
+          schema:
+            type: "integer"
+            default: 0
+      responses:
+        "200":
+          description: "List of skills"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  data:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/Skill"
+                  total:
+                    type: "integer"
+                  limit:
+                    type: "integer"
+                  offset:
+                    type: "integer"
+
+  /skills/{skillId}:
+    get:
+      summary: "Get skill details"
+      operationId: "getSkill"
+      tags:
+        - "Skills"
+      parameters:
+        - name: "skillId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "Skill details"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Skill"
+        "404":
+          description: "Skill not found"
+
+  /skills/{skillId}/versions:
+    get:
+      summary: "Get version history for a skill"
+      operationId: "getSkillVersions"
+      tags:
+        - "Skills"
+      parameters:
+        - name: "skillId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "List of versions"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  skillId:
+                    type: "string"
+                  versions:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/SkillVersion"
+
+  /skills/{skillId}/versions/{version}:
+    get:
+      summary: "Get specific skill version"
+      operationId: "getSkillVersion"
+      tags:
+        - "Skills"
+      parameters:
+        - name: "skillId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+        - name: "version"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "Skill version details"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SkillVersion"
+        "404":
+          description: "Skill or version not found"
+
+  /validate/compatibility:
+    post:
+      summary: "Validate skill compatibility against project constraints"
+      operationId: "validateCompatibility"
+      tags:
+        - "Validation"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              required:
+                - "skills"
+              properties:
+                skills:
+                  type: "array"
+                  items:
+                    type: "object"
+                    required:
+                      - "skillId"
+                      - "version"
+                    properties:
+                      skillId:
+                        type: "string"
+                      version:
+                        type: "string"
+                platform:
+                  type: "array"
+                  items:
+                    type: "string"
+                  description: "Project platforms (linux, windows, macos)"
+                environment:
+                  type: "array"
+                  items:
+                    type: "string"
+                  description: "Deployment environments (dev, staging, prod)"
+      responses:
+        "200":
+          description: "Validation result"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationResult"
+
+  /projects/{projectId}/manifest:
+    get:
+      summary: "Get skill manifest for a project"
+      operationId: "getProjectManifest"
+      tags:
+        - "Projects"
+      parameters:
+        - name: "projectId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "Skill manifest"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SkillManifest"
+        "404":
+          description: "Project not found"
+
+    put:
+      summary: "Update skill manifest for a project"
+      operationId: "updateProjectManifest"
+      tags:
+        - "Projects"
+      parameters:
+        - name: "projectId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SkillManifest"
+      responses:
+        "200":
+          description: "Manifest updated"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SkillManifest"
+        "400":
+          description: "Invalid manifest"
+
+  /projects/{projectId}/compliance:
+    get:
+      summary: "Generate compliance report for a project"
+      operationId: "getComplianceReport"
+      tags:
+        - "Compliance"
+      parameters:
+        - name: "projectId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+        - name: "generateIfMissing"
+          in: "query"
+          description: "Generate fresh report if missing (default: false)"
+          schema:
+            type: "boolean"
+            default: false
+      responses:
+        "200":
+          description: "Compliance report"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComplianceReport"
+        "404":
+          description: "Project not found"
+
+  /reports:
+    get:
+      summary: "List all compliance reports (org-wide)"
+      operationId: "listReports"
+      tags:
+        - "Compliance"
+      parameters:
+        - name: "limit"
+          in: "query"
+          schema:
+            type: "integer"
+            default: 50
+        - name: "offset"
+          in: "query"
+          schema:
+            type: "integer"
+            default: 0
+      responses:
+        "200":
+          description: "List of reports"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  data:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/ComplianceReport"
+                  total:
+                    type: "integer"
+
+  /health:
+    get:
+      summary: "Health check"
+      operationId: "healthCheck"
+      tags:
+        - "System"
+      responses:
+        "200":
+          description: "Service is healthy"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  status:
+                    type: "string"
+                    enum: ["ok"]
+                  version:
+                    type: "string"
+                  timestamp:
+                    type: "string"
+                    format: "date-time"
+
+components:
+  schemas:
+    Skill:
+      type: "object"
+      required:
+        - "id"
+        - "name"
+        - "description"
+        - "category"
+        - "status"
+        - "currentVersion"
+        - "supportedVersions"
+        - "maintainer"
+        - "license"
+        - "documentation"
+      properties:
+        id:
+          type: "string"
+          description: "Unique skill identifier (kebab-case)"
+        name:
+          type: "string"
+        description:
+          type: "string"
+        category:
+          type: "string"
+          enum: ["infrastructure", "security", "compliance", "deployment", "documentation"]
+        status:
+          type: "string"
+          enum: ["active", "beta", "deprecated"]
+        currentVersion:
+          type: "string"
+          description: "Semantic version (MAJOR.MINOR.PATCH)"
+        supportedVersions:
+          type: "array"
+          items:
+            type: "string"
+          description: "Versions currently supported and available"
+        maintainer:
+          type: "string"
+          description: "GitHub username or team"
+        license:
+          type: "string"
+          description: "SPDX license identifier"
+        prerequisiteSkills:
+          type: "array"
+          items:
+            type: "string"
+          description: "List of prerequisite skill IDs"
+        externalDependencies:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              name:
+                type: "string"
+              type:
+                type: "string"
+                enum: ["tool", "library", "platform", "service"]
+              minVersion:
+                type: "string"
+              url:
+                type: "string"
+              required:
+                type: "boolean"
+        tags:
+          type: "array"
+          items:
+            type: "string"
+        documentation:
+          type: "string"
+          description: "URL or relative path to documentation"
+        createdAt:
+          type: "string"
+          format: "date-time"
+        updatedAt:
+          type: "string"
+          format: "date-time"
+
+    SkillVersion:
+      type: "object"
+      required:
+        - "skillId"
+        - "version"
+        - "releaseDate"
+        - "isBreakingChange"
+        - "releaseNotes"
+        - "commitHash"
+        - "tag"
+      properties:
+        skillId:
+          type: "string"
+        version:
+          type: "string"
+        releaseDate:
+          type: "string"
+          format: "date-time"
+        isBreakingChange:
+          type: "boolean"
+        breakingChangeDescription:
+          type: "string"
+        migrationPath:
+          type: "string"
+          description: "URL or path to migration guide"
+        releaseNotes:
+          type: "string"
+          description: "Markdown formatted release notes"
+        commitHash:
+          type: "string"
+        tag:
+          type: "string"
+          description: "Git tag name"
+        deprecationDate:
+          type: "string"
+          format: "date-time"
+        deprecationReason:
+          type: "string"
+        deprecationNotice:
+          type: "string"
+
+    SkillManifest:
+      type: "object"
+      required:
+        - "projectId"
+        - "skills"
+      properties:
+        projectId:
+          type: "string"
+        manifestPath:
+          type: "string"
+          description: "Path to skills.yaml in project"
+        skills:
+          type: "array"
+          items:
+            type: "object"
+            required:
+              - "skillId"
+              - "version"
+            properties:
+              skillId:
+                type: "string"
+              version:
+                type: "string"
+                description: "Semantic version or range"
+              platform:
+                type: "array"
+                items:
+                  type: "string"
+              environment:
+                type: "array"
+                items:
+                  type: "string"
+        complianceConfig:
+          type: "object"
+          properties:
+            validateOnDeploy:
+              type: "boolean"
+            failOnDeprecated:
+              type: "boolean"
+            reportFrequency:
+              type: "string"
+              enum: ["daily", "weekly", "on-demand"]
+        lastValidationAt:
+          type: "string"
+          format: "date-time"
+        lastValidationStatus:
+          type: "string"
+          enum: ["success", "warning", "error"]
+        validationMessages:
+          type: "array"
+          items:
+            type: "string"
+
+    ValidationResult:
+      type: "object"
+      properties:
+        isValid:
+          type: "boolean"
+        errors:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              skillId:
+                type: "string"
+              message:
+                type: "string"
+              severity:
+                type: "string"
+                enum: ["warning", "error"]
+        warnings:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              skillId:
+                type: "string"
+              message:
+                type: "string"
+        resolutions:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              skillId:
+                type: "string"
+              resolvedVersion:
+                type: "string"
+
+    ComplianceReport:
+      type: "object"
+      required:
+        - "reportId"
+        - "reportType"
+        - "scopeId"
+        - "generatedAt"
+        - "findings"
+        - "summary"
+      properties:
+        reportId:
+          type: "string"
+          format: "uuid"
+        reportType:
+          type: "string"
+          enum: ["project", "organization"]
+        scopeId:
+          type: "string"
+        generatedAt:
+          type: "string"
+          format: "date-time"
+        scanTimestamp:
+          type: "string"
+          format: "date-time"
+        findings:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+              severity:
+                type: "string"
+                enum: ["info", "warning", "error", "critical"]
+              skill:
+                type: "string"
+              version:
+                type: "string"
+              message:
+                type: "string"
+              recommendation:
+                type: "string"
+              affectedEnvironments:
+                type: "array"
+                items:
+                  type: "string"
+        summary:
+          type: "object"
+          properties:
+            totalSkillReferences:
+              type: "integer"
+            activeSkills:
+              type: "integer"
+            deprecatedSkills:
+              type: "integer"
+            incompatibleSkills:
+              type: "integer"
+            criticalFindings:
+              type: "integer"
+            errorFindings:
+              type: "integer"
+            warningFindings:
+              type: "integer"
+            infoFindings:
+              type: "integer"
+            complianceScore:
+              type: "string"
+              description: "Percentage as string (e.g., '85%')"
+            lastSuccessfulValidation:
+              type: "string"
+              format: "date-time"
+
+  securitySchemes:
+    bearerAuth:
+      type: "http"
+      scheme: "bearer"
+      bearerFormat: "JWT"
+
+security:
+  - bearerAuth: []

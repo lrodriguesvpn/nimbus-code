@@ -1,0 +1,93 @@
+openapi: "3.0.0"
+info:
+  title: "Platform Governance CMDB API"
+  version: "1.0.0"
+  description: "API para autenticacao operacional, descoberta multi-cloud, consolidacao CMDB, baseline/compliance e perfis DSC."
+
+paths:
+  /auth/sso/session:
+    post:
+      summary: "Iniciar sessao operacional com SSO corporativo"
+      operationId: "startSsoSession"
+      responses:
+        "200":
+          description: "Sessao valida"
+        "401":
+          description: "Autenticacao invalida"
+
+  /executions:
+    post:
+      summary: "Criar execucao de descoberta/governanca"
+      operationId: "createExecution"
+      requestBody:
+        required: true
+      responses:
+        "201":
+          description: "Execucao criada"
+
+  /executions/{executionId}/run:
+    post:
+      summary: "Executar descoberta no escopo multi-cloud"
+      operationId: "runExecution"
+      parameters:
+        - in: path
+          name: executionId
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: "Execucao iniciada"
+        "409":
+          description: "Conflito de execucao"
+
+  /cmdb/records:
+    get:
+      summary: "Consultar registros consolidados do CMDB"
+      operationId: "listCmdbRecords"
+      parameters:
+        - in: query
+          name: provider
+          schema:
+            type: string
+            enum: [azure, aws, gcp]
+        - in: query
+          name: criticality
+          schema:
+            type: string
+            enum: [low, medium, high, critical]
+      responses:
+        "200":
+          description: "Lista de registros"
+
+  /baselines/compare:
+    post:
+      summary: "Comparar baseline com estado aplicado no tenant"
+      operationId: "compareBaseline"
+      responses:
+        "200":
+          description: "Comparacao concluida"
+
+  /compliance/findings:
+    get:
+      summary: "Listar achados de compliance"
+      operationId: "listFindings"
+      responses:
+        "200":
+          description: "Achados retornados"
+
+  /dsc/profiles:
+    post:
+      summary: "Gerar nova versao de perfil DSC"
+      operationId: "generateDscProfile"
+      responses:
+        "201":
+          description: "Perfil DSC gerado"
+
+  /governance/terraform/validate:
+    post:
+      summary: "Validar infraestrutura em modo advisory usando CMDB"
+      operationId: "validateTerraformAdvisory"
+      responses:
+        "200":
+          description: "Relatorio advisory emitido"
