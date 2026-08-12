@@ -8,12 +8,10 @@ name: Verificar atualizações do Nimbus Code e do bundle Nimbus-Code
 # conforme a política em
 # https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template#versão-do-bundle-em-uso--política-de-atualização
 #
-# Requer o secret VPNDEV_STANDARDS_READ_TOKEN: um PAT de qualquer membro da
-# organização venha-pra-nuvem (basta ser membro — nimbus-code-spec-kit-template é
-# um repositório interno, não exige ser colaborador explícito dele). O
-# GITHUB_TOKEN padrão do workflow só enxerga o próprio repositório onde roda,
-# por isso a leitura do catalog.json em outro repo precisa desse token
-# adicional configurado nos Secrets deste repositório consumidor.
+# O secret VPNDEV_STANDARDS_READ_TOKEN (PAT de qualquer membro da organização
+# venha-pra-nuvem) é recomendado para verificar a versão mais recente do bundle.
+# Se não estiver configurado, o workflow continua e compara apenas a versão do
+# Nimbus Code CLI.
 
 on:
   schedule:
@@ -51,22 +49,36 @@ jobs:
           VPNDEV_TOKEN: ${{ secrets.VPNDEV_STANDARDS_READ_TOKEN }}
         run: |
           LATEST_SPECKIT=$(specify self check --json 2>/dev/null | python3 -c "import json,sys;print(json.load(sys.stdin).get('latest_version',''))" || true)
-          LATEST_BUNDLE=$(curl -fsSL -H "Authorization: token ${VPNDEV_TOKEN}" \
-            https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bundles/catalog.json \
-            | python3 -c "import json,sys;print(json.load(sys.stdin)['bundles']['nimbus-code-project-bundle']['version'])")
+          LATEST_BUNDLE=""
+          if [ -z "${VPNDEV_TOKEN}" ]; then
+            echo "::warning::Secret VPNDEV_STANDARDS_READ_TOKEN não configurado; verificação de atualização do bundle será ignorada."
+          else
+            if ! LATEST_BUNDLE=$(curl -fsSL -H "Authorization: token ${VPNDEV_TOKEN}" \
+              https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bundles/catalog.json \
+              | python3 -c "import json,sys;print(json.load(sys.stdin)['bundles']['nimbus-code-project-bundle']['version'])" 2>/dev/null); then
+              LATEST_BUNDLE=""
+              echo "::warning::Não foi possível consultar o catalog.json do bundle; verificação de atualização do bundle será ignorada nesta execução."
+            fi
+          fi
           echo "speckit=$LATEST_SPECKIT" >> "$GITHUB_OUTPUT"
           echo "bundle=$LATEST_BUNDLE" >> "$GITHUB_OUTPUT"
 
       - name: Montar corpo da issue
         id: body
         run: |
+          LATEST_BUNDLE_DISPLAY="${{ steps.latest.outputs.bundle }}"
+          if [ -z "$LATEST_BUNDLE_DISPLAY" ]; then
+            LATEST_BUNDLE_DISPLAY="_não verificado (secret ausente/indisponível)_"
+          else
+            LATEST_BUNDLE_DISPLAY="\`$LATEST_BUNDLE_DISPLAY\`"
+          fi
           {
             echo "## Verificação semanal — Nimbus Code / Bundle Nimbus-Code"
             echo ""
             echo "| Item | Instalada | Disponível |"
             echo "| --- | --- | --- |"
             echo "| Nimbus Code CLI | \`${{ steps.current.outputs.speckit }}\` | \`${{ steps.latest.outputs.speckit }}\` |"
-            echo "| Bundle \`nimbus-code-project-bundle\` | \`${{ steps.current.outputs.bundle }}\` | \`${{ steps.latest.outputs.bundle }}\` |"
+            echo "| Bundle \`nimbus-code-project-bundle\` | \`${{ steps.current.outputs.bundle }}\` | ${LATEST_BUNDLE_DISPLAY} |"
             echo ""
             echo "**Esta verificação não aplica nenhuma mudança.** Se a atualização for aprovada, rodar localmente:"
             echo ""
@@ -81,7 +93,7 @@ jobs:
           } > /tmp/issue-body.md
 
       - name: Abrir ou atualizar issue de verificação
-        if: steps.current.outputs.speckit != steps.latest.outputs.speckit || steps.current.outputs.bundle != steps.latest.outputs.bundle
+        if: steps.current.outputs.speckit != steps.latest.outputs.speckit || (steps.latest.outputs.bundle != '' && steps.current.outputs.bundle != steps.latest.outputs.bundle)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
