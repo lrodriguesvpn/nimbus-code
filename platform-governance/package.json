@@ -1,0 +1,12 @@
+{
+  "name": "platform-governance",
+  "private": true,
+  "version": "0.1.0",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test",
+    "start": "node src/api/server.js",
+    "bootstrap": "bash bootstrap.sh",
+    "validate": "node src/cli/main.js validate"
+  }
+}
