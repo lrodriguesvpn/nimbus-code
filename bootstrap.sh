@@ -71,9 +71,10 @@ if [[ -f "$UPDATE_CHECK_SRC" ]]; then
   cp "$UPDATE_CHECK_SRC" "$WORKDIR/.github/workflows/update-speckit-and-bundle.yml"
   echo "  ✅ .github/workflows/update-speckit-and-bundle.yml instalado."
   echo "  ℹ Roda semanalmente + sob demanda; nunca aplica atualização sozinho, só abre/atualiza"
-  echo "    uma issue de aviso. Requer o secret VPNDEV_STANDARDS_READ_TOKEN (PAT de qualquer"
-  echo "    membro da organização venha-pra-nuvem) — configure em Settings → Secrets and"
-  echo "    variables → Actions deste repositório. Ver 'Versão do Bundle em uso' no README."
+  echo "    uma issue de aviso. Com o secret VPNDEV_STANDARDS_READ_TOKEN (PAT de qualquer"
+  echo "    membro da organização venha-pra-nuvem), também compara a versão mais recente do"
+  echo "    bundle; sem esse secret, compara apenas a versão do Nimbus Code CLI."
+  echo "    Ver 'Versão do Bundle em uso' no README."
 else
   echo "  ⚠ Template update-speckit-and-bundle.yml não encontrado em $UPDATE_CHECK_SRC"
 fi

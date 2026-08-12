@@ -249,8 +249,9 @@ para `.github/workflows/` do projeto consumidor. Esse workflow roda
 semanalmente + sob demanda e abre/atualiza uma issue avisando quando há uma
 versão mais nova do Nimbus Code CLI ou do bundle — nunca aplica a atualização
 sozinho (ver [Versão do Bundle em uso — Política de Atualização](#versão-do-bundle-em-uso--política-de-atualização)).
-Requer o secret `VPNDEV_STANDARDS_READ_TOKEN` configurado no projeto
-consumidor.
+Com o secret `VPNDEV_STANDARDS_READ_TOKEN` configurado no projeto consumidor,
+também compara a versão mais recente do bundle; sem esse secret, o workflow
+continua e compara apenas a versão do Nimbus Code CLI.
 
 > **Nota sobre `specify bundle install`**: o CLI do Nimbus Code resolve os
 > componentes de um bundle (`provides.presets/extensions/workflows`) **somente
@@ -283,8 +284,9 @@ Fluxo de atualização:
    instalada com a mais recente publicada aqui — **essa issue nunca aplica a
    atualização sozinha**, apenas avisa e traz os comandos exatos a rodar; a
    atualização em si sempre vira um PR normal, revisado como qualquer outra
-   mudança de dependência. Requer o secret `VPNDEV_STANDARDS_READ_TOKEN`
-   (PAT de qualquer membro da organização) configurado no projeto consumidor.
+   mudança de dependência. Com o secret `VPNDEV_STANDARDS_READ_TOKEN` (PAT de
+   qualquer membro da organização), também compara a versão publicada do bundle;
+   sem esse secret, a execução continua e valida apenas o Nimbus Code CLI.
 
 Todo projeto que consome este bundle deve documentar, no seu próprio README, a
 versão instalada — ver o modelo em
