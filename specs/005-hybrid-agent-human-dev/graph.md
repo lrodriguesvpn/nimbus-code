@@ -249,3 +249,19 @@ graph TD
     style TASK_READY fill:#a5d6a7
     style PLAN_READY fill:#a5d6a7
     style EXECUTION fill:#c8e6c9
+```
+
+---
+
+## Contract Validation Wiring (CI)
+
+```mermaid
+graph LR
+    WF["validate-manifests.yml"]
+    SCRIPT["validate-hybrid-contracts.sh"]
+    FIXTURES["fixtures/spec-sample.md<br/>fixtures/plan-sample.md<br/>fixtures/task-sample.md"]
+    RESULT["PR Status: pass/fail"]
+
+    WF -->|runs| SCRIPT
+    SCRIPT -->|checks required sections| FIXTURES
+    SCRIPT -->|exit code| RESULT

@@ -274,6 +274,30 @@ cat specs/005-hybrid-collaboration-test/checklists/requirements.md
 
 ---
 
+## Implementation Validation Evidence (Feature 005)
+
+Use esta seção para registrar rapidamente a conclusão das tarefas de implementação
+do contrato híbrido.
+
+- [x] T012 — Spec de exemplo validada contra contrato (ver `fixtures/spec-sample.md`)
+- [x] T015 — Corpo de task de exemplo validado para execução humana (ver `fixtures/task-sample.md`)
+- [x] T018 — Validação de custo e rollout adicionada (Step 7 + Success Criteria)
+- [x] T026 — Validação de Impeccable/OpenFeature adicionada (Step 7.1)
+
+Comando de validação automatizada:
+
+```bash
+.specify/scripts/bash/validate-hybrid-contracts.sh
+```
+
+Resultado esperado:
+
+```text
+OK: hybrid contracts validated in specs/005-hybrid-agent-human-dev/fixtures
+```
+
+---
+
 ## References
 
 - [Feature Spec](./spec.md)

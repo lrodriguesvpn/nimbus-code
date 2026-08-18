@@ -41,13 +41,18 @@ Toda plan.md gerada deve conter:
     - Contracts section (referências)
     - Quickstart section
 
-11. **Security & DevSecOps Gate** — tabela de itens críticos
+11. **Nimbus-Code — Cost Reference (SPEC KIT COST)**
+    - URL obrigatória: https://github.com/venha-pra-nuvem/spec-kit-cost
+    - Faixa estimada de tokens e horas humanas
+    - Método de rastreio do custo real
 
-12. **Quality Gate** — tabela de cobertura e SLO
+12. **Security & DevSecOps Gate** — tabela de itens críticos
 
-13. **Architecture Decision Log** — ADRs key
+13. **Quality Gate** — tabela de cobertura e SLO
 
-14. **Next Steps** — checklist de readiness para /speckit-tasks
+14. **Architecture Decision Log** — ADRs key
+
+15. **Next Steps** — checklist de readiness para /speckit-tasks
 
 ---
 
@@ -55,7 +60,7 @@ Toda plan.md gerada deve conter:
 
 ### Completeness
 
-- [ ] Todos os 14 sections acima estão presentes
+- [ ] Todos os 15 sections acima estão presentes
 - [ ] Summary tem status (Planning/In Progress/Done)
 - [ ] Technical Context descreve system holistically
 - [ ] Constitution Check cobre todos os itens obrigatórios do constitution.md
@@ -77,6 +82,7 @@ Toda plan.md gerada deve conter:
 - [ ] **Nova regra**: Quickstart inclui validação de "humano consegue executar task sem contexto extra"
 - [ ] **Nova regra**: Plans com contexto WEB declaram Impeccable como padrão de design
 - [ ] **Nova regra**: Plans com estratégia de flag declaram OpenFeature como padrão de abstração
+- [ ] **Nova regra**: Plan inclui bloco de Cost Reference com URL do SPEC KIT COST
 
 ---
 

@@ -15,9 +15,10 @@
 | `spec-template.md` | Defines spec output format | Specs without hybrid header; ambiguity in agent/human roles | Template must be in `.specify/presets/nimbus-code-standards/` before feature rollout |
 | `plan-template.md` | Defines plan output format | Plan lacks release strategy, gates, cost tracking sections | Template locked in Git; tested on 2 pilot projects before merge |
 | `task-template.md` | Defines GHE issue format | Tasks lack operational steps; humans can't execute without context | Template validated by tech lead before GHE issues published |
-| `speckit-specify` skill | Generates spec.md | Feature 005 cannot be specified | Existing skill; no changes needed (uses updated template) |
-| `speckit-plan` skill | Generates plan.md | Feature 005 cannot be planned | Skill updated to: Phase 0 research, Phase 1 design artifacts generation |
-| `speckit-tasks` skill | Generates tasks.md | Feature 005 cannot be tasked; no GHE issues published | Skill updated to: publish with hybrid collaboration guidance + cost references |
+| `speckit-specify` skill | Generates spec.md | Feature 005 cannot be specified | Skill atualizado para reforçar BDD, colaboração híbrida e padrão Impeccable em contexto WEB |
+| `speckit-plan` skill | Generates plan.md | Feature 005 cannot be planned | Skill atualizado para exigir graph/impact-map, OpenFeature e bloco de custo (SPEC KIT COST) |
+| `speckit-tasks` skill | Generates tasks.md | Feature 005 cannot be tasked; no GHE issues published | Skill atualizado para emitir tasks com contrato executável por humano |
+| `validate-hybrid-contracts.sh` | Contract validation for fixture outputs | CI pode aceitar mudança regressiva de template | Script executado no workflow de validação para bloquear regressões |
 | `constitution.md` | Governance principles | Plan validation fails; no clear responsibility assignment | Existing doc; no changes needed (used as-is in plan validation) |
 | `reuse-catalog.yaml` | Pattern library | Duplicate work; no guidance for future features | Updated post-implementation with new pattern entry (tag: `hybrid-dev-templates`) |
 

@@ -16,9 +16,9 @@
 
 **Purpose**: Add guardrails so template changes can be validated before rollout.
 
-- [ ] T001 [P] Create a contract validation script for generated spec/plan/tasks output in `.specify/scripts/bash/validate-hybrid-contracts.sh`
-- [ ] T002 [P] Create reusable fixture samples for template-output verification in `specs/005-hybrid-agent-human-dev/fixtures/`
-- [ ] T003 [P] Wire the contract validation script into CI so PRs can fail fast on malformed template output in `.github/workflows/validate-manifests.yml`
+- [x] T001 [P] Create a contract validation script for generated spec/plan/tasks output in `.specify/scripts/bash/validate-hybrid-contracts.sh`
+- [x] T002 [P] Create reusable fixture samples for template-output verification in `specs/005-hybrid-agent-human-dev/fixtures/`
+- [x] T003 [P] Wire the contract validation script into CI so PRs can fail fast on malformed template output in `.github/workflows/validate-manifests.yml`
 
 **Checkpoint**: validation scaffolding exists before template changes land.
 
@@ -28,12 +28,12 @@
 
 **Purpose**: Update the core template files and skill prompts that power the flow.
 
-- [ ] T004 [P] Add the Hybrid Collaboration Model, SLO table, and Assumptions guidance to `.specify/presets/nimbus-code-standards/templates/spec-template.md`
-- [ ] T005 [P] Add complexity classification, AC traceability, graph references, release strategy, and toggle guidance to `.specify/presets/nimbus-code-standards/templates/plan-template.md`
-- [ ] T006 [P] Expand the task output contract with Context, Objective, Result, Acceptance Criteria, Operational Steps, Dependencies, Responsible, Estimate, and Reference sections in `.specify/presets/nimbus-code-standards/templates/tasks-template.md`
-- [ ] T007 [P] Update the generation rules for `/speckit-specify` in `.github/skills/speckit-specify/SKILL.md` so the new spec contract is enforced consistently
-- [ ] T008 [P] Update the generation rules for `/speckit-plan` in `.github/skills/speckit-plan/SKILL.md` so graph, impact-map, and contract artifacts are always produced
-- [ ] T009 [P] Update the generation rules for `/speckit-tasks` in `.github/skills/speckit-tasks/SKILL.md` so GHE tasks are human-executable and story-grouped
+- [x] T004 [P] Add the Hybrid Collaboration Model, SLO table, and Assumptions guidance to `.specify/presets/nimbus-code-standards/templates/spec-template.md`
+- [x] T005 [P] Add complexity classification, AC traceability, graph references, release strategy, and toggle guidance to `.specify/presets/nimbus-code-standards/templates/plan-template.md`
+- [x] T006 [P] Expand the task output contract with Context, Objective, Result, Acceptance Criteria, Operational Steps, Dependencies, Responsible, Estimate, and Reference sections in `.specify/presets/nimbus-code-standards/templates/tasks-template.md`
+- [x] T007 [P] Update the generation rules for `/speckit-specify` in `.github/skills/speckit-specify/SKILL.md` so the new spec contract is enforced consistently
+- [x] T008 [P] Update the generation rules for `/speckit-plan` in `.github/skills/speckit-plan/SKILL.md` so graph, impact-map, and contract artifacts are always produced
+- [x] T009 [P] Update the generation rules for `/speckit-tasks` in `.github/skills/speckit-tasks/SKILL.md` so GHE tasks are human-executable and story-grouped
 
 **Checkpoint**: the three Speckit layers speak the same contract language.
 
@@ -45,9 +45,9 @@
 
 **Independent Test**: Generate one new spec from the template and confirm that the hybrid guidance, SLO section, and assumptions are present without extra prompting.
 
-- [ ] T010 [P] [US1] Prepend the hybrid collaboration section to generated spec output in `.specify/presets/nimbus-code-standards/templates/spec-template.md`
-- [ ] T011 [P] [US1] Make `/speckit-specify` populate the BDD acceptance criteria and success criteria consistently in `.github/skills/speckit-specify/SKILL.md`
-- [ ] T012 [US1] Validate a sample generated spec against the contract and record any gaps in `specs/005-hybrid-agent-human-dev/quickstart.md`
+- [x] T010 [P] [US1] Prepend the hybrid collaboration section to generated spec output in `.specify/presets/nimbus-code-standards/templates/spec-template.md`
+- [x] T011 [P] [US1] Make `/speckit-specify` populate the BDD acceptance criteria and success criteria consistently in `.github/skills/speckit-specify/SKILL.md`
+- [x] T012 [US1] Validate a sample generated spec against the contract and record any gaps in `specs/005-hybrid-agent-human-dev/quickstart.md`
 
 ---
 
@@ -57,9 +57,9 @@
 
 **Independent Test**: Generate one task issue and verify that a developer can execute it using only the issue text, without opening the spec or plan.
 
-- [ ] T013 [P] [US2] Expand the task blueprint sections and field order in `.specify/presets/nimbus-code-standards/templates/tasks-template.md`
-- [ ] T014 [P] [US2] Make `/speckit-tasks` emit explicit operational steps, dependencies, and responsibility fields in `.github/skills/speckit-tasks/SKILL.md`
-- [ ] T015 [US2] Validate one sample task body for human executability and capture the review checklist in `specs/005-hybrid-agent-human-dev/quickstart.md`
+- [x] T013 [P] [US2] Expand the task blueprint sections and field order in `.specify/presets/nimbus-code-standards/templates/tasks-template.md`
+- [x] T014 [P] [US2] Make `/speckit-tasks` emit explicit operational steps, dependencies, and responsibility fields in `.github/skills/speckit-tasks/SKILL.md`
+- [x] T015 [US2] Validate one sample task body for human executability and capture the review checklist in `specs/005-hybrid-agent-human-dev/quickstart.md`
 
 ---
 
@@ -69,10 +69,10 @@
 
 **Independent Test**: Generate the target artifacts and confirm that the public SPEC KIT COST URL appears in the expected template sections.
 
-- [ ] T016 [P] [US3] Add the Cost Reference block and SPEC KIT COST URL to `.specify/presets/nimbus-code-standards/templates/plan-template.md`
-- [ ] T017 [P] [US3] Add the SPEC KIT COST reference and human-hour guidance to `.specify/presets/nimbus-code-standards/templates/tasks-template.md`
-- [ ] T018 [P] [US3] Add cost-tracking and pilot rollout validation steps to `specs/005-hybrid-agent-human-dev/quickstart.md`
-- [ ] T019 [US3] Add the reusable `hybrid-dev-templates` pattern entry to `docs/reuse-catalog.yaml` with tag, bounded context, description, and source
+- [x] T016 [P] [US3] Add the Cost Reference block and SPEC KIT COST URL to `.specify/presets/nimbus-code-standards/templates/plan-template.md`
+- [x] T017 [P] [US3] Add the SPEC KIT COST reference and human-hour guidance to `.specify/presets/nimbus-code-standards/templates/tasks-template.md`
+- [x] T018 [P] [US3] Add cost-tracking and pilot rollout validation steps to `specs/005-hybrid-agent-human-dev/quickstart.md`
+- [x] T019 [US3] Add the reusable `hybrid-dev-templates` pattern entry to `docs/reuse-catalog.yaml` with tag, bounded context, description, and source
 
 ---
 
@@ -80,14 +80,14 @@
 
 **Purpose**: Keep governance artifacts, rollout artifacts, and operational docs in sync.
 
-- [ ] T024 [P] Add explicit WEB design standard guidance using Impeccable in `.specify/presets/nimbus-code-standards/templates/spec-template.md` and `.github/skills/speckit-specify/SKILL.md`
-- [ ] T025 [P] Add explicit OpenFeature standard guidance for rollout/toggles in `.specify/presets/nimbus-code-standards/templates/plan-template.md` and `.github/skills/speckit-plan/SKILL.md`
-- [ ] T026 [P] Add validation checks in `specs/005-hybrid-agent-human-dev/quickstart.md` confirming Impeccable (WEB) and OpenFeature sections are generated in spec/plan
-- [ ] T027 [P] Update `specs/005-hybrid-agent-human-dev/contracts/spec-contract.md` and `specs/005-hybrid-agent-human-dev/contracts/plan-contract.md` with the new mandatory governance blocks
-- [ ] T020 [P] Refresh `specs/005-hybrid-agent-human-dev/graph.yaml` and `specs/005-hybrid-agent-human-dev/graph.md` so the final template and skill wiring is explicit
-- [ ] T021 [P] Refresh `specs/005-hybrid-agent-human-dev/impact-map.md` so the rollout, rollback, and risk sections match the final implementation
-- [ ] T022 [P] Add or update ADRs in `docs/adr/` to capture the final decisions on markdown templates, feature-flag rollout, and SPEC KIT COST reference strategy
-- [ ] T023 [P] Confirm the PR gate uses the new template contract checks by validating `.github/workflows/validate-manifests.yml` against the added script
+- [x] T024 [P] Add explicit WEB design standard guidance using Impeccable in `.specify/presets/nimbus-code-standards/templates/spec-template.md` and `.github/skills/speckit-specify/SKILL.md`
+- [x] T025 [P] Add explicit OpenFeature standard guidance for rollout/toggles in `.specify/presets/nimbus-code-standards/templates/plan-template.md` and `.github/skills/speckit-plan/SKILL.md`
+- [x] T026 [P] Add validation checks in `specs/005-hybrid-agent-human-dev/quickstart.md` confirming Impeccable (WEB) and OpenFeature sections are generated in spec/plan
+- [x] T027 [P] Update `specs/005-hybrid-agent-human-dev/contracts/spec-contract.md` and `specs/005-hybrid-agent-human-dev/contracts/plan-contract.md` with the new mandatory governance blocks
+- [x] T020 [P] Refresh `specs/005-hybrid-agent-human-dev/graph.yaml` and `specs/005-hybrid-agent-human-dev/graph.md` so the final template and skill wiring is explicit
+- [x] T021 [P] Refresh `specs/005-hybrid-agent-human-dev/impact-map.md` so the rollout, rollback, and risk sections match the final implementation
+- [x] T022 [P] Add or update ADRs in `docs/adr/` to capture the final decisions on markdown templates, feature-flag rollout, and SPEC KIT COST reference strategy
+- [x] T023 [P] Confirm the PR gate uses the new template contract checks by validating `.github/workflows/validate-manifests.yml` against the added script
 
 ---
 

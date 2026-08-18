@@ -81,6 +81,16 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Each phase includes: story goal, independent test criteria, tests (if requested), implementation tasks
    - Final Phase: Polish & cross-cutting concerns
    - All tasks must follow the strict checklist format (see Task Generation Rules below)
+   - For tasks intended for human execution, include explicit operational guidance in issue/task body:
+     - Contexto
+     - Objetivo
+     - Resultado Esperado
+     - Critérios de Aceite (checkbox)
+     - Passos Operacionais (sequenciais)
+     - Dependências (ou "Nenhuma")
+     - Responsável (Agente/Humano)
+     - Estimativa de Esforço (tokens/horas)
+     - Referência (AC-ID, feature, SPEC KIT COST quando aplicável)
    - Clear file paths for each task
    - Dependencies section showing story completion order
    - Parallel execution examples per story
@@ -197,6 +207,12 @@ Every task MUST strictly follow this format:
    - Shared infrastructure → Setup phase (Phase 1)
    - Foundational/blocking tasks → Foundational phase (Phase 2)
    - Story-specific setup → within that story's phase
+
+5. **Human-executable contract (GHE)**:
+   - Any task marked for human execution must be understandable without opening plan/spec.
+   - Add operational steps that are explicit enough for a new developer in the team.
+   - Always include dependency and responsibility clarity (`Agente: sim/não`, `Humano: sim/não`).
+   - If the feature uses hybrid governance, include SPEC KIT COST URL in references.
 
 ### Phase Structure
 

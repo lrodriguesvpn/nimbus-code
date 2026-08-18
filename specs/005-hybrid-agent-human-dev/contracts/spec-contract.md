@@ -22,26 +22,31 @@ Toda spec.md gerada deve conter, nesta ordem:
    - Linguagem de negócio (não técnica)
    - Deve incluir padrões explícitos quando aplicável (ex.: Impeccable para contexto WEB)
 
-4. **Nimbus-Code — Critérios de Aceitação (BDD)**
+4. **Nimbus-Code — Hybrid Collaboration Model**
+   - Tabela com papel, responsabilidades, critério de handoff e escalação
+   - Deve explicitar como agente e humano colaboram
+   - Em contexto WEB, deve afirmar Impeccable como padrão de design
+
+5. **Nimbus-Code — Critérios de Aceitação (BDD)**
    - Formato: Given/When/Then para cada AC
    - IDs: AC-1, AC-2, etc.
    - Test ref: `test_AC<N>_<descricao>` (preenchido em plan.md)
 
-5. **User Scenarios & Testing**
+6. **User Scenarios & Testing**
    - User Stories com prioridade (P1, P2, P3)
    - Cada story: independentemente testável
    - Acceptance Scenarios em BDD (Given/When/Then)
    - Edge Cases seção
 
-6. **Requirements**
+7. **Requirements**
    - Functional Requirements (FR-001, FR-002, ...)
    - Key Entities (se houver dados)
 
-7. **Success Criteria**
+8. **Success Criteria**
    - Measurable Outcomes (SC-001, SC-002, ...)
    - Tecnology-agnostic
 
-8. **Assumptions**
+9. **Assumptions**
    - Informed guesses documentadas
 
 ---
@@ -70,6 +75,7 @@ Toda spec.md gerada deve conter, nesta ordem:
 - [ ] **Nova regra**: Assumptions menciona pelo menos um ponto sobre divisão de trabalho ou revisão humana
 - [ ] **Nova regra**: Features com contexto WEB mencionam explicitamente Impeccable como padrão de design
 - [ ] **Nova regra**: Features com rollout progressivo mencionam OpenFeature como padrão de abstração de toggle
+- [ ] **Nova regra**: Seção "Hybrid Collaboration Model" presente e completa
 
 ### Rastreabilidade
 

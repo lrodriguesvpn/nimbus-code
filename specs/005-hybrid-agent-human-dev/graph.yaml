@@ -130,6 +130,38 @@ modules:
     exports:
       - "PLAN_PATH, SPECS_DIR, FEATURE_ID (JSON)"
 
+  - id: "hybrid-contract-validator"
+    name: ".specify/scripts/bash/validate-hybrid-contracts.sh"
+    type: "script"
+    description: "Valida contrato mínimo de saídas spec/plan/tasks para o modelo híbrido"
+    owner: "Dev Platform"
+    complexity: "S1"
+    dependencies:
+      - "spec-template"
+      - "plan-template"
+      - "task-template"
+    consumes:
+      - "specs/005-hybrid-agent-human-dev/fixtures/*"
+    exports:
+      - "validation status (pass/fail)"
+
+  - id: "hybrid-fixtures"
+    name: "specs/005-hybrid-agent-human-dev/fixtures/"
+    type: "artifact"
+    description: "Amostras de saída para validação de contrato híbrido"
+    owner: "Dev Platform"
+    complexity: "S0"
+    dependencies: []
+
+  - id: "manifest-validation-workflow"
+    name: ".github/workflows/validate-manifests.yml"
+    type: "workflow"
+    description: "Workflow de CI que valida schemas e contratos híbridos"
+    owner: "Dev Platform"
+    complexity: "S1"
+    dependencies:
+      - "hybrid-contract-validator"
+
 externals:
   - id: "spec-kit-cost"
     name: "SPEC KIT COST (GitHub Public)"
@@ -207,3 +239,11 @@ edges:
   - from: "speckit-plan-skill"
     to: "nimbus-docs"
     relationship: "references (ADL, module graphs guide)"
+
+  - from: "manifest-validation-workflow"
+    to: "hybrid-contract-validator"
+    relationship: "executes"
+
+  - from: "hybrid-contract-validator"
+    to: "hybrid-fixtures"
+    relationship: "validates"
