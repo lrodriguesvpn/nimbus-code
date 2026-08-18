@@ -1,0 +1,128 @@
+# graph.yaml — Feature 006: MultiRepo Support no Spec Kit Template
+
+feature: "006-multirepo-support"
+complexity: "S3"
+version: 1
+updated_at: "2026-08-18"
+spec_ref: "specs/006-multirepo-support/spec.md"
+
+nodes:
+  - id: "bounded-contexts-yaml"
+    type: "module"
+    path: "docs/bounded-contexts.yaml"
+    description: "Novo arquivo — registro central de bounded contexts: slug, repository, stack, team, autonomous_ok"
+
+  - id: "bounded-contexts-template"
+    type: "module"
+    path: ".specify/presets/nimbus-code-standards/templates/project-root/bounded-contexts.yaml"
+    description: "Template do preset atualizado com campos repository, stack, team, autonomous_ok e exemplos comentados"
+
+  - id: "feature-json"
+    type: "module"
+    path: ".specify/feature.json"
+    description: "Estendido com campos bounded_contexts (lista de slugs) e repos (lista de org/repo resolvidos)"
+
+  - id: "create-new-feature"
+    type: "module"
+    path: ".specify/scripts/bash/create-new-feature.sh"
+    description: "Estendido com flag --bounded-contexts, resolução de repos a partir de bounded-contexts.yaml e persistência em feature.json"
+
+  - id: "setup-github-project"
+    type: "module"
+    path: "scripts/setup-github-project.sh"
+    description: "Estendido com leitura de bounded-contexts.yaml e chamada GraphQL linkProjectV2ToRepository para cada repo listado"
+
+  - id: "developer-guide"
+    type: "module"
+    path: "docs/developer-guide.md"
+    description: "Recebe seção 'MultiRepo — Registrando Microsserviços' com passos, mapeamento e edge cases"
+
+  - id: "reuse-catalog"
+    type: "module"
+    path: "docs/reuse-catalog.yaml"
+    description: "Recebe entrada multirepo-bounded-context-routing ao fechar esta feature"
+
+  - id: "ghe-api"
+    type: "external"
+    path: ""
+    description: "GitHub Enterprise Cloud GraphQL API — linkProjectV2ToRepository, createIssue, addSubIssue"
+
+  - id: "yq-python3"
+    type: "external"
+    path: ""
+    description: "Ferramentas de parsing YAML em bash: yq v4 (preferido) com fallback para python3 -c"
+
+edges:
+  - src: "create-new-feature"
+    dst: "bounded-contexts-yaml"
+    type: "sync"
+    protocol: "file read"
+    description: "Lê bounded-contexts.yaml para resolver slugs → repos ao criar uma feature"
+
+  - src: "create-new-feature"
+    dst: "feature-json"
+    type: "sync"
+    protocol: "file write"
+    description: "Persiste bounded_contexts e repos resolvidos em feature.json"
+
+  - src: "setup-github-project"
+    dst: "bounded-contexts-yaml"
+    type: "sync"
+    protocol: "file read"
+    description: "Lê lista de repos a vincular ao Project V2"
+
+  - src: "setup-github-project"
+    dst: "ghe-api"
+    type: "sync"
+    protocol: "GraphQL/HTTPS"
+    description: "Chama linkProjectV2ToRepository para cada repo do bounded-contexts.yaml"
+
+  - src: "setup-github-project"
+    dst: "yq-python3"
+    type: "sync"
+    protocol: "subprocess"
+    description: "Usa yq ou python3 para parsear o YAML do bounded-contexts.yaml"
+
+  - src: "create-new-feature"
+    dst: "yq-python3"
+    type: "sync"
+    protocol: "subprocess"
+    description: "Usa yq ou python3 para extrair repository de cada slug do bounded-contexts.yaml"
+
+  - src: "bounded-contexts-template"
+    dst: "bounded-contexts-yaml"
+    type: "async"
+    protocol: "template instantiation"
+    description: "Template copiado para docs/ ao inicializar um novo projeto com o preset"
+
+  - src: "developer-guide"
+    dst: "bounded-contexts-yaml"
+    type: "async"
+    protocol: "documentation reference"
+    description: "Documenta como preencher e manter o bounded-contexts.yaml"
+
+  - src: "developer-guide"
+    dst: "create-new-feature"
+    type: "async"
+    protocol: "documentation reference"
+    description: "Documenta o uso de --bounded-contexts no /speckit-specify"
+
+  - src: "developer-guide"
+    dst: "setup-github-project"
+    type: "async"
+    protocol: "documentation reference"
+    description: "Documenta como o setup vincula repos ao Project V2"
+
+externals:
+  - id: "ghe-graphql-api"
+    provider: "GitHub Enterprise Cloud"
+    called_by: ["setup-github-project"]
+    criticality: "medium"
+    fallback: "vínculo manual via UI 'Settings → Linked Repositories' do Project V2"
+    note: "Mutation linkProjectV2ToRepository disponível no GHE ≥ 3.8. Em versões anteriores, o script imprime instrução de vínculo manual e prossegue."
+
+  - id: "yq-v4"
+    provider: "mikefarah/yq"
+    called_by: ["create-new-feature", "setup-github-project"]
+    criticality: "low"
+    fallback: "python3 -c 'import yaml, sys' — disponível em macOS/Ubuntu modernos. Se ambos ausentes: grep/awk com parsing simplificado + aviso de instalação"
