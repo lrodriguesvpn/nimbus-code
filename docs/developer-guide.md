@@ -519,6 +519,155 @@ visual por tipo fica menos rica.
 | `/nimbus-code.implement` | Executa as tarefas | Sim |
 | `/nimbus-code.converge` | Depois do implement — garante que nada ficou faltando vs. spec/plan/tasks | Recomendado, essencial em brownfield |
 
+---
+
+## 5. MultiRepo — Registrando Microsserviços
+
+Esta seção descreve a estratégia **1 Repo Central de Specs + N Repos por
+stack/microsserviço** suportada pelo Nimbus Code. O Repo Central hospeda
+`specs/`, `docs/` e o GitHub Project V2 (board cross-repo). Cada microsserviço
+tem seu próprio repo onde o Copilot Agent abre PRs e onde as Tasks são criadas.
+
+### 5.1. Convenção de nomes de repos
+
+| Tipo | Prefixo | Exemplo |
+|---|---|---|
+| Microsserviço backend | `svc-` | `org/svc-auth`, `org/svc-orders` |
+| Frontend web | `frontend-` | `org/frontend-web`, `org/frontend-admin` |
+| Mobile | `mobile-` | `org/mobile-ios`, `org/mobile-android` |
+| Biblioteca compartilhada | `lib-` | `org/lib-commons`, `org/lib-ui` |
+| Infraestrutura (IaC) | `infra` ou `infra-` | `org/infra`, `org/infra-aws` |
+| Repo Central (governança) | nome do produto | `org/nimbus-code-spec-kit-template` |
+
+### 5.2. Registrando um novo microsserviço
+
+**Passo 1 — Adicionar entrada em `docs/bounded-contexts.yaml`:**
+
+```yaml
+contexts:
+  - slug: "order-management"
+    description: "Ciclo de vida de pedidos: criação, atualização, cancelamento e histórico."
+    repository: "minha-org/svc-orders"
+    stack: "Node.js"
+    team: "core-squad"
+    autonomous_ok: true   # true = Copilot Agent pode trabalhar sem supervisão
+                          # false = label agent:needs-human aplicado automaticamente nas Tasks
+```
+
+Convenção de slugs: `kebab-case`, substantivo no singular.
+Não invente slugs sem adicionar aqui primeiro — o agente valida esta lista ao
+criar uma nova spec.
+
+**Passo 2 — Abrir PR com a nova entrada** (revisão obrigatória antes de merge).
+
+**Passo 3 — Vincular o repo ao Project V2:**
+
+```bash
+./scripts/setup-github-project.sh --repo-owner minha-org --repo-name repo-central
+```
+
+O script lê `docs/bounded-contexts.yaml` e chama `linkProjectV2ToRepository`
+para cada repo listado. Requer escopo `write:org` no token. Se o vínculo já
+existir, o script é idempotente (imprime `↻ Já vinculado`).
+
+**Passo 4 — Configurar labels no novo repo:**
+
+```bash
+./scripts/setup-github-labels.sh --repo-owner minha-org --repo-name svc-orders
+```
+
+### 5.3. Criando uma feature que cruza múltiplos repos
+
+```bash
+# /speckit-specify com bounded contexts
+.specify/scripts/bash/create-new-feature.sh \
+    "Checkout flow — integração pedidos e pagamentos" \
+    --bounded-contexts "order-management,billing"
+```
+
+O que acontece:
+1. Os slugs são validados contra `docs/bounded-contexts.yaml`
+2. Se qualquer slug for inválido, o script aborta e lista os slugs válidos
+3. Os repos resolvidos são persistidos em `.specify/feature.json`:
+
+```json
+{
+  "feature_directory": "specs/007-checkout-flow",
+  "bounded_contexts": ["order-management", "billing"],
+  "repos": ["minha-org/svc-orders", "minha-org/svc-payments"]
+}
+```
+
+### 5.4. Como o `/speckit-taskstoissues` roteia Tasks para repos
+
+O roteamento usa a **anotação inline** no header de cada seção `[USN]` do
+`tasks.md`. Adicione o slug do contexto após um traço:
+
+```markdown
+## Phase 2: User Story 1 — Criar pedido [US1 — order-management]
+
+- [ ] T001 [US1] Implementar endpoint POST /orders
+- [ ] T002 [US1] Validar estoque antes de confirmar pedido
+
+## Phase 3: User Story 2 — Processar pagamento [US2 — billing]
+
+- [ ] T003 [US2] Integrar com gateway de pagamento
+- [ ] T004 [US2] Emitir evento payment.processed
+```
+
+**Resultado:** Tasks de `[US1 — order-management]` são criadas em
+`minha-org/svc-orders`; Tasks de `[US2 — billing]` em `minha-org/svc-payments`.
+Issues sem anotação de slug são criadas no Repo Central (comportamento atual,
+retrocompatível).
+
+**Deduplicação:** o comando usa o ID `T00N` como chave — safe para re-execução.
+
+**`autonomous_ok: false`:** se o bounded context tiver `autonomous_ok: false`
+em `bounded-contexts.yaml`, o label `agent:needs-human` é aplicado
+automaticamente nas Tasks criadas naquele repo.
+
+### 5.5. Verificando o board cross-repo
+
+Após rodar `setup-github-project.sh`:
+
+1. Acesse o GitHub Project V2 do Repo Central
+2. `Settings → Linked Repositories` → todos os repos listados em
+   `bounded-contexts.yaml` devem aparecer
+3. As views criadas pelo script (Board de Epics, Board de Features, etc.)
+   exibem issues de **todos** os repos vinculados no mesmo board
+
+> **NOTA**: `Group by` e `Iteration` não são configuráveis via API GraphQL —
+> configure manualmente na UI de cada view após a criação.
+
+### 5.6. Edge cases
+
+**Org sem suporte ao `linkProjectV2ToRepository` (GHE Server < 3.8)**
+
+O script detecta o erro e imprime instrução de vínculo manual:
+`Project → Settings → Linked Repositories → Add repository`.
+
+**Token sem escopo `write:org`**
+
+O script imprime erro claro identificando o repo problemático e continua
+vinculando os demais. Apenas o repo com falha precisa ser adicionado manualmente.
+
+**`bounded-contexts.yaml` ausente ao rodar `setup-github-project.sh`**
+
+O passo de vínculo de repos é pulado com aviso. O restante do setup funciona
+normalmente.
+
+**Feature single-repo (sem `--bounded-contexts`)**
+
+Comportamento idêntico ao atual — `bounded_contexts` e `repos` são `[]` em
+`feature.json`. O `/speckit-taskstoissues` cria todas as issues no Repo Central.
+Zero breaking change.
+
+**Feature com múltiplos Epics**
+
+Não suportado — cada feature pertence a exatamente um Epic. Se a feature cobre
+mais de um Epic, divida-a em specs separadas, cada uma com seu próprio
+`EPIC_ISSUE`.
+
 ## Documentos relacionados neste repositório
 
 - [`docs/bundle-architecture.md`](bundle-architecture.md) — diagramas Mermaid

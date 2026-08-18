@@ -58,3 +58,20 @@ entries:
     adr: ""
     reuse_count: 0
 
+
+  - tag: "multirepo-bounded-context-routing"
+    bounded_context: "spec-kit-workflow"
+    description: >
+      Padrão de suporte MultiRepo no Spec Kit: 1 Repo Central de Specs +
+      N Repos por stack/microsserviço. Inclui: (1) registro de repos em
+      docs/bounded-contexts.yaml (slug, repository, stack, team, autonomous_ok);
+      (2) flag --bounded-contexts em /speckit-specify para persistir repos em
+      feature.json; (3) anotação inline [USN — slug] em tasks.md para roteamento
+      de Tasks para o repo do serviço correto; (4) linkProjectV2ToRepository no
+      setup-github-project.sh para board cross-repo no Project V2; (5) fallback
+      gracioso para yq ausente (python3 → grep/awk) e para API indisponível
+      (GHE Server < 3.8). Reaproveitar sempre que uma feature precisar de Tasks
+      em repos de serviço distintos mantendo Epics/Features/USs no repo central.
+    source: "specs/006-multirepo-support/plan.md"
+    adr: ""
+    reuse_count: 0
