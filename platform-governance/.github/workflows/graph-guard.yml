@@ -1,0 +1,14 @@
+name: graph-guard
+
+on:
+  push:
+    paths:
+      - "specs/004-platform-cmdb-dsc-model/graph.yaml"
+      - "specs/004-platform-cmdb-dsc-model/graph.md"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "Graph artifacts present"

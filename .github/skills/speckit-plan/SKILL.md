@@ -63,8 +63,11 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Fill Constitution Check section from constitution
    - Evaluate gates (ERROR if violations unjustified)
    - Phase 0: Generate research.md (resolve all NEEDS CLARIFICATION)
-   - Phase 1: Generate data-model.md, contracts/, quickstart.md
+   - Phase 1: Generate data-model.md, contracts/, quickstart.md, graph.yaml, graph.md
+   - For S3/S4 features, also generate impact-map.md
    - Re-evaluate Constitution Check post-design
+   - Ensure plan explicitly documents OpenFeature as toggle abstraction when rollout/flag is used
+   - Ensure plan includes SPEC KIT COST reference block for hybrid agent+human delivery
 
 ## Mandatory Post-Execution Hooks
 
@@ -152,12 +155,15 @@ Command ends after Phase 1 design. Report branch, IMPL_PLAN path, and generated 
    - Do not include full implementation code, model/service/controller bodies, migrations, or complete test suites
    - Keep this artifact as a validation/run guide; implementation details belong in `tasks.md` and the implementation phase
 
-**Output**: data-model.md, /contracts/*, quickstart.md
+**Output**: data-model.md, /contracts/*, quickstart.md, graph.yaml, graph.md (and impact-map.md for S3/S4)
 
 ## Key rules
 
 - Use absolute paths for filesystem operations; use project-relative paths for references in documentation
 - ERROR on gate failures or unresolved clarifications
+- Do not leave graph artifacts as TODO when the feature is S3/S4; generate them in the same run
+- If toggle/rollout is present, `Flag provider` must be declared with OpenFeature abstraction
+- If the feature is hybrid (agent+human), include SPEC KIT COST URL in plan artifacts
 
 ## Done When
 

@@ -47,6 +47,19 @@ do modelo anterior: foque no objetivo de negócio/técnico, não numa narrativa 
 
 **Critério de done (alto nível):** [como saber que está feito — sem detalhar testes aqui]
 
+## Nimbus-Code — Hybrid Collaboration Model
+
+*Defina explicitamente como agente e humano se dividem na execução desta feature.
+Use este bloco para reduzir handoff implícito e eliminar ambiguidade operacional.*
+
+| Papel | Responsabilidades | Critério de handoff | Escalação |
+|---|---|---|---|
+| Agente | [geração inicial de artefatos, validações automatizadas] | [quando deve pedir revisão humana] | [tech lead / architecture board] |
+| Humano | [revisão de negócio, validação final, ajustes finos] | [quando retorna ao agente para correções] | [tech lead / product owner] |
+
+> Para contexto **WEB**, declarar explicitamente: *"Impeccable é o padrão oficial de design"*.  
+> Exceções só são aceitas com justificativa no Architecture Decision Log do `plan.md`.
+
 ## Nimbus-Code — Critérios de Aceitação (formato BDD)
 
 *Todo critério de aceitação deve estar no formato Given/When/Then para permitir
@@ -64,6 +77,10 @@ rastreabilidade direta com testes de integração. Cada item recebe um ID único
 > **When** …
 > **Then** …
 > **Test ref:** `test_AC2_<descricao>`
+
+> **AC de governança para rollout/toggle (se aplicável)**
+> - Feature com rollout progressivo deve declarar OpenFeature como padrão de abstração
+> - Provider específico é decisão de ambiente, não de template
 
 > *(Adicionar AC-N conforme necessário. Mínimo: 1 critério por feature.)*
 
