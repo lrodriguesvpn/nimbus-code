@@ -43,6 +43,12 @@
 # apagado ou não tenha sido criado no bootstrap original, ex.: `gh` CLI
 # indisponível na máquina de quem rodou o bootstrap).
 #
+# MultiRepo: lê docs/bounded-contexts.yaml (se existir) e vincula cada repo
+# listado ao Project V2 via GraphQL (mutation linkProjectV2ToRepository).
+# Requer escopo write:org no token. Se o arquivo não existir ou a API não
+# estiver disponível, o passo é pulado com aviso — o restante do setup não é
+# afetado.
+#
 ###############################################################################
 
 set -euo pipefail
@@ -518,9 +524,114 @@ mutation($projectId:ID!) {
   fi
 fi
 
-# 9. Resumo final
+# 9. Vincular repos de serviço ao Project V2 (MultiRepo — bounded-contexts.yaml)
+# Lê docs/bounded-contexts.yaml (relativo ao diretório de execução do script ou
+# à raiz do repo detectada via git), extrai os campos repository e os vincula ao
+# Project V2 via GraphQL (mutation linkProjectV2ToRepository).
+# Requer escopo write:org no token. Erros isolados por repo não abortam o setup.
 echo ""
-echo -e "${BLUE}[9/9]${NC} Setup concluído!"
+echo -e "${BLUE}[9/10]${NC} Vinculando repos de serviço ao Project V2 (MultiRepo)..."
+
+# Locate bounded-contexts.yaml relative to the script or the git root
+_SCRIPT_DIR_SGP="$(CDPATH="" cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_GIT_ROOT=$(git -C "$_SCRIPT_DIR_SGP" rev-parse --show-toplevel 2>/dev/null || true)
+_BC_FILE=""
+for _candidate in "${_GIT_ROOT}/docs/bounded-contexts.yaml" "${_SCRIPT_DIR_SGP}/../docs/bounded-contexts.yaml"; do
+    if [[ -f "$_candidate" ]]; then
+        _BC_FILE="$_candidate"
+        break
+    fi
+done
+
+if [[ -z "$_BC_FILE" ]]; then
+    echo -e "${YELLOW}  ℹ docs/bounded-contexts.yaml não encontrado — pulando vínculo de repos.${NC}"
+    echo -e "    Crie o arquivo para habilitar o board cross-repo (ver docs/developer-guide.md)."
+else
+    # Parse YAML: prefer yq, then python3, then skip with instructions
+    _parse_bc_repos() {
+        local file="$1"
+        if command -v yq >/dev/null 2>&1; then
+            yq e '.contexts[].repository' "$file" 2>/dev/null | grep -v '^null$' | grep -v '^$'
+        elif python3 -c "import yaml" 2>/dev/null; then
+            python3 - "$file" <<'PYEOF'
+import sys, yaml
+with open(sys.argv[1]) as f:
+    data = yaml.safe_load(f) or {}
+for ctx in (data.get("contexts") or []):
+    if isinstance(ctx, dict) and ctx.get("repository"):
+        print(ctx["repository"])
+PYEOF
+        else
+            grep -E '^\s+repository:' "$file" | sed 's/.*repository:[[:space:]]*"*//; s/"*[[:space:]]*//'
+        fi
+    }
+
+    # Get the project's owner node ID (for linkProjectV2ToRepository)
+    _ORG_NODE_ID=$(GH_HOST="$GH_HOST" gh api graphql -f login="$REPO_OWNER" -f query='
+    query($login:String!) {
+      organization(login: $login) { id }
+    }' 2>/dev/null | jq -r '.data.organization.id // empty')
+
+    REPOS_LINKED=0
+    REPOS_ALREADY=0
+    REPOS_FAILED=0
+
+    while IFS= read -r _REPO_FULL; do
+        [[ -z "$_REPO_FULL" ]] && continue
+        _REPO_OWNER_SVC="${_REPO_FULL%%/*}"
+        _REPO_NAME_SVC="${_REPO_FULL##*/}"
+
+        # Get repo node ID
+        _REPO_NODE_ID=$(GH_HOST="$GH_HOST" gh api graphql \
+            -f owner="$_REPO_OWNER_SVC" -f name="$_REPO_NAME_SVC" -f query='
+        query($owner:String!, $name:String!) {
+          repository(owner: $owner, name: $name) { id }
+        }' 2>/dev/null | jq -r '.data.repository.id // empty')
+
+        if [[ -z "$_REPO_NODE_ID" ]]; then
+            echo -e "${YELLOW}  ⚠ Repo não encontrado ou sem acesso: ${_REPO_FULL} — pulando${NC}"
+            REPOS_FAILED=$((REPOS_FAILED + 1))
+            continue
+        fi
+
+        # Try to link; linkProjectV2ToRepository is idempotent on GHE ≥ 3.8
+        _LINK_RESPONSE=$(GH_HOST="$GH_HOST" gh api graphql \
+            -f projectId="$PROJECT_ID" -f repositoryId="$_REPO_NODE_ID" -f query='
+        mutation($projectId:ID!, $repositoryId:ID!) {
+          linkProjectV2ToRepository(input: {projectId: $projectId, repositoryId: $repositoryId}) {
+            repository { nameWithOwner }
+          }
+        }' 2>&1) || true
+
+        _LINKED_NAME=$(echo "$_LINK_RESPONSE" | jq -r '.data.linkProjectV2ToRepository.repository.nameWithOwner // empty' 2>/dev/null)
+
+        if [[ -n "$_LINKED_NAME" ]]; then
+            echo -e "${GREEN}  ✓ Vinculado: ${_REPO_FULL}${NC}"
+            REPOS_LINKED=$((REPOS_LINKED + 1))
+        else
+            _ERR_MSG=$(echo "$_LINK_RESPONSE" | jq -r '.errors[0].message // empty' 2>/dev/null)
+            if echo "$_ERR_MSG" | grep -qi "already\|existe\|linked"; then
+                echo -e "${YELLOW}  ↻ Já vinculado: ${_REPO_FULL}${NC}"
+                REPOS_ALREADY=$((REPOS_ALREADY + 1))
+            else
+                echo -e "${YELLOW}  ⚠ Falha ao vincular: ${_REPO_FULL}${NC}"
+                if [[ -n "$_ERR_MSG" ]]; then
+                    echo -e "    Erro: ${_ERR_MSG}" >&2
+                fi
+                echo -e "    Verifique se o token tem escopo write:org e se a API linkProjectV2ToRepository"
+                echo -e "    está disponível (requer GHE ≥ 3.8). Para vincular manualmente:"
+                echo -e "    Project → Settings → Linked Repositories → Add repository"
+                REPOS_FAILED=$((REPOS_FAILED + 1))
+            fi
+        fi
+    done < <(_parse_bc_repos "$_BC_FILE")
+
+    echo -e "  Repos processados: vinculados=${REPOS_LINKED} já-vinculados=${REPOS_ALREADY} falhas=${REPOS_FAILED}"
+fi
+
+# 10. Resumo final
+echo ""
+echo -e "${BLUE}[10/10]${NC} Setup concluído!"
 echo ""
 echo -e "${GREEN}═══════════════════════════════════════════════════════════════${NC}"
 echo -e "GitHub Project configurado com sucesso!"
@@ -572,6 +683,9 @@ echo -e "  4. Preencha o campo \"Oportunidade D365\" nas issues vinculadas a uma
 echo -e "     venda/oportunidade específica (opcional para trabalho interno/técnico)"
 echo -e "  5. Preencha \"Ocorrência CRM (N1)\" + label type:incident nas issues"
 echo -e "     originadas de uma ocorrência/atendimento tratado inicialmente no CRM"
+echo -e "  6. MultiRepo: preencha docs/bounded-contexts.yaml com os repos de serviço"
+echo -e "     e rode este script novamente para vinculá-los ao board cross-repo"
+echo -e "     (ver docs/developer-guide.md — seção 'MultiRepo — Registrando Microsserviços')"
 echo -e ""
 echo -e "Documentação: ${BLUE}docs/developer-guide.md${NC}"
 echo -e "${GREEN}═══════════════════════════════════════════════════════════════${NC}"
