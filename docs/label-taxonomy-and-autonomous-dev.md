@@ -41,7 +41,7 @@ não tendo) uma forma consistente de responder a duas perguntas recorrentes:
 | Prioridade | `priority:P2-medium` | `#fbca04` | Planejado, sem urgência imediata |
 | Prioridade | `priority:P3-low` | `#0e8a16` | Nice-to-have |
 | Complexidade | `complexity:S0`–`S4` | gradiente verde→vermelho | Mesma escala S0–S4 do `copilot-instructions.md` (ver [`ai-code-quality-and-observability.md`](ai-code-quality-and-observability.md#6-seleção-de-modelo-por-complexidade-s0s4)) |
-| Tipo | `type:bug` / `type:feature` / `type:chore` / `type:docs` / `type:incident` | padrão GitHub | Classificação padrão de issue/PR — `type:incident` é originada de ocorrência em produção/ambiente de cliente e **sempre** exige revisão humana (ver seção 4.1) |
+| Tipo | `type:epic` / `type:feature` / `type:user-story` / `type:bug` / `type:chore` / `type:docs` / `type:incident` | padrão GitHub | Classificação padrão de issue/PR e hierarquia de backlog EPIC/FEATURE/US — `type:incident` é originada de ocorrência em produção/ambiente de cliente e **sempre** exige revisão humana (ver seção 4.1) |
 | Agente | `agent:autonomous-ok` | `#0e8a16` | Dispara o auto-assign ao Copilot coding agent |
 | Agente | `agent:needs-human` | `#e99695` | Bloqueia qualquer auto-assign, mesmo que `agent:autonomous-ok` também esteja presente |
 | Status | `status:needs-triage` | `#ededed` | Issue nova, ainda sem `priority:*`/`complexity:*` — não deve ser puxada por agente autônomo |
