@@ -31,25 +31,30 @@
 #                       (incremente manualmente ao reaproveitar — sinal de ROI)
 
 version: 1
-entries: []
+entries:
+  - tag: "ghe-sub-issues-hierarchy"
+    bounded_context: "spec-kit-workflow"
+    description: >
+      Padrão de criação de hierarquia Epic → Feature → User Story → Task no GHE
+      via sub-issues nativos (GraphQL API). Inclui: detecção de Issue Types da org,
+      fallback gracioso via labels (type:epic/feature/user-story/task) para orgs
+      sem suporte nativo, criação idempotente de views hierárquicas no Project V2,
+      e alerta de limite de 100 sub-issues por parent. Reaproveitar sempre que
+      uma feature precisar criar rastreabilidade hierárquica de issues no GHE.
+    source: "specs/005-epic-feature-us-ghe-hierarchy/plan.md"
+    adr: ""
+    reuse_count: 0
 
-# Exemplo (remova os comentários e ajuste para ativar uma entrada real):
-#
-# entries:
-#   - tag: "outbox-pattern"
-#     bounded_context: "order-service"
-#     description: >
-#       Transactional Outbox para publicar eventos de pedido de forma atômica
-#       com a escrita no banco. Reaproveitar sempre que uma feature precisar
-#       publicar evento de domínio com garantia de consistência com o dado.
-#     source: "specs/003-order-events/plan.md"
-#     adr: "docs/adr/0007-outbox-pattern.md"
-#     reuse_count: 2
-#   - tag: "correlation-id-middleware"
-#     bounded_context: "shared/http"
-#     description: >
-#       Middleware HTTP que propaga X-Correlation-Id entre serviços (ver
-#       constituição, seção Qualidade e Processo). Reaproveitar em vez de
-#       reimplementar propagação de correlation-id por serviço.
-#     source: "specs/001-observability-baseline/plan.md"
-#     reuse_count: 5
+  - tag: "speckit-deduplication-by-id"
+    bounded_context: "spec-kit-workflow"
+    description: >
+      Padrão de deduplicação de issues geradas pelo /speckit-taskstoissues usando
+      o ID estruturado da tarefa (T00N) como chave — não o título, que pode mudar.
+      Antes de criar cada issue, verifica se já existe no repo uma issue com
+      identificador T00N; antes de vincular sub-issue, verifica se o vínculo já
+      existe. Reaproveitar sempre que um comando Spec Kit precisar ser re-executável
+      sem criar duplicatas no GHE.
+    source: "specs/005-epic-feature-us-ghe-hierarchy/plan.md"
+    adr: ""
+    reuse_count: 0
+
