@@ -19,12 +19,10 @@ name: Adicionar issues/PRs à board do repositório
 # Instalar este workflow em cada repositório do projeto:
 #   cp .github/workflows/add-to-repo-project.yml <repo>/.github/workflows/
 #
-# Requer o secret VPNDEV_PROJECT_TOKEN (mesmo já usado por
-# ensure-github-project.yml): um Personal Access Token (classic, escopos
-# `repo` + `project`, ou fine-grained com permissão de leitura/escrita em
-# "Projects"). O GITHUB_TOKEN padrão do workflow nunca tem escopo `project`,
-# por isso este secret é obrigatório — sem ele, este workflow falha
-# explicitamente (não em silêncio).
+# Quando o secret VPNDEV_PROJECT_TOKEN não estiver configurado, este workflow
+# não falha: ele apenas registra um warning e pula a automação de adicionar o
+# item à board. Isso evita quebrar CI em ambientes que ainda não configuraram
+# token com escopo de Projects.
 
 on:
   issues:
@@ -42,14 +40,18 @@ jobs:
     name: Adicionar à board do repositório
     runs-on: ubuntu-latest
     steps:
-      - name: Verificar secret obrigatório
+      - name: Verificar token para automação da board
+        id: token
         run: |
           if [ -z "${{ secrets.VPNDEV_PROJECT_TOKEN }}" ]; then
-            echo "::error::Secret VPNDEV_PROJECT_TOKEN não configurado. Crie um PAT (escopos repo+project) e configure em Settings → Secrets and variables → Actions."
-            exit 1
+            echo "::warning::Secret VPNDEV_PROJECT_TOKEN não configurado. Pulando adição automática à board deste repositório."
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Descobrir URL da board deste repositório
+        if: steps.token.outputs.configured == 'true'
         id: discover
         env:
           GH_TOKEN: ${{ secrets.VPNDEV_PROJECT_TOKEN }}
@@ -69,7 +71,7 @@ jobs:
           fi
 
       - name: Adicionar item à board
-        if: steps.discover.outputs.found == 'true'
+        if: steps.token.outputs.configured == 'true' && steps.discover.outputs.found == 'true'
         uses: actions/add-to-project@v2.0.0
         with:
           project-url: ${{ steps.discover.outputs.url }}
