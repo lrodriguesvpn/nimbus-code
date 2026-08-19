@@ -1,4 +1,5 @@
 # Feature Specification: Documentação de Controle de Segurança no GHE para Projetos e Projeto Plataforma
+﻿# Feature Specification: Documentação de Controle de Segurança no GHE para Projetos e Projeto Plataforma
 
 **Feature Branch**: `007-controle-seguranca-ghe-projetos-plataforma`
 
@@ -9,6 +10,16 @@
 **Input**: User description: "/scpekit-specify Criar documentacao para Controle de Seguranca no GHE para controle dos projetos e projeto plataforma."
 
 ---
+
+## Clarifications
+
+### Session 2026-08-19
+
+- Q: O objetivo desta feature é produzir apenas a documentação (guia manual de configuração), ou ela também deve incluir/gerar automação (scripts, GitHub Actions, rulesets) que aplique os controles descritos? → A: Documentação + automação (scripts/workflows que aplicam ou validam os controles automaticamente)
+- Q: Quando um controle automatizado detectar um repositório fora de conformidade, a automação deve corrigir automaticamente ou apenas reportar o desvio para correção manual? → A: Apenas detectar e reportar (gera issue/relatório; correção é manual, seguindo o fluxo já existente)
+- Q: Com que frequência/gatilho a automação de detecção deve rodar nos repositórios de projeto e no Projeto Plataforma? → A: Agendamento automático semanal, com relatório consolidado mensal
+- Q: Qual deve ser o escopo de repositórios cobertos pela automação: todos os repositórios da organização, apenas os que seguem o fluxo Nimbus Code, ou uma lista explícita configurável? → A: Todos os repositórios da organização automaticamente (descoberta via API, sem lista manual)
+- Q: Que tipo de credencial a automação de varredura org-wide deve usar para acessar todos os repositórios da organização? → A: GitHub App dedicado, instalado na organização, com permissões somente-leitura mínimas necessárias
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -73,6 +84,14 @@ Como **time de engenharia e governança**, quero uma rotina de auditoria periód
 - **FR-003**: A documentação DEVE definir modelo de acesso por papéis (owner/admin/maintainer/contributor/leitor) com princípio de menor privilégio.
 - **FR-004**: A documentação DEVE definir padrão para uso de tokens e secrets de automação (escopo mínimo, rotação, armazenamento e revogação).
 - **FR-005**: A documentação DEVE incluir checklist operacional de auditoria periódica com critérios objetivos de conformidade.
+- **FR-001a**: A feature DEVE entregar automação (scripts e/ou GitHub Actions) que detecta e reporta (não corrige automaticamente) os controles documentados nos repositórios de projeto e no Projeto Plataforma, gerando issue/relatório rastreável para correção manual seguindo o fluxo existente.
+- **FR-002**: A documentação DEVE separar claramente controles para nível de repositório e controles para o Projeto Plataforma (Project V2 consolidado).
+- **FR-003**: A documentação DEVE definir modelo de acesso por papéis (owner/admin/maintainer/contributor/leitor) com princípio de menor privilégio.
+- **FR-004**: A documentação DEVE definir padrão para uso de tokens e secrets de automação (escopo mínimo, rotação, armazenamento e revogação).
+- **FR-004a**: A automação de varredura organizacional DEVE autenticar-se via GitHub App dedicado instalado na organização, com permissões somente-leitura mínimas necessárias (least privilege), em vez de PAT de usuário ou credenciais de escopo amplo.
+- **FR-005**: A documentação DEVE incluir checklist operacional de auditoria periódica com critérios objetivos de conformidade.
+- **FR-005a**: A automação DEVE executar a varredura de conformidade em agendamento semanal (cron) para repositórios de projeto e Projeto Plataforma, e DEVE consolidar os resultados em um relatório mensal.
+- **FR-005b**: A automação DEVE descobrir automaticamente todos os repositórios da organização via API do GHE (sem depender de lista manual configurada) para determinar o escopo de varredura.
 - **FR-006**: A documentação DEVE incluir procedimento de resposta para não conformidades (registro, prioridade, responsável, prazo e validação de correção).
 - **FR-007**: A documentação DEVE referenciar o fluxo Nimbus Code já existente para governança (labels, board e gates) sem criar processo paralelo.
 - **FR-008**: A documentação DEVE explicitar dependências mínimas para workflows que interagem com Projects (permissões e secrets obrigatórios).
@@ -92,6 +111,7 @@ Como **time de engenharia e governança**, quero uma rotina de auditoria periód
 - **SC-001**: 100% dos novos repositórios conseguem aplicar o baseline de segurança usando apenas esta documentação.
 - **SC-002**: O Projeto Plataforma passa a operar com matriz de permissões documentada e sem concessão de acesso administrativo fora da matriz aprovada.
 - **SC-003**: Pelo menos 1 auditoria mensal é executada com checklist completo e evidência registrada para cada projeto ativo.
+- **SC-003**: A automação executa a varredura semanalmente sem falha e gera um relatório consolidado mensal com evidência registrada para cada projeto ativo.
 - **SC-004**: Reduzir em pelo menos 80% a ocorrência de falhas operacionais por secret/token ausente em workflows de governança de Projects.
 
 ## Assumptions
