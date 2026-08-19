@@ -118,6 +118,7 @@ Given that feature description, do this:
        If empty: ERROR "No feature description provided"
     2. Extract key concepts from description
        Identify: actors, actions, data, constraints
+       Also identify backlog hierarchy context (EPIC, FEATURE e User Stories/US)
     3. For unclear aspects:
        - Make informed guesses based on context and industry standards
        - Only mark with [NEEDS CLARIFICATION: specific question] if:
@@ -136,11 +137,16 @@ Given that feature description, do this:
        Include both quantitative metrics (time, performance, volume) and qualitative measures (user satisfaction, task completion)
        Each criterion must be verifiable without implementation details
     7. Identify Key Entities (if data involved)
-    8. Return: SUCCESS (spec ready for planning)
+    8. Define backlog hierarchy mapping for project views:
+      - EPIC (tema macro)
+      - FEATURE (recorte da entrega)
+      - US (fatias independentes de valor)
+    9. Return: SUCCESS (spec ready for planning)
 
    9. **Hybrid governance enforcement (Nimbus-Code preset)**:
      - Ensure the generated spec includes explicit guidance for **hybrid collaboration** (agent + human responsibilities / handoff).
      - Ensure acceptance criteria are in strict **BDD** form (`Given/When/Then`) with unique IDs (`AC-N`).
+     - Ensure the spec has an explicit section "Backlog Hierarchy (EPIC/FEATURE/US)" for downstream sync/board views.
      - If the feature context is **WEB**, ensure the spec explicitly states **Impeccable** as the design standard.
      - If rollout/toggle strategy is mentioned in scope, ensure the spec references **OpenFeature** as the abstraction standard.
 

@@ -69,10 +69,12 @@ Isso já deixa o projeto com `specify init` feito e o bundle
 Se você tiver o `gh` CLI instalado e autenticado, o `bootstrap.sh` também cria
 **automaticamente um GitHub Project V2** com o nome `{repo-name} — Nimbus Code Roadmap`.
 
-O project já vem com **3 views padrão** (copiadas do IOX-CROWDFUNDINGPAAS) e
+O project já vem com **5 views padrão** (copiadas do IOX-CROWDFUNDINGPAAS) e
 **2 campos customizados**:
 
-- **Board por Epic** — organize issues por épicas (personalizável)
+- **Board por Epic** — visão da camada EPIC (`type:epic`)
+- **Board por Feature** — visão da camada FEATURE (`type:feature`)
+- **Board por User Story** — visão da camada US (`type:user-story`)
 - **Board por Prioridade** — organize por prioridade (personalizável)
 - **Tabela — P0 Blocker** — filtro pré-pronto para bloqueadores críticos (P0-blocker)
 - **Campo "Horas Humanas"** (número) — custo real do modelo híbrido (ver
