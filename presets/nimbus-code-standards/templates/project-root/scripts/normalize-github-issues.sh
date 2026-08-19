@@ -83,6 +83,16 @@ required_sections = [
     "Referência",
 ]
 
+GENERIC_RESULT = (
+    "Entregável atualizado para o novo contrato híbrido, com instruções claras para execução humana e acompanhamento por agente."
+)
+GENERIC_CRITERIA = (
+    "- [ ] A issue deve estar no novo formato híbrido.\n- [ ] O contexto deve permitir execução sem leitura adicional."
+)
+GENERIC_STEPS = (
+    "1. Revisar o contexto e o objetivo.\n2. Executar a mudança descrita.\n3. Validar o resultado e registrar evidências."
+)
+
 def parse_sections(markdown: str):
     """Parse markdown sections (## Heading), handling escaped newlines correctly."""
     # First, decode any literal escaped newlines that may exist
@@ -115,8 +125,26 @@ def has_format_issues(sections: dict, body: str) -> bool:
             return True
     return False
 
+def canonical(text: str) -> str:
+    return re.sub(r"\s+", " ", (text or "").strip()).lower()
+
+def has_generic_content(sections: dict) -> bool:
+    if canonical(sections.get("Resultado Esperado", "")) == canonical(GENERIC_RESULT):
+        return True
+    if canonical(sections.get("Critérios de Aceite", "")) == canonical(GENERIC_CRITERIA):
+        return True
+    if canonical(sections.get("Passos Operacionais", "")) == canonical(GENERIC_STEPS):
+        return True
+    if "spec-kit-cost" in (sections.get("Referência", "") or "").lower():
+        return True
+    return False
+
 sections = parse_sections(body)
-if all(sections.get(name) for name in required_sections) and not has_format_issues(sections, body):
+if (
+    all(sections.get(name) for name in required_sections)
+    and not has_format_issues(sections, body)
+    and not has_generic_content(sections)
+):
     print("UNCHANGED")
     sys.exit(0)
 
@@ -135,32 +163,39 @@ if not objective:
     objective = cleaned_title
 
 result = sections.get("Resultado Esperado")
-if not result:
+if not result or canonical(result) == canonical(GENERIC_RESULT):
     # Try to synthesize from context and objective if not explicitly provided
     has_m365 = any(keyword.lower() in body.lower() for keyword in ["m365", "sharepoint", "copilot"])
     has_workflow = any(keyword.lower() in body.lower() for keyword in ["workflow", "automação", "pipeline"])
     has_manual = any(keyword.lower() in body.lower() for keyword in ["danilo", "manual", "configuração"])
     
     if has_m365 and has_manual:
-        result = f"Configurações M365 aplicadas conforme documentação técnica com evidência de implementação registrada."
-    elif has_workflow or has_m365:
-        result = f"Solução implementada, versionada, testada em ambiente real e documentada."
+        result = "Configurações M365 Copilot aplicadas conforme documentação, com evidências e URL final de publicação no SharePoint registrada."
+    elif has_workflow:
+        result = "Workflow de sincronização da constituição M365 para SharePoint implementado, parametrizado e com rastreabilidade de execução."
+    elif has_m365:
+        result = "Operação de governança M365/SharePoint concluída conforme escopo definido e validada com evidências."
     else:
         result = "Entregável atualizado para o novo contrato híbrido, com instruções claras para execução humana e acompanhamento por agente."
 
 steps = sections.get("Passos Operacionais") or sections.get("Ações") or sections.get("Escopo sugerido")
-if not steps:
+if not steps or canonical(steps) == canonical(GENERIC_STEPS):
     # Try to synthesize from detected patterns
-    if any(keyword.lower() in body.lower() for keyword in ["sharepoint", "m365", "danilo"]):
-        steps = "1. Revisar documentação técnica e requisitos.\n2. Aplicar configurações conforme guia.\n3. Validar implementação e registrar evidências.\n4. Informar resultado neste issue."
-    elif any(keyword.lower() in body.lower() for keyword in ["workflow", "automação", "pipeline"]):
+    if any(keyword.lower() in body.lower() for keyword in ["workflow", "automação", "pipeline"]):
         steps = "1. Definir gatilho e escopo de automação.\n2. Implementar e versionar código/configuração.\n3. Testar em ambiente real/sandbox.\n4. Registrar resultado e logs de execução."
+    elif any(keyword.lower() in body.lower() for keyword in ["sharepoint", "m365", "danilo"]):
+        steps = "1. Revisar documentação técnica e requisitos.\n2. Aplicar configurações conforme guia.\n3. Validar implementação e registrar evidências.\n4. Informar resultado neste issue."
     else:
         steps = "1. Revisar o contexto e o objetivo.\n2. Executar a mudança descrita.\n3. Validar o resultado e registrar evidências."
 
 criteria = sections.get("Critérios de Aceite") or sections.get("Critérios de aceite")
-if not criteria:
-    criteria = "- [ ] A issue deve estar no novo formato híbrido.\n- [ ] O contexto deve permitir execução sem leitura adicional."
+if not criteria or canonical(criteria) == canonical(GENERIC_CRITERIA):
+    if any(keyword.lower() in body.lower() for keyword in ["workflow", "automação", "pipeline"]):
+        criteria = "- [ ] Workflow versionado no repositório e com gatilho definido.\n- [ ] Parâmetros/segredos documentados e validados.\n- [ ] Execução de teste registrada com status de sucesso/falha."
+    elif any(keyword.lower() in body.lower() for keyword in ["sharepoint", "m365", "danilo"]):
+        criteria = "- [ ] Configurações e/ou automações M365 aplicadas conforme documentação.\n- [ ] Evidências registradas no issue (logs, prints ou checklist técnico).\n- [ ] URL final do SharePoint informada quando aplicável."
+    else:
+        criteria = "- [ ] Contexto e objetivo estão claros para execução humana.\n- [ ] Entregável definido e verificável."
 
 deps = sections.get("Dependências") or sections.get("Dependência") or "Nenhuma"
 
@@ -182,13 +217,13 @@ if not estimate:
         estimate = "- Tokens (agente): ~1–3 mil\n- Horas (humano): ~1–2 horas"
 
 reference = sections.get("Referência")
-if not reference:
+if not reference or "spec-kit-cost" in reference.lower():
     if "specs/005-hybrid-agent-human-dev" in body:
-        reference = "- AC-ID: N/A\n- Feature: specs/005-hybrid-agent-human-dev\n- SPEC KIT COST: https://github.com/venha-pra-nuvem/spec-kit-cost"
+        reference = "- AC-ID: N/A\n- Feature: specs/005-hybrid-agent-human-dev"
     elif any(keyword.lower() in body.lower() for keyword in ["docs/ai-governance", "m365"]):
-        reference = "- AC-ID: N/A\n- Feature: docs/ai-governance\n- SPEC KIT COST: https://github.com/venha-pra-nuvem/spec-kit-cost"
+        reference = "- AC-ID: N/A\n- Feature: docs/ai-governance"
     else:
-        reference = "- AC-ID: N/A\n- Feature: N/A\n- SPEC KIT COST: https://github.com/venha-pra-nuvem/spec-kit-cost"
+        reference = "- AC-ID: N/A\n- Feature: N/A"
 
 normalized = "\n".join([
     "## Contexto",
