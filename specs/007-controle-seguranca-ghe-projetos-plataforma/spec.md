@@ -1,3 +1,4 @@
+# Feature Specification: Documentação de Controle de Segurança no GHE para Projetos e Projeto Plataforma
 ﻿# Feature Specification: Documentação de Controle de Segurança no GHE para Projetos e Projeto Plataforma
 
 **Feature Branch**: `007-controle-seguranca-ghe-projetos-plataforma`
@@ -79,6 +80,10 @@ Como **time de engenharia e governança**, quero uma rotina de auditoria periód
 ### Functional Requirements
 
 - **FR-001**: A documentação DEVE listar os controles obrigatórios de segurança para repositórios de projeto no GHE (acesso, branch protection, revisão, Actions, secrets).
+- **FR-002**: A documentação DEVE separar claramente controles para nível de repositório e controles para o Projeto Plataforma (Project V2 consolidado).
+- **FR-003**: A documentação DEVE definir modelo de acesso por papéis (owner/admin/maintainer/contributor/leitor) com princípio de menor privilégio.
+- **FR-004**: A documentação DEVE definir padrão para uso de tokens e secrets de automação (escopo mínimo, rotação, armazenamento e revogação).
+- **FR-005**: A documentação DEVE incluir checklist operacional de auditoria periódica com critérios objetivos de conformidade.
 - **FR-001a**: A feature DEVE entregar automação (scripts e/ou GitHub Actions) que detecta e reporta (não corrige automaticamente) os controles documentados nos repositórios de projeto e no Projeto Plataforma, gerando issue/relatório rastreável para correção manual seguindo o fluxo existente.
 - **FR-002**: A documentação DEVE separar claramente controles para nível de repositório e controles para o Projeto Plataforma (Project V2 consolidado).
 - **FR-003**: A documentação DEVE definir modelo de acesso por papéis (owner/admin/maintainer/contributor/leitor) com princípio de menor privilégio.
@@ -105,6 +110,7 @@ Como **time de engenharia e governança**, quero uma rotina de auditoria periód
 
 - **SC-001**: 100% dos novos repositórios conseguem aplicar o baseline de segurança usando apenas esta documentação.
 - **SC-002**: O Projeto Plataforma passa a operar com matriz de permissões documentada e sem concessão de acesso administrativo fora da matriz aprovada.
+- **SC-003**: Pelo menos 1 auditoria mensal é executada com checklist completo e evidência registrada para cada projeto ativo.
 - **SC-003**: A automação executa a varredura semanalmente sem falha e gera um relatório consolidado mensal com evidência registrada para cada projeto ativo.
 - **SC-004**: Reduzir em pelo menos 80% a ocorrência de falhas operacionais por secret/token ausente em workflows de governança de Projects.
 
