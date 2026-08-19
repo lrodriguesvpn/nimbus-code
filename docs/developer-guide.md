@@ -356,7 +356,158 @@ não tem um comando dedicado de importação nesse sentido.
 Depois de gerar a spec a partir do card, continue o ciclo normal
 (`/nimbus-code.clarify` → `/nimbus-code.plan` → ... ) como na seção 2.5.
 
-## Referência rápida de comandos
+## 4. Hierarquia Agile (Epic → Feature → US → Task) no GHE
+
+O Spec Kit suporta criação automática de uma hierarquia de issues no GHE
+seguindo o modelo **Epic → Feature → User Story → Task**, usando o recurso
+nativo de [sub-issues do GitHub](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/adding-sub-issues).
+
+### 4.1. Mapeamento: artefatos Spec Kit ↔ issues GHE
+
+| Artefato Spec Kit | Issue GHE | Tipo (`type:`) | Relação |
+|---|---|---|---|
+| — (criada manualmente no GHE) | **Epic** | Epic | Pai de Features |
+| `specs/NNN-slug/` (pasta da feature) | **Feature** | Feature | Sub-issue do Epic |
+| Seção `### User Story N` no `spec.md` | **User Story** | User Story | Sub-issue da Feature |
+| Linha `T00N` no `tasks.md` | **Task** | Task | Sub-issue da User Story |
+
+> **Regra 1:1** — cada pasta `specs/NNN-slug/` corresponde a exatamente uma
+> Feature issue. Features que cobrem múltiplos Epics devem ser divididas em
+> specs separadas antes de iniciar o `/speckit-specify`.
+
+### 4.2. Pré-requisitos
+
+1. **Issue Types configurados na org**: execute `setup-github-project.sh` para
+   criar os 5 tipos (Epic, Feature, User Story, Task, Bug). Em orgs sem suporte
+   a Issue Types nativos (GHE Server < 3.10), o fluxo usa labels como fallback
+   (ver seção 4.6).
+
+2. **Epic criado no GHE**: antes de iniciar o `/speckit-specify`, crie a issue
+   Epic manualmente em `github.com/<org>/<repo>/issues/new` com type "Epic"
+   (ou label `type:epic` em modo degradado). Anote o número da issue (`#N`).
+
+### 4.3. Passo a passo: criando a hierarquia
+
+#### Passo 1 — Criar o Epic no GHE
+
+```bash
+# Via gh CLI:
+gh issue create \
+  --repo <org>/<repo> \
+  --title "Nome da iniciativa" \
+  --body "Descrição do Epic" \
+  --label "type:epic"   # fallback; ou use o seletor de Issue Type na UI
+
+# Anote o número retornado, ex.: #42
+```
+
+Ou crie diretamente na UI do GHE selecionando `type: Epic` no campo de tipo.
+
+#### Passo 2 — Rodar `/speckit-specify` com referência ao Epic
+
+```
+/speckit-specify Descrição da feature. EPIC_ISSUE=42
+```
+
+O Spec Kit registra `"epic_issue": 42` em `.specify/feature.json`. Esse campo
+é opcional — sem ele, o fluxo funciona normalmente mas sem vinculação ao Epic.
+
+> Se você esqueceu de passar `EPIC_ISSUE`, edite `.specify/feature.json`
+> manualmente e adicione o campo:
+> ```json
+> { "epic_issue": 42 }
+> ```
+
+#### Passo 3 — Refinar com `/speckit-plan` e `/speckit-tasks`
+
+Execute o fluxo normal:
+
+```
+/speckit-plan
+/speckit-tasks
+```
+
+#### Passo 4 — Criar a hierarquia no GHE com `/speckit-taskstoissues`
+
+```
+/speckit-taskstoissues
+```
+
+O comando:
+1. Cria a **Feature issue** (`type:Feature`) e a vincula como sub-issue do Epic `#42`
+2. Para cada seção `[USN]` do `tasks.md`: cria a **User Story issue** (`type:User Story`) como sub-issue da Feature
+3. Para cada linha `T00N` de cada seção: cria a **Task issue** (`type:Task`) como sub-issue da User Story
+
+> **Deduplicação**: se o comando for executado novamente, ele identifica issues
+> já existentes pelo ID `T00N` (não pelo título) e não cria duplicatas.
+> Vínculos ausentes são criados sem duplicar a issue.
+
+#### Passo 5 — Verificar no board
+
+Abra o GitHub Project V2. Na view **"Board de Epics"**, cada Epic mostra o
+campo **"Sub-issue progress"** com o percentual de conclusão das Features (e
+transitivamente das User Stories e Tasks).
+
+### 4.4. Configurar as views do GitHub Project
+
+Execute `setup-github-project.sh` para criar automaticamente as views:
+
+| View | Layout | Filtro | Group by (manual na UI) |
+|---|---|---|---|
+| Board de Epics | Board | `type:"Epic"` | Status |
+| Board de Features | Board | `type:"Feature"` | Parent issue (Epic) |
+| Board de User Stories | Board | `type:"User Story"` | Parent issue (Feature) |
+| Sprint Ativo | Board | — | Iteration atual |
+| Backlog Completo | Tabela | — | — |
+| Tabela — P0 Blocker | Tabela | `label:"priority:P0-blocker"` | — |
+
+> **NOTA**: `Group by` não é configurável via API GraphQL — configure manualmente
+> na UI de cada view após a criação pelo script.
+
+### 4.5. Edge cases
+
+**Epic ainda não existe ao rodar `/speckit-specify`**
+
+Crie o Epic manualmente antes (Passo 1 acima). Alternativa: rode `/speckit-specify`
+sem `EPIC_ISSUE`, finalize o Epic manualmente e depois edite `.specify/feature.json`
+para adicionar `"epic_issue": <N>` antes de rodar `/speckit-taskstoissues`.
+
+**Feature com múltiplos Epics**
+
+Não suportado — cada Feature pertence a exatamente um Epic. Se a feature cobre
+mais de um Epic, divida-a em specs separadas (`NNN-slug-a/` e `NNN-slug-b/`),
+cada uma com seu próprio `EPIC_ISSUE`.
+
+**Re-execução do `/speckit-taskstoissues`**
+
+Seguro — o comando usa o ID `T00N` como chave de deduplicação. Issues existentes
+são identificadas e não recriadas; vínculos ausentes são adicionados.
+
+**Limite de 100 sub-issues por parent**
+
+O comando alerta ao se aproximar do limite (≥ 90) e aborta com mensagem clara
+ao atingi-lo (≥ 100). Nesse caso, divida a Feature ou a User Story em partes
+menores antes de prosseguir.
+
+### 4.6. Modo degradado (org sem Issue Types nativos)
+
+Em orgs com GHE Server < 3.10 que não suportam Issue Types nativos:
+
+1. O `setup-github-project.sh` detecta automaticamente a ausência de suporte
+   e imprime `[MODO DEGRADADO] Issue Types não disponíveis`.
+2. Execute `setup-github-labels.sh` para criar os labels de fallback:
+   - `type:epic` (roxo)
+   - `type:feature` (azul)
+   - `type:user-story` (verde)
+   - `type:task` (cinza)
+3. O `/speckit-taskstoissues` aplica esses labels nas issues em vez de Issue Types.
+4. As views do Project V2 criadas por `setup-github-project.sh` terão filtros
+   por label em vez de `type:`.
+
+A hierarquia de sub-issues funciona da mesma forma — apenas a classificação
+visual por tipo fica menos rica.
+
+
 
 | Comando | Quando usar | Obrigatório? |
 |---|---|---|
@@ -369,6 +520,155 @@ Depois de gerar a spec a partir do card, continue o ciclo normal
 | `/nimbus-code.analyze` | Checagem cruzada spec/plan/tasks antes de implementar | Recomendado |
 | `/nimbus-code.implement` | Executa as tarefas | Sim |
 | `/nimbus-code.converge` | Depois do implement — garante que nada ficou faltando vs. spec/plan/tasks | Recomendado, essencial em brownfield |
+
+---
+
+## 5. MultiRepo — Registrando Microsserviços
+
+Esta seção descreve a estratégia **1 Repo Central de Specs + N Repos por
+stack/microsserviço** suportada pelo Nimbus Code. O Repo Central hospeda
+`specs/`, `docs/` e o GitHub Project V2 (board cross-repo). Cada microsserviço
+tem seu próprio repo onde o Copilot Agent abre PRs e onde as Tasks são criadas.
+
+### 5.1. Convenção de nomes de repos
+
+| Tipo | Prefixo | Exemplo |
+|---|---|---|
+| Microsserviço backend | `svc-` | `org/svc-auth`, `org/svc-orders` |
+| Frontend web | `frontend-` | `org/frontend-web`, `org/frontend-admin` |
+| Mobile | `mobile-` | `org/mobile-ios`, `org/mobile-android` |
+| Biblioteca compartilhada | `lib-` | `org/lib-commons`, `org/lib-ui` |
+| Infraestrutura (IaC) | `infra` ou `infra-` | `org/infra`, `org/infra-aws` |
+| Repo Central (governança) | nome do produto | `org/nimbus-code-spec-kit-template` |
+
+### 5.2. Registrando um novo microsserviço
+
+**Passo 1 — Adicionar entrada em `docs/bounded-contexts.yaml`:**
+
+```yaml
+contexts:
+  - slug: "order-management"
+    description: "Ciclo de vida de pedidos: criação, atualização, cancelamento e histórico."
+    repository: "minha-org/svc-orders"
+    stack: "Node.js"
+    team: "core-squad"
+    autonomous_ok: true   # true = Copilot Agent pode trabalhar sem supervisão
+                          # false = label agent:needs-human aplicado automaticamente nas Tasks
+```
+
+Convenção de slugs: `kebab-case`, substantivo no singular.
+Não invente slugs sem adicionar aqui primeiro — o agente valida esta lista ao
+criar uma nova spec.
+
+**Passo 2 — Abrir PR com a nova entrada** (revisão obrigatória antes de merge).
+
+**Passo 3 — Vincular o repo ao Project V2:**
+
+```bash
+./scripts/setup-github-project.sh --repo-owner minha-org --repo-name repo-central
+```
+
+O script lê `docs/bounded-contexts.yaml` e chama `linkProjectV2ToRepository`
+para cada repo listado. Requer escopo `write:org` no token. Se o vínculo já
+existir, o script é idempotente (imprime `↻ Já vinculado`).
+
+**Passo 4 — Configurar labels no novo repo:**
+
+```bash
+./scripts/setup-github-labels.sh --repo-owner minha-org --repo-name svc-orders
+```
+
+### 5.3. Criando uma feature que cruza múltiplos repos
+
+```bash
+# /speckit-specify com bounded contexts
+.specify/scripts/bash/create-new-feature.sh \
+    "Checkout flow — integração pedidos e pagamentos" \
+    --bounded-contexts "order-management,billing"
+```
+
+O que acontece:
+1. Os slugs são validados contra `docs/bounded-contexts.yaml`
+2. Se qualquer slug for inválido, o script aborta e lista os slugs válidos
+3. Os repos resolvidos são persistidos em `.specify/feature.json`:
+
+```json
+{
+  "feature_directory": "specs/007-checkout-flow",
+  "bounded_contexts": ["order-management", "billing"],
+  "repos": ["minha-org/svc-orders", "minha-org/svc-payments"]
+}
+```
+
+### 5.4. Como o `/speckit-taskstoissues` roteia Tasks para repos
+
+O roteamento usa a **anotação inline** no header de cada seção `[USN]` do
+`tasks.md`. Adicione o slug do contexto após um traço:
+
+```markdown
+## Phase 2: User Story 1 — Criar pedido [US1 — order-management]
+
+- [ ] T001 [US1] Implementar endpoint POST /orders
+- [ ] T002 [US1] Validar estoque antes de confirmar pedido
+
+## Phase 3: User Story 2 — Processar pagamento [US2 — billing]
+
+- [ ] T003 [US2] Integrar com gateway de pagamento
+- [ ] T004 [US2] Emitir evento payment.processed
+```
+
+**Resultado:** Tasks de `[US1 — order-management]` são criadas em
+`minha-org/svc-orders`; Tasks de `[US2 — billing]` em `minha-org/svc-payments`.
+Issues sem anotação de slug são criadas no Repo Central (comportamento atual,
+retrocompatível).
+
+**Deduplicação:** o comando usa o ID `T00N` como chave — safe para re-execução.
+
+**`autonomous_ok: false`:** se o bounded context tiver `autonomous_ok: false`
+em `bounded-contexts.yaml`, o label `agent:needs-human` é aplicado
+automaticamente nas Tasks criadas naquele repo.
+
+### 5.5. Verificando o board cross-repo
+
+Após rodar `setup-github-project.sh`:
+
+1. Acesse o GitHub Project V2 do Repo Central
+2. `Settings → Linked Repositories` → todos os repos listados em
+   `bounded-contexts.yaml` devem aparecer
+3. As views criadas pelo script (Board de Epics, Board de Features, etc.)
+   exibem issues de **todos** os repos vinculados no mesmo board
+
+> **NOTA**: `Group by` e `Iteration` não são configuráveis via API GraphQL —
+> configure manualmente na UI de cada view após a criação.
+
+### 5.6. Edge cases
+
+**Org sem suporte ao `linkProjectV2ToRepository` (GHE Server < 3.8)**
+
+O script detecta o erro e imprime instrução de vínculo manual:
+`Project → Settings → Linked Repositories → Add repository`.
+
+**Token sem escopo `write:org`**
+
+O script imprime erro claro identificando o repo problemático e continua
+vinculando os demais. Apenas o repo com falha precisa ser adicionado manualmente.
+
+**`bounded-contexts.yaml` ausente ao rodar `setup-github-project.sh`**
+
+O passo de vínculo de repos é pulado com aviso. O restante do setup funciona
+normalmente.
+
+**Feature single-repo (sem `--bounded-contexts`)**
+
+Comportamento idêntico ao atual — `bounded_contexts` e `repos` são `[]` em
+`feature.json`. O `/speckit-taskstoissues` cria todas as issues no Repo Central.
+Zero breaking change.
+
+**Feature com múltiplos Epics**
+
+Não suportado — cada feature pertence a exatamente um Epic. Se a feature cobre
+mais de um Epic, divida-a em specs separadas, cada uma com seu próprio
+`EPIC_ISSUE`.
 
 ## Documentos relacionados neste repositório
 

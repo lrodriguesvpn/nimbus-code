@@ -45,6 +45,12 @@
 # apagado ou não tenha sido criado no bootstrap original, ex.: `gh` CLI
 # indisponível na máquina de quem rodou o bootstrap).
 #
+# MultiRepo: lê docs/bounded-contexts.yaml (se existir) e vincula cada repo
+# listado ao Project V2 via GraphQL (mutation linkProjectV2ToRepository).
+# Requer escopo write:org no token. Se o arquivo não existir ou a API não
+# estiver disponível, o passo é pulado com aviso — o restante do setup não é
+# afetado.
+#
 ###############################################################################
 
 set -euo pipefail
@@ -203,15 +209,20 @@ mutation($ownerId:ID!, $repoId:ID!, $title:String!) {
 fi
 
 
-# 3. Criar as VIEWS padrão (5 views, sem "View 1")
+# 3. Criar as VIEWS padrão (views hierárquicas + views existentes)
 echo ""
-echo -e "${BLUE}[3/7]${NC} Criando views padrão..."
+echo -e "${BLUE}[3/9]${NC} Criando views padrão..."
 
-# Definir as 5 views (nome, layout, filter)
+# Views: nome, layout, filter
+# Inclui as views originais (Board por Epic, Board por Prioridade, Tabela P0 Blocker)
+# mais as novas views hierárquicas Agile introduzidas pela feature 005.
 declare -a VIEWS=(
-  "Board por Epic|BOARD_LAYOUT|label:\"type:epic\""
-  "Board por Feature|BOARD_LAYOUT|label:\"type:feature\""
-  "Board por User Story|BOARD_LAYOUT|label:\"type:user-story\""
+  "Board de Epics|BOARD_LAYOUT|type:\"Epic\""
+  "Board de Features|BOARD_LAYOUT|type:\"Feature\""
+  "Board de User Stories|BOARD_LAYOUT|type:\"User Story\""
+  "Sprint Ativo|BOARD_LAYOUT|"
+  "Backlog Completo|TABLE_LAYOUT|"
+  "Board por Epic|BOARD_LAYOUT|"
   "Board por Prioridade|BOARD_LAYOUT|"
   "Tabela — P0 Blocker|TABLE_LAYOUT|label:\"priority:P0-blocker\""
 )
@@ -278,6 +289,81 @@ mutation($viewId:ID!, $filter:String!) {
   fi
 done
 
+# 4. Configurar Issue Types da org para hierarquia Agile (Epic, Feature, User Story, Task, Bug)
+# NOTA: Issue Types são configurados na ORG, não no repositório. A query de
+# verificação e a mutation de criação usam o owner (org) como contexto.
+# Em orgs sem suporte a Issue Types (GHE Server < 3.10), este passo imprime
+# aviso e ativa automaticamente o modo degradado via labels (type:epic etc.).
+echo ""
+echo -e "${BLUE}[4/9]${NC} Configurando Issue Types da org (hierarquia Agile)..."
+
+# Definir os 5 Issue Types padrão: nome, cor, descrição
+# Cores suportadas pela API: RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE, PINK, GRAY
+declare -a ISSUE_TYPES=(
+  "Epic|PURPLE|Iniciativa de negócio — pai de Features; rastreia progresso de múltiplas Features no board"
+  "Feature|BLUE|Entrega de funcionalidade — sub-issue de Epic; tem correspondência 1:1 com specs/NNN-slug/"
+  "User Story|GREEN|Requisito de usuário — sub-issue de Feature; corresponde a seção [USN] do spec.md"
+  "Task|GRAY|Unidade de implementação — sub-issue de User Story; gerada pelo /speckit-taskstoissues a partir de T00N"
+  "Bug|RED|Comportamento incorreto em relação ao especificado — pode ser sub-issue de qualquer nível"
+)
+
+# Verificar se a org suporta Issue Types antes de tentar criar
+ISSUE_TYPES_SUPPORT=$(GH_HOST="$GH_HOST" gh api graphql \
+  -f owner="$REPO_OWNER" \
+  -f query='
+query($owner:String!) {
+  organization(login:$owner) {
+    issueTypes(first: 20) {
+      nodes { id name }
+    }
+  }
+}' 2>/dev/null || echo "ERROR")
+
+if echo "$ISSUE_TYPES_SUPPORT" | grep -q '"issueTypes"'; then
+  EXISTING_ISSUE_TYPES_JSON=$(echo "$ISSUE_TYPES_SUPPORT" | jq -c '.data.organization.issueTypes.nodes // []' 2>/dev/null)
+  echo -e "${GREEN}  ✓ Org suporta Issue Types nativos — verificando/criando tipos...${NC}"
+
+  for type_config in "${ISSUE_TYPES[@]}"; do
+    IFS='|' read -r TYPE_NAME TYPE_COLOR TYPE_DESC <<< "$type_config"
+
+    ALREADY_EXISTS=$(echo "$EXISTING_ISSUE_TYPES_JSON" | jq -r --arg n "$TYPE_NAME" '.[] | select(.name == $n) | .name' | head -1)
+    if [[ -n "$ALREADY_EXISTS" ]]; then
+      echo -e "${YELLOW}    ℹ Issue Type já existe (pulando): $TYPE_NAME${NC}"
+      continue
+    fi
+
+    TYPE_RESPONSE=$(GH_HOST="$GH_HOST" gh api graphql \
+      -f owner="$REPO_OWNER" \
+      -f typeName="$TYPE_NAME" \
+      -f typeColor="$TYPE_COLOR" \
+      -f typeDesc="$TYPE_DESC" \
+      -f query='
+mutation($owner:String!, $typeName:String!, $typeColor:IssueTypeColor!, $typeDesc:String!) {
+  createIssueType(input: {
+    organizationLogin: $owner
+    name: $typeName
+    color: $typeColor
+    description: $typeDesc
+  }) {
+    issueType { id name }
+  }
+}' 2>&1) || true
+
+    TYPE_RESULT=$(echo "$TYPE_RESPONSE" | jq -r '.data.createIssueType.issueType.name // empty' 2>/dev/null)
+    if [[ -n "$TYPE_RESULT" ]]; then
+      echo -e "${GREEN}    ✓ Issue Type criado: $TYPE_NAME${NC}"
+    else
+      echo -e "${YELLOW}    ⚠ Falha ao criar Issue Type: $TYPE_NAME — $(echo "$TYPE_RESPONSE" | jq -r '.errors[0].message // "erro desconhecido"' 2>/dev/null)${NC}"
+      echo -e "${YELLOW}      Crie manualmente em: Org Settings → Planning → Issue types${NC}"
+    fi
+  done
+else
+  echo -e "${YELLOW}  ⚠ [MODO DEGRADADO] Org não suporta Issue Types nativos (GHE Server legado).${NC}"
+  echo -e "${YELLOW}    Issue Types não serão criados. O fluxo do /speckit-taskstoissues usará${NC}"
+  echo -e "${YELLOW}    labels type:epic, type:feature, type:user-story, type:task como fallback.${NC}"
+  echo -e "${YELLOW}    Execute setup-github-labels.sh para garantir que os labels existem.${NC}"
+fi
+
 # Buscar campos já existentes ANTES de criar (idempotência — o mesmo motivo
 # das views acima: sem essa checagem, rodar de novo falha com "Name has
 # already been taken" e, por causa do `set -e`, aborta o script inteiro em
@@ -295,9 +381,9 @@ field_already_exists() {
   echo "$EXISTING_FIELDS_JSON" | jq -e --arg n "$1" 'any(.[]; .name == $n)' >/dev/null 2>&1
 }
 
-# 4. Criar campo customizado "Horas Humanas" (controle de custo em modelo híbrido)
+# 5. Criar campo customizado "Horas Humanas" (controle de custo em modelo híbrido)
 echo ""
-echo -e "${BLUE}[4/7]${NC} Criando campo customizado \"Horas Humanas\"..."
+echo -e "${BLUE}[5/9]${NC} Criando campo customizado \"Horas Humanas\"..."
 
 if field_already_exists "Horas Humanas"; then
   echo -e "${YELLOW}  ℹ Campo já existe (pulando): Horas Humanas${NC}"
@@ -330,9 +416,9 @@ mutation($projectId:ID!, $fieldName:String!) {
   fi
 fi
 
-# 5. Criar campo customizado "Oportunidade D365" (link para o CRM)
+# 6. Criar campo customizado "Oportunidade D365" (link para o CRM)
 echo ""
-echo -e "${BLUE}[5/7]${NC} Criando campo customizado \"Oportunidade D365\"..."
+echo -e "${BLUE}[6/9]${NC} Criando campo customizado \"Oportunidade D365\"..."
 
 if field_already_exists "Oportunidade D365"; then
   echo -e "${YELLOW}  ℹ Campo já existe (pulando): Oportunidade D365${NC}"
@@ -365,9 +451,9 @@ mutation($projectId:ID!, $fieldName:String!) {
   fi
 fi
 
-# 6. Criar campo customizado "Ocorrência CRM (N1)" (link para incidentes/recorrência)
+# 7. Criar campo customizado "Ocorrência CRM (N1)" (link para incidentes/recorrência)
 echo ""
-echo -e "${BLUE}[6/7]${NC} Criando campo customizado \"Ocorrência CRM (N1)\"..."
+echo -e "${BLUE}[7/9]${NC} Criando campo customizado \"Ocorrência CRM (N1)\"..."
 
 if field_already_exists "Ocorrência CRM (N1)"; then
   echo -e "${YELLOW}  ℹ Campo já existe (pulando): Ocorrência CRM (N1)${NC}"
@@ -400,9 +486,9 @@ mutation($projectId:ID!, $fieldName:String!) {
   fi
 fi
 
-# 7. Criar campo customizado "Priority" (single-select sincronizado com labels priority:*)
+# 8. Criar campo customizado "Priority" (single-select sincronizado com labels priority:*)
 echo ""
-echo -e "${BLUE}[7/8]${NC} Criando campo customizado \"Priority\" (single-select)..."
+echo -e "${BLUE}[8/9]${NC} Criando campo customizado \"Priority\" (single-select)..."
 
 if field_already_exists "Priority"; then
   echo -e "${YELLOW}  ℹ Campo já existe (pulando): Priority${NC}"
@@ -440,21 +526,140 @@ mutation($projectId:ID!) {
   fi
 fi
 
-# 8. Resumo final
+# 9. Vincular repos de serviço ao Project V2 (MultiRepo — bounded-contexts.yaml)
+# Lê docs/bounded-contexts.yaml (relativo ao diretório de execução do script ou
+# à raiz do repo detectada via git), extrai os campos repository e os vincula ao
+# Project V2 via GraphQL (mutation linkProjectV2ToRepository).
+# Requer escopo write:org no token. Erros isolados por repo não abortam o setup.
 echo ""
-echo -e "${BLUE}[8/8]${NC} Setup concluído!"
+echo -e "${BLUE}[9/10]${NC} Vinculando repos de serviço ao Project V2 (MultiRepo)..."
+
+# Locate bounded-contexts.yaml relative to the script or the git root
+_SCRIPT_DIR_SGP="$(CDPATH="" cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_GIT_ROOT=$(git -C "$_SCRIPT_DIR_SGP" rev-parse --show-toplevel 2>/dev/null || true)
+_BC_FILE=""
+for _candidate in "${_GIT_ROOT}/docs/bounded-contexts.yaml" "${_SCRIPT_DIR_SGP}/../docs/bounded-contexts.yaml"; do
+    if [[ -f "$_candidate" ]]; then
+        _BC_FILE="$_candidate"
+        break
+    fi
+done
+
+if [[ -z "$_BC_FILE" ]]; then
+    echo -e "${YELLOW}  ℹ docs/bounded-contexts.yaml não encontrado — pulando vínculo de repos.${NC}"
+    echo -e "    Crie o arquivo para habilitar o board cross-repo (ver docs/developer-guide.md)."
+else
+    # Parse YAML: prefer yq, then python3, then skip with instructions
+    _parse_bc_repos() {
+        local file="$1"
+        if command -v yq >/dev/null 2>&1; then
+            yq e '.contexts[].repository' "$file" 2>/dev/null | grep -v '^null$' | grep -v '^$'
+        elif python3 -c "import yaml" 2>/dev/null; then
+            python3 - "$file" <<'PYEOF'
+import sys, yaml
+with open(sys.argv[1]) as f:
+    data = yaml.safe_load(f) or {}
+for ctx in (data.get("contexts") or []):
+    if isinstance(ctx, dict) and ctx.get("repository"):
+        print(ctx["repository"])
+PYEOF
+        else
+            grep -E '^\s+repository:' "$file" | sed 's/.*repository:[[:space:]]*"*//; s/"*[[:space:]]*//'
+        fi
+    }
+
+    # Get the project's owner node ID (for linkProjectV2ToRepository)
+    _ORG_NODE_ID=$(GH_HOST="$GH_HOST" gh api graphql -f login="$REPO_OWNER" -f query='
+    query($login:String!) {
+      organization(login: $login) { id }
+    }' 2>/dev/null | jq -r '.data.organization.id // empty')
+
+    REPOS_LINKED=0
+    REPOS_ALREADY=0
+    REPOS_FAILED=0
+
+    while IFS= read -r _REPO_FULL; do
+        [[ -z "$_REPO_FULL" ]] && continue
+        _REPO_OWNER_SVC="${_REPO_FULL%%/*}"
+        _REPO_NAME_SVC="${_REPO_FULL##*/}"
+
+        # Get repo node ID
+        _REPO_NODE_ID=$(GH_HOST="$GH_HOST" gh api graphql \
+            -f owner="$_REPO_OWNER_SVC" -f name="$_REPO_NAME_SVC" -f query='
+        query($owner:String!, $name:String!) {
+          repository(owner: $owner, name: $name) { id }
+        }' 2>/dev/null | jq -r '.data.repository.id // empty')
+
+        if [[ -z "$_REPO_NODE_ID" ]]; then
+            echo -e "${YELLOW}  ⚠ Repo não encontrado ou sem acesso: ${_REPO_FULL} — pulando${NC}"
+            REPOS_FAILED=$((REPOS_FAILED + 1))
+            continue
+        fi
+
+        # Try to link; linkProjectV2ToRepository is idempotent on GHE ≥ 3.8
+        _LINK_RESPONSE=$(GH_HOST="$GH_HOST" gh api graphql \
+            -f projectId="$PROJECT_ID" -f repositoryId="$_REPO_NODE_ID" -f query='
+        mutation($projectId:ID!, $repositoryId:ID!) {
+          linkProjectV2ToRepository(input: {projectId: $projectId, repositoryId: $repositoryId}) {
+            repository { nameWithOwner }
+          }
+        }' 2>&1) || true
+
+        _LINKED_NAME=$(echo "$_LINK_RESPONSE" | jq -r '.data.linkProjectV2ToRepository.repository.nameWithOwner // empty' 2>/dev/null)
+
+        if [[ -n "$_LINKED_NAME" ]]; then
+            echo -e "${GREEN}  ✓ Vinculado: ${_REPO_FULL}${NC}"
+            REPOS_LINKED=$((REPOS_LINKED + 1))
+        else
+            _ERR_MSG=$(echo "$_LINK_RESPONSE" | jq -r '.errors[0].message // empty' 2>/dev/null)
+            if echo "$_ERR_MSG" | grep -qi "already\|existe\|linked"; then
+                echo -e "${YELLOW}  ↻ Já vinculado: ${_REPO_FULL}${NC}"
+                REPOS_ALREADY=$((REPOS_ALREADY + 1))
+            else
+                echo -e "${YELLOW}  ⚠ Falha ao vincular: ${_REPO_FULL}${NC}"
+                if [[ -n "$_ERR_MSG" ]]; then
+                    echo -e "    Erro: ${_ERR_MSG}" >&2
+                fi
+                echo -e "    Verifique se o token tem escopo write:org e se a API linkProjectV2ToRepository"
+                echo -e "    está disponível (requer GHE ≥ 3.8). Para vincular manualmente:"
+                echo -e "    Project → Settings → Linked Repositories → Add repository"
+                REPOS_FAILED=$((REPOS_FAILED + 1))
+            fi
+        fi
+    done < <(_parse_bc_repos "$_BC_FILE")
+
+    echo -e "  Repos processados: vinculados=${REPOS_LINKED} já-vinculados=${REPOS_ALREADY} falhas=${REPOS_FAILED}"
+fi
+
+# 10. Resumo final
+echo ""
+echo -e "${BLUE}[10/10]${NC} Setup concluído!"
 echo ""
 echo -e "${GREEN}═══════════════════════════════════════════════════════════════${NC}"
 echo -e "GitHub Project configurado com sucesso!"
 echo -e "${GREEN}URL:${NC} ${PROJECT_URL}"
 echo -e "${GREEN}ID:${NC}  ${PROJECT_ID}"
 echo ""
+echo -e "Issue Types da org (hierarquia Agile):"
+echo -e "  • Epic (roxo) — iniciativa de negócio, pai de Features"
+echo -e "  • Feature (azul) — entrega de funcionalidade, sub-issue de Epic"
+echo -e "  • User Story (verde) — requisito de usuário, sub-issue de Feature"
+echo -e "  • Task (cinza) — unidade de implementação, sub-issue de User Story"
+echo -e "  • Bug (vermelho) — comportamento incorreto"
+echo -e "  ℹ Em modo degradado (org sem Issue Types): use labels type:epic/"
+echo -e "    type:feature/type:user-story/type:task criados pelo setup-github-labels.sh"
+echo ""
 echo -e "Views criadas:"
-echo -e "  • Board por Epic"
-echo -e "  • Board por Feature"
-echo -e "  • Board por User Story"
-echo -e "  • Board por Prioridade"
-echo -e "  • Tabela — P0 Blocker"
+echo -e "  • Board de Epics (filtro: type:Epic)"
+echo -e "  • Board de Features (filtro: type:Feature)"
+echo -e "  • Board de User Stories (filtro: type:User Story)"
+echo -e "  • Sprint Ativo (sem filtro — configure 'group by' e 'iteration' manualmente na UI)"
+echo -e "  • Backlog Completo (tabela, sem filtro)"
+echo -e "  • Board por Epic (sem filtro — configure 'group by' manualmente)"
+echo -e "  • Board por Prioridade (sem filtro — configure 'group by' manualmente)"
+echo -e "  • Tabela — P0 Blocker (filtro: priority:P0-blocker)"
+echo -e "  ℹ NOTA: 'Group by' não é configurável via API — ajuste manualmente na UI"
+echo -e "    de cada view após a criação."
 echo ""
 echo -e "Campos customizados criados:"
 echo -e "  • Horas Humanas (número) — para lançar horas de trabalho humano em"
@@ -474,12 +679,15 @@ echo -e "    instale esse workflow no repositório para manter o campo sincroniz
 echo ""
 echo -e "Próximos passos:"
 echo -e "  1. Abra o projeto acima e customize as views conforme necessário"
-echo -e "  2. Configure os filtros e grupos para cada view"
+echo -e "  2. Configure 'group by' e 'iteration' em Sprint Ativo e Board de Epics na UI"
 echo -e "  3. Referencie o project no README do seu projeto"
 echo -e "  4. Preencha o campo \"Oportunidade D365\" nas issues vinculadas a uma"
 echo -e "     venda/oportunidade específica (opcional para trabalho interno/técnico)"
 echo -e "  5. Preencha \"Ocorrência CRM (N1)\" + label type:incident nas issues"
 echo -e "     originadas de uma ocorrência/atendimento tratado inicialmente no CRM"
+echo -e "  6. MultiRepo: preencha docs/bounded-contexts.yaml com os repos de serviço"
+echo -e "     e rode este script novamente para vinculá-los ao board cross-repo"
+echo -e "     (ver docs/developer-guide.md — seção 'MultiRepo — Registrando Microsserviços')"
 echo -e ""
 echo -e "Documentação: ${BLUE}docs/developer-guide.md${NC}"
 echo -e "${GREEN}═══════════════════════════════════════════════════════════════${NC}"

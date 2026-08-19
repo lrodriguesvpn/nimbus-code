@@ -119,6 +119,16 @@ declare -a LABELS=(
   "status:needs-triage|ededed|Issue nova, ainda sem priority:*/complexity:* definidos — não deve ser puxada por agente autônomo"
   "status:blocked|5319e7|Bloqueada por dependência externa — pular na fila mesmo com priority:P0-blocker"
 
+  # Hierarquia Agile — fallback para orgs sem suporte a Issue Types nativos
+  # (ex.: GHE Server < 3.10). Em orgs com Issue Types, esses labels são usados
+  # como complemento visual de rastreabilidade nos PRs e no board.
+  # Ver seção "Hierarquia Agile (Epic → Feature → US → Task)" em
+  # docs/developer-guide.md e specs/005-epic-feature-us-ghe-hierarchy/spec.md.
+  "type:epic|6f42c1|Epic — iniciativa de negócio; pai de Features no GHE (fallback para orgs sem Issue Types nativos)"
+  "type:feature|0075ca|Feature — entrega de funcionalidade; sub-issue de Epic; tem correspondência 1:1 com specs/NNN-slug/"
+  "type:user-story|0e8a16|User Story — sub-issue de Feature; corresponde a seção [USN] do spec.md"
+  "type:task|cfd3d7|Task — unidade de implementação; sub-issue de User Story; gerada pelo /speckit-taskstoissues a partir de T00N"
+
   # DORA — domínio de métrica DevOps (Four Keys) que esta issue impacta.
   # Usado para correlacionar issues fechadas com os indicadores DORA da equipe
   # (ver docs/label-taxonomy-and-autonomous-dev.md, seção 5).

@@ -1,0 +1,77 @@
+# Bounded Contexts — nimbus-code-spec-kit-template
+#
+# Lista oficial dos bounded contexts deste projeto (o próprio template Nimbus Code).
+# Para projetos que usam este template como base, este arquivo serve de exemplo —
+# substitua as entradas pelos seus microsserviços reais.
+#
+# Estratégia MultiRepo:
+#   Este Repo Central hospeda specs/, docs/ e o board (GitHub Project V2).
+#   Cada contexto tem seu próprio repo de código onde o Copilot Agent abre PRs.
+#
+# Como registrar um novo microsserviço:
+#   1. Adicione uma entrada abaixo com slug, description, repository, stack,
+#      team e autonomous_ok.
+#   2. Abra PR com a nova entrada — revisão obrigatória antes de merge.
+#   3. Rode setup-github-project.sh para vincular o novo repo ao Project V2.
+#   4. Rode setup-github-labels.sh no novo repo para criar a taxonomia de labels.
+#
+# Convenção de slugs: kebab-case, substantivo no singular.
+# Convenção de nomes de repos:
+#   svc-<slug>      → microsserviços de backend
+#   frontend-<slug> → aplicações frontend web
+#   mobile-<slug>   → aplicações mobile
+#   lib-<slug>      → bibliotecas compartilhadas
+#   infra           → infraestrutura (Terraform/IaC)
+
+version: 1
+contexts:
+  - slug: "spec-kit-workflow"
+    description: "Templates, scripts e docs do Nimbus Code Spec Kit — fluxo specify/plan/tasks/implement."
+    repository: "venha-pra-nuvem/nimbus-code-spec-kit-template"
+    stack: "Bash/YAML/Markdown"
+    team: "platform"
+    autonomous_ok: true
+
+# Exemplos para projetos reais (descomente e ajuste):
+#
+#   - slug: "identity"
+#     description: "Autenticação, autorização, SSO e gestão de identidades de usuário."
+#     repository: "<org>/svc-auth"
+#     stack: "Go"
+#     team: "<squad>"
+#     autonomous_ok: true
+#
+#   - slug: "order-management"
+#     description: "Ciclo de vida de pedidos: criação, atualização, cancelamento e histórico."
+#     repository: "<org>/svc-orders"
+#     stack: "Node.js"
+#     team: "<squad>"
+#     autonomous_ok: true
+#
+#   - slug: "billing"
+#     description: "Faturamento, cobranças, integração com gateways de pagamento."
+#     repository: "<org>/svc-payments"
+#     stack: "Python"
+#     team: "<squad>"
+#     autonomous_ok: false   # dados financeiros — requer revisão humana
+#
+#   - slug: "frontend-web"
+#     description: "Aplicação web principal (SPA)."
+#     repository: "<org>/frontend-web"
+#     stack: "React/Next.js"
+#     team: "<squad>"
+#     autonomous_ok: true
+#
+#   - slug: "frontend-admin"
+#     description: "Painel administrativo interno."
+#     repository: "<org>/frontend-admin"
+#     stack: "React"
+#     team: "<squad>"
+#     autonomous_ok: false
+#
+#   - slug: "infra"
+#     description: "Infraestrutura compartilhada: Terraform, CI/CD, networking, observabilidade."
+#     repository: "<org>/infra"
+#     stack: "Terraform"
+#     team: "<squad>"
+#     autonomous_ok: false   # mudanças de infra exigem revisão humana (S4)
