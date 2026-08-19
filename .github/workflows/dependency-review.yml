@@ -45,16 +45,5 @@ jobs:
             CC0-1.0,
             Unlicense
 
-          # Bloqueia licenças incompatíveis com software proprietário
-          deny-licenses: >-
-            GPL-2.0,
-            GPL-3.0,
-            AGPL-3.0,
-            SSPL-1.0,
-            BUSL-1.1
-
           # Comentar na PR com resumo de vulnerabilidades encontradas
           comment-summary-in-pr: always
-
-          # Avisar (não bloquear) para Medium — visibilidade sem travar o time
-          warn-on-openssl-cf: true
