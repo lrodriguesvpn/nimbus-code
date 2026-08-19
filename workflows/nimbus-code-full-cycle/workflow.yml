@@ -3,7 +3,7 @@ schema_version: "1.0"
 workflow:
   id: "nimbus-code-full-cycle"
   name: "Nimbus-Code — Ciclo Completo com Gate DevSecOps"
-  version: "1.3.0"
+  version: "1.4.0"
   author: "Nimbus-Code"
   description: >
     Ciclo SDD completo (discovery → specify → plan → tasks → implement → converge)
