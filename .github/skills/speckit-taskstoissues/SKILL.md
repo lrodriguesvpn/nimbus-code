@@ -70,6 +70,43 @@ git config --get remote.origin.url
 1. For each task in the list, use the GitHub MCP server to create a new issue in the repository that is representative of the Git remote. Task lines in `tasks.md` start with a markdown checkbox, so first strip the leading `- [ ]` (and any `[P]` / `[US#]` markers) to recover the task ID and its description. Create the issue with a single canonical title of the form `T001: <description>`, with the ID written once followed by the task description (for example, the line `- [ ] T001 Create project structure` becomes the title `T001: Create project structure`).
    - **Skip** any task whose ID is already present in the set of existing issues from the previous step, and report it (for example, `T001 already has an issue, skipping`).
    - Only create issues for tasks that do not yet have a matching issue.
+2. Create the issue body using the Nimbus-Code hybrid task contract so the issue is directly executable by a human or agent without rereading the spec/plan:
+
+   ```markdown
+   ## Contexto
+   [o mínimo necessário para entender o problema]
+
+   ## Objetivo
+   [ação clara e acionável]
+
+   ## Resultado Esperado
+   [entregável verificável]
+
+   ## Critérios de Aceite
+   - [ ] [critério 1 verificável]
+
+   ## Passos Operacionais
+   1. [passo 1]
+   2. [passo 2]
+
+   ## Dependências
+   [Nenhuma | IDs de tasks/issues bloqueadoras]
+
+   ## Responsável
+   Agente: [sim/não]
+   Humano: [sim/não]
+
+   ## Estimativa de Esforço
+   - Tokens (agente): ~X–Y mil
+   - Horas (humano): ~X–Y horas
+
+   ## Referência
+   - AC-ID: AC-N
+   - Feature: specs/<feature-slug>
+   - SPEC KIT COST: https://github.com/venha-pra-nuvem/spec-kit-cost
+   ```
+
+   If the task does not have an explicit AC or feature link, keep those fields as `N/A` instead of omitting them.
 
 > [!CAUTION]
 > UNDER NO CIRCUMSTANCES EVER CREATE ISSUES IN REPOSITORIES THAT DO NOT MATCH THE REMOTE URL
