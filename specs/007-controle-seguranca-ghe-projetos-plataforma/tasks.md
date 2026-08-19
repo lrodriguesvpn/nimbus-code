@@ -13,6 +13,30 @@
 - **[Story]**: US1, US2 ou US3 (mapeado ao `spec.md`)
 - Caminhos de arquivo exatos em cada descrição
 
+## GHE Issue Tracking (hierarquia Epic → Feature → User Story → Task)
+
+*Gerado por `/speckit-taskstoissues` — sub-issues nativas do GHE (Issue Types: Epic/Feature/User Story/Task), com labels de prioridade/complexidade/tipo/agente aplicadas em cada issue.*
+
+| Nível | Issue | Título |
+|---|---|---|
+| Epic | [#65](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/65) | Governança de Segurança do GHE — Nimbus-Code |
+| Feature (007) | [#66](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/66) | Controle de Segurança no GHE para Projetos e Projeto Plataforma |
+| User Story 1 | [#67](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/67) | Definir baseline de segurança para repositórios de projeto |
+| User Story 2 | [#68](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/68) | Definir governança de segurança para o Projeto Plataforma |
+| User Story 3 | [#69](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/69) | Padronizar auditoria e operação contínua |
+
+**Tasks → Issue (sub-issue do parent indicado):**
+
+| Task | Issue | Sub-issue de |
+|---|---|---|
+| T001–T010 | [#23](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/23)–[#32](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/32) | Feature #66 (Setup/Foundational, sem US específica) |
+| T011–T018 | [#33](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/33)–[#40](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/40) | User Story 1 #67 |
+| T019–T023 | [#41](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/41)–[#45](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/45) | User Story 2 #68 |
+| T024–T032 | [#46](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/46)–[#54](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/54) | User Story 3 #69 |
+| T033–T041 | [#55](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/55)–[#63](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/63) | Feature #66 (Polish, sem US específica) |
+
+Cada issue de Task recebeu labels de `priority:*`, `complexity:*`, `type:*` e `agent:autonomous-ok`/`agent:needs-human` (T004 e T038 são `agent:needs-human`, refletindo `[Humano]` nesta lista).
+
 ---
 
 ## Phase 1: Setup (Shared Infrastructure)
