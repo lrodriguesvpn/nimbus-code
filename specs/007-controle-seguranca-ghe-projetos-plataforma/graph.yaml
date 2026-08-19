@@ -1,0 +1,88 @@
+# graph.yaml — Grafo de Módulos estruturado por feature
+#
+# OBRIGATÓRIO: criado junto com spec.md (/nimbus-code-specify) e mantido
+# atualizado a cada tarefa que adiciona, remove ou renomeia um módulo/serviço.
+# Arquivo lido pelo GitHub Action Graph Guard para validar consistência.
+
+feature: "007-controle-seguranca-ghe-projetos-plataforma"
+complexity: "S4"
+version: 1
+updated_at: "2026-08-19"
+spec_ref: "specs/007-controle-seguranca-ghe-projetos-plataforma/spec.md"
+
+nodes:
+  - id: "security-baseline-doc"
+    type: "module"
+    path: "docs/security-baseline-ghe.md"
+    description: "Documentação de baseline de segurança para repositórios de projeto e Projeto Plataforma"
+
+  - id: "security-compliance-scan-workflow"
+    type: "service"
+    path: ".github/workflows/security-compliance-scan.yml"
+    description: "Workflow agendado (semanal) que dispara a varredura de conformidade"
+
+  - id: "security-compliance-scan-script"
+    type: "module"
+    path: "scripts/security-compliance-scan.sh"
+    description: "Lógica de varredura: descoberta de repos, avaliação de controles, criação de issues, agregação mensal"
+
+  - id: "github-issues"
+    type: "external"
+    path: "N/A"
+    description: "Rastreamento de não conformidades como Issues do GitHub (reaproveita fluxo Nimbus Code existente)"
+
+  - id: "platform-project-v2"
+    type: "external"
+    path: "N/A"
+    description: "Project V2 consolidado (Projeto Plataforma) — alvo de avaliação da matriz de permissões"
+
+  - id: "openfeature-flag-provider"
+    type: "module"
+    path: "scripts/security-compliance-scan.sh (flag resolution)"
+    description: "Resolução do flag security.baseline_scan.org_wide_enabled via abstração OpenFeature (provider env/file-based)"
+
+nodes_removed: []
+
+edges:
+  - src: "security-compliance-scan-workflow"
+    dst: "security-compliance-scan-script"
+    type: "sync"
+    protocol: "shell invocation"
+    description: "Workflow invoca o script de varredura a cada execução agendada"
+
+  - src: "security-compliance-scan-script"
+    dst: "openfeature-flag-provider"
+    type: "sync"
+    protocol: "in-process"
+    description: "Script resolve o escopo de repositórios (piloto vs. org-wide) antes de varrer"
+
+  - src: "security-compliance-scan-script"
+    dst: "github-issues"
+    type: "sync"
+    protocol: "GitHub REST API (HTTPS)"
+    description: "Cria/atualiza issues idempotentes de não conformidade"
+
+  - src: "security-compliance-scan-script"
+    dst: "platform-project-v2"
+    type: "sync"
+    protocol: "GitHub GraphQL API (HTTPS)"
+    description: "Lê a matriz de permissões do Project V2 consolidado"
+
+  - src: "security-baseline-doc"
+    dst: "security-compliance-scan-script"
+    type: "async"
+    protocol: "referência documental"
+    description: "A documentação define os controles que o script implementa/avalia (não é chamada em runtime, é referência de especificação)"
+
+externals:
+  - id: "github-app-security-auditor"
+    provider: "GitHub"
+    called_by: ["security-compliance-scan-script"]
+    criticality: "high"
+    fallback: "Nenhum — se a autenticação falhar, o workflow falha explicitamente (::error::) sem executar varredura parcial sem credencial válida"
+
+  - id: "github-rest-graphql-api"
+    provider: "GitHub"
+    called_by: ["security-compliance-scan-script"]
+    criticality: "high"
+    fallback: "Backoff exponencial em rate limit (403/429); repositórios com erro persistente são contabilizados em repos_com_erro e reportados, não bloqueiam os demais"
