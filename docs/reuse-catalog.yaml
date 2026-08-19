@@ -32,6 +32,16 @@
 
 version: 1
 entries:
+  - tag: "hybrid-dev-templates"
+    bounded_context: "dev-platform/spec-kit"
+    description: >
+      Padrão para geração de spec/plan/tasks com colaboração híbrida agente+humano,
+      incluindo contrato de task executável no GHE, referência de custo (SPEC KIT COST),
+      padrão de design WEB via Impeccable e padrão de toggle via OpenFeature.
+    source: "specs/005-hybrid-agent-human-dev/plan.md"
+    adr: "docs/adr/0007-hybrid-dev-templates-governance.md"
+    reuse_count: 0
+
   - tag: "ghe-sub-issues-hierarchy"
     bounded_context: "spec-kit-workflow"
     description: >

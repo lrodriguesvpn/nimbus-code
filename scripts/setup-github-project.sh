@@ -20,8 +20,10 @@
 # O script:
 # 1. Valida que o repo existe
 # 2. Cria um ProjectV2 com o nome: "{repo-name} — Nimbus Code Roadmap"
-# 3. Cria 3 views padrão (copiadas do IOX-CROWDFUNDINGPAAS):
-#    - "Board por Epic" (board layout, sem filtro inicial — dev personaliza)
+# 3. Cria 5 views padrão (copiadas do IOX-CROWDFUNDINGPAAS):
+#    - "Board por Epic" (board layout, filtro por type:epic)
+#    - "Board por Feature" (board layout, filtro por type:feature)
+#    - "Board por User Story" (board layout, filtro por type:user-story)
 #    - "Board por Prioridade" (board layout, sem filtro inicial — dev personaliza)
 #    - "Tabela — P0 Blocker" (table layout, filtro para P0-blocker)
 # 4. Cria o campo customizado numérico "Horas Humanas", usado para controle de
@@ -689,4 +691,3 @@ echo -e "     (ver docs/developer-guide.md — seção 'MultiRepo — Registrand
 echo -e ""
 echo -e "Documentação: ${BLUE}docs/developer-guide.md${NC}"
 echo -e "${GREEN}═══════════════════════════════════════════════════════════════${NC}"
-

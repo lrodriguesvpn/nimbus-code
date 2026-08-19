@@ -5,6 +5,50 @@
   `references/devops-artifacts-catalog.md` e no Passo 6.3 da skill devops-planning.
 -->
 
+## Nimbus-Code — Contrato de Task Executável no GHE
+
+*Toda task orientada a execução humana deve permitir execução sem depender de
+leitura adicional de spec/plan. Use este bloco como padrão para cada issue/tarefa.*
+
+```markdown
+## Contexto
+[o mínimo necessário para entender o problema]
+
+## Objetivo
+[ação clara e acionável]
+
+## Resultado Esperado
+[entregável verificável]
+
+## Critérios de Aceite
+- [ ] [critério 1 verificável]
+
+## Passos Operacionais
+1. [passo 1]
+2. [passo 2]
+
+## Dependências
+[Nenhuma | IDs de tasks/issues bloqueadoras]
+
+## Responsável
+Agente: [sim/não]
+Humano: [sim/não]
+
+## Estimativa de Esforço
+- Tokens (agente): ~X–Y mil
+- Horas (humano): ~X–Y horas
+
+## Referência
+- AC-ID: AC-N
+- Feature: specs/<feature-slug>
+- SPEC KIT COST: https://github.com/venha-pra-nuvem/spec-kit-cost
+```
+
+- [ ] Toda task com `Responsável.Humano = sim` inclui `Passos Operacionais` completos
+- [ ] `Dependências` está preenchido com `Nenhuma` quando não existir bloqueador
+- [ ] `Referência` inclui AC-ID e link da feature de origem
+- [ ] `SPEC KIT COST` presente quando a task fizer parte do modelo híbrido
+
 ## Nimbus-Code — Checklist de Qualidade de Código, Testes e Observabilidade
 
 *Aplicável a TODA tarefa desta lista que produz ou altera código (não apenas

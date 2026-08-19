@@ -138,6 +138,11 @@ jobs:
               print("✅ Todos os manifests estão com schema correto.")
           EOF
 
+      - name: Validar contratos híbridos de spec/plan/tasks
+        run: |
+          chmod +x .specify/scripts/bash/validate-hybrid-contracts.sh
+          .specify/scripts/bash/validate-hybrid-contracts.sh
+
       - name: Comentar na PR com erros (se houver)
         if: failure() && github.event_name == 'pull_request'
         uses: actions/github-script@v7
