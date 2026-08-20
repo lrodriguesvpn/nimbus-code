@@ -68,7 +68,7 @@ git config --get remote.origin.url
 
 1. **Derive `--repo-owner`/`--repo-name`** from the remote URL parsed above (the `owner/repo` segment of the GitHub/GHE URL). All hierarchy-related script invocations below use these two values plus `GH_HOST` inherited from the environment (defaults to `venha-pra-nuvem.ghe.com` — do not override it unless the remote points elsewhere).
 
-1. **Bootstrap the Epic → Feature → User Story hierarchy** (specs/005-epic-feature-us-ghe-hierarchy). This uses `.specify/scripts/bash/create-github-issue-hierarchy.sh`, a bash+`gh` CLI helper (same idiom as `scripts/setup-github-project.sh`) that handles GraphQL sub-issue linking (`addSubIssue`), native Issue Type assignment (`updateIssueIssueType`) with graceful label fallback (`type:epic`/`type:feature`/`type:user-story`/`type:task`), marker-based deduplication (an HTML comment `<!-- speckit-feature-id: ... -->` / `<!-- speckit-us-id: ... -->` in the issue body — same pattern as the `speckit-deduplication-by-id` entry in `docs/reuse-catalog.yaml`), and the 90/100 sub-issue limit alert. Run it for real (not a dry-run) unless the user explicitly asked for a preview:
+1. **Bootstrap the Epic → Feature → User Story hierarchy** (specs/005-epic-feature-us-ghe-hierarchy). This uses `.specify/scripts/bash/create-github-issue-hierarchy.sh`, a bash+`gh` CLI helper (same idiom as `scripts/setup-github-project.sh`) that handles GraphQL sub-issue linking (`addSubIssue`), native Issue Type assignment (`updateIssueIssueType`) with graceful label fallback (`type:epic`/`type:feature`/`type:user-story`/`type:task`), marker-based deduplication (an HTML comment `<!-- speckit-feature-id: ... -->` / `<!-- speckit-us-id: ... -->` in the issue body — same pattern as the `speckit-deduplication-by-id` entry in `docs/reuse-catalog.yaml`), governance labels (`priority:*`/`complexity:*`/`agent:*` — applied on creation and self-healed on reuse if a previously-created Feature/User Story issue is missing any of them), and the 90/100 sub-issue limit alert. Run it for real (not a dry-run) unless the user explicitly asked for a preview:
    1. Read `epic_issue` from `.specify/feature.json` (via `FEATURE_DIR/../feature.json` or the repo-root `.specify/feature.json` — whichever the project resolves as the active feature's metadata). If the key is absent or null, treat the feature as having no Epic parent — this is not an error.
    2. Ensure the Feature issue exists and is linked to the Epic (if any):
       ```bash
@@ -76,9 +76,11 @@ git config --get remote.origin.url
         --repo-owner <owner> --repo-name <repo> \
         --feature-dir "<FEATURE_DIR>" \
         [--epic-issue <N> if epic_issue was set] \
+        [--priority <P0-blocker|P1-high|P2-medium|P3-low> if the feature's Classificação de Complexidade table in plan.md implies a clear priority; default is P1-high] \
+        [--complexity <S0|S1|S2|S3|S4> to match the level declared in plan.md; default is S3] \
         --json
       ```
-      Parse `feature_issue` from the JSON result printed on the last line — this is `FEATURE_ISSUE`. The command is idempotent: re-running it reuses the existing Feature issue (matched by its hidden marker) instead of creating a duplicate, and only adds the Epic link if it is missing.
+      Parse `feature_issue` from the JSON result printed on the last line — this is `FEATURE_ISSUE`. The command is idempotent: re-running it reuses the existing Feature issue (matched by its hidden marker) instead of creating a duplicate, only adds the Epic link if it is missing, and backfills any of `priority:*`/`complexity:*`/`agent:*` that a prior run left out — never overwrites a label already present.
    3. Parse every User Story section header from `tasks.md` (pattern: a `## Phase N: User Story M ...` or `## Phase N: User Story M — ...` heading — the em dash/hyphen and trailing `(Priority: ...)` suffix vary, only `User Story M` and the title text between the dash/em dash and the trailing parenthetical matter). For each one found, in order:
       ```bash
       .specify/scripts/bash/create-github-issue-hierarchy.sh ensure-user-story \
@@ -86,9 +88,11 @@ git config --get remote.origin.url
         --feature-dir "<FEATURE_DIR>" \
         --us-id US<M> --title "<extracted US title>" \
         --parent-issue <FEATURE_ISSUE> \
+        [--priority <...> if the section header's trailing "(Priority: PN)" is present; default is P2-medium] \
+        [--complexity <...> to match the feature's own level; default is S2] \
         --json
       ```
-      Parse `user_story_issue` from the result and keep an in-memory map `US<M> -> issue number` for the task-linking step below. This is also idempotent (reused by marker on re-run) and skips re-linking if already a sub-issue of the Feature.
+      Parse `user_story_issue` from the result and keep an in-memory map `US<M> -> issue number` for the task-linking step below. This is also idempotent (reused by marker on re-run), skips re-linking if already a sub-issue of the Feature, and backfills missing governance labels the same way `ensure-feature` does.
    4. If the script prints a line starting with `✗ Parent #... já tem N sub-issues` (hard limit reached, exit code 2) for either the Epic or the Feature, **stop and report this clearly to the user** — the corresponding link was NOT created (the issue itself may still exist), and the Epic/Feature must be split into smaller pieces before continuing. Do not silently ignore this.
    5. If the script reports `[MODO DEGRADADO]` (org without native Issue Types), continue normally — it already applied the `type:*` label fallback; just surface the message once to the user instead of repeating it per issue.
 

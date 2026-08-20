@@ -18,6 +18,12 @@
 #   - Aplicar o Issue Type nativo correto (Epic/Feature/User Story/Task) com
 #     fallback gracioso para labels type:* quando a org não suporta Issue
 #     Types nativos
+#   - Aplicar (e retroativamente corrigir, se ausentes) os labels de governança
+#     priority:*/complexity:*/agent:* nas issues de Feature e User Story que
+#     ele cria — gap real encontrado em 2026-08-20: rodar ensure-feature/
+#     ensure-user-story sem --priority/--complexity/--agent deixava essas
+#     issues só com type:*, exigindo correção manual depois. Agora aplica
+#     defaults sensatos (ver --help) e nunca deixa uma issue sem os 4 labels.
 #   - Alertar/abortar quando um parent se aproxima do limite de 100 sub-issues
 #
 # Uso:
@@ -44,10 +50,20 @@
 #     --epic-issue <N>       Número da Epic issue pai (opcional; sem ela a
 #                             Feature é criada/reaproveitada sem vínculo)
 #     --title <texto>        Título da feature (default: primeiro H1 do spec.md)
+#     --priority <P0-blocker|P1-high|P2-medium|P3-low>   Default: P1-high
+#     --complexity <S0|S1|S2|S3|S4>                       Default: S3 (nível
+#                             típico de uma Feature — herde o nível declarado
+#                             no plan.md da feature quando disponível)
+#     --agent <autonomous-ok|needs-human>  Default: derivado de --complexity
+#                             (S4 → needs-human, senão autonomous-ok — regra
+#                             "S4 nunca é autônomo" da constituição)
 #   ensure-user-story:
 #     --us-id <USN>          Ex.: US1, US2 (obrigatório)
 #     --title <texto>        Título da User Story (obrigatório)
 #     --parent-issue <N>     Número da issue de Feature pai (obrigatório)
+#     --priority <...>       Default: P2-medium (ver --priority acima)
+#     --complexity <...>     Default: S2 (ver --complexity acima)
+#     --agent <...>          Default: derivado de --complexity (ver acima)
 #   link-task:
 #     --parent-issue <N>     Número da issue de User Story pai (obrigatório)
 #     --child-issue <N>      Número da issue de Task já criada (obrigatório)
@@ -93,6 +109,9 @@ PARENT_ISSUE=""
 CHILD_ISSUE=""
 ISSUE_NUMBER=""
 ISSUE_TYPE_NAME=""
+PRIORITY=""
+COMPLEXITY=""
+AGENT_LABEL=""
 JSON_MODE=false
 DRY_RUN=false
 
@@ -108,6 +127,9 @@ while [[ $# -gt 0 ]]; do
     --child-issue) CHILD_ISSUE="$2"; shift 2 ;;
     --issue) ISSUE_NUMBER="$2"; shift 2 ;;
     --type) ISSUE_TYPE_NAME="$2"; shift 2 ;;
+    --priority) PRIORITY="$2"; shift 2 ;;
+    --complexity) COMPLEXITY="$2"; shift 2 ;;
+    --agent) AGENT_LABEL="$2"; shift 2 ;;
     --json) JSON_MODE=true; shift ;;
     --dry-run) DRY_RUN=true; shift ;;
     --help|-h)
@@ -234,6 +256,67 @@ mutation($issueId:ID!, $issueTypeId:ID!) {
         || echo -e "${YELLOW}  ⚠ Falha ao aplicar label '$label' em #$issue_number — o label existe? rode scripts/setup-github-labels.sh${NC}" >&2
     fi
   fi
+}
+
+# -----------------------------------------------------------------------------
+# Resolve o label agent:* a aplicar quando --agent não foi passado
+# explicitamente: deriva de --complexity, seguindo a regra da constituição
+# "S4 nunca é autônomo" — S4 sempre vira agent:needs-human, qualquer outro
+# nível (S0-S3) vira agent:autonomous-ok por padrão.
+# -----------------------------------------------------------------------------
+resolve_agent_label() {
+  local complexity="$1"
+  if [[ -n "$AGENT_LABEL" ]]; then
+    echo "$AGENT_LABEL"
+  elif [[ "$complexity" == "S4" ]]; then
+    echo "needs-human"
+  else
+    echo "autonomous-ok"
+  fi
+}
+
+# -----------------------------------------------------------------------------
+# Garante que uma issue (Feature ou User Story) tem os 3 labels de governança
+# obrigatórios (priority:*, complexity:*, agent:*), aplicando o default
+# resolvido apenas para o(s) que estiver(em) ausente(s) — nunca sobrescreve um
+# label já presente (ex.: se alguém já ajustou a prioridade manualmente).
+# Idempotente e retroativo: rodar de novo numa issue já correta é um no-op;
+# rodar numa issue antiga que só tem type:* (gap encontrado em 2026-08-20)
+# corrige os labels faltantes na hora.
+# Args: $1 = número da issue, $2 = prioridade default se --priority não foi
+#       passado (ex.: P1-high), $3 = complexidade default se --complexity não
+#       foi passado (ex.: S3) — cada comando (ensure-feature/ensure-user-story)
+#       passa seu próprio par de defaults (ver --help).
+# -----------------------------------------------------------------------------
+ensure_governance_labels() {
+  local issue_number="$1"
+  local default_priority="${PRIORITY:-${2:-P2-medium}}"
+  local default_complexity="${COMPLEXITY:-${3:-S2}}"
+  local default_agent
+  default_agent=$(resolve_agent_label "$default_complexity")
+
+  if [[ "$DRY_RUN" == true ]]; then
+    echo -e "${YELLOW}  [dry-run] garantiria labels de governança em #$issue_number (priority:$default_priority, complexity:$default_complexity, agent:$default_agent — só os ausentes)${NC}"
+    return 0
+  fi
+
+  local current_labels
+  current_labels=$(GH_HOST="$GH_HOST" gh issue view "$issue_number" --repo "$REPO_SLUG" --json labels -q '[.labels[].name]' 2>/dev/null || echo "[]")
+
+  local to_add=()
+  echo "$current_labels" | jq -e 'any(.[]; startswith("priority:"))' >/dev/null 2>&1 || to_add+=("priority:$default_priority")
+  echo "$current_labels" | jq -e 'any(.[]; startswith("complexity:"))' >/dev/null 2>&1 || to_add+=("complexity:$default_complexity")
+  echo "$current_labels" | jq -e 'any(.[]; startswith("agent:"))' >/dev/null 2>&1 || to_add+=("agent:$default_agent")
+
+  if [[ ${#to_add[@]} -eq 0 ]]; then
+    return 0
+  fi
+
+  local joined
+  joined=$(IFS=,; echo "${to_add[*]}")
+  GH_HOST="$GH_HOST" gh issue edit "$issue_number" --repo "$REPO_SLUG" --add-label "$joined" >/dev/null 2>&1 \
+    && echo -e "${GREEN}  ✓ Labels de governança aplicados em #$issue_number: $joined${NC}" \
+    || echo -e "${YELLOW}  ⚠ Falha ao aplicar labels de governança em #$issue_number ($joined) — os labels existem? rode scripts/setup-github-labels.sh${NC}" >&2
 }
 
 get_issue_node_id() {
@@ -403,6 +486,7 @@ cmd_ensure_feature() {
   fi
 
   apply_issue_type "$feature_number" "Feature"
+  ensure_governance_labels "$feature_number" "P1-high" "S3"
 
   if [[ -n "$EPIC_ISSUE" ]]; then
     link_sub_issue "$EPIC_ISSUE" "$feature_number" || true
@@ -459,6 +543,7 @@ cmd_ensure_user_story() {
   fi
 
   apply_issue_type "$us_number" "User Story"
+  ensure_governance_labels "$us_number" "P2-medium" "S2"
   link_sub_issue "$PARENT_ISSUE" "$us_number" || true
 
   if [[ "$JSON_MODE" == true ]]; then
