@@ -41,7 +41,7 @@ modelo atual de governança do Nimbus-Code.
 
 ## Compatibilidade com GitHub Enterprise
 
-### GHE Cloud (github.com enterprise)
+### GitHub Enterprise Cloud
 
 Suporte direto para o fluxo acima: GitHub Actions + Secrets + revisão de PR.
 

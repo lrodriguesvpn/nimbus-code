@@ -53,9 +53,13 @@ Comparar a configuração do repositório de teste antes e depois da execução 
 
 ## Passo 5 — Validar o relatório mensal
 
-Após pelo menos 1 execução semanal completa dentro do mês corrente, disparar (manual ou agendado) a etapa de consolidação mensal.
+Após pelo menos 1 execução semanal completa dentro do mês corrente, verificar a
+Issue mensal `Relatório de Conformidade de Segurança — YYYY-MM` criada/atualizada
+automaticamente pelo próprio workflow.
 
-**Resultado esperado**: relatório no formato de [`monthly-report-contract.md`](./contracts/monthly-report-contract.md), incluindo % de conformidade por controle e lista de desvios abertos/fechados.
+**Resultado esperado**: relatório no formato de
+[`monthly-report-contract.md`](./contracts/monthly-report-contract.md),
+incluindo % de conformidade por controle e lista de desvios abertos/fechados.
 
 ## Passo 6 — Validar rollout progressivo (flag)
 

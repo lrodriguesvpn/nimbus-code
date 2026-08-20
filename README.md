@@ -86,6 +86,8 @@ flowchart TD
     I --> A
 ```
 
+O bootstrap agora exige a selecao explicita do tipo de repositorio (`platform` ou `dev_standards`) antes de instalar qualquer preset. Em CI/automacao, use `--repo-type` para evitar falha explicita em modo nao interativo.
+
 ## O que este repositório contém
 
 | Componente | Pasta | O que faz |
@@ -166,8 +168,8 @@ plataforma — GitHub, Microsoft 365, Azure, Google Workspace, GCP) estão em
 curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bootstrap.sh | bash
 ```
 
-Isso executa `specify init` (se ainda não inicializado) e instala preset +
-extensão + workflow na versão publicada mais recente da branch `main`.
+Isso executa `specify init` (se ainda nao inicializado), exige a selecao explicita do tipo de repositorio (`platform` ou `dev_standards`) e instala preset + extensao + workflow na versao publicada mais recente da branch `main`.
+
 
 ### Bônus: GitHub Project criado automaticamente (garantido em todo repo)
 
@@ -194,14 +196,14 @@ O project é criado com o nome `{repo-name} — Nimbus Code Roadmap` e fica
 imediatamente acessível para customize (adicionar/remover filtros, agrupar
 por campos, etc.).
 
-**Garantia contínua:** o `bootstrap.sh` também instala
+**Garantia continua:** o `bootstrap.sh` tambem instala
 [`.github/workflows/ensure-github-project.yml`](.github/workflows/ensure-github-project.yml),
-que roda semanalmente e recria o Project automaticamente se ele não existir
-mais (ex.: `gh` CLI indisponível no bootstrap original, ou Project apagado por
-engano) — garantindo que **todo repositório com este bundle sempre tenha o
-Project**, mesmo sem intervenção manual. Requer os secrets
-`VPNDEV_PROJECT_TOKEN` (PAT com escopos `repo`+`project`) e
-`VPNDEV_STANDARDS_READ_TOKEN`.
+que roda semanalmente e recria o Project automaticamente se ele nao existir
+mais (ex.: `gh` CLI indisponivel no bootstrap original, ou Project apagado por
+engano) - garantindo que **todo repositorio com este bundle sempre tenha o
+Project**, mesmo sem intervencao manual. Prefere `NIMBUS_APP_ID` e
+`NIMBUS_APP_PRIVATE_KEY`; `VPNDEV_PROJECT_TOKEN` permanece apenas como fallback
+temporario durante o rollout do GitHub App.
 
 Se preferir criar o project **manualmente** ou em **um repositório existente**:
 
@@ -246,12 +248,13 @@ a `P3-low`, `complexity:S0`–`S4`, `type:bug/feature/chore/docs`,
 `dora:deployment-frequency`/`dora:lead-time`/`dora:change-failure-rate`/`dora:mttr`
 (para correlacionar issues com os 4 indicadores DORA).
 
-O label `agent:autonomous-ok` dispara automaticamente a atribuição da issue
+O label `agent:autonomous-ok` dispara automaticamente a atribuicao da issue
 ao GitHub Copilot coding agent (via
 [`.github/workflows/agent-auto-assign.yml`](.github/workflows/agent-auto-assign.yml)),
-com guardrails que impedem atribuição autônoma em issues `agent:needs-human`,
-`complexity:S4`, `status:blocked` ou já atribuídas. Requer o secret
-`COPILOT_AGENT_ASSIGN_TOKEN` configurado no repositório consumidor — ver guia
+com guardrails que impedem atribuicao autonoma em issues `agent:needs-human`,
+`complexity:S4`, `status:blocked` ou ja atribuidas. Prefere
+`NIMBUS_APP_ID`/`NIMBUS_APP_PRIVATE_KEY`; `COPILOT_AGENT_ASSIGN_TOKEN` segue
+como fallback temporario durante o rollout - ver guia
 completo, incluindo como evitar gatilhos duplicados com a feature nativa
 "Copilot Automations" do GitHub, em
 [`docs/label-taxonomy-and-autonomous-dev.md`](docs/label-taxonomy-and-autonomous-dev.md).

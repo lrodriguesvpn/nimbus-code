@@ -10,7 +10,7 @@
 > Pré-requisitos (`specify` CLI, `uv`, Copilot) na tabela logo abaixo.
 
 Este é o manual **central** de como todo dev da Nimbus-Code deve usar o
-[GitHub Nimbus Code](https://github.com/github/nimbus-code) no dia a dia, com as
+[GitHub Spec Kit](https://github.com/github/spec-kit) no dia a dia, com as
 ferramentas da empresa (GHE, Azure DevOps/JIRA, GitHub Copilot). Ele cobre três
 cenários, na ordem em que você provavelmente vai precisar deles:
 
@@ -28,8 +28,8 @@ verdade — abra um PR corrigindo, não crie um manual paralelo em outro lugar.
 
 | Ferramenta | Para quê | Como obter |
 |---|---|---|
-| `specify` CLI | Roda `specify init`, gerencia presets/extensões/workflows | `uv tool install specify-cli --from git+https://github.com/github/nimbus-code.git` — ver [guia de instalação](https://github.com/github/nimbus-code/blob/main/docs/installation.md) |
-| [`uv`](https://docs.astral.sh/uv/) | Gerenciador Python usado para instalar o `specify-cli` | [Guia de instalação do uv](https://github.com/github/nimbus-code/blob/main/docs/install/uv.md) |
+| `specify` CLI | Roda `specify init`, gerencia presets/extensões/workflows | `uv tool install specify-cli --from git+https://github.com/github/spec-kit.git` — ver [guia de instalação](https://github.com/github/spec-kit) |
+| [`uv`](https://docs.astral.sh/uv/) | Gerenciador Python usado para instalar o `specify-cli` | [Guia de instalação do uv](https://docs.astral.sh/uv/getting-started/installation/) |
 | Acesso ao GHE da org `venha-pra-nuvem` | Clonar este repo e os repos de projeto | Onboarding padrão de acesso à organização |
 | GitHub Copilot habilitado no editor | Agente que executa os comandos `/speckit.*` | Extensão do Copilot no VS Code (ou outro agente suportado — ver [integrações](https://github.github.io/nimbus-code/reference/integrations.html)) |
 | MCP do backlog (Atlassian Rovo **ou** `ado`), se o projeto usa JIRA/Azure DevOps | Necessário só para os fluxos de importação/sincronização de board (seções 2 e 3) | Configuração do host do agente (ex.: `.vscode/mcp.json`) — ver [`docs/mcp-and-bundles.md`](mcp-and-bundles.md) |
@@ -87,7 +87,7 @@ que roda semanalmente e **recria o Project automaticamente se ele não existir
 mais** — garante que todo repositório com este bundle sempre tenha o Project,
 mesmo que o passo automático do bootstrap tenha sido pulado originalmente
 (ex.: `gh` CLI indisponível na máquina de quem rodou o bootstrap). Requer os
-secrets `VPNDEV_PROJECT_TOKEN` e `VPNDEV_STANDARDS_READ_TOKEN`.
+secrets `NIMBUS_APP_ID` e `NIMBUS_APP_PRIVATE_KEY`, com `VPNDEV_PROJECT_TOKEN` mantido apenas como fallback tempor?rio durante o rollout.
 
 Depois do bootstrap, você pode:
 
@@ -154,7 +154,7 @@ Este é o passo que resolve "como o Nimbus Code entende o código". **Não exist
 comando dedicado de "scan"** — a varredura acontece dentro do próprio
 `/nimbus-code.constitution`, sendo explícito no prompt para o agente analisar a
 fundo antes de escrever qualquer princípio. Use este prompt (adaptado do
-[walkthrough oficial de brownfield](https://github.com/mnriem/nimbus-code-aspnet-brownfield-demo)
+walkthrough oficial de brownfield do time do Spec Kit (demo ASP.NET brownfield)
 do próprio time do Nimbus Code):
 
 ```
@@ -360,7 +360,7 @@ Depois de gerar a spec a partir do card, continue o ciclo normal
 
 O Spec Kit suporta criação automática de uma hierarquia de issues no GHE
 seguindo o modelo **Epic → Feature → User Story → Task**, usando o recurso
-nativo de [sub-issues do GitHub](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/adding-sub-issues).
+nativo de sub-issues do GitHub.
 
 ### 4.1. Mapeamento: artefatos Spec Kit ↔ issues GHE
 
@@ -383,7 +383,7 @@ nativo de [sub-issues do GitHub](https://docs.github.com/en/issues/tracking-your
    (ver seção 4.6).
 
 2. **Epic criado no GHE**: antes de iniciar o `/speckit-specify`, crie a issue
-   Epic manualmente em `github.com/<org>/<repo>/issues/new` com type "Epic"
+   Epic manualmente em `https://venha-pra-nuvem.ghe.com/<org>/<repo>/issues/new` com type "Epic"
    (ou label `type:epic` em modo degradado). Anote o número da issue (`#N`).
 
 ### 4.3. Passo a passo: criando a hierarquia
@@ -698,7 +698,7 @@ repo git com esse arquivo.
 - **Testes unitários (bats)**: `.specify/scripts/bash/tests/create-new-feature.bats`
   cobre a resolução de `--bounded-contexts` (slug válido, flag omitida, slug
   inválido, arquivo ausente) contra um projeto fixture isolado — não requer
-  API do GHE. Rode com [bats-core](https://github.com/bats-core/bats-core):
+  API do GHE. Rode com [bats-core](https://bats-core.readthedocs.io/):
   ```bash
   bats .specify/scripts/bash/tests/create-new-feature.bats
   ```

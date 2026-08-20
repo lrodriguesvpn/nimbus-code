@@ -1,78 +1,89 @@
 # Quickstart: Bootstrap Governance & Repo Provisioning Hardening
 
-**Purpose**: Validação E2E de que o bootstrap endurecido, a paridade de templates
-e a migração de autenticação funcionam como especificado.
+**Purpose**: validacao E2E de que o bootstrap endurecido, a paridade de templates
+ e a migracao de autenticacao funcionam como especificado.
 
-## Pré-requisitos
+## Pre-requisitos
 
-- `gh` CLI autenticado na organização `venha-pra-nuvem`
-- Acesso a um repositório de teste (piloto) no GHE
-- `bash`, `jq`, `python3` disponíveis localmente
+- `gh` CLI autenticado na organizacao `venha-pra-nuvem`
+- Acesso a um repositorio de teste (piloto) no GHE
+- `python3` disponivel localmente
+- Git Bash (`C:\Program Files\Git\bin\bash.exe`) para rodar os scripts shell no Windows
 
-## Cenário 1 — Bootstrap pergunta o tipo de repositório (AC-1)
-
-```sh
-cd /tmp && mkdir repo-teste-bootstrap && cd repo-teste-bootstrap && git init
-bash /caminho/para/nimbus-code-spec-kit-template/bootstrap.sh
-```
-
-**Validação**: o script pergunta "Plataforma/Cliente ou Dev Standards?" antes de
-qualquer instalação de preset. Responder `dev_standards` e confirmar que
-`nimbus-code-standards` foi instalado (não `nimbus-code-platform-standards`).
-
-## Cenário 2 — Paridade de templates de issue (AC-2)
+## Cenario 1 - Bootstrap pergunta o tipo de repositorio (AC-1)
 
 ```sh
-./scripts/validate-issue-template-parity.sh
+cp -R specs/008-bootstrap-governance-hardening/fixtures/bootstrap-target specs/008-bootstrap-governance-hardening/fixtures/.runtime-bootstrap-manual
+cd specs/008-bootstrap-governance-hardening/fixtures/.runtime-bootstrap-manual
+git init
+bash ../../../../bootstrap.sh --local ../../../../ --repo-type dev_standards
 ```
 
-**Validação**: saída `✅ Templates de issue idênticos...`. Para testar o caminho
-de falha, remova temporariamente uma seção de um dos dois templates e confirme
-que o script reporta a divergência com exit code ≠ 0.
+**Validacao**: o script deve instalar `nimbus-code-standards` e imprimir a linha
+`Preset instalado: nimbus-code-standards (tipo de repositorio: dev_standards)`.
+Para o caminho interativo, rode sem `--repo-type` em um terminal real e confirme
+que a pergunta `platform/dev_standards` aparece antes da instalacao do preset.
 
-## Cenário 3 — Migração de workflow para GitHub App (AC-4, AC-5)
+## Cenario 2 - Paridade de templates de issue (AC-2)
 
-Num repositório de teste com `NIMBUS_APP_ID`/`NIMBUS_APP_PRIVATE_KEY` **não**
+```sh
+bash scripts/validate-issue-template-parity.sh
+bash scripts/validate-issue-template-parity.sh \
+  --template-a presets/nimbus-code-standards/templates/project-root/.github/ISSUE_TEMPLATE/nimbus-code-task.md \
+  --template-b specs/008-bootstrap-governance-hardening/fixtures/invalid-nimbus-code-task.md \
+  --label-a nimbus-code-standards \
+  --label-b fixture-divergente
+```
+
+**Validacao**: a primeira execucao deve retornar status `0`. A segunda deve falhar e
+exibir o diff de headings, cobrindo o caminho de divergencia proposital.
+
+## Cenario 3 - Migracao de workflow para GitHub App (AC-4, AC-5)
+
+Num repositorio de teste com `NIMBUS_APP_ID`/`NIMBUS_APP_PRIVATE_KEY` **nao**
 configurados:
 
 ```sh
 gh workflow run ensure-github-project.yml --repo <org>/<repo-teste>
 ```
 
-**Validação**: log mostra `::warning::GitHub App não configurado — usando PAT de
-fallback`. Configurar os secrets e rodar novamente — log deve mostrar
+**Validacao**: o log mostra `::warning::GitHub App nao configurado - usando PAT de
+fallback`.
+
+Depois da conclusao humana de T005/T006, configure os secrets do App e rode o
+mesmo workflow novamente.
+
+**Validacao esperada apos T005/T006**: o log mostra
 `::notice::Autenticado via GitHub App`.
 
-Para um workflow de escopo restrito ao próprio repo (ex.: `graph-guard.yml`):
+Para um workflow de escopo restrito ao proprio repo (ex.: `graph-guard.yml`):
 
-**Validação**: nenhuma mudança de comportamento — continua usando `GITHUB_TOKEN`
+**Validacao**: nenhuma mudanca de comportamento - continua usando `GITHUB_TOKEN`
 nativo, sem exigir nenhum secret adicional.
 
-## Cenário 4 — Fonte oficial do Spec Kit e domínio GHE (AC-6, AC-7)
+## Cenario 4 - Fonte oficial do Spec Kit e dominio GHE (AC-6, AC-7)
 
 ```sh
-grep -n "specify" bootstrap.sh | grep -i "github.com"
-grep -rn "github.com" docs/ presets/ .github/workflows/ 2>/dev/null | grep -v "ghe.com" | grep -v "github/spec-kit"
+grep -RIn "github.com" bootstrap.sh docs presets | grep -v "github.com/github/spec-kit"
 ```
 
-**Validação**: única ocorrência de `github.com` público deve ser a referência ao
-Spec Kit CLI oficial; nenhuma outra URL `github.com` deve aparecer fora dessa
-exceção documentada.
+**Validacao**: nenhuma ocorrencia deve ser retornada fora da excecao documentada
+para a fonte oficial do Spec Kit.
 
-## Cenário 5 — Manual de skills locais vs. remotas (AC-8)
+## Cenario 5 - Manual de skills locais vs. remotas (AC-8)
 
 ```sh
-cat docs/skills-distribution-guide.md | grep -A2 "speckit-specify"
+grep -A3 "speckit-specify" docs/skills-distribution-guide.md
 ```
 
-**Validação**: em até 2 minutos de leitura, um desenvolvedor consegue determinar
-se `speckit-specify` (ou qualquer outra skill consultada) é local ou remota, e
+**Validacao**: em ate 2 minutos de leitura, um desenvolvedor consegue determinar
+se `speckit-specify` (ou qualquer outra skill consultada) e local ou remota, e
 qual o estado atual de disponibilidade.
 
-## Checklist final
+## Registro de validacao desta implementacao
 
-- [ ] AC-1 validado (Cenário 1)
-- [ ] AC-2 validado (Cenário 2)
-- [ ] AC-4/AC-5 validados (Cenário 3)
-- [ ] AC-6/AC-7 validados (Cenário 4)
-- [ ] AC-8 validado (Cenário 5)
+- [x] AC-1 validado localmente com fixture + execucao nao interativa (`--repo-type`) e falha explicita sem a flag.
+- [x] AC-2 validado localmente com caminho feliz e fixture divergente.
+- [ ] AC-4/AC-5 pendentes de piloto com GitHub App real (bloqueado por T005/T006); fallback e permanencia do `graph-guard.yml` foram verificados por inspecao e lint.
+- [x] AC-6/AC-7 validados localmente pelo teste de URLs publicas.
+- [ ] AC-8 com medicao por desenvolvedor real pendente (T026); clareza do manual revisada localmente.

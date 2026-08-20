@@ -109,21 +109,22 @@ entries:
     source: "specs/005-epic-feature-us-ghe-hierarchy/plan.md"
     adr: ""
     reuse_count: 0
+  - tag: "subtree-repo-extraction"
     bounded_context: "spec-kit-workflow"
     description: >
-      Padrão para migrar uma implementação já existente dentro de uma subpasta
-      deste template (ex.: código desenvolvido numa branch órfã nunca proposta
-      como PR) para um repositório próprio, preservando histórico via
+      Padrao para migrar uma implementacao ja existente dentro de uma subpasta
+      deste template (ex.: codigo desenvolvido numa branch orfa nunca proposta
+      como PR) para um repositorio proprio, preservando historico via
       `git subtree split -P <subpasta> -b <branch>` + push para `main` do repo
       novo (fallback: `git filter-repo --path <subpasta> --path-rename
-      <subpasta>/:` se disponível no ambiente). Inclui: criação do repo via
-      `gh repo create`, proteção de branch `main` (PR obrigatório + 1 revisão),
-      aplicação de `scripts/setup-github-labels.sh` e
+      <subpasta>/:` se disponivel no ambiente). Inclui: criacao do repo via
+      `gh repo create`, protecao de branch `main` (PR obrigatorio + 1 revisao),
+      aplicacao de `scripts/setup-github-labels.sh` e
       `scripts/setup-github-project.sh` contra o repo novo, registro do bounded
-      context em `docs/bounded-contexts.yaml`, e atualização por PONTEIRO
-      (sem duplicar conteúdo) do `plan.md`/`tasks.md` da feature de origem.
+      context em `docs/bounded-contexts.yaml`, e atualizacao por PONTEIRO
+      (sem duplicar conteudo) do `plan.md`/`tasks.md` da feature de origem.
       Reaproveitar sempre que uma feature implementada dentro deste template
-      precisar "sair" para um repositório dedicado (ADL tipo "Central
+      precisar "sair" para um repositorio dedicado (ADL tipo "Central
       Repository vs. Distributed Skills").
     source: "specs/003-vpn-skills-repo-governance/plan.md"
     adr: ""
@@ -144,6 +145,20 @@ entries:
       em repos de serviço distintos mantendo Epics/Features/USs no repo central.
     source: "specs/006-multirepo-support/plan.md"
     adr: ""
+
+  - tag: "bootstrap-github-app-auth"
+    bounded_context: "repository-provisioning"
+    description: >
+      Padrao para migrar automacoes cross-repo/org do bootstrap para
+      `actions/create-github-app-token@v1`, com fallback explicito para o
+      secret legado por workflow durante o rollout. Inclui snippet reutilizavel
+      em `docs/github-app-auth-snippet.md`, permissoes explicitas por workflow,
+      atualizacao coordenada de `bootstrap.sh`, workflows instalados no repo e
+      templates em `templates/workflows/`. Reaproveitar sempre que outra
+      automacao do bundle precisar trocar PAT classico por GitHub App sem
+      interromper repositorios ja provisionados.
+    source: "specs/008-bootstrap-governance-hardening/plan.md"
+    adr: "docs/adr/0009-github-app-para-automacoes-bootstrap-cross-repo.md"
     reuse_count: 0
 
   - tag: "standard-devcontainer"
@@ -181,4 +196,16 @@ entries:
       organizacional de falhas compartilhada entre times e agentes.
     source: "specs/011-harness-engineering/plan.md"
     adr: ""
+  - tag: "org-wide-security-compliance-scan"
+    bounded_context: "platform-security/ghe-governance"
+    description: >
+      Padrão de varredura org-wide de conformidade no GHE usando GitHub App
+      somente-leitura, descoberta automática de repositórios via API,
+      deduplicação de findings por marcador HTML em issues, avaliação de
+      governança do Project V2 consolidado e relatório mensal consolidado
+      publicado como issue com snapshots por execução. Reaproveitar sempre que
+      outra feature precisar auditar postura de segurança/governança em múltiplos
+      repositórios sem criar infraestrutura adicional.
+    source: "specs/007-controle-seguranca-ghe-projetos-plataforma/plan.md"
+    adr: "docs/adr/0008-github-app-para-varredura-de-seguranca-org-wide.md"
     reuse_count: 0

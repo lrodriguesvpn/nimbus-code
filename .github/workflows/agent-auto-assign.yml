@@ -1,46 +1,15 @@
 name: Agent Auto-Assign — Desenvolvimento Autônomo por Label
 
 # Quando o label `agent:autonomous-ok` é aplicado a uma issue, atribui
-# automaticamente o GitHub Copilot coding agent para implementá-la sem
-# intervenção humana prévia — respeitando as guardrails abaixo.
+# automaticamente o GitHub Copilot coding agent.
 #
-# Instalar este workflow em cada repositório do projeto:
-#   cp .github/workflows/agent-auto-assign.yml <repo>/.github/workflows/
+# Autenticação:
+#   - Preferencial: GitHub App (`NIMBUS_APP_ID` + `NIMBUS_APP_PRIVATE_KEY`)
+#   - Fallback temporário: `COPILOT_AGENT_ASSIGN_TOKEN`
 #
-# Pré-requisitos:
-#   1. Rodar scripts/setup-github-labels.sh no repositório (cria a taxonomia
-#      de labels, incluindo agent:autonomous-ok e agent:needs-human).
-#   2. GitHub Copilot coding agent habilitado no repositório/organização.
-#   3. Secret COPILOT_AGENT_ASSIGN_TOKEN: um Personal Access Token (classic,
-#      escopo `repo`, ou fine-grained com read/write em actions+contents+
-#      issues+pull requests) de um usuário com acesso de escrita ao repo.
-#      A API de atribuição de issues ao Copilot exige um token
-#      "user-to-server" — o GITHUB_TOKEN padrão do workflow (server-to-server)
-#      NÃO é aceito por essa API, então este secret adicional é obrigatório.
-#      Sem ele, o workflow falha explicitamente (não falha silenciosamente).
-#
-# Guardrails (ver docs/label-taxonomy-and-autonomous-dev.md):
-#   - NUNCA atribui se a issue também tiver o label `agent:needs-human`.
-#   - NUNCA atribui se a issue tiver `complexity:S4` (exige revisão humana
-#     por princípio da constituição Nimbus-Code — S4 nunca é 100% autônomo).
-#   - NUNCA atribui se a issue tiver `type:incident` (originada de ocorrência
-#     em produção/ambiente de cliente — exige revisão humana obrigatória,
-#     independente da complexidade S0–S4, por princípio da constituição Nimbus-Code).
-#   - NUNCA atribui se a issue já tiver algum assignee (evita reatribuir
-#     trabalho que já está em andamento, humano ou agente).
-#   - NUNCA atribui se a issue tiver `status:blocked`.
-#   - A ordem de prioridade (priority:P0-blocker > P1-high > P2-medium >
-#     P3-low) é passada como contexto em `custom_instructions` para o agente
-#     entender onde este item se encaixa na fila, mas NÃO controla o
-#     disparo em si — cada issue com agent:autonomous-ok dispara seu próprio
-#     auto-assign assim que o label é aplicado.
-#
-# ⚠️ Antes de instalar: este é o ÚNICO gatilho versionado deste bundle para
-# auto-assign do Copilot — não existe outro label/script/workflow equivalente
-# neste repositório. Porém confira a aba "Agents → Automations" (feature
-# nativa do GitHub, configurada na UI e NÃO versionada em git, privada por
-# criador) antes de habilitar, para não ter dois gatilhos rodando em paralelo
-# na mesma issue. Ver docs/label-taxonomy-and-autonomous-dev.md seção 7.
+# O fallback permanece durante o rollout porque esta automação já existe em
+# produção e não pode parar enquanto o GitHub App organizacional não estiver
+# provisionado.
 
 on:
   issues:
@@ -56,10 +25,36 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.label.name == 'agent:autonomous-ok'
     steps:
+      - name: Generate GitHub App installation token
+        id: app-token
+        if: ${{ secrets.NIMBUS_APP_ID != '' && secrets.NIMBUS_APP_PRIVATE_KEY != '' }}
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.NIMBUS_APP_ID }}
+          private-key: ${{ secrets.NIMBUS_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          github-api-url: ${{ github.api_url }}
+          permission-metadata: read
+          permission-issues: write
+
+      - name: Resolve auth token (App or PAT fallback)
+        id: resolve-token
+        run: |
+          if [ -n "${{ steps.app-token.outputs.token }}" ]; then
+            echo "token=${{ steps.app-token.outputs.token }}" >> "$GITHUB_OUTPUT"
+            echo "::notice::Autenticado via GitHub App (instalação de curta duração)."
+          elif [ -n "${{ secrets.COPILOT_AGENT_ASSIGN_TOKEN }}" ]; then
+            echo "token=${{ secrets.COPILOT_AGENT_ASSIGN_TOKEN }}" >> "$GITHUB_OUTPUT"
+            echo "::warning::GitHub App não configurado — usando token legado de fallback (rollout em andamento; ver docs/github-app-auth-snippet.md)."
+          else
+            echo "::error::Nenhuma credencial configurada. Defina NIMBUS_APP_ID/NIMBUS_APP_PRIVATE_KEY ou COPILOT_AGENT_ASSIGN_TOKEN."
+            exit 1
+          fi
+
       - name: Verificar guardrails e coletar labels da issue
         id: guard
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           LABELS=$(gh api "repos/${{ github.repository }}/issues/${{ github.event.issue.number }}" --jq '[.labels[].name] | join(",")')
           ASSIGNEES=$(gh api "repos/${{ github.repository }}/issues/${{ github.event.issue.number }}" --jq '[.assignees[].login] | join(",")')
@@ -83,11 +78,11 @@ jobs:
       - name: Comentar e abortar (guardrail violada)
         if: steps.guard.outputs.skip != ''
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           gh issue comment "${{ github.event.issue.number }}" \
             --repo "${{ github.repository }}" \
-            --body "🤖 **Auto-assign ao Copilot coding agent não disparado**: ${{ steps.guard.outputs.skip }}. Remova o(s) bloqueio(s) e reaplique o label \`agent:autonomous-ok\` se ainda quiser desenvolvimento autônomo, ou atribua manualmente."
+            --body "?? **Auto-assign ao Copilot coding agent não disparado**: ${{ steps.guard.outputs.skip }}. Remova o(s) bloqueio(s) e reaplique o label \`agent:autonomous-ok\` se ainda quiser desenvolvimento autônomo, ou atribua manualmente."
 
       - name: Extrair prioridade para contexto do agente
         id: priority
@@ -106,13 +101,8 @@ jobs:
       - name: Atribuir Copilot coding agent à issue
         if: steps.guard.outputs.skip == ''
         env:
-          GH_TOKEN: ${{ secrets.COPILOT_AGENT_ASSIGN_TOKEN }}
+          GH_TOKEN: ${{ steps.resolve-token.outputs.token }}
         run: |
-          if [[ -z "${GH_TOKEN:-}" ]]; then
-            echo "::error::Secret COPILOT_AGENT_ASSIGN_TOKEN não configurado. A API de atribuição ao Copilot exige um token user-to-server (PAT), o GITHUB_TOKEN padrão não é aceito. Ver comentário no topo deste workflow."
-            exit 1
-          fi
-
           gh api \
             --method POST \
             -H "Accept: application/vnd.github+json" \
@@ -124,8 +114,8 @@ jobs:
       - name: Confirmar atribuição
         if: steps.guard.outputs.skip == ''
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           gh issue comment "${{ github.event.issue.number }}" \
             --repo "${{ github.repository }}" \
-            --body "🤖 Issue atribuída ao GitHub Copilot coding agent para desenvolvimento autônomo (${{ steps.priority.outputs.value }}). Acompanhe o progresso na aba **Agents** do repositório."
+            --body "?? Issue atribuída ao GitHub Copilot coding agent para desenvolvimento autônomo (${{ steps.priority.outputs.value }}). Acompanhe o progresso na aba **Agents** do repositório."

@@ -109,22 +109,73 @@ sem workflows que dependam de secrets pode legitimamente não ter nenhum).
 
 ## 2. Governança do Projeto Plataforma
 
-> **Pendente** — implementado na User Story 2 (`tasks.md` T021), fora do
-> escopo desta sessão (MVP). Ver
-> [`spec.md` — User Story 2](/specs/007-controle-seguranca-ghe-projetos-plataforma/spec.md)
-> e
-> [`data-model.md` — Projeto Plataforma](/specs/007-controle-seguranca-ghe-projetos-plataforma/data-model.md).
+Controles específicos para o **Project V2 consolidado** usado como visão de
+plataforma. Atende `FR-002` do
+[`spec.md`](/specs/007-controle-seguranca-ghe-projetos-plataforma/spec.md) e
+é **separado** do baseline de repositório da seção 1: aqui o foco não é branch
+protection ou secrets de um repo individual, e sim **quem pode administrar o
+board consolidado, suas views e seus campos críticos**.
+
+### Diferença explícita: repositório vs. Projeto Plataforma
+
+| Escopo | O que proteger | Onde configurar | Quem administra |
+|---|---|---|---|
+| **Repositório de projeto** | Branch protection, revisão obrigatória, Actions, secrets | `Settings` do próprio repositório | Maintainers / tech leads do repositório |
+| **Projeto Plataforma (Project V2)** | Visibilidade cross-repo, views executivas, campos críticos, automações que escrevem no board | UI/API do Project V2 no repositório/owner que hospeda o board | Responsável de Plataforma + time admin aprovado |
+
+### Regras mínimas de governança do Project V2 consolidado
+
+- O board consolidado **deve permanecer privado** (`public=false`) — nenhuma
+  visão cross-repo de segurança/governança deve ficar pública.
+- Grants diretos de time no Project V2 ficam restritos à lista aprovada pelo
+  responsável de plataforma (ex.: allowlist operacional usada pela automação em
+  `SECURITY_SCAN_PLATFORM_ALLOWED_TEAM_SLUGS`).
+- Views e campos críticos (ex.: `Board por Prioridade`, `Tabela — P0 Blocker`,
+  campos `Status`, `Repository`, `Reviewers`) só podem ser administrados por
+  perfis `owner`/`admin` do contexto de plataforma.
+- Maintainers, contributors e leitores interagem com o board **por itens**,
+  links de issues/PRs e workflows aprovados — não por administração direta de
+  views/campos.
+
+### Critério objetivo avaliado pela automação
+
+Controle `platform-project-access` (bloqueante):
+
+- o Project V2 consolidado é encontrado automaticamente no repositório/owner
+  configurado para a plataforma;
+- `public=false`;
+- a credencial da varredura retorna `viewerCanUpdate=false` (prova de que
+  continua somente leitura, sem privilégio administrativo no board);
+- não existem grants diretos de times fora da allowlist aprovada;
+- views/campos críticos obrigatórios existem no projeto.
+
+Se qualquer um dos itens acima falhar, o status é `risco` ou `pendente`,
+gerando Issue rastreável no repositório que hospeda a automação.
 
 ---
 
 ## 3. Modelo de Acesso por Papéis
 
-> **Pendente** — implementado na User Story 2 (`tasks.md` T021), fora do
-> escopo desta sessão (MVP). A enumeração de papéis já está definida em
-> [`data-model.md` — Perfil de Acesso](/specs/007-controle-seguranca-ghe-projetos-plataforma/data-model.md)
-> (`owner`, `admin`, `maintainer`, `contributor`, `leitor`); a tabela completa
-> papel → permissão → quando usar será adicionada nesta seção junto com a
-> governança do Projeto Plataforma.
+Atende `FR-003` do
+[`spec.md`](/specs/007-controle-seguranca-ghe-projetos-plataforma/spec.md).
+Use sempre o menor papel suficiente para a função.
+
+| Papel | Repositório de projeto | Projeto Plataforma | Quando usar |
+|---|---|---|---|
+| `owner` | Administração institucional do repositório/organização | Aprova política do board, grants excepcionais e revisão S4 | Responsável máximo pelo contexto; uso raro |
+| `admin` | Configura branch rules, secrets, webhooks, Actions | Administra views/campos críticos e automações do Project V2 | Time de plataforma/governança autorizado |
+| `maintainer` | Mantém backlog, revisa PRs, gerencia labels/issues | Pode operar itens do board e validar fluxo, **sem** administrar estrutura do Project V2 | Tech leads e mantenedores do fluxo |
+| `contributor` | Implementa trabalho e interage com PRs/issues | Atualiza somente itens atribuídos/necessários ao trabalho | Devs e agentes atuando em tarefas do board |
+| `leitor` | Consulta código, backlog e evidências | Visualiza status consolidado sem editar estrutura | Auditoria, gestão, stakeholders |
+
+### Regras práticas
+
+- Nunca promova `contributor` para `admin` apenas para “ajudar no board”.
+- A administração da **estrutura** do Project V2 (views, campos, automações)
+  fica restrita a `owner`/`admin`.
+- `maintainer` é o papel operacional padrão para quem precisa acompanhar e
+  validar itens do board sem superprivilégio.
+- `leitor` é suficiente para auditoria e acompanhamento executivo.
 
 ---
 
@@ -181,50 +232,112 @@ código-fonte, nunca colados em corpo de issue/PR/comentário.
 
 ## 5. Checklist Operacional de Auditoria
 
-> **Pendente** — implementado na User Story 3 (`tasks.md` T028), fora do
-> escopo desta sessão (MVP). A varredura automatizada dos 4 controles de
-> repositório já roda semanalmente via
-> [`.github/workflows/security-compliance-scan.yml`](/.github/workflows/security-compliance-scan.yml)
-> (ver seção 1 acima para os critérios objetivos de cada controle); o
-> checklist operacional consolidado e o relatório mensal (`Compliance
-> Report`) serão documentados nesta seção junto com a padronização de
-> auditoria contínua (User Story 3).
+Atende `FR-005`, `FR-005a` e `FR-005b`.
+
+### Frequência e escopo
+
+- **Scan semanal automatizado**: workflow
+  [`.github/workflows/security-compliance-scan.yml`](/.github/workflows/security-compliance-scan.yml)
+  roda toda segunda-feira.
+- **Relatório mensal consolidado**: Issue `Relatório de Conformidade de
+  Segurança — YYYY-MM` agrega as execuções semanais do mês.
+- **Descoberta automática**: o escopo `org-wide` usa a API do GHE para
+  descobrir todos os repositórios da organização — nunca depende de lista
+  manual estática.
+- **Rollout progressivo**: enquanto o flag
+  `security.baseline_scan.org_wide_enabled` estiver desligado, o escopo fica no
+  piloto `spec-kit-workflow`; quando ligado, expande para `org-wide`.
+
+### Checklist objetivo por controle
+
+| Controle | Escopo | Critério `ok` | Ausência gera |
+|---|---|---|---|
+| `branch-protection` | Repositório | `GET /repos/{owner}/{repo}/branches/{default}/protection -> 200` | `risco` |
+| `required-review` | Repositório | `required_approving_review_count >= 1` | `risco` |
+| `actions-permissions` | Repositório | `enabled=true` e `allowed_actions != "all"` | `risco` |
+| `secrets-configured` | Repositório | `total_count > 0` em `actions/secrets` | `pendente` |
+| `platform-project-access` | Projeto Plataforma | Projeto privado, `viewerCanUpdate=false` para a credencial da varredura, sem grants fora da allowlist, views/campos críticos presentes | `risco` / `pendente` |
+
+### Evidências operacionais que devem existir
+
+- Logs da execução com `repos_avaliados` e `repos_com_erro`.
+- Warning explícito se `repos_com_erro / repos_avaliados > 5%`.
+- Issues abertas/atualizadas para cada finding com `status != ok`.
+- Relatório mensal publicado mesmo quando não houver desvios abertos.
 
 ---
 
 ## 6. Procedimento de Não Conformidade
 
-> **Pendente (detalhamento completo)** — parte do fluxo já está em produção
-> nesta versão MVP: toda `Evidência de Auditoria` com `status != ok` gerada
-> pelos 4 avaliadores da seção 1 é automaticamente registrada como uma Issue
-> rastreável no próprio repositório avaliado, seguindo o formato definido em
-> [`contracts/finding-schema.md`](/specs/007-controle-seguranca-ghe-projetos-plataforma/contracts/finding-schema.md):
-> título, corpo com controle/status/evidência/instrução de correção, labels
-> `security-baseline` + prioridade (`priority:P0-blocker` para controles
-> bloqueantes, `priority:P2-medium` para os demais), e um marcador HTML
-> `<!-- security-baseline-finding-id: ... -->` usado para deduplicação
-> (reaproveita o padrão `speckit-deduplication-by-id` — ver
-> `docs/reuse-catalog.yaml`). O detalhamento completo do procedimento
-> (responsável, prazo por prioridade) é adicionado na User Story 3
-> (`tasks.md` T028).
+Toda `Evidência de Auditoria` com `status != ok` vira uma Issue rastreável,
+seguindo o schema de
+[`finding-schema.md`](/specs/007-controle-seguranca-ghe-projetos-plataforma/contracts/finding-schema.md).
+
+### Campos obrigatórios da Issue
+
+- `priority:P0-blocker` para controles bloqueantes; `priority:P2-medium` para
+  os demais.
+- `Responsável inicial`: Tech Lead/mantenedor do repositório ou responsável de
+  plataforma, conforme o alvo do finding.
+- `Prazo sugerido para correção`:
+  - `P0-blocker`: **7 dias corridos**
+  - `P2-medium`: **30 dias corridos**
+- `Critério de validação`: a próxima execução semanal deve retornar
+  `status: ok` para o mesmo `finding_id`.
+- Marcador de deduplicação:
+  `<!-- security-baseline-finding-id: security-baseline:{repo}:{controle} -->`
+
+### Fluxo operacional
+
+1. A automação cria/atualiza a Issue idempotente.
+2. O time dono do repositório/projeto confirma a evidência e define o
+   responsável humano final.
+3. A correção é feita manualmente no GHE; a automação **não** corrige nada.
+4. Quando o controle volta a `ok`, a Issue é fechada automaticamente pela
+   próxima varredura (ou manualmente, após validação).
+5. O relatório mensal lista desvios ainda abertos e os fechados no período.
 
 ---
 
 ## 7. Referência ao Fluxo Nimbus Code
 
-> **Pendente** — implementado na User Story 3 (`tasks.md` T032), fora do
-> escopo desta sessão (MVP). Ver desde já
-> [`docs/label-taxonomy-and-autonomous-dev.md`](/docs/label-taxonomy-and-autonomous-dev.md)
-> para a taxonomia de labels (`priority:*`, `status:*`, `agent:*`) usada pelas
-> issues de não conformidade geradas por esta automação — nenhum processo de
-> governança paralelo é criado por esta feature.
+Esta feature **não cria processo paralelo** de governança.
+
+- Labels e prioridades reaproveitam a taxonomia já documentada em
+  [`docs/label-taxonomy-and-autonomous-dev.md`](/docs/label-taxonomy-and-autonomous-dev.md).
+- O board/Project V2 segue o fluxo Nimbus Code já existente; a automação desta
+  feature apenas produz evidência (Issues + relatório mensal) que entra no
+  mesmo pipeline normal de triagem e execução.
+- Para features S4 como esta, a revisão humana obrigatória continua valendo —
+  nenhum finding ou rollout org-wide pode contornar esse gate.
 
 ---
 
 ## 8. Dependências de Workflows com Projects
 
-> **Pendente** — implementado na User Story 3 (`tasks.md` T032), fora do
-> escopo desta sessão (MVP). Esta seção documentará as permissões e secrets
-> mínimos exigidos por workflows que leem/escrevem no Project V2 consolidado
-> (Projeto Plataforma), complementando a seção 2 (Governança do Projeto
-> Plataforma).
+Atende `FR-008`.
+
+### Regra geral
+
+Workflows que **escrevem** no Project V2 consolidado usam credencial dedicada
+de escopo mínimo para aquele board; workflows que **apenas leem** a postura de
+segurança org-wide usam o GitHub App da varredura.
+
+### Credenciais mínimas por caso
+
+| Caso | Credencial recomendada | Escopo mínimo | Armazenamento |
+|---|---|---|---|
+| Workflow que escreve no Project V2 do repositório local | PAT de conta de serviço (ex.: `VPNDEV_PROJECT_TOKEN`) | `repo` + `project`, restrito ao repositório/board necessário | GitHub Secret do repositório |
+| Workflow central de varredura org-wide | GitHub App `Nimbus Code Security Auditor` | `metadata:read`, `administration:read`, `secrets:read`, `contents:read` | `SECURITY_SCAN_APP_ID`, `SECURITY_SCAN_APP_PRIVATE_KEY`, `SECURITY_SCAN_APP_INSTALLATION_ID` |
+| Workflow que só interage com o próprio repositório | `GITHUB_TOKEN` | `contents: read` por padrão + bloco `permissions:` explícito | Nativo do Actions |
+
+### Regras adicionais
+
+- `GITHUB_TOKEN` padrão **não substitui** o GitHub App para leitura cross-repo
+  org-wide nem substitui um PAT quando o workflow precisa escrever em Projects
+  V2 fora do escopo do próprio job.
+- Todo secret de workflow fica em **Settings → Secrets and variables → Actions**;
+  nunca em texto plano no repositório.
+- Tokens/PATs usados para Projects devem ter rotação definida (mínimo:
+  trimestral) e owner explícito.
+- Declarar sempre `permissions:` no workflow com o menor conjunto necessário.

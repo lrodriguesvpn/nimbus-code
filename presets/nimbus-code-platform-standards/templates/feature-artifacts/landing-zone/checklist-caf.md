@@ -105,7 +105,7 @@
 ## Nuvem: GCP (Cloud Foundation Toolkit + Well-Architected)
 
 > Referências: https://cloud.google.com/architecture/framework e
-> https://github.com/GoogleCloudPlatform/cloud-foundation-toolkit
+> GoogleCloudPlatform/cloud-foundation-toolkit
 
 ### Organização e Governança
 

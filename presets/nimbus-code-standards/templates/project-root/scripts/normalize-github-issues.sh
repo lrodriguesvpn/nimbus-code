@@ -52,7 +52,7 @@ command -v python3 >/dev/null 2>&1 || { echo "python3 is required" >&2; exit 1; 
 command -v jq >/dev/null 2>&1 || { echo "jq is required" >&2; exit 1; }
 
 if [[ -z "$repo" ]]; then
-  repo="$(git config --get remote.origin.url | sed -E 's#.*github.com[/:]([^/]+/[^/.]+)(\.git)?#\1#')"
+  repo="$(git config --get remote.origin.url | sed -E 's#^(https?://[^/]+/|git@[^:]+:)?([^/]+/[^/.]+)(\.git)?$#\2#')"
 fi
 
 if [[ -z "$repo" ]]; then
