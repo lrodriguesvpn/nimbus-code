@@ -1,0 +1,23 @@
+name: Validate issue template parity
+
+on:
+  pull_request:
+    paths:
+      - 'presets/nimbus-code-standards/templates/project-root/.github/ISSUE_TEMPLATE/nimbus-code-task.md'
+      - 'presets/nimbus-code-platform-standards/templates/project-root/.github/ISSUE_TEMPLATE/nimbus-code-task.md'
+      - '.specify/presets/nimbus-code-standards/templates/project-root/.github/ISSUE_TEMPLATE/nimbus-code-task.md'
+      - '.specify/presets/nimbus-code-platform-standards/templates/project-root/.github/ISSUE_TEMPLATE/nimbus-code-task.md'
+      - 'scripts/validate-issue-template-parity.sh'
+
+permissions:
+  contents: read
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate parity
+        run: bash scripts/validate-issue-template-parity.sh

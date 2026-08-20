@@ -12,7 +12,7 @@ código já existe, padrões já estão estabelecidos (mesmo que implícitos), e
 freqüentemente há um backlog/histórico de decisões já tomadas.
 
 O Nimbus Code **funciona em brownfield** (ver
-[walkthrough oficial do próprio time do Nimbus Code](https://github.com/mnriem/nimbus-code-aspnet-brownfield-demo)
+walkthrough oficial de brownfield do time do Spec Kit (demo ASP.NET brownfield)
 aplicado a uma CMS .NET com ~307k linhas), mas o fluxo é **3 passos mais
 longo** que greenfield porque o agente precisa **aprender o código antes de
 especificar**.
@@ -278,5 +278,5 @@ de novo. Repita até converged.
   workflow se compõem.
 - [`ai-code-quality-and-observability.md`](ai-code-quality-and-observability.md) —
   regras de qualidade que valem para todas as features (novo ou brownfield).
-- [Walkthrough oficial de brownfield do time do Nimbus Code](https://github.com/mnriem/nimbus-code-aspnet-brownfield-demo) —
+- Walkthrough oficial de brownfield do time do Spec Kit (demo ASP.NET brownfield) —
   demonstração real em ~307k linhas de C# .NET.

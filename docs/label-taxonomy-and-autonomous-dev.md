@@ -110,24 +110,20 @@ flowchart LR
 2. Copiar `.github/workflows/agent-auto-assign.yml` para o repositório do
    projeto (feito automaticamente pelo `bootstrap.sh`; ver seção 6).
 3. GitHub Copilot coding agent habilitado no repositório/organização.
-4. Configurar o secret `COPILOT_AGENT_ASSIGN_TOKEN`: um **Personal Access
-   Token** (classic com escopo `repo`, ou fine-grained com leitura/escrita em
-   `actions`, `contents`, `issues` e `pull requests`) de um usuário com acesso
-   de escrita ao repositório.
+4. Configurar `NIMBUS_APP_ID` e `NIMBUS_APP_PRIVATE_KEY` para o caminho
+   preferencial do workflow. Durante o rollout,
+   `COPILOT_AGENT_ASSIGN_TOKEN` pode permanecer configurado como fallback
+   legado.
 
-   **Por que não dá para usar o `GITHUB_TOKEN` padrão?** A API de atribuição
-   de issues ao Copilot só aceita autenticação **user-to-server** (PAT, OAuth
-   app token, ou GitHub App user-to-server token). O `GITHUB_TOKEN` que o
-   GitHub Actions injeta automaticamente é um token **server-to-server**
-   (installation token), explicitamente **não suportado** por essa API — ver
-   [documentação oficial da API de agentes do Copilot](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/cloud-agent/use-cloud-agent-via-the-api).
-   Sem o secret configurado, o workflow falha explicitamente com uma mensagem
-   clara, em vez de tentar e falhar de forma confusa.
+   **Por que nao da para usar apenas o `GITHUB_TOKEN` padrao?** Esta automacao
+   precisa de uma credencial dedicada para a atribuicao do agente; por isso o
+   workflow tenta primeiro o GitHub App e falha explicitamente se nenhuma
+   credencial dedicada estiver disponivel.
 
-Sem o secret configurado, o workflow **falha explicitamente** (ver step
-"Atribuir Copilot coding agent à issue") em vez de tentar e falhar de forma
-confusa — assim quem instalar o bundle percebe rapidamente que falta esse
-passo de configuração.
+Sem nenhuma credencial dedicada configurada, o workflow **falha
+explicitamente** (ver step "Atribuir Copilot coding agent a issue") em vez de
+tentar e falhar de forma confusa; assim quem instalar o bundle percebe
+rapidamente que falta esse passo de configuracao.
 
 ### Guardrail: por que `complexity:S4` bloqueia sempre
 
@@ -253,6 +249,9 @@ curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-
 git add .github/workflows/agent-auto-assign.yml
 
 # 3. Configurar o secret no GitHub (Settings → Secrets and variables → Actions)
+gh secret set NIMBUS_APP_ID --repo venha-pra-nuvem/meu-projeto
+gh secret set NIMBUS_APP_PRIVATE_KEY --repo venha-pra-nuvem/meu-projeto < caminho/para/chave.pem
+# Opcional durante o rollout:
 gh secret set COPILOT_AGENT_ASSIGN_TOKEN --repo venha-pra-nuvem/meu-projeto
 ```
 
