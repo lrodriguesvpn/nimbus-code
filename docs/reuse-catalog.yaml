@@ -46,11 +46,17 @@ entries:
     bounded_context: "spec-kit-workflow"
     description: >
       Padrão de criação de hierarquia Epic → Feature → User Story → Task no GHE
-      via sub-issues nativos (GraphQL API). Inclui: detecção de Issue Types da org,
-      fallback gracioso via labels (type:epic/feature/user-story/task) para orgs
-      sem suporte nativo, criação idempotente de views hierárquicas no Project V2,
-      e alerta de limite de 100 sub-issues por parent. Reaproveitar sempre que
-      uma feature precisar criar rastreabilidade hierárquica de issues no GHE.
+      via sub-issues nativos (GraphQL API: addSubIssue, updateIssueIssueType,
+      Issue.subIssuesSummary/parent). Implementado em
+      .specify/scripts/bash/create-github-issue-hierarchy.sh (bash + gh CLI,
+      subcomandos ensure-feature/ensure-user-story/link-task/set-type),
+      invocado por .github/skills/speckit-taskstoissues/SKILL.md. Inclui:
+      detecção de Issue Types da org (mesma query usada em
+      scripts/setup-github-project.sh), fallback gracioso via labels
+      (type:epic/feature/user-story/task) para orgs sem suporte nativo, criação
+      idempotente de views hierárquicas no Project V2, e alerta/abort de limite
+      de sub-issues por parent (aviso >=90, abort >=100). Reaproveitar sempre
+      que uma feature precisar criar rastreabilidade hierárquica de issues no GHE.
     source: "specs/005-epic-feature-us-ghe-hierarchy/plan.md"
     adr: ""
     reuse_count: 0
@@ -58,18 +64,51 @@ entries:
   - tag: "speckit-deduplication-by-id"
     bounded_context: "spec-kit-workflow"
     description: >
-      Padrão de deduplicação de issues geradas pelo /speckit-taskstoissues usando
-      o ID estruturado da tarefa (T00N) como chave — não o título, que pode mudar.
-      Antes de criar cada issue, verifica se já existe no repo uma issue com
-      identificador T00N; antes de vincular sub-issue, verifica se o vínculo já
-      existe. Reaproveitar sempre que um comando Spec Kit precisar ser re-executável
-      sem criar duplicatas no GHE.
+      Padrão de deduplicação de issues geradas por comandos Spec Kit usando um
+      identificador estruturado como chave — não o título, que pode mudar. Para
+      Tasks, o ID é o T00N no título (dedup via GitHub MCP list_issues em
+      /speckit-taskstoissues). Para Feature/User Story (sem um ID numérico
+      natural), o identificador é um marcador oculto no corpo da issue, ex.:
+      `<!-- speckit-feature-id: <feature-slug> -->` /
+      `<!-- speckit-us-id: <feature-slug>#US<N> -->`, pré-filtrado via
+      `gh issue list --search` e confirmado por match exato via jq — o mesmo
+      esquema de marcador já usado por outra automação deste repositório
+      (`security-baseline-finding-id`, ver
+      specs/007-controle-seguranca-ghe-projetos-plataforma/quickstart.md).
+      Implementado em .specify/scripts/bash/create-github-issue-hierarchy.sh.
+      Antes de criar cada issue, verifica se já existe uma correspondente;
+      antes de vincular sub-issue, verifica se o vínculo já existe (consulta o
+      `parent` atual via GraphQL). Reaproveitar sempre que um comando Spec Kit
+      precisar ser re-executável sem criar duplicatas no GHE.
     source: "specs/005-epic-feature-us-ghe-hierarchy/plan.md"
     adr: ""
     reuse_count: 0
 
-
-  - tag: "subtree-extraction-to-standalone-repo"
+  - tag: "skill-mid-flow-instruction-reliability-gate"
+    bounded_context: "spec-kit-workflow"
+    description: >
+      Padrão para reduzir a fragilidade de instruções em prosa no meio de um
+      SKILL.md longo (ex.: "se você achar X, extraia e persista Y") que um
+      agente LLM pode pular sem que ninguém perceba, já que SKILL.md não é
+      código determinístico. Solução em 3 camadas: (1) hardening do script
+      bash correspondente para também extrair o dado do texto livre, não só
+      via flag explícita — ajuda quem chama via CLI/hook; (2) um script bash
+      pequeno e determinístico (regex + jq, com fallback sem jq) que recebe o
+      texto original e o arquivo de estado, compara e se autocorrige — não
+      depende de interpretação; (3) uma seção "Mandatory Post-Execution
+      Validation" no SKILL.md, marcada como incondicional (independente de
+      hooks/extensions.yml), que instrui o agente a sempre rodar o script (2)
+      como último passo, substituindo "lembre-se no meio do fluxo" por "sempre
+      execute isto no final". Implementado para o campo `epic_issue` em
+      .specify/scripts/bash/create-new-feature.sh +
+      .specify/scripts/bash/check-epic-issue-consistency.sh +
+      .github/skills/speckit-specify/SKILL.md. Reaproveitar para qualquer
+      outro campo de feature.json extraído de texto livre por um SKILL.md
+      (ex.: bounded_contexts na feature 006, ainda não migrado para este
+      padrão).
+    source: "specs/005-epic-feature-us-ghe-hierarchy/plan.md"
+    adr: ""
+    reuse_count: 0
     bounded_context: "spec-kit-workflow"
     description: >
       Padrão para migrar uma implementação já existente dentro de uma subpasta

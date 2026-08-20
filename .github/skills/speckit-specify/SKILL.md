@@ -103,6 +103,12 @@ Given that feature description, do this:
      ```
      Write the actual resolved directory path value (for example, `specs/003-user-auth`), not the literal string `SPECIFY_FEATURE_DIRECTORY`.
      This allows downstream commands (`/speckit-plan`, `/speckit-tasks`, etc.) to locate the feature directory without relying on git branch name conventions.
+   - **Optional Epic link** (specs/005-epic-feature-us-ghe-hierarchy): scan the raw feature description text for an `EPIC_ISSUE=<N>` token (case-insensitive, `N` a positive integer — the number of an existing Epic issue in the GHE repo). If present:
+     - Strip the `EPIC_ISSUE=<N>` token out of the feature description before using it as spec content.
+     - Merge `"epic_issue": <N>` (as a JSON number, not a string) into `.specify/feature.json` alongside `feature_directory` — do not overwrite other existing keys (`bounded_contexts`, `repos`, etc.) already in that file.
+     - Equivalently, `.specify/scripts/bash/create-new-feature.sh` accepts a `--epic-issue <N>` flag that does this same merge when the feature is created via that script directly.
+     - If `EPIC_ISSUE` is absent, do not add the key at all — downstream `/speckit-taskstoissues` treats a missing `epic_issue` as "no Epic parent" and creates the Feature issue without a parent link (not an error).
+     - **Edge case — Epic does not exist yet**: this command does NOT create the Epic issue automatically (Epics are created manually in the GHE UI or via `gh issue create --label type:epic`, see `docs/developer-guide.md` seção 4.3, Passo 1). If the user did not provide `EPIC_ISSUE`, do not block spec creation — inform them they can add `"epic_issue": <N>` to `.specify/feature.json` manually later, before running `/speckit-taskstoissues`.
 
    **IMPORTANT**:
    - You must only create one feature per `/speckit-specify` invocation
@@ -258,6 +264,23 @@ Given that feature description, do this:
 
    d. **Update Checklist**: After each validation iteration, update the checklist file with current pass/fail status
 
+## Mandatory Post-Execution Validation (Epic Issue Consistency)
+
+**You MUST run this before reporting completion to the user. Unlike the "Mandatory Post-Execution Hooks" section below, this step is unconditional — it does not depend on `.specify/extensions.yml` existing or any hook being registered. Never skip it.**
+
+This closes a reliability gap (specs/005-epic-feature-us-ghe-hierarchy): the `EPIC_ISSUE=<N>` extraction described in step 3 of the Outline above is prose in the middle of a long multi-step flow — an agent (you, in a future run, or a different session) could skip it without anyone noticing. This step is a deterministic, idempotent, self-healing check implemented in bash, not something you re-interpret from text — it does not rely on you having extracted `EPIC_ISSUE` correctly earlier.
+
+Run:
+```bash
+.specify/scripts/bash/check-epic-issue-consistency.sh --description "<the original, unmodified feature description text the user typed after /speckit-specify>" --json
+```
+
+- Pass the **original raw text** exactly as the user provided it — not a paraphrased or already-stripped version — so the script's own regex extraction is authoritative regardless of what happened in step 3.
+- The script is a no-op (exits 0, prints `{"status":"no-op",...}`) when the description has no `EPIC_ISSUE=<N>` token — safe and cheap to always run, even for features with no Epic.
+- If it prints `{"status":"fixed",...}`: step 3's extraction was missed or produced a different value, and this script just corrected `.specify/feature.json` for you. Mention this self-correction in the Completion Report so the user is aware.
+- If it prints `{"status":"ok",...}`: everything was already consistent — nothing to mention.
+- If the script exits non-zero (for example, `.specify/feature.json` does not exist yet — which would indicate step 3 did not run correctly), **do not silently ignore it or declare completion** — report the failure to the user.
+
 ## Mandatory Post-Execution Hooks
 
 **You MUST complete this section before reporting completion to the user.**
@@ -300,6 +323,7 @@ Report completion to the user with:
 - `SPEC_FILE` — the spec file path
 - Checklist results summary
 - Readiness for the next phase (`/speckit-clarify` or `/speckit-plan`)
+- If the "Mandatory Post-Execution Validation" step above reported `{"status":"fixed",...}`, mention that `epic_issue` was auto-corrected in `.specify/feature.json` (and to what value)
 
 **NOTE:** Branch creation is handled by the `before_specify` hook (git extension). Spec directory and file creation are always handled by this core command.
 
