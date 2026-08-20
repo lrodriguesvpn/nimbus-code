@@ -1,0 +1,67 @@
+name: Codespaces Idle Governance (reference)
+
+# Workflow de REFERÊNCIA/FALLBACK para parada automática de Codespaces
+# ociosos além do limite definido em CodespaceIdleGovernancePolicy
+# (specs/009-codespaces-dev-planning/data-model.md).
+#
+# A PRIMEIRA linha de governança é a configuração nativa do GitHub Codespaces
+# a nível de organização ("Default idle timeout" / "Retention period" — ver
+# docs/codespaces-adoption-guide.md, seção 2). Este workflow só é relevante
+# como fallback se a configuração nativa se mostrar insuficiente para um
+# repositório específico (ex.: necessidade de alerta de custo granular).
+#
+# Gatilho: `workflow_dispatch` (execução manual) nesta feature de
+# planejamento — NÃO habilitado como `schedule` automático. Trocar para
+# `schedule` é uma decisão de rollout por repositório (permissões de API
+# `gh api /user/codespaces` e possível impacto de custo/billing) e requer
+# aprovação humana explícita antes da ativação. Ver
+# docs/codespaces-adoption-guide.md, seção 2 ("Nota de ativação").
+#
+# Instalar em um repositório de projeto (após decisão de rollout):
+#   cp .github/workflows/codespaces-idle-governance.yml <repo>/.github/workflows/
+
+on:
+  workflow_dispatch:
+    inputs:
+      idle_timeout_minutes:
+        description: "Limite de inatividade (minutos) antes de considerar um Codespace ocioso"
+        required: false
+        default: "30"
+
+permissions:
+  contents: read
+
+jobs:
+  check-idle-codespaces:
+    name: Listar e parar Codespaces ociosos além do limite
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Listar e avaliar Codespaces do usuário/organização
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IDLE_TIMEOUT_MINUTES: ${{ github.event.inputs.idle_timeout_minutes || '30' }}
+        run: |
+          set -euo pipefail
+
+          echo "==> Avaliando Codespaces com limite de ociosidade de ${IDLE_TIMEOUT_MINUTES} minutos..."
+
+          gh api /user/codespaces --paginate | \
+            jq -r '.codespaces[] | select(.state == "Available") | [.name, .last_used_at] | @tsv' | \
+          while IFS=$'\t' read -r name last_used_at; do
+            [ -z "${name}" ] && continue
+
+            last_used_epoch="$(date -d "${last_used_at}" +%s)"
+            now_epoch="$(date -u +%s)"
+            idle_minutes=$(( (now_epoch - last_used_epoch) / 60 ))
+
+            echo "Codespace: ${name} — ocioso há ${idle_minutes} min (limite: ${IDLE_TIMEOUT_MINUTES} min)"
+
+            if [ "${idle_minutes}" -ge "${IDLE_TIMEOUT_MINUTES}" ]; then
+              echo "  → Parando Codespace ocioso: ${name}"
+              gh api -X POST "/user/codespaces/${name}/stop"
+              echo "::notice::Codespace '${name}' parado automaticamente após ${idle_minutes} min de ociosidade (auditoria de custo — AC-3)."
+            fi
+          done
+
+          echo "==> Avaliação concluída."
