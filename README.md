@@ -172,10 +172,12 @@ extensão + workflow na versão publicada mais recente da branch `main`.
 ### Bônus: GitHub Project criado automaticamente (garantido em todo repo)
 
 Se o `gh` CLI estiver instalado e autenticado, o `bootstrap.sh` **cria
-automaticamente um GitHub Project V2** com 3 views padrão (copiadas do
+automaticamente um GitHub Project V2** com 5 views padrão (copiadas do
 IOX-CROWDFUNDINGPAAS) e 2 campos customizados:
 
-- **Board por Epic** — organize issues por épicas
+- **Board por Epic** — visão da camada EPIC (`type:epic`)
+- **Board por Feature** — visão da camada FEATURE (`type:feature`)
+- **Board por User Story** — visão da camada US (`type:user-story`)
 - **Board por Prioridade** — organize por níveis de prioridade
 - **Tabela — P0 Blocker** — filtro pré-configurado para P0-blocker críticos
 - **Campo "Horas Humanas"** (número) — para lançar tempo humano em tarefas de

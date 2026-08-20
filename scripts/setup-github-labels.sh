@@ -102,8 +102,10 @@ declare -a LABELS=(
   "complexity:S4|b60205|Arquitetura, segurança ou dados sensíveis — impact-map.md + revisão humana obrigatórios"
 
   # Tipo — classificação padrão de issue/PR
+  "type:epic|5319e7|Iniciativa macro (guarda contexto estratégico e agrega features)"
   "type:bug|d73a4a|Comportamento incorreto em relação ao especificado"
   "type:feature|a2eeef|Nova funcionalidade ou capacidade"
+  "type:user-story|1d76db|Fatia de valor de usuário vinculada a uma feature"
   "type:chore|cfd3d7|Manutenção, refactor ou débito técnico sem mudança de comportamento visível"
   "type:docs|0075ca|Somente documentação (specs, ADRs, README, guias)"
   "type:incident|b60205|Ocorrência de produção/cliente (ex.: N1 do CRM) — SEMPRE exige revisão humana, mesmo complexidade S0"
@@ -116,6 +118,16 @@ declare -a LABELS=(
   # Status — controle de fluxo/ordenamento do backlog
   "status:needs-triage|ededed|Issue nova, ainda sem priority:*/complexity:* definidos — não deve ser puxada por agente autônomo"
   "status:blocked|5319e7|Bloqueada por dependência externa — pular na fila mesmo com priority:P0-blocker"
+
+  # Hierarquia Agile — fallback para orgs sem suporte a Issue Types nativos
+  # (ex.: GHE Server < 3.10). Em orgs com Issue Types, esses labels são usados
+  # como complemento visual de rastreabilidade nos PRs e no board.
+  # Ver seção "Hierarquia Agile (Epic → Feature → US → Task)" em
+  # docs/developer-guide.md e specs/005-epic-feature-us-ghe-hierarchy/spec.md.
+  "type:epic|6f42c1|Epic — iniciativa de negócio; pai de Features no GHE (fallback para orgs sem Issue Types nativos)"
+  "type:feature|0075ca|Feature — entrega de funcionalidade; sub-issue de Epic; tem correspondência 1:1 com specs/NNN-slug/"
+  "type:user-story|0e8a16|User Story — sub-issue de Feature; corresponde a seção [USN] do spec.md"
+  "type:task|cfd3d7|Task — unidade de implementação; sub-issue de User Story; gerada pelo /speckit-taskstoissues a partir de T00N"
 
   # DORA — domínio de métrica DevOps (Four Keys) que esta issue impacta.
   # Usado para correlacionar issues fechadas com os indicadores DORA da equipe
@@ -161,9 +173,11 @@ echo -e "  1. Aplique priority:*/complexity:*/type:* ao triar novas issues"
 echo -e "  2. Use agent:autonomous-ok para liberar o auto-assign do Copilot coding agent"
 echo -e "     (requer o workflow .github/workflows/agent-auto-assign.yml e o secret"
 echo -e "     COPILOT_AGENT_ASSIGN_TOKEN — ver docs/label-taxonomy-and-autonomous-dev.md)"
-echo -e "  3. Use a view \"Board por Prioridade\" do GitHub Project (setup-github-project.sh)"
-echo -e "     agrupada por priority:* para visualizar o ordenamento do backlog"
-echo -e "  4. Aplique dora:* nas issues que impactam métricas DORA (deploy frequency,"
+echo -e "  3. Use as views \"Board por Epic\", \"Board por Feature\" e \"Board por User Story\""
+echo -e "     com labels type:* para visualizar hierarquia EPIC/FEATURE/US"
+echo -e "  4. Use a view \"Board por Prioridade\" agrupada por priority:* para visualizar"
+echo -e "     o ordenamento do backlog"
+echo -e "  5. Aplique dora:* nas issues que impactam métricas DORA (deploy frequency,"
 echo -e "     lead time, change failure rate, MTTR) para poder correlacioná-las depois"
 echo ""
 echo -e "Documentação: ${BLUE}docs/label-taxonomy-and-autonomous-dev.md${NC}"

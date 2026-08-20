@@ -8,7 +8,9 @@ jira:
 azure_devops:
   organization: ""
   project: ""
-  parent_work_item_type: "Feature" # ou "Epic"
-  child_work_item_type: "Task"
+  epic_work_item_type: "Epic"
+  feature_work_item_type: "Feature"
+  user_story_work_item_type: "User Story"
+  child_work_item_type: "Task" # filho de User Story
 
 create_parent_on_split: true

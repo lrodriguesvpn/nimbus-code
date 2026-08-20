@@ -3,7 +3,7 @@ schema_version: "1.0"
 extension:
   id: "nimbus-code-backlog-sync"
   name: "Nimbus-Code — Sincronização de Backlog"
-  version: "1.1.1"
+  version: "1.2.0"
   description: "Sincroniza specs/tasks do Nimbus Code com JIRA ou Azure DevOps via MCP, como complemento opcional ao fluxo nativo baseado em specs/."
   category: "integration"
   effect: "read-write"
@@ -25,12 +25,12 @@ provides:
   commands:
     - name: "speckit.nimbus-code-backlog-sync.sync"
       file: "commands/sync.md"
-      description: "Cria/atualiza a User Story e as tarefas correspondentes no JIRA ou Azure DevOps a partir de specs/<feature>/spec.md e tasks.md"
+      description: "Cria/atualiza a hierarquia EPIC/FEATURE/US e as tarefas correspondentes no JIRA ou Azure DevOps a partir de specs/<feature>/spec.md e tasks.md"
 
   config:
     - name: "nimbus-code-backlog-sync-config.yml"
       template: "config-template.yml"
-      description: "Ferramenta de backlog (jira|azure-devops), projeto/organização alvo e mapeamento de tipos de work item"
+      description: "Ferramenta de backlog (jira|azure-devops), projeto/organização alvo e mapeamento da hierarquia EPIC/FEATURE/US"
       required: false
 
 hooks:
@@ -41,7 +41,7 @@ hooks:
     command: "speckit.nimbus-code-backlog-sync.sync"
     optional: true
     prompt: "Sincronizar esta spec com o backlog (JIRA/Azure DevOps) configurado?"
-    description: "Cria ou atualiza a User Story correspondente no backlog externo"
+    description: "Cria ou atualiza a hierarquia EPIC/FEATURE/US correspondente no backlog externo"
 
   after_tasks:
     command: "speckit.nimbus-code-backlog-sync.sync"

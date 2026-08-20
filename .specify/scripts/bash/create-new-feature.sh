@@ -9,6 +9,7 @@ SHORT_NAME=""
 BRANCH_NUMBER=""
 USE_TIMESTAMP=false
 NUMBER_EXPLICIT=false
+BOUNDED_CONTEXTS_INPUT=""
 ARGS=()
 i=1
 while [ $i -le $# ]; do
@@ -56,22 +57,39 @@ while [ $i -le $# ]; do
         --timestamp)
             USE_TIMESTAMP=true
             ;;
+        --bounded-contexts)
+            if [ $((i + 1)) -gt $# ]; then
+                echo 'Error: --bounded-contexts requires a value (comma-separated slugs)' >&2
+                exit 1
+            fi
+            i=$((i + 1))
+            next_arg="${!i}"
+            if [[ "$next_arg" == --* ]]; then
+                echo 'Error: --bounded-contexts requires a value (comma-separated slugs)' >&2
+                exit 1
+            fi
+            BOUNDED_CONTEXTS_INPUT="$next_arg"
+            ;;
         --help|-h)
-            echo "Usage: $0 [--json] [--dry-run] [--allow-existing-branch] [--short-name <name>] [--number N] [--timestamp] <feature_description>"
+            echo "Usage: $0 [--json] [--dry-run] [--allow-existing-branch] [--short-name <name>] [--number N] [--timestamp] [--bounded-contexts <slug1,slug2>] <feature_description>"
             echo ""
             echo "Options:"
-            echo "  --json              Output in JSON format"
-            echo "  --dry-run           Compute feature name and paths without creating directories or files"
-            echo "  --allow-existing-branch  Reuse an existing feature directory if it already exists"
-            echo "  --short-name <name> Provide a custom short name (2-4 words) for the feature"
-            echo "  --number N          Prefer a feature number (auto-corrected if its specs prefix exists)"
-            echo "  --timestamp         Use timestamp prefix (YYYYMMDD-HHMMSS) instead of sequential numbering"
-            echo "  --help, -h          Show this help message"
+            echo "  --json                      Output in JSON format"
+            echo "  --dry-run                   Compute feature name and paths without creating directories or files"
+            echo "  --allow-existing-branch     Reuse an existing feature directory if it already exists"
+            echo "  --short-name <name>         Provide a custom short name (2-4 words) for the feature"
+            echo "  --number N                  Prefer a feature number (auto-corrected if its specs prefix exists)"
+            echo "  --timestamp                 Use timestamp prefix (YYYYMMDD-HHMMSS) instead of sequential numbering"
+            echo "  --bounded-contexts <slugs>  Comma-separated bounded context slugs for multi-repo features."
+            echo "                              Slugs are resolved to repositories via docs/bounded-contexts.yaml."
+            echo "                              Persisted in .specify/feature.json as bounded_contexts and repos."
+            echo "  --help, -h                  Show this help message"
             echo ""
             echo "Examples:"
             echo "  $0 'Add user authentication system' --short-name 'user-auth'"
             echo "  $0 'Implement OAuth2 integration for API' --number 5"
             echo "  $0 --timestamp --short-name 'user-auth' 'Add user authentication'"
+            echo "  $0 'Order checkout flow' --bounded-contexts 'order-management,billing'"
             exit 0
             ;;
         *)
@@ -187,6 +205,191 @@ source "$SCRIPT_DIR/common.sh"
 REPO_ROOT=$(get_repo_root) || exit 1
 
 cd "$REPO_ROOT"
+
+# ---------------------------------------------------------------------------
+# MultiRepo: parse bounded-contexts.yaml and resolve slugs → repos
+# ---------------------------------------------------------------------------
+# Path to the project's bounded-contexts registry
+BOUNDED_CONTEXTS_FILE="$REPO_ROOT/docs/bounded-contexts.yaml"
+
+# Parse YAML using yq (preferred), python3 -c (fallback), or grep/awk (minimal)
+_yaml_parse_tool() {
+    if command -v yq >/dev/null 2>&1; then
+        echo "yq"
+    elif python3 -c "import yaml" 2>/dev/null; then
+        echo "python3"
+    else
+        echo "grep"
+    fi
+}
+
+# Resolve a single bounded context slug to its repository (org/repo).
+# Returns empty string if not found; prints warning to stderr.
+_resolve_bc_slug_to_repo() {
+    local slug="$1"
+    local bc_file="$2"
+    local tool
+    tool=$(_yaml_parse_tool)
+
+    case "$tool" in
+        yq)
+            yq e ".contexts[] | select(.slug == \"$slug\") | .repository" "$bc_file" 2>/dev/null | grep -v '^null$' | head -1
+            ;;
+        python3)
+            python3 - "$bc_file" "$slug" <<'PYEOF'
+import sys, yaml
+bc_file, slug = sys.argv[1], sys.argv[2]
+with open(bc_file) as f:
+    data = yaml.safe_load(f) or {}
+contexts = data.get("contexts") or []
+for ctx in contexts:
+    if isinstance(ctx, dict) and ctx.get("slug") == slug:
+        print(ctx.get("repository", ""))
+        break
+PYEOF
+            ;;
+        grep)
+            # Minimal fallback: assumes slug and repository appear in consecutive lines
+            awk -v slug="$slug" '
+                /slug:/ && $0 ~ "\"?" slug "\"?" { found=1; next }
+                found && /repository:/ { gsub(/.*repository:[[:space:]]*"?/, ""); gsub(/".*/, ""); print; exit }
+                found && /slug:/ { exit }
+            ' "$bc_file"
+            ;;
+    esac
+}
+
+# Check whether autonomous_ok is true for a slug.
+_bc_autonomous_ok() {
+    local slug="$1"
+    local bc_file="$2"
+    local tool
+    tool=$(_yaml_parse_tool)
+
+    case "$tool" in
+        yq)
+            yq e ".contexts[] | select(.slug == \"$slug\") | .autonomous_ok" "$bc_file" 2>/dev/null | grep -v '^null$' | head -1
+            ;;
+        python3)
+            python3 - "$bc_file" "$slug" <<'PYEOF'
+import sys, yaml
+bc_file, slug = sys.argv[1], sys.argv[2]
+with open(bc_file) as f:
+    data = yaml.safe_load(f) or {}
+contexts = data.get("contexts") or []
+for ctx in contexts:
+    if isinstance(ctx, dict) and ctx.get("slug") == slug:
+        print(str(ctx.get("autonomous_ok", True)).lower())
+        break
+PYEOF
+            ;;
+        grep)
+            # Best-effort; assumes autonomous_ok follows slug within a few lines
+            awk -v slug="$slug" '
+                /slug:/ && $0 ~ "\"?" slug "\"?" { found=1; next }
+                found && /autonomous_ok:/ { gsub(/.*autonomous_ok:[[:space:]]*/, ""); gsub(/"/, ""); print; exit }
+                found && /slug:/ { exit }
+            ' "$bc_file"
+            ;;
+    esac
+}
+
+# List all valid slugs from bounded-contexts.yaml
+_list_bc_slugs() {
+    local bc_file="$1"
+    local tool
+    tool=$(_yaml_parse_tool)
+
+    case "$tool" in
+        yq)
+            yq e ".contexts[].slug" "$bc_file" 2>/dev/null | grep -v '^null$'
+            ;;
+        python3)
+            python3 - "$bc_file" <<'PYEOF'
+import sys, yaml
+with open(sys.argv[1]) as f:
+    data = yaml.safe_load(f) or {}
+contexts = data.get("contexts") or []
+for ctx in contexts:
+    if isinstance(ctx, dict) and ctx.get("slug"):
+        print(ctx["slug"])
+PYEOF
+            ;;
+        grep)
+            grep -E '^\s+slug:' "$bc_file" | sed 's/.*slug:[[:space:]]*"*//; s/"*[[:space:]]*$//'
+            ;;
+    esac
+}
+
+# Resolve the --bounded-contexts input to parallel arrays of slugs and repos.
+# Sets RESOLVED_SLUGS_JSON and RESOLVED_REPOS_JSON (JSON arrays as strings).
+RESOLVED_SLUGS_JSON="[]"
+RESOLVED_REPOS_JSON="[]"
+
+if [ -n "$BOUNDED_CONTEXTS_INPUT" ]; then
+    if [ ! -f "$BOUNDED_CONTEXTS_FILE" ]; then
+        echo "Error: --bounded-contexts requires docs/bounded-contexts.yaml to exist." >&2
+        echo "       Create it first (see .specify/presets/.../templates/project-root/bounded-contexts.yaml)." >&2
+        exit 1
+    fi
+
+    if command -v yq >/dev/null 2>&1; then
+        true  # preferred tool available
+    elif python3 -c "import yaml" 2>/dev/null; then
+        echo "[specify] Info: yq not found — using python3 to parse bounded-contexts.yaml" >&2
+    else
+        echo "[specify] Warning: neither yq nor python3+yaml available. Using grep/awk fallback (limited)." >&2
+        echo "          Install yq (brew install yq / snap install yq) for reliable YAML parsing." >&2
+    fi
+
+    VALID_SLUGS=$(_list_bc_slugs "$BOUNDED_CONTEXTS_FILE")
+
+    resolved_slugs=()
+    resolved_repos=()
+
+    IFS=',' read -ra INPUT_SLUGS <<< "$BOUNDED_CONTEXTS_INPUT"
+    for raw_slug in "${INPUT_SLUGS[@]}"; do
+        slug=$(echo "$raw_slug" | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')
+        [ -z "$slug" ] && continue
+
+        repo=$(_resolve_bc_slug_to_repo "$slug" "$BOUNDED_CONTEXTS_FILE")
+
+        if [ -z "$repo" ]; then
+            echo "Error: bounded context slug '$slug' not found in docs/bounded-contexts.yaml." >&2
+            echo "       Valid slugs:" >&2
+            while IFS= read -r valid_slug; do
+                echo "         - $valid_slug" >&2
+            done <<< "$VALID_SLUGS"
+            exit 1
+        fi
+
+        resolved_slugs+=("$slug")
+        resolved_repos+=("$repo")
+    done
+
+    # Build JSON arrays
+    if command -v jq >/dev/null 2>&1; then
+        slugs_json=$(printf '%s\n' "${resolved_slugs[@]}" | jq -R . | jq -s .)
+        repos_json=$(printf '%s\n' "${resolved_repos[@]}" | jq -R . | jq -s .)
+    else
+        # Manual JSON array construction (no jq)
+        slugs_json="["
+        repos_json="["
+        first=true
+        for idx in "${!resolved_slugs[@]}"; do
+            $first || { slugs_json+=","; repos_json+=","; }
+            first=false
+            slugs_json+="\"${resolved_slugs[$idx]}\""
+            repos_json+="\"${resolved_repos[$idx]}\""
+        done
+        slugs_json+="]"
+        repos_json+="]"
+    fi
+
+    RESOLVED_SLUGS_JSON="$slugs_json"
+    RESOLVED_REPOS_JSON="$repos_json"
+fi
+# ---------------------------------------------------------------------------
 
 SPECS_DIR="$REPO_ROOT/specs"
 if [ "$DRY_RUN" != true ]; then
@@ -354,6 +557,23 @@ if [ "$DRY_RUN" != true ]; then
     # Persist to .specify/feature.json so downstream commands can find the feature
     _persist_feature_json "$REPO_ROOT" "$FEATURE_DIR"
 
+    # Merge bounded_contexts and repos into feature.json (MultiRepo support)
+    _fj="$REPO_ROOT/.specify/feature.json"
+    if command -v jq >/dev/null 2>&1; then
+        _fj_tmp=$(jq \
+            --argjson bc "$RESOLVED_SLUGS_JSON" \
+            --argjson repos "$RESOLVED_REPOS_JSON" \
+            '. + {bounded_contexts: $bc, repos: $repos}' \
+            "$_fj")
+        printf '%s\n' "$_fj_tmp" > "$_fj"
+    else
+        # Minimal fallback: insert fields before the closing brace
+        _existing=$(cat "$_fj")
+        _existing="${_existing%\}}"
+        printf '%s,"bounded_contexts":%s,"repos":%s}\n' \
+            "$_existing" "$RESOLVED_SLUGS_JSON" "$RESOLVED_REPOS_JSON" > "$_fj"
+    fi
+
     # Inform the user how to set feature state in their own shell
     printf '# To persist: export SPECIFY_FEATURE=%s\n' "$(shell_quote "$BRANCH_NAME")" >&2
     printf '#              export SPECIFY_FEATURE_DIRECTORY=%s\n' "$(shell_quote "$FEATURE_DIR")" >&2
@@ -366,25 +586,33 @@ if $JSON_MODE; then
                 --arg branch_name "$BRANCH_NAME" \
                 --arg spec_file "$SPEC_FILE" \
                 --arg feature_num "$FEATURE_NUM" \
-                '{BRANCH_NAME:$branch_name,SPEC_FILE:$spec_file,FEATURE_NUM:$feature_num,DRY_RUN:true}'
+                --argjson bc "$RESOLVED_SLUGS_JSON" \
+                --argjson repos "$RESOLVED_REPOS_JSON" \
+                '{BRANCH_NAME:$branch_name,SPEC_FILE:$spec_file,FEATURE_NUM:$feature_num,bounded_contexts:$bc,repos:$repos,DRY_RUN:true}'
         else
             jq -cn \
                 --arg branch_name "$BRANCH_NAME" \
                 --arg spec_file "$SPEC_FILE" \
                 --arg feature_num "$FEATURE_NUM" \
-                '{BRANCH_NAME:$branch_name,SPEC_FILE:$spec_file,FEATURE_NUM:$feature_num}'
+                --argjson bc "$RESOLVED_SLUGS_JSON" \
+                --argjson repos "$RESOLVED_REPOS_JSON" \
+                '{BRANCH_NAME:$branch_name,SPEC_FILE:$spec_file,FEATURE_NUM:$feature_num,bounded_contexts:$bc,repos:$repos}'
         fi
     else
         if [ "$DRY_RUN" = true ]; then
-            printf '{"BRANCH_NAME":"%s","SPEC_FILE":"%s","FEATURE_NUM":"%s","DRY_RUN":true}\n' "$(json_escape "$BRANCH_NAME")" "$(json_escape "$SPEC_FILE")" "$(json_escape "$FEATURE_NUM")"
+            printf '{"BRANCH_NAME":"%s","SPEC_FILE":"%s","FEATURE_NUM":"%s","bounded_contexts":%s,"repos":%s,"DRY_RUN":true}\n' "$(json_escape "$BRANCH_NAME")" "$(json_escape "$SPEC_FILE")" "$(json_escape "$FEATURE_NUM")" "$RESOLVED_SLUGS_JSON" "$RESOLVED_REPOS_JSON"
         else
-            printf '{"BRANCH_NAME":"%s","SPEC_FILE":"%s","FEATURE_NUM":"%s"}\n' "$(json_escape "$BRANCH_NAME")" "$(json_escape "$SPEC_FILE")" "$(json_escape "$FEATURE_NUM")"
+            printf '{"BRANCH_NAME":"%s","SPEC_FILE":"%s","FEATURE_NUM":"%s","bounded_contexts":%s,"repos":%s}\n' "$(json_escape "$BRANCH_NAME")" "$(json_escape "$SPEC_FILE")" "$(json_escape "$FEATURE_NUM")" "$RESOLVED_SLUGS_JSON" "$RESOLVED_REPOS_JSON"
         fi
     fi
 else
     echo "BRANCH_NAME: $BRANCH_NAME"
     echo "SPEC_FILE: $SPEC_FILE"
     echo "FEATURE_NUM: $FEATURE_NUM"
+    if [ "$RESOLVED_SLUGS_JSON" != "[]" ]; then
+        echo "BOUNDED_CONTEXTS: $RESOLVED_SLUGS_JSON"
+        echo "REPOS: $RESOLVED_REPOS_JSON"
+    fi
     if [ "$DRY_RUN" != true ]; then
         printf '# To persist in your shell: export SPECIFY_FEATURE=%s\n' "$(shell_quote "$BRANCH_NAME")"
         printf '#                           export SPECIFY_FEATURE_DIRECTORY=%s\n' "$(shell_quote "$FEATURE_DIR")"

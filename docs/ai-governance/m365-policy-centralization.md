@@ -53,10 +53,19 @@ Como não há controle universal por "número de linhas" no prompt:
 - Monitorar uso com auditoria e tratar violações como não-conformidade.
 - Restringir criação/publicação de agentes a grupos aprovados.
 
+## Evidência mínima para fechamento de issue operacional
+
+- Registrar no issue a **URL completa do SharePoint** onde a constituição foi publicada.
+- Anexar evidência da execução (print das telas ou checklist textual dos caminhos
+  administrativos alterados).
+- Declarar dependências bloqueadoras no issue antes de iniciar (quando houver).
+
 ## Checklist de implementação
 
 - [ ] Constituição publicada no SharePoint oficial
+- [ ] URL completa do SharePoint registrada no issue de execução
 - [ ] Caminho **Copilot > Settings > Data access > Agents** configurado para grupos específicos
 - [ ] Inventário em **Copilot > Agents** revisado e limpo
 - [ ] Agentes aprovados apontando para a política canônica
 - [ ] Regra anti-shadow-IT formalizada em engenharia e governança
+- [ ] Evidência anexada no issue (print ou checklist textual)
