@@ -21,7 +21,11 @@ ainda falta — principalmente nos **skills que orientam o agente**
 (`speckit-specify`, `speckit-taskstoissues`), que nunca foram atualizados para
 validar bounded context ou rotear/deduplicar tasks entre repos.
 
-**Total Tasks**: 20 tasks (13 já concluídas na verificação, 7 pendentes)
+**Atualização (2026-08-20, sessão de conclusão)**: As 7 tasks pendentes
+(T009–T013, T018–T020) foram implementadas nesta sessão — ver detalhes nas
+seções abaixo e no PR correspondente.
+
+**Total Tasks**: 20 tasks (20 concluídas)
 
 ---
 
@@ -57,8 +61,8 @@ slugs não cadastrados em vez de aceitar nome ad-hoc.
 existe em `docs/bounded-contexts.yaml` e confirmar que o agente sinaliza a
 divergência e propõe adicionar a entrada em vez de prosseguir silenciosamente.
 
-- [ ] T009 [US-AC2] Adicionar instrução em `.github/skills/speckit-specify/SKILL.md` para ler `docs/bounded-contexts.yaml` e validar o campo "Bounded Context" contra os slugs cadastrados antes de finalizar a spec
-- [ ] T010 [US-AC2] Adicionar instrução para, quando o slug não existir, o agente propor a adição de uma nova entrada (não usar nome ad-hoc silenciosamente) em `.github/skills/speckit-specify/SKILL.md`
+- [x] T009 [US-AC2] Adicionar instrução em `.github/skills/speckit-specify/SKILL.md` para ler `docs/bounded-contexts.yaml` e validar o campo "Bounded Context" contra os slugs cadastrados antes de finalizar a spec
+- [x] T010 [US-AC2] Adicionar instrução para, quando o slug não existir, o agente propor a adição de uma nova entrada (não usar nome ad-hoc silenciosamente) em `.github/skills/speckit-specify/SKILL.md`
 
 **Checkpoint**: `/speckit-specify` não aceita mais um Bounded Context não cadastrado sem alertar o Dev.
 
@@ -76,9 +80,9 @@ inacessível.
 repositório correto; rodar `/speckit-taskstoissues` novamente e confirmar que
 nenhuma issue é duplicada.
 
-- [ ] T011 [P] [US-AC7] Adicionar instrução em `.github/skills/speckit-taskstoissues/SKILL.md` para identificar o repositório de destino de cada task a partir da seção `[USN — slug]` e do `bounded_contexts`/`repos` em `feature.json`
-- [ ] T012 [US-AC8] Adicionar tratamento de erro isolado por repositório em `.github/skills/speckit-taskstoissues/SKILL.md`: se um repo estiver inacessível, reportar erro claro e continuar processando os demais, sem abortar tudo
-- [ ] T013 [US-AC9] Adicionar instrução de deduplicação por ID de task (`T00N`) em `.github/skills/speckit-taskstoissues/SKILL.md`, reaproveitando o padrão já usado para o repo único (reuse-catalog tag `speckit-deduplication-by-id`), estendido para múltiplos repos
+- [x] T011 [P] [US-AC7] Adicionar instrução em `.github/skills/speckit-taskstoissues/SKILL.md` para identificar o repositório de destino de cada task a partir da seção `[USN — slug]` e do `bounded_contexts`/`repos` em `feature.json`
+- [x] T012 [US-AC8] Adicionar tratamento de erro isolado por repositório em `.github/skills/speckit-taskstoissues/SKILL.md`: se um repo estiver inacessível, reportar erro claro e continuar processando os demais, sem abortar tudo
+- [x] T013 [US-AC9] Adicionar instrução de deduplicação por ID de task (`T00N`) em `.github/skills/speckit-taskstoissues/SKILL.md`, reaproveitando o padrão já usado para o repo único (reuse-catalog tag `speckit-deduplication-by-id`), estendido para múltiplos repos
 
 **Checkpoint**: `/speckit-taskstoissues` roteia e deduplica corretamente entre múltiplos repos.
 
@@ -90,9 +94,9 @@ nenhuma issue é duplicada.
 - [x] T015 [P] Implementar vinculação de repos ao Project V2 via GraphQL `linkProjectV2ToRepository` em `scripts/setup-github-project.sh`, lendo `docs/bounded-contexts.yaml` (AC-11)
 - [x] T016 Implementar idempotência da vinculação em `scripts/setup-github-project.sh` — não duplicar vínculo, imprimir "✓ já vinculado" (AC-12)
 - [x] T017 Implementar aviso (não abort) quando `bounded-contexts.yaml` está ausente em `scripts/setup-github-project.sh` (AC-13)
-- [ ] T018 [P] Corrigir o bug de resolução de `$GIT_ROOT` relatado na [issue #21](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/21) em `scripts/setup-github-project.sh` — hoje usa o diretório do script (`BASH_SOURCE`) em vez do diretório de chamada (`$PWD`) para localizar `docs/bounded-contexts.yaml`, causando vínculo incorreto quando o script é chamado por caminho absoluto de outro clone
-- [ ] T019 Validar manualmente os 15 ACs do `spec.md` contra a implementação atual (a maioria já implementada — ver notas de status acima) e registrar resultado em um `quickstart.md` para esta feature (hoje ausente)
-- [ ] T020 Adicionar teste unitário bash (`bats`) para a resolução de `--bounded-contexts` em `create-new-feature.sh` (candidato identificado no `plan.md`, AC-4/AC-6), cobrindo caso de slug válido e slug inválido
+- [x] T018 [P] Corrigir o bug de resolução de `$GIT_ROOT` relatado na [issue #21](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/21) em `scripts/setup-github-project.sh` — hoje usa o diretório do script (`BASH_SOURCE`) em vez do diretório de chamada (`$PWD`) para localizar `docs/bounded-contexts.yaml`, causando vínculo incorreto quando o script é chamado por caminho absoluto de outro clone
+- [x] T019 Validar manualmente os 15 ACs do `spec.md` contra a implementação atual (a maioria já implementada — ver notas de status acima) e registrar resultado em um `quickstart.md` para esta feature (hoje ausente)
+- [x] T020 Adicionar teste unitário bash (`bats`) para a resolução de `--bounded-contexts` em `create-new-feature.sh` (candidato identificado no `plan.md`, AC-4/AC-6), cobrindo caso de slug válido e slug inválido
 
 **Checkpoint**: gaps reais de comportamento do agente fechados; bug conhecido de resolução de path corrigido.
 
@@ -101,14 +105,14 @@ nenhuma issue é duplicada.
 ## Dependency Graph & Execution Order
 
 ```text
-Phase 1 (Setup) [T001–T003] — ✅ já concluído
+Phase 1 (Setup) [T001–T003] — ✅ concluído
   ↓
-Phase 2 (Foundational) [T004–T008] — ✅ já concluído
+Phase 2 (Foundational) [T004–T008] — ✅ concluído
   ↓
-  ├─→ Phase 3 (Validação de Bounded Context) [T009–T010] — pendente
-  ├─→ Phase 4 (Roteamento/Dedup Cross-Repo) [T011–T013] — pendente
+  ├─→ Phase 3 (Validação de Bounded Context) [T009–T010] — ✅ concluído
+  ├─→ Phase 4 (Roteamento/Dedup Cross-Repo) [T011–T013] — ✅ concluído
   ↓
-Phase 5 (Polish & Verificação) [T014–T020] — parcialmente pendente (T018–T020)
+Phase 5 (Polish & Verificação) [T014–T020] — ✅ concluído
 ```
 
 ## Parallel Opportunities
@@ -120,10 +124,10 @@ Phase 5 (Polish & Verificação) [T014–T020] — parcialmente pendente (T018�
 
 ### Escopo restante real (não repetir trabalho já feito)
 
-1. **Prioridade 1**: T009–T010 (validação de bounded context no `/speckit-specify`) — fecha o AC-2, hoje o gap mais visível para o Dev.
-2. **Prioridade 2**: T011–T013 (roteamento/dedup no `/speckit-taskstoissues`) — sem isso, a promessa central da feature (Tasks no repo certo) não é cumprida pelo agente, mesmo com os scripts prontos.
-3. **Prioridade 3**: T018 (bug já relatado na issue #21) — correção pontual, não bloqueia as demais.
-4. **Prioridade 4**: T019–T020 — validação e teste, fecham o ciclo de qualidade.
+1. **Prioridade 1**: T009–T010 (validação de bounded context no `/speckit-specify`) — fecha o AC-2, hoje o gap mais visível para o Dev. ✅ Concluído.
+2. **Prioridade 2**: T011–T013 (roteamento/dedup no `/speckit-taskstoissues`) — sem isso, a promessa central da feature (Tasks no repo certo) não é cumprida pelo agente, mesmo com os scripts prontos. ✅ Concluído.
+3. **Prioridade 3**: T018 (bug já relatado na issue #21) — correção pontual, não bloqueia as demais. ✅ Concluído.
+4. **Prioridade 4**: T019–T020 — validação e teste, fecham o ciclo de qualidade. ✅ Concluído — ver `quickstart.md` e `.specify/scripts/bash/tests/create-new-feature.bats` (4/4 testes passando).
 
 ### Validation Strategy
 

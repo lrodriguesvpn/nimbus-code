@@ -3,7 +3,7 @@
 feature: "006-multirepo-support"
 complexity: "S3"
 version: 1
-updated_at: "2026-08-18"
+updated_at: "2026-08-20"
 spec_ref: "specs/006-multirepo-support/spec.md"
 
 nodes:
@@ -41,6 +41,26 @@ nodes:
     type: "module"
     path: "docs/reuse-catalog.yaml"
     description: "Recebe entrada multirepo-bounded-context-routing ao fechar esta feature"
+
+  - id: "speckit-specify-skill"
+    type: "module"
+    path: ".github/skills/speckit-specify/SKILL.md"
+    description: "Instrui o agente a validar o campo 'Bounded Context' do header da spec contra os slugs de bounded-contexts.yaml e a propor nova entrada em vez de aceitar nome ad-hoc (AC-2)"
+
+  - id: "speckit-taskstoissues-skill"
+    type: "module"
+    path: ".github/skills/speckit-taskstoissues/SKILL.md"
+    description: "Instrui o agente a resolver o roteamento MultiRepo (feature.json + bounded-contexts.yaml + anotação [USN — slug] em tasks.md), criar/deduplicar Tasks por repositório de destino e isolar erros por repo (AC-3, AC-7, AC-8, AC-9)"
+
+  - id: "bounded-contexts-bats-tests"
+    type: "module"
+    path: ".specify/scripts/bash/tests/create-new-feature.bats"
+    description: "Testes unitários (bats-core) para a resolução de --bounded-contexts: slug válido, flag omitida, slug inválido e arquivo ausente (AC-4, AC-5, AC-6, AC-10)"
+
+  - id: "quickstart"
+    type: "module"
+    path: "specs/006-multirepo-support/quickstart.md"
+    description: "Checklist de validação manual E2E dos 15 ACs desta feature"
 
   - id: "ghe-api"
     type: "external"
@@ -112,6 +132,30 @@ edges:
     type: "async"
     protocol: "documentation reference"
     description: "Documenta como o setup vincula repos ao Project V2"
+
+  - src: "speckit-specify-skill"
+    dst: "bounded-contexts-yaml"
+    type: "sync"
+    protocol: "file read (agent instruction)"
+    description: "Agente lê os slugs registrados para validar o campo 'Bounded Context' do header da spec antes de finalizá-la (AC-2)"
+
+  - src: "speckit-taskstoissues-skill"
+    dst: "feature-json"
+    type: "sync"
+    protocol: "file read (agent instruction)"
+    description: "Agente lê bounded_contexts/repos para decidir se o roteamento MultiRepo se aplica (AC-10: ausente/vazio = comportamento single-repo)"
+
+  - src: "speckit-taskstoissues-skill"
+    dst: "bounded-contexts-yaml"
+    type: "sync"
+    protocol: "file read (agent instruction)"
+    description: "Agente resolve slug → {repository, autonomous_ok} para cada anotação [USN — slug] em tasks.md (AC-3, AC-7)"
+
+  - src: "bounded-contexts-bats-tests"
+    dst: "create-new-feature"
+    type: "sync"
+    protocol: "subprocess (bats run)"
+    description: "Testa a resolução de --bounded-contexts contra um projeto fixture isolado (AC-4, AC-5, AC-6, AC-10)"
 
 externals:
   - id: "ghe-graphql-api"
