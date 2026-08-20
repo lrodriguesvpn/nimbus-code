@@ -43,9 +43,9 @@ Cada issue de Task recebeu labels de `priority:*`, `complexity:*`, `type:*` e `a
 
 **Purpose**: Inicialização da estrutura de arquivos que a automação e os testes vão usar.
 
-- [ ] T001 Create directory skeleton `scripts/`, `tests/docs/`, `tests/scripts/`, `tests/workflows/` (adicionar `.gitkeep` onde necessário)
-- [ ] T002 [P] Scaffold `scripts/security-compliance-scan.sh` com parsing de argumentos (`--dry-run`, `--scope=pilot|org-wide`) e shellcheck limpo
-- [ ] T003 [P] Scaffold `.github/workflows/security-compliance-scan.yml` com triggers `schedule` (semanal) + `workflow_dispatch` e passo de verificação de secrets obrigatórios, per [contracts/weekly-scan-workflow-contract.md](./contracts/weekly-scan-workflow-contract.md)
+- [x] T001 Create directory skeleton `scripts/`, `tests/docs/`, `tests/scripts/`, `tests/workflows/` (adicionar `.gitkeep` onde necessário)
+- [x] T002 [P] Scaffold `scripts/security-compliance-scan.sh` com parsing de argumentos (`--dry-run`, `--scope=pilot|org-wide`) e shellcheck limpo
+- [x] T003 [P] Scaffold `.github/workflows/security-compliance-scan.yml` com triggers `schedule` (semanal) + `workflow_dispatch` e passo de verificação de secrets obrigatórios, per [contracts/weekly-scan-workflow-contract.md](./contracts/weekly-scan-workflow-contract.md)
 
 **Checkpoint**: esqueleto de arquivos existe antes de qualquer lógica ser implementada.
 
@@ -56,6 +56,8 @@ Cada issue de Task recebeu labels de `priority:*`, `complexity:*`, `type:*` e `a
 **Purpose**: Credencial e mecanismos centrais que TODAS as user stories dependem (descoberta de repos, autenticação, deduplicação de issue).
 
 **⚠️ CRITICAL**: Nenhuma user story pode ser considerada completa/testável de ponta a ponta sem esta fase.
+
+**Status desta sessão (MVP)**: T004 é manual (criação do GitHub App na organização) e permanece pendente — nenhum agente pode executá-la. Como consequência, T005 (configurar os secrets reais com as credenciais do App) também permanece pendente, pois depende diretamente de T004. T006–T010 foram implementados em código (a lógica de autenticação, descoberta, dedup de issue e resolução de flag funciona assim que os secrets existirem — ela falha explicitamente com `::error::` enquanto não existirem, sem simular autenticação).
 
 - [ ] T004 [Humano] Criar o GitHub App "Nimbus Code Security Auditor" na organização com permissões somente-leitura (`metadata:read`, `administration:read`, `secrets:read`, `contents:read`) e instalá-lo — ver ADR [0008](/docs/adr/0008-github-app-para-varredura-de-seguranca-org-wide.md)
 
@@ -109,11 +111,11 @@ Cada issue de Task recebeu labels de `priority:*`, `complexity:*`, `type:*` e `a
   ```
 
 - [ ] T005 Configurar `SECURITY_SCAN_APP_ID`, `SECURITY_SCAN_APP_PRIVATE_KEY`, `SECURITY_SCAN_APP_INSTALLATION_ID` como GitHub Secrets do repositório (depende de T004)
-- [ ] T006 [P] Implementar autenticação via JWT + installation access token do GitHub App em `scripts/security-compliance-scan.sh`, com falha explícita (`::error::`) se algum secret estiver ausente
-- [ ] T007 [P] Implementar descoberta paginada de repositórios (`gh api --paginate`) com backoff exponencial em rate limit (403/429) em `scripts/security-compliance-scan.sh`
-- [ ] T008 Criar as estruturas de dados de `Compliance Finding` (`id`, `repo`, `controle_id`, `status`, `timestamp`, `evidencia`) em `scripts/security-compliance-scan.sh`, conforme [data-model.md](./data-model.md) (depende de T002)
-- [ ] T009 [P] Implementar criação/atualização idempotente de Issue por `id` de finding (marcador `<!-- security-baseline-finding-id -->`) em `scripts/security-compliance-scan.sh`, reaproveitando o padrão `speckit-deduplication-by-id` (`docs/reuse-catalog.yaml`)
-- [ ] T010 [P] Implementar resolução do flag `security.baseline_scan.org_wide_enabled` via abstração OpenFeature (provider env/arquivo) em `scripts/security-compliance-scan.sh`
+- [x] T006 [P] Implementar autenticação via JWT + installation access token do GitHub App em `scripts/security-compliance-scan.sh`, com falha explícita (`::error::`) se algum secret estiver ausente
+- [x] T007 [P] Implementar descoberta paginada de repositórios (`gh api --paginate`) com backoff exponencial em rate limit (403/429) em `scripts/security-compliance-scan.sh`
+- [x] T008 Criar as estruturas de dados de `Compliance Finding` (`id`, `repo`, `controle_id`, `status`, `timestamp`, `evidencia`) em `scripts/security-compliance-scan.sh`, conforme [data-model.md](./data-model.md) (depende de T002)
+- [x] T009 [P] Implementar criação/atualização idempotente de Issue por `id` de finding (marcador `<!-- security-baseline-finding-id -->`) em `scripts/security-compliance-scan.sh`, reaproveitando o padrão `speckit-deduplication-by-id` (`docs/reuse-catalog.yaml`)
+- [x] T010 [P] Implementar resolução do flag `security.baseline_scan.org_wide_enabled` via abstração OpenFeature (provider env/arquivo) em `scripts/security-compliance-scan.sh`
 
 **Checkpoint**: credencial, descoberta de repos, deduplicação de issue e resolução de flag prontos — as user stories podem começar.
 
@@ -127,17 +129,17 @@ Cada issue de Task recebeu labels de `priority:*`, `complexity:*`, `type:*` e `a
 
 ### Tests for User Story 1
 
-- [ ] T011 [P] [US1] Escrever teste de integração `tests/docs/security-baseline-checklist.test.sh` validando a presença das seções 1 e 4 do [documentation-contract.md](./contracts/documentation-contract.md) (AC-1)
-- [ ] T012 [P] [US1] Escrever teste de integração `tests/scripts/security-compliance-scan.detect.test.sh` validando a detecção de branch protection, revisão obrigatória, permissões de Actions e existência de secrets contra repositórios fixture (AC-2)
+- [x] T011 [P] [US1] Escrever teste de integração `tests/docs/security-baseline-checklist.test.sh` validando a presença das seções 1 e 4 do [documentation-contract.md](./contracts/documentation-contract.md) (AC-1)
+- [x] T012 [P] [US1] Escrever teste de integração `tests/scripts/security-compliance-scan.detect.test.sh` validando a detecção de branch protection, revisão obrigatória, permissões de Actions e existência de secrets contra repositórios fixture (AC-2)
 
 ### Implementation for User Story 1
 
-- [ ] T013 [US1] Escrever `docs/security-baseline-ghe.md` — seções 1 (Baseline de Repositório de Projeto) e 4 (Padrão de Tokens e Secrets), conforme [documentation-contract.md](./contracts/documentation-contract.md)
-- [ ] T014 [P] [US1] Implementar avaliador do controle `branch-protection` em `scripts/security-compliance-scan.sh`
-- [ ] T015 [P] [US1] Implementar avaliador do controle `required-review` em `scripts/security-compliance-scan.sh`
-- [ ] T016 [P] [US1] Implementar avaliador do controle `actions-permissions` em `scripts/security-compliance-scan.sh`
-- [ ] T017 [P] [US1] Implementar avaliador do controle `secrets-configured` (apenas existência, nunca valores) em `scripts/security-compliance-scan.sh`
-- [ ] T018 [US1] Integrar os avaliadores de repositório ao loop principal de varredura, tratando o edge case "repositório sem permissões administrativas" (marcar como `repos_com_erro`, não falhar a execução) em `scripts/security-compliance-scan.sh` (depende de T014-T017)
+- [x] T013 [US1] Escrever `docs/security-baseline-ghe.md` — seções 1 (Baseline de Repositório de Projeto) e 4 (Padrão de Tokens e Secrets), conforme [documentation-contract.md](./contracts/documentation-contract.md)
+- [x] T014 [P] [US1] Implementar avaliador do controle `branch-protection` em `scripts/security-compliance-scan.sh`
+- [x] T015 [P] [US1] Implementar avaliador do controle `required-review` em `scripts/security-compliance-scan.sh`
+- [x] T016 [P] [US1] Implementar avaliador do controle `actions-permissions` em `scripts/security-compliance-scan.sh`
+- [x] T017 [P] [US1] Implementar avaliador do controle `secrets-configured` (apenas existência, nunca valores) em `scripts/security-compliance-scan.sh`
+- [x] T018 [US1] Integrar os avaliadores de repositório ao loop principal de varredura, tratando o edge case "repositório sem permissões administrativas" (marcar como `repos_com_erro`, não falhar a execução) em `scripts/security-compliance-scan.sh` (depende de T014-T017)
 
 **Checkpoint**: User Story 1 completa e testável de forma independente (MVP).
 
