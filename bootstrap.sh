@@ -113,6 +113,23 @@ else
 fi
 
 echo ""
+echo "→ Instalando GitHub Action de integração híbrida com DEVSTATS corporativo..."
+DEVSTATS_WORKFLOW_SRC="$LOCAL_PATH/templates/workflows/devstats-corporate-integration.yml"
+if [[ -f "$DEVSTATS_WORKFLOW_SRC" ]]; then
+  mkdir -p "$WORKDIR/.github/workflows"
+  cp "$DEVSTATS_WORKFLOW_SRC" "$WORKDIR/.github/workflows/devstats-corporate-integration.yml"
+  echo "  ✅ .github/workflows/devstats-corporate-integration.yml instalado."
+  echo "  ℹ Emite eventos semânticos de issue/PR + snapshot diário para reconciliação"
+  echo "    central no DEVSTATS. Requer padrão corporativo em nível de organização:"
+  echo "    Secret obrigatório DEVSTATS_TOKEN, Variable obrigatória DEVSTATS_ENDPOINT,"
+  echo "    Variables opcionais DEVSTATS_ENV/DEVSTATS_ENABLED e Secret opcional"
+  echo "    DEVSTATS_CLIENT_ID. Sem credencial/config obrigatória, o workflow falha"
+  echo "    explicitamente (observável)."
+else
+  echo "  ⚠ Template devstats-corporate-integration.yml não encontrado em $DEVSTATS_WORKFLOW_SRC"
+fi
+
+echo ""
 echo "ℹ Workflows OPT-IN (copie manualmente quando os pré-requisitos existirem):"
 echo "  • templates/workflows/add-to-pmo-project.yml — conecta este repo ao Portfólio"
 echo "    PMO (1x por organização, ver scripts/setup-pmo-org-project.sh)."

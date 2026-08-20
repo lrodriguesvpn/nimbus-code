@@ -1,5 +1,11 @@
 # Padrões de Plataforma/Cliente e Infraestrutura Legada
 
+> **TL;DR** (S0/S1 — leitura completa reservada para S2+ ou dúvida
+> específica): use o preset `nimbus-code-platform-standards` quando o
+> repositório representa o **ambiente real de um cliente/tenant** (contas
+> cloud, legado, M365/GWS, D365) — não um projeto de código. Ele adiciona
+> inventário de legado, registro de DB e discovery report ao ciclo SDD.
+
 Este documento detalha o preset
 [`nimbus-code-platform-standards`](../presets/nimbus-code-platform-standards) — o par
 complementar do [`nimbus-code-standards`](../presets/nimbus-code-standards) para
