@@ -107,14 +107,13 @@ houver homologações concorrentes.*
 - Regra de precedência entre frentes: [qual comportamento vence em conflito]
 - Evidência registrada no ADL: [link/âncora da decisão]
 
-## Nimbus-Code — Cost Reference (SPEC KIT COST)
+## Nimbus-Code — Cost Reference
 
 *Obrigatório para features com participação híbrida agente+humano. O objetivo é
 deixar explícito como estimativa e consumo real serão rastreados ao longo do ciclo.*
 
 | Campo | Valor |
 |---|---|
-| **SPEC KIT COST URL** | https://github.com/venha-pra-nuvem/spec-kit-cost |
 | **Token estimate range** | ~[X]–[Y] mil tokens (coerente com Classificação de Complexidade) |
 | **Human effort estimate range** | ~[X]–[Y] horas (quando houver execução/revisão humana) |
 | **Tracking method** | [ex.: tabela "Estimativa vs. Consumo Real" no tasks.md + campo "Horas Humanas" no GitHub Project] |

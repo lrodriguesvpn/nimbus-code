@@ -109,3 +109,14 @@
 - **Complexity Estimate**: This feature is **S3** — multiple modules (repo initialization, discovery API/CLI, compliance tooling, dashboard), integration across projects, governance-critical. Recommend reasoning-capable model for planning.
 - **Next Step**: Proceed to `/speckit-plan` to generate architecture, module graph, and detailed implementation strategy.
 
+## Update — Replanejamento de 2026-08-20 (retrofit ao contrato híbrido)
+
+- [x] Hybrid collaboration guidance is explicit (agent + human) — coberto pelo cabeçalho Nimbus-Code + ADL-004 (GitHub App para automações; humano segue obrigatório para gates S3 e revisão de PR)
+- [x] Cabeçalho Nimbus-Code (slug/complexidade/bounded context) retrofitado
+- [x] SLO table retrofitada (herdada de `impact-map.md`, já aprovada na Phase 1)
+- [x] Critérios de aceitação em formato `AC-N` (BDD) adicionados (AC-1 a AC-4), rastreando os cenários mais críticos já existentes nas User Stories — sem duplicar conteúdo
+- [x] Cost Reference block adicionado — **sem** a URL externa "SPEC KIT COST" (identificada como incorreta/fora da organização e removida do padrão em 2026-08-20); usa apenas mecanismos internos de rastreio de custo
+- [x] WEB context explicitly references Impeccable — N/A, VPN-SKILLS não é um projeto WEB (dashboard de descoberta é P3/escopo limitado em v1, sem indicação de ser o foco desta feature)
+- [x] Rollout/toggle context references OpenFeature abstraction — N/A, ADL-003 já decidiu estratégia `direct` sem feature flags para esta feature de governança
+- Ver `plan.md`, seção "Known Gaps", para o histórico completo desta revisão e das tasks de convergência (T114–T116) associadas.
+

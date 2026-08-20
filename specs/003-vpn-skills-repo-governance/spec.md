@@ -8,6 +8,82 @@
 
 **Input**: User description: Creation and governance of the VPN-SKILLS repository by organization; centralized remote skills management (without project copies); rigorous CI/CD, versioning, and evolution cycle control; reference of this repository in code/platform templates; bootstrap initialization to support the SPECKIT workflow in this new repository.
 
+> **Retrofit de contrato híbrido (2026-08-20)**: esta spec foi criada em 2026-08-12,
+> antes de `specs/005-hybrid-agent-human-dev/` tornar obrigatório o cabeçalho
+> Nimbus-Code, os critérios de aceitação em formato `AC-N` (BDD) e o bloco de
+> Cost Reference. Os blocos abaixo foram retrofitados durante a revisão de
+> convergência/replanejamento desta feature — ver `plan.md`, seção "Known Gaps",
+> item 2 (agora resolvido).
+
+## Nimbus-Code — Cabeçalho Obrigatório da Spec
+
+| Campo | Valor |
+|---|---|
+| **Feature slug** | `vpn-skills-repo-governance` |
+| **Complexidade estimada** | S3 |
+| **Bounded Context** | Developer Experience & Governance (skill distribution) |
+| **PR de referência / Issue** | novo |
+| **Data alvo de entrega** | sem data |
+
+> S0 = doc · S1 = função isolada · S2 = módulo · S3 = múltiplos módulos ·
+> S4 = arquitetura, segurança, dados ou integração crítica
+
+## Nimbus-Code — SLO Alvo desta Feature
+
+| Componente | Latência p99 (ms) | Taxa de erro máx. (%) | Disponibilidade alvo | RTO | RPO |
+|---|---|---|---|---|---|
+| API de descoberta de skills (`GET /skills`, cacheado) | 1000 | 1,0% | 99,5% | 30 min | 24 h |
+| API de descoberta de skills (não cacheado) | 3000 | 1,0% | 99,5% | 30 min | 24 h |
+| Compliance report generator (10+ projetos) | 60000 | 2,0% | 99,0% | 1 h | 24 h |
+
+> Valores herdados de `impact-map.md` (Gate 3 — SLO Targets Feasible), já
+> aprovados na Phase 1 desta feature.
+
+## Nimbus-Code — Critérios de Aceitação (formato BDD)
+
+*Os critérios abaixo formalizam, em BDD, os cenários de aceitação mais críticos
+já detalhados nos Acceptance Scenarios de cada User Story abaixo — não
+duplicam o conteúdo, apenas o tornam rastreável por ID único.*
+
+> **AC-1**
+> **Given** o repositório VPN-SKILLS inicializado com o template padrão
+> **When** o workflow de inicialização rodar
+> **Then** `constitution.md`, pasta `ADR/` com ao menos um ADR fundacional, `.specify/` configurado e `.github/workflows/` com CI/CD existem
+> **Test ref:** `test_AC1_repo_governance_scaffold` (US1)
+
+> **AC-2**
+> **Given** um bootstrap template referenciando o VPN-SKILLS remotamente
+> **When** o processo de bootstrap rodar num projeto novo
+> **Then** a ferramenta de descoberta consegue listar skills disponíveis, versões, prerequisites e timestamp de última atualização, sem copiar arquivos localmente
+> **Test ref:** `test_AC2_remote_skill_discovery_no_copy` (US2)
+
+> **AC-3**
+> **Given** uma nova versão de skill publicada com breaking change
+> **When** o workflow de release rodar
+> **Then** uma tag semver é criada, release notes são geradas automaticamente, e projetos pinados na versão anterior continuam funcionando sem alteração
+> **Test ref:** `test_AC3_semver_release_backward_compat` (US3)
+
+> **AC-4**
+> **Given** uma automação (API, CLI ou compliance report generator) precisando acessar repositórios/organização no GitHub
+> **When** a automação executar
+> **Then** ela autentica via token de instalação do GitHub App organizacional (server-to-server) ou via OAuth do mesmo App (login humano no dashboard) — nunca via PAT clássico
+> **Test ref:** `test_AC4_github_app_auth` (ADL-004, ver plan.md)
+
+## Nimbus-Code — Cost Reference
+
+| Campo | Valor |
+|---|---|
+| **Estimativa de tokens (agente)** | ~18–24 mil (Phase 0+1, já consumidos) — ver `plan.md`, seção "Escala de Complexidade S3" |
+| **Estimativa de horas (humano)** | A definir em `tasks.md` por task, seguindo `docs/cost-profiles-and-rates.md` |
+| **Metodologia de rastreio** | `docs/ai-code-quality-and-observability.md`, seção 6 (estimativa vs. consumo real) |
+
+> Nota: uma versão anterior deste retrofit referenciava um "SPEC KIT COST"
+> como projeto GitHub público externo — essa referência foi identificada como
+> incorreta (repositório não pertence à organização) e removida do padrão em
+> 2026-08-20 (ver `scripts/normalize-github-issues.sh` e
+> `.github/ISSUE_TEMPLATE/nimbus-code-task.md`). O rastreio de custo desta
+> feature usa exclusivamente os mecanismos internos acima.
+
 ---
 
 ## User Scenarios & Testing *(mandatory)*

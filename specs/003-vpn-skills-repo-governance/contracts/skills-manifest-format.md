@@ -310,7 +310,7 @@ project/
    ```bash
    git commit -m "Update VPN skills to 2.1.3
    
-   See release notes: https://github.com/org/vpn-skills/releases/tag/v2.1.3
+   See release notes: https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/vpn-skills/releases/tag/v2.1.3
    Fixes: #123, #456"
    ```
 

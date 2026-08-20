@@ -18,7 +18,7 @@ This guide provides end-to-end test scenarios that validate each user story of t
 
 ```bash
 # 1. Clone VPN-SKILLS repository
-git clone https://github.com/org/vpn-skills.git
+git clone https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/vpn-skills.git
 cd vpn-skills
 
 # 2. Install CLI (if not already installed)
@@ -195,7 +195,7 @@ External Dependencies:
 
 Tags: vpn, networking, security
 
-Documentation: https://github.com/org/vpn-skills/tree/main/docs/vpn-client-setup
+Documentation: https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/vpn-skills/tree/main/docs/vpn-client-setup
 ```
 
 **Verification**:
@@ -227,7 +227,7 @@ Version 2.1.2 (2026-08-01)
 Version 2.0.5 (2026-06-15)
   Status: active (supported)
   Breaking Change: yes
-  Migration Guide: https://github.com/org/vpn-skills/tree/main/docs/migrations/2.0-to-2.1.md
+  Migration Guide: https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/vpn-skills/tree/main/docs/migrations/2.0-to-2.1.md
 ```
 
 **Verification**:
@@ -499,7 +499,7 @@ Findings:
     Status: Deprecated (expires 2026-12-31)
     Environment: prod
     Action: Upgrade to v2.1.3 or later
-    Migration Guide: https://github.com/org/vpn-skills/tree/main/docs/migrations/2.0-to-2.1.md
+    Migration Guide: https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/vpn-skills/tree/main/docs/migrations/2.0-to-2.1.md
 ```
 
 **Verification**:

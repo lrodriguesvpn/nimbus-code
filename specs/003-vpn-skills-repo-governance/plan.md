@@ -71,18 +71,25 @@ The VPN-SKILLS system comprises 5 primary components:
 
 ### External Dependencies
 
-- **GitHub Enterprise**: Repository hosting, Actions for CI/CD
+- **GitHub Enterprise** (`venha-pra-nuvem.ghe.com`): Repository hosting, Actions para CI/CD —
+  **exclusivamente** este domínio para todo conteúdo próprio da Venha Pra Nuvem; nenhuma URL
+  `github.com` público é aceitável aqui (ver `specs/006-bootstrap-governance-hardening/`, FR-007).
+- **GitHub App organizacional** (`venha-pra-nuvem`): identidade de autenticação única para
+  automações server-to-server e login humano no dashboard — ver ADL-004. Substitui qualquer
+  necessidade de PAT clássico ou esquemas de auth ad-hoc por integração.
+- **Spec Kit CLI**: única exceção deliberada à regra acima — obtido sempre da fonte oficial
+  pública do GitHub (`github.com/github/spec-kit`), por ser a ferramenta open source mantida
+  publicamente pelo GitHub (ver `specs/006-bootstrap-governance-hardening/`, FR-006).
 - **Package registry** (optional): If skills are distributed as packages (npm, pip, Maven)
 - **OpenFeature SDK** (if using feature flags for compliance/discovery tooling)
-- **Speckit CLI**: For feature planning workflow in VPN-SKILLS repo itself
 
 ### Technology Choices
 
 - **Language**: YAML/JSON for metadata, Bash/Python/Go for CLI tooling (multi-platform)
-- **API Framework**: REST (OpenAPI 3.0 specification)
+- **API Framework**: REST (OpenAPI 3.0 specification) com autenticação via GitHub App (ADL-004)
 - **Release Automation**: GitHub Actions + semantic-release (Node.js based) or similar
 - **Testing**: Standard unit + integration tests per skill; end-to-end tests for CLI/API
-- **Documentation**: Markdown (GitHub Pages or similar)
+- **Documentation**: Markdown (GitHub Pages, hospedado dentro do GHE da organização)
 
 ---
 
@@ -94,7 +101,10 @@ The VPN-SKILLS system comprises 5 primary components:
 
 1. **Segurança e Dados**
    - No secrets in repo: ✅ Enforced via .gitignore, GitHub Actions secrets management
-   - SSO requirement: N/A (VPN-SKILLS is a code/artifact repository, not a service with users; no authentication needed for public discovery)
+   - SSO requirement: ✅ Não se aplica SSO tradicional (não é um sistema com login/senha próprio), mas o
+     dashboard de descoberta E a API têm, sim, autenticação — via GitHub App organizacional (user-to-server
+     OAuth para humanos, installation token para automações). A afirmação anterior ("no authentication
+     needed") estava incorreta e foi corrigida — ver ADL-004.
    - Database logging: N/A (no persistent datastore in v1)
 
 2. **Infraestrutura como Código**
@@ -117,17 +127,22 @@ The VPN-SKILLS system comprises 5 primary components:
 
 ---
 
-## Quality Gates — Status Before Planning
+## Quality Gates — Status (atualizado após revisão de convergência com specs/006)
+
+> **Nota de revisão (2026-08-20)**: esta tabela estava desatualizada — dizia "PENDING" para
+> itens que a seção "Phase 1 Completion Status" (mais abaixo, já existente) mostra como
+> completos desde a fase de design. Corrigida abaixo para refletir o estado real, e revisada
+> contra as decisões de `specs/006-bootstrap-governance-hardening/` (GitHub App, domínio GHE).
 
 | Gate | Status | Notes |
 |------|--------|-------|
 | **Specification Quality** | ✅ PASS | All acceptance scenarios, requirements, and success criteria defined |
-| **Requirement Traceability** | ⏳ PENDING | Will be filled during Phase 1 (AC → test mapping) |
-| **Module Dependency Graph** | ⏳ PENDING | Will be generated in Phase 1 |
-| **Impact Map (S3)** | ⏳ PENDING | Will be generated in Phase 1 |
-| **Security & DevSecOps** | ⏳ PENDING | Will be filled during Phase 1 |
-| **SLO Gate** | ⏳ PENDING | Will define SLOs for API and dashboard endpoints |
-| **Release Strategy** | ⏳ PENDING | Will be defined during Phase 1 |
+| **Requirement Traceability** | ✅ PASS | AC → test mapping presente em `quickstart.md` |
+| **Module Dependency Graph** | ✅ PASS | `graph.yaml` + `graph.md` completos; edges de autenticação unificados sob GitHub App (ADL-004) |
+| **Impact Map (S3)** | ✅ PASS | `impact-map.md` completo; itens de auth reconciliados com ADL-004 |
+| **Security & DevSecOps** | ✅ PASS (com ressalva) | Estratégia de auth unificada via ADL-004; **pendente**: alinhar `spec.md`/`tasks.md` desta feature ao contrato híbrido obrigatório introduzido por `specs/005-hybrid-agent-human-dev/` (cabeçalho Nimbus-Code, AC-N formal, tabela de SLO, Cost Reference) — ver "Known Gaps" abaixo |
+| **SLO Gate** | ✅ PASS | SLOs definidos em `impact-map.md` (API <1s cached, <3s uncached; 99.5% uptime) |
+| **Release Strategy** | ✅ PASS | ADL-003 (`direct` strategy, sem feature flag) |
 
 ---
 
@@ -181,6 +196,61 @@ The VPN-SKILLS system comprises 5 primary components:
 - Governance changes (e.g., new compliance rules) take effect immediately, as intended.
 
 **Rollback Plan**: If a skill version introduces critical issues, it is marked deprecated, and projects are notified via compliance report; they upgrade to previous version or skip broken version.
+
+---
+
+### ADL-004: Authentication Strategy — GitHub App (organizacional) em vez de PAT ou esquemas ad-hoc
+
+**Status**: Decided (2026-08-20, revisão de convergência)
+
+**Contexto**: A versão anterior deste plano deixava a estratégia de autenticação indefinida e
+inconsistente — o Gate 4 afirmava "auth strategy defined", mas `graph.yaml` misturava 5
+mecanismos diferentes (`github-token`, `api-key`, `git-token`, `webhook-token`, `oauth2`) sem
+critério único, `contracts/api-openapi.yaml` declarava um `bearerAuth`/JWT genérico não
+relacionado a nenhum deles, e `tasks.md` (T095) tratava a camada de auth como "optional for
+v1, placeholder". Nenhum desses artefatos referenciava PAT nem GitHub App explicitamente de
+forma coerente.
+
+**Decision**: Toda comunicação que envolva acesso a repositórios/organização no GitHub
+(API → Repositório, CLI → Repositório, login humano no dashboard de descoberta) usa um único
+**GitHub App instalado a nível de organização** (`venha-pra-nuvem`):
+- **Automações server-to-server** (API, CLI, compliance report generator lendo/escrevendo em
+  repositórios ou fazendo scanning cross-repo): token de instalação de curta duração, emitido
+  dinamicamente por execução — nunca um PAT clássico de longa duração vinculado a uma pessoa.
+- **Login humano no dashboard de descoberta**: fluxo user-to-server OAuth do mesmo GitHub App
+  (não é um provider OAuth genérico de terceiros).
+- **Chamadas puramente internas ao próprio serviço VPN-SKILLS** (ex.: CLI → API do próprio
+  VPN-SKILLS): permanecem com API key de serviço — esse tráfego não é acesso a GitHub e,
+  portanto, está fora do escopo desta política (mas continua exigindo segredo em cofre, nunca
+  hardcoded).
+
+**Rationale**: Alinha esta feature com a política definida em
+`specs/006-bootstrap-governance-hardening/spec.md` (FR-004/FR-005/AC-4/AC-5), decidida com o
+Dev para eliminar PAT clássico de qualquer automação de escopo organizacional/cross-repo em
+toda a Nimbus-Code — VPN-SKILLS é exatamente esse tipo de automação (o compliance report
+generator precisa ler manifestos e status de 10+ projetos em repositórios distintos).
+
+**Alternatives Considered**:
+- PAT clássico dedicado ao serviço: rejeitado — vinculado a uma identidade, sem expiração,
+  sem escopo fino; era o problema original que motivou a spec 006.
+- Fine-grained PAT de conta de serviço: mais seguro que PAT clássico, mas ainda é uma
+  identidade "humana/bot" com rotação manual — GitHub App resolve isso de forma superior
+  (rotação automática do token de instalação, escopo por repositório/permissão).
+- Esquemas ad-hoc por integração (a situação anterior — `github-token`, `git-token`,
+  `webhook-token`, `oauth2` misturados): rejeitado — gera superfície de auditoria fragmentada
+  e nenhuma garantia de consistência entre os componentes do próprio VPN-SKILLS.
+
+**Implications**:
+- `graph.yaml`: edges `vpn-skills-api → vpn-skills-repo-core`,
+  `vpn-skills-cli → vpn-skills-repo-core` e `vpn-skills-discovery-dashboard → vpn-skills-api`
+  atualizados para `github-app-installation-token` / `github-app-user-oauth` respectivamente.
+- `contracts/api-openapi.yaml`: security scheme substituído de `bearerAuth` (JWT genérico) por
+  `githubAppInstallationToken` (server-to-server) e `githubAppUserOAuth` (dashboard).
+- `impact-map.md`: critérios de Gate 4 e checklist de produção atualizados para citar
+  explicitamente GitHub App em vez de "API keys or OAuth" genéricos.
+- `tasks.md` (T095 e correlatas): precisam ser revisadas numa próxima passagem de
+  `/speckit-tasks` ou `/speckit-converge` para deixar de tratar a camada de auth como
+  "optional/placeholder" — está definida e é obrigatória.
 
 ---
 
@@ -322,10 +392,57 @@ Will document:
    - Compliance report generation: Scheduled or on-demand? (Recommended: Scheduled)
    - Deprecation grace period: 30, 60, or 90 days? (Recommended: 60 days)
 
-3. **Ready for Task Generation**
-   - Once gates approved, run `/speckit-tasks` to generate implementation tasks
-   - Tasks will be dependency-ordered and effort-estimated
-   - Phase 2 implementation can begin immediately after task approval
+3. **`tasks.md` Already Generated — Ready for Implementation**
+   - `tasks.md` already exists (113 original tasks + 3 convergence tasks T114–T116, T115/T116 now resolved)
+   - Once gates approved, run `/speckit-implement` to begin Phase 2 implementation
+   - T114 (GitHub App auth middleware) should be prioritized early given ADL-004
+
+---
+
+## Known Gaps (registrados na revisão de convergência de 2026-08-20, atualizados no replanejamento de 2026-08-20)
+
+*Esta seção documenta lacunas identificadas ao comparar este plano com as decisões de
+`specs/008-bootstrap-governance-hardening/` (renumerada de `006` após colisão com
+`specs/006-multirepo-support`, publicada por outra sessão — ver nota de renumeração
+naquela spec). As correções de URL (GHE) e de estratégia de autenticação (ADL-004)
+já foram aplicadas na primeira revisão. Status atualizado abaixo:*
+
+1. **`tasks.md` já existe mas não reflete o ADL-004** — **ainda em aberto**: um
+   `tasks.md` foi gerado anteriormente (113 tasks) antes da aprovação formal dos
+   gates recomendada na seção "Next Steps" acima. A task T095 trata a camada de
+   autenticação como "optional for v1, placeholder" — isso está desatualizado; a
+   autenticação via GitHub App é obrigatória e definida (ADL-004). **Já existe uma
+   task de convergência (T114, `## Phase 8: Convergence` em `tasks.md`) cobrindo
+   exatamente esta substituição** — não requer nova ação de planejamento, apenas
+   `/speckit-implement` executar T114 quando a fase de implementação começar.
+2. **Contrato híbrido obrigatório (feature 005) não aplicado a esta spec** — **✅
+   RESOLVIDO nesta revisão (2026-08-20)**: `spec.md` foi retrofitado com o
+   cabeçalho Nimbus-Code (slug/complexidade/bounded context), tabela de SLO,
+   critérios de aceitação em formato `AC-N` (4 ACs formalizando os cenários mais
+   críticos já existentes nas User Stories) e bloco de Cost Reference. A task
+   T115 (`## Phase 8: Convergence`) que pedia esse retrofit pode ser marcada
+   como concluída em `tasks.md`. **Nota**: o retrofit do Cost Reference
+   deliberadamente **não** reintroduziu a URL externa "SPEC KIT COST" — essa
+   referência foi identificada como incorreta (repositório não pertence à
+   organização) e removida do padrão da Nimbus-Code em 2026-08-20; o rastreio de
+   custo desta feature usa apenas os mecanismos internos já existentes
+   (`docs/cost-profiles-and-rates.md`, `docs/ai-code-quality-and-observability.md`).
+3. **Topologia multi-repo não conectada à consolidação de board** — **esclarecido
+   nesta revisão**: `graph.yaml` referencia `vpn-skills-infrastructure` como
+   dependência externa (repositório companheiro). O padrão correto para esse
+   cenário (repo central + repo(s) de serviço/infraestrutura correlatos, com
+   board consolidado) é agora **formalmente especificado em
+   `specs/006-multirepo-support/`** (15 ACs detalhados: `bounded-contexts.yaml`,
+   roteamento de Tasks via `/speckit-taskstoissues`, vínculo cross-repo via
+   `setup-github-project.sh`) — publicada por outra sessão em paralelo e
+   descoberta durante este replanejamento. **Ação restante**: se/quando
+   `vpn-skills-infrastructure` for de fato criado como repositório separado,
+   aplicar o modelo de `006-multirepo-support` a ele (declarar como bounded
+   context correlato no `bounded-contexts.yaml` do VPN-SKILLS) — tratado como
+   tarefa incremental fora do escopo desta feature, não bloqueia `tasks.md` atual
+   porque T116 (`## Phase 8: Convergence`) já cobre "documentar e decidir" esse
+   modelo; T116 pode agora apontar diretamente para `006-multirepo-support` em
+   vez de reinventar o padrão.
 
 ---
 
