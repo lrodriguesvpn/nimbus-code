@@ -579,16 +579,19 @@ PYEOF
     REPOS_FAILED=0
 
     while IFS= read -r _REPO_FULL; do
+        _REPO_FULL="${_REPO_FULL%$'\r'}"
         [[ -z "$_REPO_FULL" ]] && continue
         _REPO_OWNER_SVC="${_REPO_FULL%%/*}"
         _REPO_NAME_SVC="${_REPO_FULL##*/}"
 
-        # Get repo node ID
-        _REPO_NODE_ID=$(GH_HOST="$GH_HOST" gh api graphql \
+        # Get repo node ID (guarded with `|| true`: a repo not found or
+        # inaccessible must not abort the whole script under set -e/pipefail —
+        # errors are isolated per-repo per the function's own contract above)
+        _REPO_NODE_ID=$( { GH_HOST="$GH_HOST" gh api graphql \
             -f owner="$_REPO_OWNER_SVC" -f name="$_REPO_NAME_SVC" -f query='
         query($owner:String!, $name:String!) {
           repository(owner: $owner, name: $name) { id }
-        }' 2>/dev/null | jq -r '.data.repository.id // empty')
+        }' 2>/dev/null || true; } | jq -r '.data.repository.id // empty')
 
         if [[ -z "$_REPO_NODE_ID" ]]; then
             echo -e "${YELLOW}  ⚠ Repo não encontrado ou sem acesso: ${_REPO_FULL} — pulando${NC}"

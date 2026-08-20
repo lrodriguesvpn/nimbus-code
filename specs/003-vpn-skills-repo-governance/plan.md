@@ -150,7 +150,19 @@ The VPN-SKILLS system comprises 5 primary components:
 
 ### ADL-001: Central Repository vs. Distributed Skills
 
-**Status**: Decided
+**Status**: Decided — **Executado em 2026-08-20**
+
+**Execução**: Repositório próprio criado em
+**[venha-pra-nuvem/vpn-skills](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/vpn-skills)**
+(privado, branch `main` protegida — PR obrigatório + 1 revisão). Histórico do
+subdiretório `vpn-skills/` (implementação completa das 113 tasks) extraído via
+`git subtree split -P vpn-skills` a partir da branch `copilot/controle-de-custos`
+e publicado como `main` do novo repositório, preservando o commit original.
+Labels (taxonomia Nimbus-Code) e GitHub Project V2 aplicados via
+`scripts/setup-github-labels.sh`/`scripts/setup-github-project.sh` deste
+template. Bounded context registrado em `docs/bounded-contexts.yaml`
+(slug `vpn-skills`). Ver `tasks.md` desta feature para o pointer de status
+completo — não duplicado aqui.
 
 **Decision**: VPN-SKILLS will be a **monorepo** containing all skills, versioned together, with release automation.
 
