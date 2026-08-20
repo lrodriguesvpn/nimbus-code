@@ -134,7 +134,7 @@ External Dependencies:
 
 Tags: vpn, networking, security
 
-Documentation: https://github.com/org/vpn-skills/tree/main/docs/vpn-client-setup
+Documentation: https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/vpn-skills/tree/main/docs/vpn-client-setup
 ```
 
 ---
@@ -178,7 +178,7 @@ Version 2.1.2 (2026-08-01)
 Version 2.0.5 (2026-06-15)
   Status: active (supported)
   Breaking Change: yes
-  Migration Guide: https://github.com/org/vpn-skills/tree/main/docs/migrations/2.0-to-2.1.md
+  Migration Guide: https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/vpn-skills/tree/main/docs/migrations/2.0-to-2.1.md
 ```
 
 ---
@@ -252,7 +252,7 @@ Compliance Score: 66%
 
 Warnings:
   1. vpn-advanced-setup v2.5.0 is deprecated. Upgrade to 3.0.0 or later.
-     Migration guide: https://github.com/org/vpn-skills/tree/main/docs/migrations/2.5-to-3.0.md
+     Migration guide: https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/vpn-skills/tree/main/docs/migrations/2.5-to-3.0.md
 
 Exit code: 0 (or 1 if --fail-on-deprecated)
 ```
@@ -325,7 +325,7 @@ Findings:
     Status: Deprecated (expires 2026-10-12)
     Environment: prod
     Action: Upgrade to v3.0.0 or later within 60 days
-    Guide: https://github.com/org/vpn-skills/tree/main/docs/migrations/2.5-to-3.0.md
+    Guide: https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/vpn-skills/tree/main/docs/migrations/2.5-to-3.0.md
 
 No critical errors. Compliance within acceptable parameters.
 ```

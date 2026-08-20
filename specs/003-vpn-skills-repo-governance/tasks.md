@@ -245,6 +245,16 @@ This tasks.md outlines the implementation plan for the VPN-SKILLS feature, organ
 
 ---
 
+## Phase 8: Convergence
+
+**Purpose**: Fechar lacunas encontradas na revisão de convergência de 2026-08-20 entre spec.md/plan.md/tasks.md e as decisões de `specs/006-bootstrap-governance-hardening/` (nota: renumeração pendente — ver achado de colisão de números reportado separadamente).
+
+- [ ] T114 Replace the placeholder authentication layer with a real GitHub App-based middleware (installation token for server-to-server calls, user-to-server OAuth for the discovery dashboard) in `vpn-skills/src/api/middleware/auth.ts`, superseding the "optional for v1, placeholder" framing in T095 per plan.md ADL-004 (contradicts)
+- [ ] T115 Retrofit `spec.md` to the mandatory Nimbus-Code hybrid contract (Cabeçalho Obrigatório table, BDD `AC-N` acceptance criteria block, SLO table, Cost Reference/SPEC KIT COST block) introduced by `specs/005-hybrid-agent-human-dev/` per Constitution — Qualidade e Processo (missing)
+- [ ] T116 Document and decide the multi-repo board consolidation model for the `vpn-skills-infrastructure` companion repository referenced in `graph.yaml` (issues consolidated into the VPN-SKILLS Project V2, analogous to the Frontend/Backend → Produto pattern) per plan.md Known Gaps #3 (missing)
+
+---
+
 ## Dependency Graph & Execution Order
 
 ```

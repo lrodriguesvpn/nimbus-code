@@ -128,6 +128,34 @@ def has_format_issues(sections: dict, body: str) -> bool:
 def canonical(text: str) -> str:
     return re.sub(r"\s+", " ", (text or "").strip()).lower()
 
+def get_section(sections: dict, *names: str):
+    """Look up a section by any of its known spelling variants (accents, aliases)."""
+    for name in names:
+        value = sections.get(name)
+        if value:
+            return value
+    return None
+
+def extract_inline_field(text: str, field: str):
+    """Extract an inline bold field like '**Responsável**: Agente' embedded inside a section body."""
+    if not text:
+        return None
+    match = re.search(rf"\*\*{re.escape(field)}\*\*:\s*(.+)", text)
+    return match.group(1).strip() if match else None
+
+def strip_inline_field(text: str, field: str) -> str:
+    """Remove an inline bold field line from a section body, leaving the rest intact."""
+    if not text:
+        return text
+    return re.sub(rf"\n?\*\*{re.escape(field)}\*\*:\s*.+\n?", "\n", text).strip()
+
+def strip_spec_kit_cost_line(text: str) -> str:
+    """Remove only the SPEC KIT COST reference line, preserving any other reference lines."""
+    if not text:
+        return text
+    lines = [line for line in text.splitlines() if "spec-kit-cost" not in line.lower()]
+    return "\n".join(lines).strip()
+
 def has_generic_content(sections: dict) -> bool:
     if canonical(sections.get("Resultado Esperado", "")) == canonical(GENERIC_RESULT):
         return True
@@ -135,7 +163,16 @@ def has_generic_content(sections: dict) -> bool:
         return True
     if canonical(sections.get("Passos Operacionais", "")) == canonical(GENERIC_STEPS):
         return True
-    if "spec-kit-cost" in (sections.get("Referência", "") or "").lower():
+    if "spec-kit-cost" in (get_section(sections, "Referência", "Referencia") or "").lower():
+        return True
+    # Section headers present under a non-accented/alias spelling (e.g. "Referencia",
+    # "Descrição" without the task's own "Objetivo") mean the contract isn't actually
+    # satisfied yet, even though `all(sections.get(name) ...)` would miss this.
+    if sections.get("Escopo") and "Escopo" not in required_sections:
+        return True
+    if (sections.get("Descrição") or sections.get("Descricao")) and not sections.get("Objetivo"):
+        return True
+    if sections.get("Referencia") and not sections.get("Referência"):
         return True
     return False
 
@@ -156,25 +193,55 @@ def strip_text(text: str):
     # Remove leading/trailing whitespace from each line and overall
     return "\n".join(line.rstrip() for line in text.splitlines()).strip()
 
-context = sections.get("Contexto") or strip_text(body.strip()) or "Descreva aqui o contexto."
+context = sections.get("Contexto")
+if not context:
+    # When there's no explicit "## Contexto", prefer a short, non-duplicated context
+    # over dumping the raw body (which would repeat "Descrição"/"Referência" verbatim
+    # and duplicate content already placed into Objetivo/Referência below).
+    descricao_preview = sections.get("Descrição") or sections.get("Descricao")
+    feature_match = re.search(r"Feature:\s*(\S+)", body)
+    if descricao_preview and feature_match:
+        context = f"Task técnica derivada de {feature_match.group(1)} (ver Referência)."
+    else:
+        context = strip_text(body.strip()) or "Descreva aqui o contexto."
+context = strip_inline_field(context, "Responsável")
+context = strip_inline_field(context, "Priority")
+context = strip_inline_field(context, "User Story")
+
+# Preserve "## Escopo" (Epic-level issues) instead of discarding it — fold it into Contexto.
+escopo = sections.get("Escopo")
+if escopo and canonical(escopo) not in canonical(context):
+    context = f"{context}\n\n**Escopo**:\n{escopo}"
+
+descricao = sections.get("Descrição") or sections.get("Descricao")
+if descricao:
+    descricao = strip_inline_field(descricao, "Responsável")
+    descricao = strip_inline_field(descricao, "User Story")
+
 objective = sections.get("Objetivo")
 if not objective:
-    cleaned_title = re.sub(r"^\[[^\]]+\]\s*", "", title).strip()
-    objective = cleaned_title
+    # T-level task issues carry the actual action under "## Descrição" — reuse it
+    # verbatim instead of falling back to a generic title-derived objective.
+    objective = descricao or re.sub(r"^\[[^\]]+\]\s*", "", title).strip()
 
 result = sections.get("Resultado Esperado")
 if not result or canonical(result) == canonical(GENERIC_RESULT):
-    # Try to synthesize from context and objective if not explicitly provided
+    # Try to synthesize from context and objective if not explicitly provided.
+    # NOTE: "has_workflow" must require actual M365/SharePoint co-occurrence — a bare
+    # "workflow" match also fires on unrelated strings like ".github/workflows/*.yml",
+    # which would otherwise mislabel any CI/CD task as M365 SharePoint sync.
     has_m365 = any(keyword.lower() in body.lower() for keyword in ["m365", "sharepoint", "copilot"])
-    has_workflow = any(keyword.lower() in body.lower() for keyword in ["workflow", "automação", "pipeline"])
+    has_workflow = has_m365 and any(keyword.lower() in body.lower() for keyword in ["workflow", "automação", "pipeline"])
     has_manual = any(keyword.lower() in body.lower() for keyword in ["danilo", "manual", "configuração"])
-    
+
     if has_m365 and has_manual:
         result = "Configurações M365 Copilot aplicadas conforme documentação, com evidências e URL final de publicação no SharePoint registrada."
     elif has_workflow:
         result = "Workflow de sincronização da constituição M365 para SharePoint implementado, parametrizado e com rastreabilidade de execução."
     elif has_m365:
         result = "Operação de governança M365/SharePoint concluída conforme escopo definido e validada com evidências."
+    elif objective and objective != title:
+        result = f"\"{objective.splitlines()[0].strip()}\" implementado, testado e validado conforme os critérios de aceite da feature de origem."
     else:
         result = "Entregável atualizado para o novo contrato híbrido, com instruções claras para execução humana e acompanhamento por agente."
 
@@ -201,11 +268,18 @@ deps = sections.get("Dependências") or sections.get("Dependência") or "Nenhuma
 
 responsavel = sections.get("Responsável")
 if not responsavel:
-    human_only = any(keyword.lower() in body.lower() for keyword in ["danilo", "sharepoint", "copilot"]) or "type:incident" in " ".join(labels)
-    if human_only:
-        responsavel = "Agente: não\nHumano: sim"
+    # T-level task issues carry this as an inline bold field, not its own heading.
+    inline_responsavel = extract_inline_field(descricao or body, "Responsável")
+    if inline_responsavel:
+        is_agente = "agente" in inline_responsavel.lower()
+        is_humano = "humano" in inline_responsavel.lower()
+        responsavel = f"Agente: {'sim' if is_agente else 'não'}\nHumano: {'sim' if is_humano or not is_agente else 'não'}"
     else:
-        responsavel = "Agente: sim\nHumano: sim"
+        human_only = any(keyword.lower() in body.lower() for keyword in ["danilo", "sharepoint", "copilot"]) or "type:incident" in " ".join(labels)
+        if human_only:
+            responsavel = "Agente: não\nHumano: sim"
+        else:
+            responsavel = "Agente: sim\nHumano: sim"
 
 estimate = sections.get("Estimativa de Esforço")
 if not estimate:
@@ -216,8 +290,13 @@ if not estimate:
     else:
         estimate = "- Tokens (agente): ~1–3 mil\n- Horas (humano): ~1–2 horas"
 
-reference = sections.get("Referência")
-if not reference or "spec-kit-cost" in reference.lower():
+reference = get_section(sections, "Referência", "Referencia")
+if reference:
+    reference = strip_spec_kit_cost_line(reference)
+    inline_user_story = extract_inline_field(descricao or body, "User Story")
+    if inline_user_story and inline_user_story.lower() not in reference.lower():
+        reference = f"{reference}\n- User Story: {inline_user_story}"
+if not reference:
     if "specs/005-hybrid-agent-human-dev" in body:
         reference = "- AC-ID: N/A\n- Feature: specs/005-hybrid-agent-human-dev"
     elif any(keyword.lower() in body.lower() for keyword in ["docs/ai-governance", "m365"]):

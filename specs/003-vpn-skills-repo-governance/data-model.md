@@ -84,7 +84,7 @@ externalDependencies:
 | `tag` | string | Yes | Git tag | `v2.1.3` |
 | `deprecationDate` | timestamp | If deprecated | ISO-8601 or null | `2026-10-12T00:00:00Z` |
 | `deprecationReason` | string | If deprecated | 1–500 chars | `Superseded by VPN 3.0 with native multi-cloud support` |
-| `deprecationNotice` | string | If deprecated | Markdown link | `https://github.com/org/vpn-skills/releases/tag/v2.1.3` |
+| `deprecationNotice` | string | If deprecated | Markdown link | `https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/vpn-skills/releases/tag/v2.1.3` |
 
 **Validation Rules**:
 

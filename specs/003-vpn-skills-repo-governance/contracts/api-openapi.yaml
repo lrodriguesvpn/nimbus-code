@@ -9,7 +9,7 @@ info:
   version: "1.0.0"
   contact:
     name: "VPN Skills Team"
-    url: "https://github.com/org/vpn-skills"
+    url: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/vpn-skills"
 
 servers:
   - url: "https://vpn-skills.org/api/v1"
@@ -606,10 +606,28 @@ components:
               format: "date-time"
 
   securitySchemes:
-    bearerAuth:
+    githubAppInstallationToken:
       type: "http"
       scheme: "bearer"
-      bearerFormat: "JWT"
+      bearerFormat: "opaque"
+      description: >
+        Token de instalação de curta duração emitido pelo GitHub App organizacional
+        (venha-pra-nuvem), usado por automações server-to-server (bootstrap, CI/CD,
+        compliance report generator) para acessar repositórios/organização. Ver
+        ADL-004 neste plan.md e specs/006-bootstrap-governance-hardening/spec.md
+        (FR-004) para a política completa. Nunca um PAT clássico.
+    githubAppUserOAuth:
+      type: "oauth2"
+      description: >
+        Fluxo user-to-server OAuth do mesmo GitHub App organizacional, usado
+        exclusivamente pelo dashboard de descoberta (login humano). Não é um
+        provider OAuth genérico/terceiro.
+      flows:
+        authorizationCode:
+          authorizationUrl: "https://venha-pra-nuvem.ghe.com/login/oauth/authorize"
+          tokenUrl: "https://venha-pra-nuvem.ghe.com/login/oauth/access_token"
+          scopes:
+            read:org: "Ler associação e times da organização"
 
 security:
-  - bearerAuth: []
+  - githubAppInstallationToken: []

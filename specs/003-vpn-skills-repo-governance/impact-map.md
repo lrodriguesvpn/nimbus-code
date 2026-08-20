@@ -195,7 +195,7 @@ Project uses vpn-client-setup v2.0.5 (deprecated 2026-08-01, grace period 60 day
 #### Gate 4: Compliance and Security Checks
 **Criteria**:
 - [ ] No secrets in spec, plan, or manifests
-- [ ] Authentication strategy documented (GitHub App for API → Repo access)
+- [ ] Authentication strategy documented — GitHub App organizacional para escopo cross-repo/org (API → Repo, CLI → Repo, dashboard login); `GITHUB_TOKEN` nativo apenas para automações restritas ao próprio repositório VPN-SKILLS. Ver ADL-004 e specs/006-bootstrap-governance-hardening/spec.md (FR-004/FR-005).
 - [ ] Network policies defined (ingress, egress, internal only for DB/cache)
 - [ ] RBAC for skill publishing defined
 - [ ] Data retention policy for compliance reports defined (30+ days)
@@ -501,7 +501,7 @@ Project-level audit
 - [ ] **Security**
   - [ ] Network policies deployed (K8s NetworkPolicy)
   - [ ] SSL/TLS certificates provisioned (auto-renewal configured)
-  - [ ] API authentication (API keys or OAuth) working
+  - [ ] API authentication working — token de instalação de GitHub App (server-to-server) e user-to-server OAuth do mesmo App (dashboard); nenhum PAT clássico. Ver ADL-004.
   - [ ] Secrets management (HashiCorp Vault) set up
   
 - [ ] **Disaster Recovery**

@@ -169,15 +169,15 @@ dependencies:
     ttl: "3600s"
     priority: "high"
     
-  # API → Repository
+  # API → Repository (escopo cross-repo/org — GitHub App, ver ADL-004 e specs/006-bootstrap-governance-hardening)
   - from: "vpn-skills-api"
     to: "vpn-skills-repo-core"
     protocol: "https"
     pattern: "request-response"
-    authentication: "github-token"
+    authentication: "github-app-installation-token"
     priority: "high"
     
-  # CLI → API
+  # CLI → API (chamada interna ao próprio serviço VPN-SKILLS, não é acesso a GitHub — fora do escopo da política GitHub App/GITHUB_TOKEN)
   - from: "vpn-skills-cli"
     to: "vpn-skills-api"
     protocol: "https"
@@ -186,12 +186,12 @@ dependencies:
     authentication: "api-key"
     priority: "high"
     
-  # CLI → Repository
+  # CLI → Repository (escopo cross-repo/org — GitHub App, ver ADL-004 e specs/006-bootstrap-governance-hardening)
   - from: "vpn-skills-cli"
     to: "vpn-skills-repo-core"
     protocol: "https"
     pattern: "request-response"
-    authentication: "git-token"
+    authentication: "github-app-installation-token"
     priority: "high"
     
   # Compliance Engine → API
@@ -242,12 +242,12 @@ dependencies:
     authentication: "api-key"
     priority: "medium"
     
-  # Dashboard → API
+  # Dashboard → API (login humano via o mesmo GitHub App org-level, fluxo user-to-server OAuth — ver ADL-004)
   - from: "vpn-skills-discovery-dashboard"
     to: "vpn-skills-api"
     protocol: "https"
     pattern: "rest"
-    authentication: "oauth2"
+    authentication: "github-app-user-oauth"
     priority: "high"
     
   # Dashboard → Cache (for frontend optimization)
@@ -315,18 +315,18 @@ integrations:
   - name: "project-bootstrap-template"
     type: "git-submodule"
     description: "Reference to skills.yaml schema in project templates"
-    repository: "https://github.com/org/nimbus-code-spec-kit-template"
+    repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
     path: "templates/skills.yaml"
     
   - name: "github-actions-workflow"
     type: "github-actions"
     description: "Reusable workflow for skills validation in CI/CD"
-    repository: "https://github.com/org/vpn-skills"
+    repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/vpn-skills"
     workflow: ".github/workflows/validate.yml"
     
   - name: "terraform-modules"
     type: "git-submodule"
     description: "IaC modules for deploying VPN-SKILLS infrastructure"
-    repository: "https://github.com/org/vpn-skills-infrastructure"
+    repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/vpn-skills-infrastructure"
     path: "terraform/modules"
 
