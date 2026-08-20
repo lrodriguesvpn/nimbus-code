@@ -90,7 +90,7 @@ You **MUST** consider the user input before proceeding (if not empty).
      - Dependências (ou "Nenhuma")
      - Responsável (Agente/Humano)
      - Estimativa de Esforço (tokens/horas)
-     - Referência (AC-ID, feature, SPEC KIT COST quando aplicável)
+     - Referência (AC-ID, feature)
    - Clear file paths for each task
    - Dependencies section showing story completion order
    - Parallel execution examples per story
@@ -212,7 +212,7 @@ Every task MUST strictly follow this format:
    - Any task marked for human execution must be understandable without opening plan/spec.
    - Add operational steps that are explicit enough for a new developer in the team.
    - Always include dependency and responsibility clarity (`Agente: sim/não`, `Humano: sim/não`).
-   - If the feature uses hybrid governance, include SPEC KIT COST URL in references.
+   - If the feature uses hybrid governance, ensure references trace back to the AC-ID and feature path (no external cost-tracking URL).
 
 ### Phase Structure
 

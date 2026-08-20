@@ -103,7 +103,6 @@ git config --get remote.origin.url
    ## Referência
    - AC-ID: AC-N
    - Feature: specs/<feature-slug>
-   - SPEC KIT COST: https://github.com/venha-pra-nuvem/spec-kit-cost
    ```
 
    If the task does not have an explicit AC or feature link, keep those fields as `N/A` instead of omitting them.

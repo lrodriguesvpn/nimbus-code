@@ -67,7 +67,7 @@ You **MUST** consider the user input before proceeding (if not empty).
    - For S3/S4 features, also generate impact-map.md
    - Re-evaluate Constitution Check post-design
    - Ensure plan explicitly documents OpenFeature as toggle abstraction when rollout/flag is used
-   - Ensure plan includes SPEC KIT COST reference block for hybrid agent+human delivery
+   - Ensure plan includes a Cost Reference block (token/hour estimates + internal tracking method) for hybrid agent+human delivery
 
 ## Mandatory Post-Execution Hooks
 
@@ -163,7 +163,7 @@ Command ends after Phase 1 design. Report branch, IMPL_PLAN path, and generated 
 - ERROR on gate failures or unresolved clarifications
 - Do not leave graph artifacts as TODO when the feature is S3/S4; generate them in the same run
 - If toggle/rollout is present, `Flag provider` must be declared with OpenFeature abstraction
-- If the feature is hybrid (agent+human), include SPEC KIT COST URL in plan artifacts
+- If the feature is hybrid (agent+human), include the internal Cost Reference block (not an external URL) in plan artifacts
 
 ## Done When
 
