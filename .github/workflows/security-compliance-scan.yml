@@ -1,0 +1,91 @@
+name: Varredura semanal de conformidade de segurança
+
+# Varre periodicamente os repositórios da organização (escopo piloto ou
+# org-wide, conforme o flag de rollout) em busca de não conformidades com o
+# baseline de segurança documentado em docs/security-baseline-ghe.md (branch
+# protection, revisão obrigatória de PR, permissões de GitHub Actions e
+# existência de secrets configurados). NUNCA corrige nada automaticamente —
+# apenas detecta e reporta, criando/atualizando Issues idempotentes por
+# repositório (ver specs/007-controle-seguranca-ghe-projetos-plataforma/
+# contracts/finding-schema.md e contracts/weekly-scan-workflow-contract.md).
+#
+# MVP (Setup + Foundational + User Story 1 — esta versão): avalia apenas os 4
+# controles de repositório de projeto listados acima. A avaliação da matriz
+# de permissões do Projeto Plataforma (User Story 2) e a agregação do
+# relatório mensal (User Story 3) ficam para sessões futuras.
+#
+# Pré-requisitos (3 secrets — GitHub App dedicado, ver ADR-0008):
+#   - SECURITY_SCAN_APP_ID
+#   - SECURITY_SCAN_APP_PRIVATE_KEY
+#   - SECURITY_SCAN_APP_INSTALLATION_ID
+# O GitHub App "Nimbus Code Security Auditor" precisa ser criado manualmente
+# na organização e instalado ANTES de configurar os secrets acima (task T004,
+# manual — ver docs/adr/0008-github-app-para-varredura-de-seguranca-org-wide.md
+# e specs/007-controle-seguranca-ghe-projetos-plataforma/quickstart.md).
+# Sem esses secrets, este workflow falha explicitamente (não silenciosamente).
+#
+# Rollout: por padrão roda em --scope=pilot (bounded context
+# spec-kit-workflow, ver docs/bounded-contexts.yaml). A expansão para
+# --scope=org-wide (100% dos repositórios da organização) é um gate S4 que
+# exige aprovação humana obrigatória (task T038 do tasks.md desta feature) —
+# não alterar o default deste workflow sem essa aprovação registrada.
+
+on:
+  schedule:
+    - cron: "0 13 * * 1" # toda segunda-feira, 10h BRT
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: "Escopo da varredura"
+        required: false
+        default: "pilot"
+        type: choice
+        options:
+          - pilot
+          - org-wide
+      dry_run:
+        description: "Rodar em modo dry-run (não cria/atualiza issues)"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar secrets obrigatórios
+        run: |
+          if [ -z "${{ secrets.SECURITY_SCAN_APP_ID }}" ]; then
+            echo "::error::Secret SECURITY_SCAN_APP_ID não configurado. Crie o GitHub App \"Nimbus Code Security Auditor\" (ver docs/adr/0008-github-app-para-varredura-de-seguranca-org-wide.md, task T004) e configure o secret em Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+          if [ -z "${{ secrets.SECURITY_SCAN_APP_PRIVATE_KEY }}" ]; then
+            echo "::error::Secret SECURITY_SCAN_APP_PRIVATE_KEY não configurado. Gere a chave privada (.pem) do GitHub App e configure-a como secret (nunca em texto plano no repositório)."
+            exit 1
+          fi
+          if [ -z "${{ secrets.SECURITY_SCAN_APP_INSTALLATION_ID }}" ]; then
+            echo "::error::Secret SECURITY_SCAN_APP_INSTALLATION_ID não configurado. Instale o GitHub App na organização e configure o Installation ID exibido na página do App."
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Rodar varredura de conformidade de segurança
+        env:
+          GH_HOST: venha-pra-nuvem.ghe.com
+          SECURITY_SCAN_APP_ID: ${{ secrets.SECURITY_SCAN_APP_ID }}
+          SECURITY_SCAN_APP_PRIVATE_KEY: ${{ secrets.SECURITY_SCAN_APP_PRIVATE_KEY }}
+          SECURITY_SCAN_APP_INSTALLATION_ID: ${{ secrets.SECURITY_SCAN_APP_INSTALLATION_ID }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          SCOPE_INPUT: ${{ github.event.inputs.scope }}
+          DRY_RUN_INPUT: ${{ github.event.inputs.dry_run }}
+        run: |
+          ARGS=("--scope=${SCOPE_INPUT:-pilot}")
+          if [ "${DRY_RUN_INPUT}" = "true" ]; then
+            ARGS+=("--dry-run")
+          fi
+          bash scripts/security-compliance-scan.sh "${ARGS[@]}"
