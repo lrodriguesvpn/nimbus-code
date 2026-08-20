@@ -5,7 +5,9 @@ usage() {
   cat <<'EOF'
 Usage: scripts/normalize-github-issues.sh [--repo owner/repo] [--issue NUMBER] [--all] [--dry-run]
 
-Normalizes GitHub issue bodies to the Nimbus-Code hybrid task contract.
+Normalizes GitHub issue bodies to the Nimbus-Code hybrid task contract and
+reconciles mandatory Task labels (`priority:*`, `complexity:*`, `type:task`,
+`agent:*`) when the issue title matches `T00N`.
 If --issue is omitted, open issues are normalized.
 EOF
 }
@@ -337,6 +339,97 @@ print(normalized)
 PY
 }
 
+reconcile_task_labels() {
+  local issue_json="$1"
+  python3 - "$issue_json" <<'PY'
+import json
+import re
+import sys
+
+issue = json.loads(sys.argv[1])
+title = issue.get("title") or ""
+body = (issue.get("body") or "").replace("\\r\\n", "\n").replace("\\n", "\n")
+labels = []
+for label in issue.get("labels", []):
+    if isinstance(label, dict):
+        labels.append(label.get("name", ""))
+    else:
+        labels.append(str(label))
+
+if not re.search(r"\bT\d{3}\b", title):
+    print(json.dumps({"add": [], "remove": []}))
+    sys.exit(0)
+
+text = f"{title}\n{body}".lower()
+
+def find_family(prefix):
+    return next((label for label in labels if label.startswith(prefix)), None)
+
+def infer_priority():
+    if "p0-blocker" in text or re.search(r"\bpriority:\s*p0\b", text):
+        return "priority:P0-blocker"
+    match = re.search(r"\bpriority:\s*p([123])\b", text)
+    if match:
+        return {
+            "1": "priority:P1-high",
+            "2": "priority:P2-medium",
+            "3": "priority:P3-low",
+        }[match.group(1)]
+    return "priority:P2-medium"
+
+def infer_complexity():
+    if any(keyword in text for keyword in [
+        "github app", "security", "org-wide", "organization", "organização",
+        "permission", "permiss", "oauth", "credential", "secret",
+        "branch protection", "administra", "governança"
+    ]):
+        return "complexity:S4"
+    if any(keyword in text for keyword in [
+        "cross-repo", "multi-repo", "graphql", "project v2", "sub-issue",
+        "workflow orchestration", "integração", "integration", "board"
+    ]):
+        return "complexity:S3"
+    if any(keyword in text for keyword in [
+        "database", "migration", "endpoint", "schema", "api ", " api",
+        "workflow", ".yml", ".yaml", ".json", ".ts", ".go", ".py", ".sh"
+    ]):
+        return "complexity:S2"
+    if any(keyword in text for keyword in [
+        "document", "documentar", "guia", "guide", "quickstart", "readme",
+        "checklist", ".md", "cenário", "cenario", "validar"
+    ]):
+        return "complexity:S0"
+    return "complexity:S1"
+
+def infer_agent():
+    if any(keyword in text for keyword in [
+        "[humano]", "humano", "manual", "github app", "security", "org-wide",
+        "organization settings", "permiss", "oauth", "credential", "secret"
+    ]):
+        return "agent:needs-human"
+    return "agent:autonomous-ok"
+
+desired = {
+    "priority:": infer_priority(),
+    "complexity:": infer_complexity(),
+    "type:": "type:task",
+    "agent:": infer_agent(),
+}
+
+to_add = []
+to_remove = []
+for family, wanted in desired.items():
+    current = find_family(family)
+    if current == wanted:
+        continue
+    if current:
+        to_remove.append(current)
+    to_add.append(wanted)
+
+print(json.dumps({"add": to_add, "remove": to_remove}))
+PY
+}
+
 issue_jsons=()
 if [[ -n "$issue_number" ]]; then
   issue_jsons+=("$(gh issue view "$issue_number" --repo "$repo" --json number,title,body,labels)")
@@ -359,20 +452,32 @@ for issue_json in "${issue_jsons[@]}"; do
   issue_number_current="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["number"])' "$issue_json")"
   title_current="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["title"])' "$issue_json")"
   normalized_body="$(normalize_one "$issue_json")"
+  label_plan="$(reconcile_task_labels "$issue_json")"
+  labels_to_add="$(python3 -c 'import json,sys; print(",".join(json.loads(sys.argv[1])["add"]))' "$label_plan")"
+  labels_to_remove="$(python3 -c 'import json,sys; print(",".join(json.loads(sys.argv[1])["remove"]))' "$label_plan")"
 
-  if [[ "$normalized_body" == "UNCHANGED" ]]; then
+  if [[ "$normalized_body" == "UNCHANGED" && -z "$labels_to_add" && -z "$labels_to_remove" ]]; then
     echo "Issue #$issue_number_current already uses the new format, skipping."
     continue
   fi
 
   if [[ "$dry_run" == true ]]; then
     echo "Would update issue #$issue_number_current: $title_current"
+    [[ -n "$labels_to_add" ]] && echo "  add labels: $labels_to_add"
+    [[ -n "$labels_to_remove" ]] && echo "  remove labels: $labels_to_remove"
     continue
   fi
 
-  tmp_file="$(mktemp)"
-  printf '%s\n' "$normalized_body" > "$tmp_file"
-  gh issue edit "$issue_number_current" --repo "$repo" --body-file "$tmp_file" >/dev/null
-  rm -f "$tmp_file"
+  edit_args=(gh issue edit "$issue_number_current" --repo "$repo")
+  tmp_file=""
+  if [[ "$normalized_body" != "UNCHANGED" ]]; then
+    tmp_file="$(mktemp)"
+    printf '%s\n' "$normalized_body" > "$tmp_file"
+    edit_args+=(--body-file "$tmp_file")
+  fi
+  [[ -n "$labels_to_add" ]] && edit_args+=(--add-label "$labels_to_add")
+  [[ -n "$labels_to_remove" ]] && edit_args+=(--remove-label "$labels_to_remove")
+  "${edit_args[@]}" >/dev/null
+  [[ -n "$tmp_file" ]] && rm -f "$tmp_file"
   echo "Updated issue #$issue_number_current: $title_current"
 done
