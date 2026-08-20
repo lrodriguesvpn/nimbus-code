@@ -23,10 +23,67 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Verificar suporte a Dependency Review
+        id: support
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEPENDENCY_GRAPH_SBOM_URL: ${{ github.api_url }}/repos/${{ github.repository }}/dependency-graph/sbom
+        run: |
+          set -euo pipefail
+
+          HTTP_CODE="$(
+            curl -sS \
+              -u "x-access-token:${GH_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              -o /tmp/dependency-graph-sbom.json \
+              -w "%{http_code}" \
+              "${DEPENDENCY_GRAPH_SBOM_URL}"
+          )"
+
+          if [[ "${HTTP_CODE}" =~ ^20[02]$ ]]; then
+            echo "supported=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          MESSAGE="$(
+            python3 - <<'PY'
+            import json
+            from pathlib import Path
+
+            path = Path("/tmp/dependency-graph-sbom.json")
+            if not path.exists():
+                print("Dependency Graph/SBOM endpoint indisponível.")
+                raise SystemExit
+
+            try:
+                data = json.loads(path.read_text())
+            except json.JSONDecodeError:
+                print("Dependency Graph/SBOM endpoint retornou uma resposta não-JSON.")
+                raise SystemExit
+
+            print(data.get("message", "Dependency Graph/SBOM endpoint indisponível."))
+            PY
+          )"
+
+          echo "supported=false" >> "$GITHUB_OUTPUT"
+          {
+            echo "### ⚠️ Dependency Review ignorado"
+            echo
+            echo "O endpoint de Dependency Graph/SBOM não está disponível para este repositório."
+            echo "Status HTTP: ${HTTP_CODE}"
+            echo
+            echo "> ${MESSAGE}"
+            echo
+            echo "Habilite **Dependency Graph** e **GitHub Advanced Security** para ativar este gate."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice::Dependency Review ignorado: ${MESSAGE} (HTTP ${HTTP_CODE})."
+
       - name: Checkout
+        if: steps.support.outputs.supported == 'true'
         uses: actions/checkout@v4
 
       - name: Dependency Review
+        if: steps.support.outputs.supported == 'true'
         uses: actions/dependency-review-action@v4
         with:
           # Bloqueia dependências com severidade High ou Critical
