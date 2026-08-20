@@ -3,6 +3,19 @@
 **Feature de origem**: [specs/003-vpn-skills-repo-governance/](./spec.md)
 **Status**: Guia operacional — a ser seguido pelo Dev antes/durante o início da implementação (`/speckit-implement`)
 
+> **Atualização (2026-08-20)**: o cenário deste guia (bootstrap de um repositório
+> vazio seguido de implementação task-a-task via `/speckit-implement`) **não foi
+> o caminho realmente seguido**. Uma implementação completa das 113 tasks já
+> existia numa branch órfã (`copilot/controle-de-custos`, nunca proposta como
+> PR) deste template. Em vez de reimplementar do zero, essa implementação foi
+> **extraída** (histórico preservado via `git subtree split`) diretamente para
+> **[venha-pra-nuvem/vpn-skills](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/vpn-skills)**,
+> com labels/Project V2 aplicados via os scripts deste template e proteção de
+> branch `main` configurada. Este guia permanece válido como referência para os
+> passos 2–4 (bootstrap Nimbus Code, decisão de GitHub App, CODEOWNERS/branch
+> protection) que ainda **não foram executados** no repositório novo — ver
+> `tasks.md` desta feature para o status consolidado.
+
 ## Por que este guia existe
 
 O `tasks.md` desta feature (113 tasks + 3 de convergência) assume que o repositório

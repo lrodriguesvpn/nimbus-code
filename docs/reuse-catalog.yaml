@@ -69,6 +69,27 @@ entries:
     reuse_count: 0
 
 
+  - tag: "subtree-extraction-to-standalone-repo"
+    bounded_context: "spec-kit-workflow"
+    description: >
+      Padrão para migrar uma implementação já existente dentro de uma subpasta
+      deste template (ex.: código desenvolvido numa branch órfã nunca proposta
+      como PR) para um repositório próprio, preservando histórico via
+      `git subtree split -P <subpasta> -b <branch>` + push para `main` do repo
+      novo (fallback: `git filter-repo --path <subpasta> --path-rename
+      <subpasta>/:` se disponível no ambiente). Inclui: criação do repo via
+      `gh repo create`, proteção de branch `main` (PR obrigatório + 1 revisão),
+      aplicação de `scripts/setup-github-labels.sh` e
+      `scripts/setup-github-project.sh` contra o repo novo, registro do bounded
+      context em `docs/bounded-contexts.yaml`, e atualização por PONTEIRO
+      (sem duplicar conteúdo) do `plan.md`/`tasks.md` da feature de origem.
+      Reaproveitar sempre que uma feature implementada dentro deste template
+      precisar "sair" para um repositório dedicado (ADL tipo "Central
+      Repository vs. Distributed Skills").
+    source: "specs/003-vpn-skills-repo-governance/plan.md"
+    adr: ""
+    reuse_count: 0
+
   - tag: "multirepo-bounded-context-routing"
     bounded_context: "spec-kit-workflow"
     description: >

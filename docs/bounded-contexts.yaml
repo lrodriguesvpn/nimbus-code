@@ -32,6 +32,17 @@ contexts:
     team: "platform"
     autonomous_ok: true
 
+  - slug: "vpn-skills"
+    description: >
+      Repositório central de governança e ciclo de vida de skills VPN reutilizáveis
+      (CLI, API REST, dashboard de descoberta, versionamento semântico, compliance).
+      Extraído de specs/003-vpn-skills-repo-governance/ (ADL-001) para repositório
+      próprio em 2026-08-20 — ver tasks.md/plan.md dessa feature para o histórico.
+    repository: "venha-pra-nuvem/vpn-skills"
+    stack: "Go + TypeScript + React"
+    team: "a definir"
+    autonomous_ok: false  # ainda sem primeira revisão humana pós-migração
+
 # Exemplos para projetos reais (descomente e ajuste):
 #
 #   - slug: "identity"
