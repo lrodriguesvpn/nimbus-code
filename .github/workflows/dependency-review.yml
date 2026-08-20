@@ -47,22 +47,22 @@ jobs:
 
           MESSAGE="$(
             python3 - <<'PY'
-            import json
-            from pathlib import Path
+import json
+from pathlib import Path
 
-            path = Path("/tmp/dependency-graph-sbom.json")
-            if not path.exists():
-                print("Dependency Graph/SBOM endpoint indisponível.")
-                raise SystemExit
+path = Path("/tmp/dependency-graph-sbom.json")
+if not path.exists():
+    print("Dependency Graph/SBOM endpoint indisponível.")
+    raise SystemExit
 
-            try:
-                data = json.loads(path.read_text())
-            except json.JSONDecodeError:
-                print("Dependency Graph/SBOM endpoint retornou uma resposta não-JSON.")
-                raise SystemExit
+try:
+    data = json.loads(path.read_text())
+except json.JSONDecodeError:
+    print("Dependency Graph/SBOM endpoint retornou uma resposta não-JSON.")
+    raise SystemExit
 
-            print(data.get("message", "Dependency Graph/SBOM endpoint indisponível."))
-            PY
+print(data.get("message", "Dependency Graph/SBOM endpoint indisponível."))
+PY
           )"
 
           echo "supported=false" >> "$GITHUB_OUTPUT"
