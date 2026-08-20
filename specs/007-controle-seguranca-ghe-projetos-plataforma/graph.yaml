@@ -7,7 +7,7 @@
 feature: "007-controle-seguranca-ghe-projetos-plataforma"
 complexity: "S4"
 version: 1
-updated_at: "2026-08-19"
+updated_at: "2026-08-20"
 spec_ref: "specs/007-controle-seguranca-ghe-projetos-plataforma/spec.md"
 
 nodes:
@@ -24,12 +24,12 @@ nodes:
   - id: "security-compliance-scan-script"
     type: "module"
     path: "scripts/security-compliance-scan.sh"
-    description: "Lógica de varredura: descoberta de repos, avaliação de controles, criação de issues, agregação mensal"
+    description: "Lógica de varredura: descoberta de repos, avaliação de controles de repositório e Project V2, criação/fechamento de issues e agregação mensal"
 
   - id: "github-issues"
     type: "external"
     path: "N/A"
-    description: "Rastreamento de não conformidades como Issues do GitHub (reaproveita fluxo Nimbus Code existente)"
+    description: "Rastreamento de não conformidades e publicação do relatório mensal como Issues do GitHub (reaproveita fluxo Nimbus Code existente)"
 
   - id: "platform-project-v2"
     type: "external"

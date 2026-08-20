@@ -6,7 +6,7 @@
 # Mapa de Impacto — `007-controle-seguranca-ghe-projetos-plataforma`
 
 > **Complexidade:** S4 — Arquitetura, segurança, dados sensíveis ou integração crítica
-> **Última atualização:** 2026-08-19
+> **Última atualização:** 2026-08-20
 > **Grafo:** [graph.md](./graph.md) · [graph.yaml](./graph.yaml)
 
 ---
