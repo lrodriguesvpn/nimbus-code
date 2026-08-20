@@ -165,3 +165,9 @@
 - Cada US pode ser testada independentemente antes de seguir para a próxima
 - Commits granulares: um por tarefa ou por fase concluída
 - Antes do merge: rodar `secret scanning` nos arquivos modificados
+
+---
+
+## Phase 7: Convergence
+
+- [ ] T018 Adicionar um gate de validação pós-execução incondicional e determinístico em `.github/skills/speckit-taskstoissues/SKILL.md` (com um script auxiliar correspondente, no mesmo padrão de `.specify/scripts/bash/check-epic-issue-consistency.sh`) que confirme, antes de reportar conclusão, que toda issue de User Story e Task processada na execução atual está de fato vinculada ao parent correto no GHE (consultando `parent`/`subIssuesSummary` via GraphQL) — em vez de depender apenas da prosa do Outline sendo seguida corretamente pelo agente per FR-009, reuse-catalog tag `skill-mid-flow-instruction-reliability-gate` (partial)
