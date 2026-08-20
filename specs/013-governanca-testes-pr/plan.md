@@ -41,7 +41,7 @@ Architecture Decision Log. Sem introdução de infraestrutura externa de teste
 
 **Constraints**: Não pode depender de credenciais reais, rede externa ou estado de organização no caminho mandatório (Edge Cases do `spec.md`); não pode quebrar a suíte já existente durante a transição — testes legados exigem tratamento explícito (migração, exceção temporária ou remoção), nunca remoção silenciosa
 
-**Scale/Scope**: Toda a suíte hoje existente sob `tests/` neste template (8 arquivos em 4 subpastas) + toda PR aberta contra `main` deste repositório; o padrão resultante é reutilizável por repositórios consumidores via `docs/reuse-catalog.yaml`, mas o rollout nesses repositórios está fora do escopo desta feature
+**Scale/Scope**: Toda a suíte hoje existente sob `tests/` neste template (10 arquivos em 4 subpastas) + toda PR aberta contra `main` deste repositório; o padrão resultante é reutilizável por repositórios consumidores via `docs/reuse-catalog.yaml`, mas o rollout nesses repositórios está fora do escopo desta feature
 
 ## Constitution Check
 

@@ -9,7 +9,7 @@
 | Módulo | Tipo de impacto | Risco | Mitigação |
 |---|---|---|---|
 | `docs/testing-policy.md` | Novo arquivo | Baixo — documento aditivo, não altera comportamento até ser referenciado | Revisão humana antes de aprovar a matriz de decisão de formato |
-| `scripts/run-tests.sh` | Novo script | Médio — se a descoberta de testes tiver bug, pode reportar falso-positivo/negativo para toda a suíte | Testado contra a suíte real existente (`bash -n`, execução real dos 8 arquivos de teste já existentes) antes de virar gate obrigatório |
+| `scripts/run-tests.sh` | Novo script | Médio — se a descoberta de testes tiver bug, pode reportar falso-positivo/negativo para toda a suíte | Testado contra a suíte real existente (`bash -n`, execução real dos 10 arquivos de teste já existentes) antes de virar gate obrigatório |
 | `.github/workflows/test-suite.yml` | Novo workflow | **Alto** — se marcado como "required status check" prematuramente, pode bloquear PRs legítimas por falso-positivo, teste legado instável ou tempo de execução | Rollout faseado obrigatório: modo relatório (não bloqueante) por período de observação → só então "required", com decisão humana explícita (ver `plan.md`, Estratégia de Release) |
 | `scripts/setup-dev-environment.sh` | Possível edição (adicionar instalação de `bats` se ainda não coberta) | Baixo — aditivo | Verificar se `bats` já está incluído antes de duplicar instalação |
 | `docs/reuse-catalog.yaml` | Nova entrada (se aplicável) | Baixo — apenas acrescenta | — |
@@ -106,7 +106,7 @@ dados, apenas em reprodutibilidade do ambiente.
 
 | Critério | Go | No-Go |
 |---|---|---|
-| `run-tests.sh` executa com sucesso toda a suíte hoje existente (8 arquivos, 4 pastas) sem falso-positivo | Confirmado por execução real antes do merge | Qualquer falso-positivo/negativo não explicado |
+| `run-tests.sh` executa com sucesso toda a suíte hoje existente (10 arquivos, 4 pastas) sem falso-positivo | Confirmado por execução real antes do merge | Qualquer falso-positivo/negativo não explicado |
 | `test-suite.yml` roda em modo relatório (não bloqueante) no PR de implementação | Confirmado — check aparece como não-obrigatório | Marcado como "required" sem período de observação prévio |
 | Matriz de decisão de formato revisada e aprovada por humano | Aprovação explícita registrada no PR | Divergência não resolvida entre agente e mantenedor |
 | FR-011 (identificar segmento que falhou na 1ª leitura) demonstrado | Saída de uma falha simulada aponta o grupo correto | Saída genérica sem indicar o segmento |
