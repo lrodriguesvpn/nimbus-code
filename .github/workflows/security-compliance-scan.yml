@@ -9,10 +9,8 @@ name: Varredura semanal de conformidade de segurança
 # repositório (ver specs/007-controle-seguranca-ghe-projetos-plataforma/
 # contracts/finding-schema.md e contracts/weekly-scan-workflow-contract.md).
 #
-# MVP (Setup + Foundational + User Story 1 — esta versão): avalia apenas os 4
-# controles de repositório de projeto listados acima. A avaliação da matriz
-# de permissões do Projeto Plataforma (User Story 2) e a agregação do
-# relatório mensal (User Story 3) ficam para sessões futuras.
+# Esta versão cobre os controles de repositório, a governança do Projeto
+# Plataforma (Project V2 consolidado) e a consolidação do relatório mensal.
 #
 # Pré-requisitos (3 secrets — GitHub App dedicado, ver ADR-0008):
 #   - SECURITY_SCAN_APP_ID
@@ -38,9 +36,10 @@ on:
       scope:
         description: "Escopo da varredura"
         required: false
-        default: "pilot"
+        default: "auto"
         type: choice
         options:
+          - auto
           - pilot
           - org-wide
       dry_run:
@@ -84,7 +83,10 @@ jobs:
           SCOPE_INPUT: ${{ github.event.inputs.scope }}
           DRY_RUN_INPUT: ${{ github.event.inputs.dry_run }}
         run: |
-          ARGS=("--scope=${SCOPE_INPUT:-pilot}")
+          ARGS=()
+          if [ -n "${SCOPE_INPUT}" ] && [ "${SCOPE_INPUT}" != "auto" ]; then
+            ARGS+=("--scope=${SCOPE_INPUT}")
+          fi
           if [ "${DRY_RUN_INPUT}" = "true" ]; then
             ARGS+=("--dry-run")
           fi

@@ -153,14 +153,14 @@ Cada issue de Task recebeu labels de `priority:*`, `complexity:*`, `type:*` e `a
 
 ### Tests for User Story 2
 
-- [ ] T019 [P] [US2] Escrever teste de integração `tests/scripts/security-compliance-scan.platform-access.test.sh` validando a avaliação da matriz de permissões do Project V2 (AC-3)
-- [ ] T020 [P] [US2] Escrever teste de integração `tests/docs/security-baseline-tokens.test.sh` validando a orientação de tokens/secrets para workflows que interagem com Projects (AC-4)
+- [x] T019 [P] [US2] Escrever teste de integração `tests/scripts/security-compliance-scan.platform-access.test.sh` validando a avaliação da matriz de permissões do Project V2 (AC-3)
+- [x] T020 [P] [US2] Escrever teste de integração `tests/docs/security-baseline-tokens.test.sh` validando a orientação de tokens/secrets para workflows que interagem com Projects (AC-4)
 
 ### Implementation for User Story 2
 
-- [ ] T021 [US2] Escrever `docs/security-baseline-ghe.md` — seções 2 (Governança do Projeto Plataforma) e 3 (Modelo de Acesso por Papéis), conforme [documentation-contract.md](./contracts/documentation-contract.md)
-- [ ] T022 [P] [US2] Implementar avaliador da matriz de permissões do Project V2 (GraphQL) em `scripts/security-compliance-scan.sh`
-- [ ] T023 [US2] Integrar o avaliador de plataforma ao loop de varredura, cobrindo o edge case "múltiplos projetos vinculados ao mesmo Project V2 com sensibilidade diferente" em `scripts/security-compliance-scan.sh` (depende de T022)
+- [x] T021 [US2] Escrever `docs/security-baseline-ghe.md` — seções 2 (Governança do Projeto Plataforma) e 3 (Modelo de Acesso por Papéis), conforme [documentation-contract.md](./contracts/documentation-contract.md)
+- [x] T022 [P] [US2] Implementar avaliador da matriz de permissões do Project V2 (GraphQL) em `scripts/security-compliance-scan.sh`
+- [x] T023 [US2] Integrar o avaliador de plataforma ao loop de varredura, cobrindo o edge case "múltiplos projetos vinculados ao mesmo Project V2 com sensibilidade diferente" em `scripts/security-compliance-scan.sh` (depende de T022)
 
 **Checkpoint**: User Stories 1 e 2 funcionam de forma independente.
 
@@ -174,18 +174,18 @@ Cada issue de Task recebeu labels de `priority:*`, `complexity:*`, `type:*` e `a
 
 ### Tests for User Story 3
 
-- [ ] T024 [P] [US3] Escrever teste de integração `tests/workflows/security-compliance-scan.report.test.sh` validando o formato do relatório mensal, conforme [monthly-report-contract.md](./contracts/monthly-report-contract.md) (AC-5)
-- [ ] T025 [P] [US3] Escrever teste de integração `tests/scripts/security-compliance-scan.issue-creation.test.sh` validando os campos obrigatórios da issue (prioridade, responsável, prazo, critério de validação), conforme [finding-schema.md](./contracts/finding-schema.md) (AC-6)
-- [ ] T026 [P] [US3] Escrever teste de integração `tests/workflows/security-compliance-scan.discovery.test.sh` validando o agendamento semanal e a descoberta org-wide sem lista manual (AC-7)
-- [ ] T027 [P] [US3] Escrever teste de integração `tests/scripts/security-compliance-scan.auth.test.sh` validando que a autenticação usa exclusivamente o GitHub App, falhando explicitamente se os secrets estiverem ausentes (AC-8)
+- [x] T024 [P] [US3] Escrever teste de integração `tests/workflows/security-compliance-scan.report.test.sh` validando o formato do relatório mensal, conforme [monthly-report-contract.md](./contracts/monthly-report-contract.md) (AC-5)
+- [x] T025 [P] [US3] Escrever teste de integração `tests/scripts/security-compliance-scan.issue-creation.test.sh` validando os campos obrigatórios da issue (prioridade, responsável, prazo, critério de validação), conforme [finding-schema.md](./contracts/finding-schema.md) (AC-6)
+- [x] T026 [P] [US3] Escrever teste de integração `tests/workflows/security-compliance-scan.discovery.test.sh` validando o agendamento semanal e a descoberta org-wide sem lista manual (AC-7)
+- [x] T027 [P] [US3] Escrever teste de integração `tests/scripts/security-compliance-scan.auth.test.sh` validando que a autenticação usa exclusivamente o GitHub App, falhando explicitamente se os secrets estiverem ausentes (AC-8)
 
 ### Implementation for User Story 3
 
-- [ ] T028 [US3] Escrever `docs/security-baseline-ghe.md` — seções 5 (Checklist Operacional de Auditoria) e 6 (Procedimento de Não Conformidade), conforme [documentation-contract.md](./contracts/documentation-contract.md)
-- [ ] T029 [P] [US3] Implementar a agregação do `Compliance Report` mensal (4–5 execuções semanais) em `scripts/security-compliance-scan.sh`, conforme [monthly-report-contract.md](./contracts/monthly-report-contract.md)
-- [ ] T030 [P] [US3] Implementar o template de Issue de não conformidade (prioridade, responsável, prazo, critério de validação, labels da taxonomia existente) em `scripts/security-compliance-scan.sh`, conforme [finding-schema.md](./contracts/finding-schema.md)
-- [ ] T031 [US3] Conectar o gatilho semanal + `workflow_dispatch`, o aviso de rate limit (`repos_com_erro / repos_avaliados > 5%`) e a resolução do flag (piloto vs. org-wide) em `.github/workflows/security-compliance-scan.yml` (depende de T007, T010, T029, T030)
-- [ ] T032 [US3] Escrever `docs/security-baseline-ghe.md` — seções 7 (Referência ao Fluxo Nimbus Code) e 8 (Dependências de Workflows com Projects), conforme [documentation-contract.md](./contracts/documentation-contract.md)
+- [x] T028 [US3] Escrever `docs/security-baseline-ghe.md` — seções 5 (Checklist Operacional de Auditoria) e 6 (Procedimento de Não Conformidade), conforme [documentation-contract.md](./contracts/documentation-contract.md)
+- [x] T029 [P] [US3] Implementar a agregação do `Compliance Report` mensal (4–5 execuções semanais) em `scripts/security-compliance-scan.sh`, conforme [monthly-report-contract.md](./contracts/monthly-report-contract.md)
+- [x] T030 [P] [US3] Implementar o template de Issue de não conformidade (prioridade, responsável, prazo, critério de validação, labels da taxonomia existente) em `scripts/security-compliance-scan.sh`, conforme [finding-schema.md](./contracts/finding-schema.md)
+- [x] T031 [US3] Conectar o gatilho semanal + `workflow_dispatch`, o aviso de rate limit (`repos_com_erro / repos_avaliados > 5%`) e a resolução do flag (piloto vs. org-wide) em `.github/workflows/security-compliance-scan.yml` (depende de T007, T010, T029, T030)
+- [x] T032 [US3] Escrever `docs/security-baseline-ghe.md` — seções 7 (Referência ao Fluxo Nimbus Code) e 8 (Dependências de Workflows com Projects), conforme [documentation-contract.md](./contracts/documentation-contract.md)
 
 **Checkpoint**: as 3 user stories funcionam de forma independente.
 
@@ -196,10 +196,20 @@ Cada issue de Task recebeu labels de `priority:*`, `complexity:*`, `type:*` e `a
 **Purpose**: Fechar a feature com validação E2E, atualização de grafo/impact-map, catálogo de reuso e aprovação humana obrigatória (S4).
 
 - [ ] T033 [P] Executar os passos 1–7 do [quickstart.md](./quickstart.md) de ponta a ponta no bounded context piloto (`spec-kit-workflow`)
-- [ ] T034 [P] Adicionar entrada reutilizável em `docs/reuse-catalog.yaml` (tag: `org-wide-security-compliance-scan`) referenciando o `plan.md` desta feature
-- [ ] T035 [P] Confirmar que `specs/007-controle-seguranca-ghe-projetos-plataforma/graph.yaml` e `graph.md` continuam refletindo a implementação final (atualizar se algum módulo/script divergiu do planejado)
-- [ ] T036 [P] Confirmar que `specs/007-controle-seguranca-ghe-projetos-plataforma/impact-map.md` (riscos, rollback, critérios Go/No-Go) reflete a implementação final
+
+  > **Nota (2026-08-20)**: bloqueada por `T004`/`T005`. A implementação de código,
+  > documentação e testes automatizados foi concluída, mas a validação E2E do
+  > quickstart depende do GitHub App real e dos secrets reais, ambos fora do
+  > escopo do agente nesta sessão.
+
+- [x] T034 [P] Adicionar entrada reutilizável em `docs/reuse-catalog.yaml` (tag: `org-wide-security-compliance-scan`) referenciando o `plan.md` desta feature
+- [x] T035 [P] Confirmar que `specs/007-controle-seguranca-ghe-projetos-plataforma/graph.yaml` e `graph.md` continuam refletindo a implementação final (atualizar se algum módulo/script divergiu do planejado)
+- [x] T036 [P] Confirmar que `specs/007-controle-seguranca-ghe-projetos-plataforma/impact-map.md` (riscos, rollback, critérios Go/No-Go) reflete a implementação final
 - [ ] T037 [P] Atualizar o status de `docs/adr/0008-github-app-para-varredura-de-seguranca-org-wide.md` de "Em revisão" para "Aceita" após aprovação humana, registrando o aprovador
+
+  > **Nota (2026-08-20)**: permanece pendente porque depende da aprovação humana
+  > obrigatória registrada em `T038`. O ADR não foi alterado para “Aceita” sem
+  > aprovação explícita de owner/revisor humano.
 - [ ] T038 [Humano] Obter a aprovação humana obrigatória (S4) do `plan.md` completo e do ADR-0008 antes de habilitar o rollout org-wide
 
   ```markdown

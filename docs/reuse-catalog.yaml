@@ -165,3 +165,17 @@ entries:
     source: "specs/009-codespaces-dev-planning/plan.md"
     adr: ""
     reuse_count: 0
+
+  - tag: "org-wide-security-compliance-scan"
+    bounded_context: "platform-security/ghe-governance"
+    description: >
+      Padrão de varredura org-wide de conformidade no GHE usando GitHub App
+      somente-leitura, descoberta automática de repositórios via API,
+      deduplicação de findings por marcador HTML em issues, avaliação de
+      governança do Project V2 consolidado e relatório mensal consolidado
+      publicado como issue com snapshots por execução. Reaproveitar sempre que
+      outra feature precisar auditar postura de segurança/governança em múltiplos
+      repositórios sem criar infraestrutura adicional.
+    source: "specs/007-controle-seguranca-ghe-projetos-plataforma/plan.md"
+    adr: "docs/adr/0008-github-app-para-varredura-de-seguranca-org-wide.md"
+    reuse_count: 0

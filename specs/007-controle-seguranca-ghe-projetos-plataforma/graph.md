@@ -6,7 +6,7 @@
 # Grafo de Módulos — `007-controle-seguranca-ghe-projetos-plataforma`
 
 > **Complexidade:** S4 — Arquitetura, segurança, dados sensíveis ou integração crítica
-> **Última atualização:** 2026-08-19
+> **Última atualização:** 2026-08-20
 > **Spec:** [spec.md](./spec.md) · **Grafo estruturado:** [graph.yaml](./graph.yaml)
 
 ---
@@ -76,8 +76,8 @@ graph LR
 |---|---|---|---|
 | `security-baseline-doc` | module | `docs/security-baseline-ghe.md` | Guia único de controles obrigatórios |
 | `security-compliance-scan-workflow` | service | `.github/workflows/security-compliance-scan.yml` | Agendamento semanal da varredura |
-| `security-compliance-scan-script` | module | `scripts/security-compliance-scan.sh` | Descoberta de repos, avaliação, issues, relatório mensal |
-| `github-issues` | external | — | Rastreamento de não conformidades |
+| `security-compliance-scan-script` | module | `scripts/security-compliance-scan.sh` | Descoberta de repos, avaliação de repositórios + Project V2, issues e relatório mensal |
+| `github-issues` | external | — | Rastreamento de não conformidades e relatório mensal |
 | `platform-project-v2` | external | — | Alvo de avaliação da matriz de permissões |
 | `openfeature-flag-provider` | module | `scripts/security-compliance-scan.sh` (trecho de resolução) | Rollout progressivo (piloto → org-wide) |
 | `github-app-security-auditor` | external | — | Credencial somente-leitura para varredura org-wide |
