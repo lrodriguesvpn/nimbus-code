@@ -392,38 +392,57 @@ Will document:
    - Compliance report generation: Scheduled or on-demand? (Recommended: Scheduled)
    - Deprecation grace period: 30, 60, or 90 days? (Recommended: 60 days)
 
-3. **Ready for Task Generation**
-   - Once gates approved, run `/speckit-tasks` to generate implementation tasks
-   - Tasks will be dependency-ordered and effort-estimated
-   - Phase 2 implementation can begin immediately after task approval
+3. **`tasks.md` Already Generated — Ready for Implementation**
+   - `tasks.md` already exists (113 original tasks + 3 convergence tasks T114–T116, T115/T116 now resolved)
+   - Once gates approved, run `/speckit-implement` to begin Phase 2 implementation
+   - T114 (GitHub App auth middleware) should be prioritized early given ADL-004
 
 ---
 
-## Known Gaps (registrados na revisão de convergência de 2026-08-20)
+## Known Gaps (registrados na revisão de convergência de 2026-08-20, atualizados no replanejamento de 2026-08-20)
 
 *Esta seção documenta lacunas identificadas ao comparar este plano com as decisões de
-`specs/006-bootstrap-governance-hardening/`. As correções de URL (GHE) e de estratégia de
-autenticação (ADL-004) já foram aplicadas nesta revisão. Os itens abaixo permanecem em aberto
-e devem ser tratados antes ou durante a próxima geração/revisão de `tasks.md`:*
+`specs/008-bootstrap-governance-hardening/` (renumerada de `006` após colisão com
+`specs/006-multirepo-support`, publicada por outra sessão — ver nota de renumeração
+naquela spec). As correções de URL (GHE) e de estratégia de autenticação (ADL-004)
+já foram aplicadas na primeira revisão. Status atualizado abaixo:*
 
-1. **`tasks.md` já existe mas não reflete o ADL-004**: um `tasks.md` foi gerado anteriormente
-   (113+ tasks) antes da aprovação formal dos gates recomendada na seção "Next Steps" acima.
-   A task T095 trata a camada de autenticação como "optional for v1, placeholder" — isso está
-   desatualizado; a autenticação via GitHub App é obrigatória e definida (ADL-004). Requer uma
-   passagem de `/speckit-tasks` (revisão) ou `/speckit-converge` antes da implementação.
-2. **Contrato híbrido obrigatório (feature 005) não aplicado a esta spec**: `spec.md` desta
-   feature foi criado em 2026-08-12, antes de `specs/005-hybrid-agent-human-dev/` tornar
-   obrigatório o cabeçalho Nimbus-Code (slug/complexidade/bounded context), os critérios de
-   aceitação em formato `AC-N` rastreável, a tabela de SLO e o bloco de Cost Reference (SPEC
-   KIT COST). `spec.md` e este `plan.md` ainda não foram retrofitados para esse contrato —
-   fora do escopo desta revisão pontual (que tratou apenas URLs/domínio e autenticação);
-   recomenda-se tratar como tarefa dedicada antes de `/speckit-tasks`.
-3. **Topologia multi-repo não conectada à consolidação de board (US3 de 006)**: `graph.yaml`
-   referencia `vpn-skills-infrastructure` como dependência externa (repositório companheiro).
-   Se VPN-SKILLS vier a ser multi-repositório (núcleo + infraestrutura), o repositório
-   companheiro deve ter suas issues consolidadas no Project V2 do repositório VPN-SKILLS
-   (análogo ao padrão Frontend/Backend → Produto definido em
-   `specs/006-bootstrap-governance-hardening/spec.md`, FR-003/AC-3) — ainda não avaliado aqui.
+1. **`tasks.md` já existe mas não reflete o ADL-004** — **ainda em aberto**: um
+   `tasks.md` foi gerado anteriormente (113 tasks) antes da aprovação formal dos
+   gates recomendada na seção "Next Steps" acima. A task T095 trata a camada de
+   autenticação como "optional for v1, placeholder" — isso está desatualizado; a
+   autenticação via GitHub App é obrigatória e definida (ADL-004). **Já existe uma
+   task de convergência (T114, `## Phase 8: Convergence` em `tasks.md`) cobrindo
+   exatamente esta substituição** — não requer nova ação de planejamento, apenas
+   `/speckit-implement` executar T114 quando a fase de implementação começar.
+2. **Contrato híbrido obrigatório (feature 005) não aplicado a esta spec** — **✅
+   RESOLVIDO nesta revisão (2026-08-20)**: `spec.md` foi retrofitado com o
+   cabeçalho Nimbus-Code (slug/complexidade/bounded context), tabela de SLO,
+   critérios de aceitação em formato `AC-N` (4 ACs formalizando os cenários mais
+   críticos já existentes nas User Stories) e bloco de Cost Reference. A task
+   T115 (`## Phase 8: Convergence`) que pedia esse retrofit pode ser marcada
+   como concluída em `tasks.md`. **Nota**: o retrofit do Cost Reference
+   deliberadamente **não** reintroduziu a URL externa "SPEC KIT COST" — essa
+   referência foi identificada como incorreta (repositório não pertence à
+   organização) e removida do padrão da Nimbus-Code em 2026-08-20; o rastreio de
+   custo desta feature usa apenas os mecanismos internos já existentes
+   (`docs/cost-profiles-and-rates.md`, `docs/ai-code-quality-and-observability.md`).
+3. **Topologia multi-repo não conectada à consolidação de board** — **esclarecido
+   nesta revisão**: `graph.yaml` referencia `vpn-skills-infrastructure` como
+   dependência externa (repositório companheiro). O padrão correto para esse
+   cenário (repo central + repo(s) de serviço/infraestrutura correlatos, com
+   board consolidado) é agora **formalmente especificado em
+   `specs/006-multirepo-support/`** (15 ACs detalhados: `bounded-contexts.yaml`,
+   roteamento de Tasks via `/speckit-taskstoissues`, vínculo cross-repo via
+   `setup-github-project.sh`) — publicada por outra sessão em paralelo e
+   descoberta durante este replanejamento. **Ação restante**: se/quando
+   `vpn-skills-infrastructure` for de fato criado como repositório separado,
+   aplicar o modelo de `006-multirepo-support` a ele (declarar como bounded
+   context correlato no `bounded-contexts.yaml` do VPN-SKILLS) — tratado como
+   tarefa incremental fora do escopo desta feature, não bloqueia `tasks.md` atual
+   porque T116 (`## Phase 8: Convergence`) já cobre "documentar e decidir" esse
+   modelo; T116 pode agora apontar diretamente para `006-multirepo-support` em
+   vez de reinventar o padrão.
 
 ---
 
