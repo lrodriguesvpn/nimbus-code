@@ -1,0 +1,49 @@
+# graph.yaml — Feature 001: Catálogo de Conteúdo Reutilizável
+
+feature: "001-catalogo-conteudo-reutilizavel"
+complexity: "S2"
+version: 1
+updated_at: "2026-08-20"
+spec_ref: "specs/001-catalogo-conteudo-reutilizavel/spec.md"
+
+nodes:
+  - id: "reuse-catalog"
+    type: "module"
+    path: "docs/reuse-catalog.yaml"
+    description: "Catálogo machine-readable de padrões/decisões técnicas reutilizáveis; instalado em todo projeto consumidor pelo bootstrap.sh; preenchimento manual/curatorial"
+
+  - id: "constitution-pointer-principle"
+    type: "module"
+    path: ".specify/memory/constitution.md"
+    description: "Princípio 'Referenciar por ponteiro, nunca duplicar por valor' — introduzido por esta feature na seção 'Reutilização de Conteúdo e Referência por Ponteiro'"
+
+  - id: "plan-template-reuse-field"
+    type: "module"
+    path: "presets/nimbus-code-standards/templates/plan-template.md"
+    description: "Campo 'Padrão reutilizado encontrado?' na tabela de Classificação de Complexidade — consultado antes de qualquer novo plan.md"
+
+  - id: "ai-quality-docs-tldr"
+    type: "module"
+    path: "docs/ai-code-quality-and-observability.md"
+    description: "Recebeu TL;DR no topo e a seção 9 'Catálogo de Reuso — reduzindo custo de tokens com conteúdo já existente'"
+
+edges:
+  - src: "plan-template-reuse-field"
+    dst: "reuse-catalog"
+    type: "async"
+    protocol: "consulta manual/agente (leitura do YAML antes de preencher o plan.md)"
+    description: "Todo novo plan.md consulta o catálogo antes de declarar 'Padrão reutilizado encontrado?'"
+
+  - src: "constitution-pointer-principle"
+    dst: "reuse-catalog"
+    type: "async"
+    protocol: "documentation reference"
+    description: "O princípio constitucional formaliza a prática de citar o catálogo por link em vez de duplicar conteúdo"
+
+  - src: "ai-quality-docs-tldr"
+    dst: "reuse-catalog"
+    type: "async"
+    protocol: "documentation reference"
+    description: "Seção 9 documenta o funcionamento completo do catálogo (schema, convenção de uso, metodologia)"
+
+externals: []
