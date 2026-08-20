@@ -1,0 +1,43 @@
+version: "1.0"
+feature: "009-codespaces-dev-planning"
+
+nodes:
+  - name: "devcontainer.json"
+    type: "configuration"
+    description: "Devcontainer de referência Nimbus-Code para GitHub Codespaces"
+
+  - name: "ci-cd-acceleration-map.md"
+    type: "documentation"
+    description: "Mapeamento de etapas de pipeline aceleráveis via Codespace"
+
+  - name: "codespaces-adoption-guide.md"
+    type: "documentation"
+    description: "Guia de adoção, governança de custo e modelo de segurança para agentes"
+
+  - name: "codespaces-idle-governance.yml"
+    type: "workflow"
+    description: "Workflow de referência para parada automática de Codespaces ociosos (fallback à config nativa)"
+
+externals:
+  - name: "github-codespaces"
+    type: "platform-service"
+    description: "Plataforma gerenciada de ambientes de desenvolvimento remoto"
+    criticality: "medium"
+
+dependencies:
+  - from: "devcontainer.json"
+    to: "github-codespaces"
+    pattern: "config-consumed-by"
+    priority: "high"
+
+  - from: "codespaces-idle-governance.yml"
+    to: "github-codespaces"
+    protocol: "https"
+    pattern: "request-response"
+    authentication: "github-token-native"
+    priority: "medium"
+
+  - from: "ci-cd-acceleration-map.md"
+    to: "devcontainer.json"
+    pattern: "documents"
+    priority: "low"
