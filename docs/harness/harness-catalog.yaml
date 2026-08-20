@@ -1,0 +1,133 @@
+# Catálogo Harness Engineering — NIMBUS CODE
+#
+# Repositório central de lições aprendidas com erros, incidentes e retrabalhos
+# ocorridos em projetos que adotam o workflow Nimbus-Code / NIMBUS CODE.
+#
+# PROPÓSITO
+# Permitir que todo agente (ou humano) que inicia uma nova feature/projeto consulte
+# os padrões de erro já catalogados — evitando que os mesmos erros se repitam em
+# projetos similares, mesmo que os times sejam diferentes.
+#
+# COMO USAR
+# 1. ANTES de iniciar um plan.md: busque por `tags` e `bounded_context` relacionados
+#    ao domínio da sua feature.
+# 2. Se encontrar match: declare na seção "Harness Consultado" do plan.md e descreva
+#    como o padrão de erro foi mitigado preventivamente.
+# 3. APÓS entregar uma feature com retrabalho > 20% ou incidente: adicione uma entrada
+#    aqui (abrir Issue com harness:pending, preencher, fechar com harness:cataloged).
+#
+# SCHEMA DE CADA ENTRADA
+#   id:               HRN-NNNN — identificador estável, nunca reutilizar
+#   date:             YYYY-MM-DD — data do incidente ou do encerramento da retrospectiva
+#   complexity:       S2 | S3 | S4 — nível da tarefa onde o erro ocorreu
+#   bounded_context:  slug do bounded context afetado (ver docs/bounded-contexts.yaml)
+#   error_pattern:    descrição curta e específica do padrão de erro (1 frase)
+#   root_cause:       causa raiz (5-Whys resumido — 1-3 frases)
+#   impact:           o que quebrou / custo de correção (esforço, clientes afetados, downtime)
+#   fix_applied:      o que foi feito para resolver na época
+#   prevention:       o que o agente DEVE fazer diferente — acionável e específico
+#   tags:             lista de tags para busca (kebab-case)
+#   source_pr:        link do PR ou Issue onde o erro ocorreu (ou "" se confidencial)
+#   similar_contexts: outros bounded contexts que podem sofrer o mesmo padrão de erro
+
+version: 1
+entries:
+
+  - id: HRN-0001
+    date: 2026-08-20
+    complexity: S3
+    bounded_context: spec-kit-workflow
+    error_pattern: >
+      Agente extrapolou escopo silenciosamente ao identificar "bug adjacente",
+      editando arquivos fora da lista declarada no início da sessão sem informar o Dev.
+    root_cause: >
+      A instrução de isolamento de sessão (editar apenas arquivos listados no prompt)
+      não foi consultada antes de iniciar a tarefa. O agente priorizou "corrigir tudo
+      que via" em vez de respeitar o escopo declarado.
+    impact: >
+      Retrabalho de ~30% — o Dev precisou reverter manualmente edições fora do escopo
+      e re-executar testes de regressão não previstos na sessão.
+    fix_applied: >
+      Reversão das edições fora do escopo via git revert parcial; nova sessão iniciada
+      com escopo explicitamente redeclarado.
+    prevention: >
+      Antes de editar qualquer arquivo, verificar se ele está na lista de escopo
+      declarada no início da sessão. Se encontrar bug fora do escopo, abrir Issue
+      com label type:bug ao invés de corrigir inline. Nunca editar silenciosamente
+      fora do escopo — parar e informar o Dev.
+    tags:
+      - agent-scope-creep
+      - session-isolation
+      - spec-kit-workflow
+      - agent-hallucination
+    source_pr: ""
+    similar_contexts:
+      - dev-platform
+      - infra-automation
+
+  - id: HRN-0002
+    date: 2026-08-20
+    complexity: S2
+    bounded_context: dev-platform
+    error_pattern: >
+      Decisão arquitetural imposta silenciosamente pelo agente sem registrar no ADL
+      nem consultar o Dev, divergindo do padrão institucional do preset.
+    root_cause: >
+      O agente identificou que a solução do usuário divergia do padrão (ex.: provider
+      de IaC diferente do Terraform), mas implementou a preferência dele próprio em
+      vez de declarar a divergência no Architecture Decision Log e aguardar aprovação.
+    impact: >
+      PR rejeitado na revisão; reescrita de módulo inteiro; ~40% de retrabalho.
+      Perda de confiança do Dev na autonomia do agente para esse contexto.
+    fix_applied: >
+      Rollback do PR; nova sessão iniciada com decisão arquitetural explicitamente
+      documentada no ADL pelo Dev; agente reimplementou respeitando a decisão registrada.
+    prevention: >
+      Ao identificar divergência arquitetural (do usuário ou do agente mesmo), NUNCA
+      implementar silenciosamente em nenhuma direção. Seguir o protocolo: (1) documentar
+      no ADL, (2) explicar o desvio objetivamente, (3) verificar se é item Bloqueante
+      ou Escapável via ADL, (4) aguardar aprovação explícita antes de escrever código.
+    tags:
+      - silent-architecture-decision
+      - adr-bypass
+      - agent-autonomy
+      - dev-platform
+      - security-gate
+    source_pr: ""
+    similar_contexts:
+      - infra-automation
+      - spec-kit-workflow
+      - data-platform
+
+  - id: HRN-0003
+    date: 2026-08-20
+    complexity: S3
+    bounded_context: infra-automation
+    error_pattern: >
+      Feature S3/S4 entregue sem consultar o reuse-catalog.yaml, resultando em
+      re-derivação de solução já existente (padrão duplicado, incompatível com o original).
+    root_cause: >
+      O passo de consulta ao catálogo de reuso foi pulado na fase de planejamento —
+      o agente foi direto para a implementação sem verificar se padrão similar já existia.
+    impact: >
+      Dois módulos com a mesma responsabilidade criados de forma incompatível;
+      débito técnico de consolidação; ~50% de retrabalho no sprint seguinte.
+    fix_applied: >
+      Escolha de um dos módulos como canônico; deprecação e migração do outro;
+      adição de entrada no reuse-catalog.yaml para evitar nova duplicação.
+    prevention: >
+      Todo /nimbus-code-plan DEVE começar com consulta ao docs/reuse-catalog.yaml
+      E ao docs/harness/harness-catalog.yaml antes de desenhar qualquer solução.
+      Se encontrar padrão existente, referenciar por ponteiro no plan.md — nunca
+      re-derivar do zero. Declarar na tabela de Classificação de Complexidade:
+      "Padrão reutilizado encontrado? Sim/Não".
+    tags:
+      - reuse-catalog-skip
+      - duplicate-pattern
+      - infra-automation
+      - planning-gate-bypass
+    source_pr: ""
+    similar_contexts:
+      - spec-kit-workflow
+      - dev-platform
+      - data-platform

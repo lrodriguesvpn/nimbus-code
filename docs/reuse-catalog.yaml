@@ -181,6 +181,21 @@ entries:
     adr: ""
     reuse_count: 0
 
+  - tag: "harness-engineering-pattern"
+    bounded_context: "spec-kit-workflow"
+    description: >
+      Padrão de catálogo de erros curatorial (YAML estático versionado no Git)
+      para memória organizacional de falhas. Inclui: (1) harness-catalog.yaml com
+      schema id/date/complexity/bounded_context/error_pattern/root_cause/impact/
+      fix_applied/prevention/tags/source_pr/similar_contexts; (2) consulta obrigatória
+      pré-plan declarada no copilot-instructions.md e no plan-template.md (seção
+      "Harness Gate"); (3) labels harness:pending, harness:cataloged, harness:blocking
+      para rastreabilidade no GitHub; (4) script harness-search.sh (grep/yq) para
+      busca rápida por tag/bounded_context; (5) incident-template.md para post-mortem
+      estruturado com 5-Whys. Reaproveitar sempre que um projeto precisar de memória
+      organizacional de falhas compartilhada entre times e agentes.
+    source: "specs/011-harness-engineering/plan.md"
+    adr: ""
   - tag: "org-wide-security-compliance-scan"
     bounded_context: "platform-security/ghe-governance"
     description: >

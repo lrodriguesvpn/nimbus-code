@@ -177,6 +177,27 @@ humana constante. Instalada via `scripts/setup-github-labels.sh`.
 - Detalhamento completo:
   `docs/ai-code-quality-and-observability.md`, seção 9.
 
+## Harness Engineering (Aprendizado com Erros)
+
+> **Passo obrigatório antes de qualquer `/nimbus-code-plan`**: consulte também
+> `docs/harness/harness-catalog.yaml` buscando por `tags` e `bounded_context`
+> relacionados ao domínio da feature — ANTES de redigir o `plan.md`.
+>
+> Use `./scripts/harness-search.sh <tag>` ou `grep` direto no arquivo.
+
+- Se encontrar match: declare na seção **"Harness Gate"** do `plan.md`:
+  - ID(s) do harness consultado(s)
+  - Padrão de erro evitado
+  - Como foi mitigado preventivamente nesta feature
+- Se não encontrar match: declare explicitamente `"Nenhum padrão de erro relevante
+  encontrado"` na seção "Harness Gate" — **nunca deixar em branco**.
+- Se o catálogo estiver vazio: declare `"Catálogo vazio — nenhum padrão disponível"`.
+- Se durante a implementação você (agente) perceber que está prestes a cometer um
+  padrão catalogado no harness: **pare imediatamente** e informe o Dev antes de continuar.
+- Ao fechar uma feature com retrabalho > 20% ou incidente: abrir Issue com label
+  `harness:pending` e preencher entrada no `harness-catalog.yaml`.
+- Detalhamento completo: `docs/harness/harness-guide.md`.
+
 ---
 
 ## Modelo Híbrido (Agente + Humano) e Controle de Custo

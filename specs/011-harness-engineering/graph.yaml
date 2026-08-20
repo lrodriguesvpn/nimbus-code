@@ -1,0 +1,126 @@
+# graph.yaml — Feature 010: Harness Engineering — Aprendizado Organizacional com Erros
+
+feature: "011-harness-engineering"
+complexity: "S3"
+version: 1
+updated_at: "2026-08-20"
+spec_ref: "specs/011-harness-engineering/spec.md"
+
+nodes:
+  - id: "harness-catalog"
+    type: "module"
+    path: "docs/harness/harness-catalog.yaml"
+    description: "Catálogo central de lições aprendidas com erros — fonte de verdade para consulta de padrões de erro antes do planejamento"
+
+  - id: "harness-readme"
+    type: "module"
+    path: "docs/harness/README.md"
+    description: "Conceito de Harness Engineering, fluxo de uso e links para os demais artefatos do diretório"
+
+  - id: "harness-guide"
+    type: "module"
+    path: "docs/harness/harness-guide.md"
+    description: "Guia completo para devs e agentes: protocolo de consulta, como escrever uma entrada, ciclo de vida e FAQ"
+
+  - id: "incident-template"
+    type: "module"
+    path: "docs/harness/incident-template.md"
+    description: "Template de post-mortem para incidentes S3/S4: timeline, 5-Whys, ações preventivas e checklist de encerramento"
+
+  - id: "harness-search"
+    type: "module"
+    path: "scripts/harness-search.sh"
+    description: "Script CLI de busca no harness-catalog.yaml por tags e bounded_context; retorna IDs e resumos para uso pelo agente"
+
+  - id: "plan-template"
+    type: "module"
+    path: "presets/nimbus-code-standards/templates/plan-template.md"
+    description: "Template de plan.md do preset — estendido com seção 'Harness Gate' obrigatória"
+
+  - id: "copilot-instructions"
+    type: "module"
+    path: ".github/copilot-instructions.md"
+    description: "Instruções do agente — estendido com protocolo de consulta obrigatória ao harness-catalog antes de /nimbus-code-plan"
+
+  - id: "setup-github-labels"
+    type: "module"
+    path: "scripts/setup-github-labels.sh"
+    description: "Script de setup de labels — estendido com harness:pending, harness:cataloged, harness:blocking"
+
+  - id: "reuse-catalog"
+    type: "module"
+    path: "docs/reuse-catalog.yaml"
+    description: "Catálogo de reuso — análogo ao harness-catalog mas para soluções bem-sucedidas; referenciado para diferenciação"
+
+  - id: "tasks-template"
+    type: "module"
+    path: "presets/nimbus-code-standards/templates/tasks-template.md"
+    description: "Template de tasks.md — estendido com passo de catalogação no checklist de fechamento"
+
+edges:
+  - src: "copilot-instructions"
+    dst: "harness-catalog"
+    type: "sync"
+    protocol: "file read (instrução ao agente)"
+    description: "copilot-instructions instrui o agente a ler harness-catalog.yaml antes de iniciar plan.md"
+
+  - src: "plan-template"
+    dst: "harness-catalog"
+    type: "sync"
+    protocol: "file read (referência no template)"
+    description: "Seção 'Harness Gate' do plan-template instrui consulta ao harness-catalog e declaração de resultado"
+
+  - src: "harness-search"
+    dst: "harness-catalog"
+    type: "sync"
+    protocol: "file read (grep/yq)"
+    description: "Script lê harness-catalog.yaml e filtra por tags/bounded_context"
+
+  - src: "tasks-template"
+    dst: "harness-catalog"
+    type: "sync"
+    protocol: "file write (instrução no checklist)"
+    description: "Checklist de fechamento do tasks-template instrui adicionar entrada ao harness-catalog quando gatilho se aplica"
+
+  - src: "setup-github-labels"
+    dst: "ghe-api"
+    type: "sync"
+    protocol: "REST/HTTPS (gh label create)"
+    description: "Cria labels harness:pending, harness:cataloged, harness:blocking no repositório"
+
+  - src: "harness-readme"
+    dst: "harness-catalog"
+    type: "async"
+    protocol: "documentation reference"
+    description: "README documenta o propósito e a estrutura do catálogo"
+
+  - src: "harness-readme"
+    dst: "harness-guide"
+    type: "async"
+    protocol: "documentation reference"
+    description: "README linka para o guia detalhado"
+
+  - src: "harness-readme"
+    dst: "incident-template"
+    type: "async"
+    protocol: "documentation reference"
+    description: "README linka para o template de post-mortem"
+
+  - src: "harness-guide"
+    dst: "harness-catalog"
+    type: "async"
+    protocol: "documentation reference"
+    description: "Guia documenta como buscar e preencher o catálogo"
+
+  - src: "harness-catalog"
+    dst: "reuse-catalog"
+    type: "async"
+    protocol: "conceptual complement"
+    description: "Harness catalog (erros) e reuse catalog (soluções) são complementares — ambos consultados antes do plan.md"
+
+externals:
+  - id: "ghe-api"
+    provider: "GitHub Enterprise Cloud"
+    called_by: ["setup-github-labels"]
+    criticality: "low"
+    fallback: "criação manual dos labels harness:* via UI do GitHub"
