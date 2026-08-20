@@ -145,3 +145,23 @@ entries:
     source: "specs/006-multirepo-support/plan.md"
     adr: ""
     reuse_count: 0
+
+  - tag: "standard-devcontainer"
+    bounded_context: "dev-platform/codespaces"
+    description: >
+      Devcontainer de referência Nimbus-Code para GitHub Codespaces
+      (imagem `mcr.microsoft.com/devcontainers/base:ubuntu` + features
+      Python/Node/GitHub CLI + `postCreateCommand` idempotente), acompanhado
+      de mapeamento de aceleração de CI/CD via Codespaces prebuilds
+      (`docs/ci-cd-acceleration-map.md`), política de governança de
+      custo/ociosidade baseada na configuração nativa do GitHub Codespaces
+      (`docs/codespaces-adoption-guide.md`) e modelo de segurança para
+      sessões remotas de agentes de IA com paridade ao escopo de segredos já
+      exigido para o CI/CD do repositório. Reaproveitar sempre que um
+      repositório Nimbus-Code precisar padronizar seu ambiente de
+      desenvolvimento via Codespaces — copiar `.devcontainer/devcontainer.json`
+      e `scripts/setup-dev-environment.sh` e ajustar para a stack local antes
+      de divulgar ao time.
+    source: "specs/009-codespaces-dev-planning/plan.md"
+    adr: ""
+    reuse_count: 0

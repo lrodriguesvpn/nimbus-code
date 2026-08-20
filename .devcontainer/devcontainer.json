@@ -1,0 +1,28 @@
+{
+  "name": "Nimbus-Code Standard Devcontainer",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.12"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "eamodio.gitlens",
+        "redhat.vscode-yaml",
+        "davidanson.vscode-markdownlint"
+      ]
+    }
+  },
+  "postCreateCommand": "bash scripts/setup-dev-environment.sh",
+  "remoteEnv": {
+    "GH_HOST": "venha-pra-nuvem.ghe.com"
+  }
+}

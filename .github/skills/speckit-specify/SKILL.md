@@ -155,6 +155,15 @@ Given that feature description, do this:
      - Ensure the spec has an explicit section "Backlog Hierarchy (EPIC/FEATURE/US)" for downstream sync/board views.
      - If the feature context is **WEB**, ensure the spec explicitly states **Impeccable** as the design standard.
      - If rollout/toggle strategy is mentioned in scope, ensure the spec references **OpenFeature** as the abstraction standard.
+     - **Bounded Context validation (MultiRepo, AC-2)**: before filling the "Bounded Context" row of the header table, read `docs/bounded-contexts.yaml` from the repo root.
+       - If the file does not exist, or has no entries under `contexts`, MultiRepo isn't configured for this project — fill the field with the best-guess bounded context name as before, nothing to validate against.
+       - If the file exists, collect the registered `slug` values and compare the bounded context you are about to write against them (case-insensitive; compare on slug form, e.g. "Order Management" ~ `order-management`).
+       - If it matches a registered slug, write that registered `slug` (not an ad-hoc free-text label) into the "Bounded Context" field.
+       - **If it does not match any registered slug**, do not silently accept an ad-hoc name and do not add the entry yourself. Instead:
+         1. Stop before finalizing the spec and clearly flag the divergence to the Dev, listing every slug currently registered in `docs/bounded-contexts.yaml`.
+         2. Propose a new entry (`slug`, `description`, `repository`, `stack`, `team`, `autonomous_ok`) for the Dev to review — registering a bounded context affects org-wide routing (`/speckit-taskstoissues`, `scripts/setup-github-project.sh`), so it requires explicit confirmation, not a silent agent decision.
+         3. Ask the Dev to either confirm the proposed new entry (to be added to `docs/bounded-contexts.yaml`, typically via its own PR) or pick one of the existing registered slugs instead.
+         4. Only write the spec's "Bounded Context" field once the Dev confirms — either with the newly registered slug or an existing one. Do not proceed with an unregistered/ad-hoc value.
 
 7. Write the specification to SPEC_FILE using the template structure, replacing placeholders with concrete details derived from the feature description (arguments) while preserving section order and headings.
 
@@ -197,6 +206,7 @@ Given that feature description, do this:
       - [ ] Hybrid collaboration guidance is explicit (agent + human)
       - [ ] WEB context explicitly references Impeccable
       - [ ] Rollout/toggle context references OpenFeature abstraction
+      - [ ] Bounded Context field matches a slug registered in docs/bounded-contexts.yaml (or the file is absent/empty)
 
       ## Notes
 

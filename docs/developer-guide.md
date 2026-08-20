@@ -681,6 +681,32 @@ Não suportado — cada feature pertence a exatamente um Epic. Se a feature cobr
 mais de um Epic, divida-a em specs separadas, cada uma com seu próprio
 `EPIC_ISSUE`.
 
+**`setup-github-project.sh` chamado por caminho absoluto de outro clone**
+
+Corrigido (issue #21): o script resolve `docs/bounded-contexts.yaml` a partir
+da raiz git do **diretório de chamada** (`$PWD`, via `git rev-parse
+--show-toplevel` sem `-C`), não do diretório onde o script físico está. Isso
+evita vincular o Project V2 de um projeto consumidor ao repo errado quando o
+script é invocado por caminho absoluto de outro clone (ex.: `/tmp/nimbus-code-
+spec-kit-template/scripts/setup-github-project.sh` chamado de dentro de
+`~/meu-projeto`). O fallback para o `docs/bounded-contexts.yaml` relativo ao
+próprio script só é usado quando o diretório de chamada não está dentro de um
+repo git com esse arquivo.
+
+### 5.7. Testes e Validação
+
+- **Testes unitários (bats)**: `.specify/scripts/bash/tests/create-new-feature.bats`
+  cobre a resolução de `--bounded-contexts` (slug válido, flag omitida, slug
+  inválido, arquivo ausente) contra um projeto fixture isolado — não requer
+  API do GHE. Rode com [bats-core](https://github.com/bats-core/bats-core):
+  ```bash
+  bats .specify/scripts/bash/tests/create-new-feature.bats
+  ```
+- **Checklist de validação E2E**: [`specs/006-multirepo-support/quickstart.md`](../specs/006-multirepo-support/quickstart.md)
+  mapeia cada um dos 15 ACs desta feature a um passo de validação (automatizado
+  onde possível; manual onde depende de uma API GHE real ou do comportamento
+  do agente).
+
 ## Documentos relacionados neste repositório
 
 - [`docs/bundle-architecture.md`](bundle-architecture.md) — diagramas Mermaid
