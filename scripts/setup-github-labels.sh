@@ -102,10 +102,11 @@ declare -a LABELS=(
   "complexity:S4|b60205|Arquitetura, segurança ou dados sensíveis — impact-map.md + revisão humana obrigatórios"
 
   # Tipo — classificação padrão de issue/PR
-  "type:epic|5319e7|Iniciativa macro (guarda contexto estratégico e agrega features)"
+  "type:epic|6f42c1|Epic — iniciativa macro; pai de Features"
   "type:bug|d73a4a|Comportamento incorreto em relação ao especificado"
-  "type:feature|a2eeef|Nova funcionalidade ou capacidade"
-  "type:user-story|1d76db|Fatia de valor de usuário vinculada a uma feature"
+  "type:feature|0075ca|Feature — entrega de funcionalidade"
+  "type:user-story|0e8a16|User Story — fatia de valor do usuário"
+  "type:task|cfd3d7|Task — unidade de implementação; sub-issue de User Story"
   "type:chore|cfd3d7|Manutenção, refactor ou débito técnico sem mudança de comportamento visível"
   "type:docs|0075ca|Somente documentação (specs, ADRs, README, guias)"
   "type:incident|b60205|Ocorrência de produção/cliente (ex.: N1 do CRM) — SEMPRE exige revisão humana, mesmo complexidade S0"
@@ -118,16 +119,6 @@ declare -a LABELS=(
   # Status — controle de fluxo/ordenamento do backlog
   "status:needs-triage|ededed|Issue nova, ainda sem priority:*/complexity:* definidos — não deve ser puxada por agente autônomo"
   "status:blocked|5319e7|Bloqueada por dependência externa — pular na fila mesmo com priority:P0-blocker"
-
-  # Hierarquia Agile — fallback para orgs sem suporte a Issue Types nativos
-  # (ex.: GHE Server < 3.10). Em orgs com Issue Types, esses labels são usados
-  # como complemento visual de rastreabilidade nos PRs e no board.
-  # Ver seção "Hierarquia Agile (Epic → Feature → US → Task)" em
-  # docs/developer-guide.md e specs/005-epic-feature-us-ghe-hierarchy/spec.md.
-  "type:epic|6f42c1|Epic — iniciativa de negócio; pai de Features no GHE (fallback para orgs sem Issue Types nativos)"
-  "type:feature|0075ca|Feature — entrega de funcionalidade; sub-issue de Epic; tem correspondência 1:1 com specs/NNN-slug/"
-  "type:user-story|0e8a16|User Story — sub-issue de Feature; corresponde a seção [USN] do spec.md"
-  "type:task|cfd3d7|Task — unidade de implementação; sub-issue de User Story; gerada pelo /speckit-taskstoissues a partir de T00N"
 
   # DORA — domínio de métrica DevOps (Four Keys) que esta issue impacta.
   # Usado para correlacionar issues fechadas com os indicadores DORA da equipe

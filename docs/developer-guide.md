@@ -501,6 +501,9 @@ Em orgs com GHE Server < 3.10 que não suportam Issue Types nativos:
    - `type:user-story` (verde)
    - `type:task` (cinza)
 3. O `/speckit-taskstoissues` aplica esses labels nas issues em vez de Issue Types.
+   Em qualquer modo, cada Task issue também deve sair com o conjunto mínimo
+   `priority:*`, `complexity:S0`–`S4`, `type:task` e
+   `agent:autonomous-ok`/`agent:needs-human` coerente com a task.
 4. As views do Project V2 criadas por `setup-github-project.sh` terão filtros
    por label em vez de `type:`.
 
@@ -626,7 +629,9 @@ retrocompatível).
 
 **`autonomous_ok: false`:** se o bounded context tiver `autonomous_ok: false`
 em `bounded-contexts.yaml`, o label `agent:needs-human` é aplicado
-automaticamente nas Tasks criadas naquele repo.
+automaticamente nas Tasks criadas naquele repo. Tasks humanas de segurança,
+GitHub App ou permissão organizacional também devem receber `agent:needs-human`
+mesmo fora desse caso.
 
 ### 5.5. Verificando o board cross-repo
 
