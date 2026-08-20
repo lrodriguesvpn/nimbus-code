@@ -1,24 +1,11 @@
 name: Sincronizar campo Priority com label priority:*
 
-# Mantém o campo nativo "Priority" (single-select, criado por
-# scripts/setup-github-project.sh e scripts/setup-pmo-org-project.sh)
-# sincronizado com o label priority:* da issue/PR — sem isso, "Group by" nas
-# views dos GitHub Projects só funciona por Labels, que mistura priority:*
-# com type:*/agent:*/status:*/dora:*/complexity:* na mesma view (Labels é um
-# campo multi-valor com TODOS os labels, não só a família de prioridade).
+# Mantém o campo nativo "Priority" sincronizado com o label priority:* da
+# issue/PR.
 #
-# Genérico e sem configuração: descobre automaticamente TODOS os GitHub
-# Projects (por-repositório e/ou Portfólio PMO) aos quais a issue/PR já
-# pertence e que tenham um campo chamado "Priority" — não precisa de
-# project-url nem de edição manual após copiar este arquivo.
-#
-# Instalar em cada repositório:
-#   cp templates/workflows/sync-priority-field.yml <repo>/.github/workflows/
-#
-# Requer o secret ADD_TO_PROJECT_PAT (o mesmo já usado por
-# add-to-pmo-project.yml — PAT classic escopo `project`, ou fine-grained com
-# permissão de escrita em "Projects"). O GITHUB_TOKEN padrão do workflow NÃO
-# tem escopo `project`, por isso este secret é obrigatório.
+# Autenticação:
+#   - Preferencial: GitHub App (`NIMBUS_APP_ID` + `NIMBUS_APP_PRIVATE_KEY`)
+#   - Fallback temporário: `ADD_TO_PROJECT_PAT`
 
 on:
   issues:
@@ -31,17 +18,39 @@ jobs:
     name: Sincronizar Priority
     runs-on: ubuntu-latest
     steps:
-      - name: Verificar secret obrigatório
+      - name: Generate GitHub App installation token
+        id: app-token
+        if: ${{ secrets.NIMBUS_APP_ID != '' && secrets.NIMBUS_APP_PRIVATE_KEY != '' }}
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.NIMBUS_APP_ID }}
+          private-key: ${{ secrets.NIMBUS_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          github-api-url: ${{ github.api_url }}
+          permission-metadata: read
+          permission-issues: write
+          permission-pull-requests: write
+          permission-repository-projects: write
+          permission-organization-projects: write
+
+      - name: Resolve auth token (App or PAT fallback)
+        id: resolve-token
         run: |
-          if [ -z "${{ secrets.ADD_TO_PROJECT_PAT }}" ]; then
-            echo "::error::Secret ADD_TO_PROJECT_PAT não configurado. Ver templates/workflows/add-to-pmo-project.yml para instruções."
+          if [ -n "${{ steps.app-token.outputs.token }}" ]; then
+            echo "token=${{ steps.app-token.outputs.token }}" >> "$GITHUB_OUTPUT"
+            echo "::notice::Autenticado via GitHub App (instalação de curta duração)."
+          elif [ -n "${{ secrets.ADD_TO_PROJECT_PAT }}" ]; then
+            echo "token=${{ secrets.ADD_TO_PROJECT_PAT }}" >> "$GITHUB_OUTPUT"
+            echo "::warning::GitHub App não configurado — usando PAT de fallback (rollout em andamento; ver docs/github-app-auth-snippet.md)."
+          else
+            echo "::error::Nenhuma credencial configurada. Defina NIMBUS_APP_ID/NIMBUS_APP_PRIVATE_KEY ou ADD_TO_PROJECT_PAT."
             exit 1
           fi
 
       - name: Sincronizar campo Priority nos projects do item
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.ADD_TO_PROJECT_PAT }}
+          github-token: ${{ steps.resolve-token.outputs.token }}
           script: |
             const content = context.payload.issue || context.payload.pull_request;
             const contentId = content.node_id;
@@ -112,7 +121,6 @@ jobs:
                   }`, { projectId: item.project.id, itemId: item.id, fieldId: priorityField.id, optionId: option.id });
                 core.info(`Priority = ${suffix} aplicado no project ${item.project.id}.`);
               } else {
-                // Nenhum label priority:* presente (ex.: foi removido) — limpa o campo.
                 await github.graphql(`
                   mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!) {
                     clearProjectV2ItemFieldValue(input: {

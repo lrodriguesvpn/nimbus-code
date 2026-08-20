@@ -1,21 +1,79 @@
 #!/usr/bin/env bash
-# Bootstrap: aplica o bundle nimbus-code-project-bundle num repositório novo ou existente.
-#
-# Uso:
-#   curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bootstrap.sh | bash
-# ou, com o repo já clonado localmente:
-#   ./bootstrap.sh --local /caminho/para/nimbus-code-spec-kit-template
-#
-# Este script existe porque, hoje, o bundle ainda não está publicado num catálogo
-# (specify preset/extension/workflow catalogs) — ver "Publicação e Catálogo" no
-# README.md raiz. Enquanto isso, o bootstrap usa `--dev`/paths locais diretamente.
-# Quando o catálogo estiver publicado, este script pode ser trocado por:
-#   specify bundle install nimbus-code-project-bundle --integration copilot
+# Bootstrap: applies the nimbus-code-project-bundle to a new or existing repository.
 set -euo pipefail
 
 STANDARDS_REPO="https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
 LOCAL_PATH=""
 INTEGRATION="${SPECKIT_INTEGRATION_DEFAULT:-copilot}"
+REPO_TYPE=""
+SELECTED_PRESET=""
+
+print_usage() {
+  cat <<'EOF'
+Usage:
+  ./bootstrap.sh [--local <path>] [--integration <copilot|claude|gemini>] [--repo-type <platform|dev_standards>]
+EOF
+}
+
+preset_for_repo_type() {
+  case "$1" in
+    platform)
+      echo "nimbus-code-platform-standards"
+      ;;
+    dev_standards)
+      echo "nimbus-code-standards"
+      ;;
+    *)
+      echo ""
+      ;;
+  esac
+}
+
+resolve_repo_type() {
+  if [[ -n "$REPO_TYPE" ]]; then
+    if [[ -z "$(preset_for_repo_type "$REPO_TYPE")" ]]; then
+      echo "ERROR: invalid --repo-type '$REPO_TYPE'. Use 'platform' or 'dev_standards'." >&2
+      exit 1
+    fi
+    return
+  fi
+
+  if [[ ! -t 0 ]]; then
+    echo "ERROR: --repo-type is required in non-interactive mode. Use --repo-type platform or --repo-type dev_standards." >&2
+    exit 1
+  fi
+
+  while true; do
+    printf '? Is this repository platform/client or dev standards? [platform/dev_standards] '
+    read -r REPO_TYPE
+    case "$REPO_TYPE" in
+      platform|dev_standards)
+        return
+        ;;
+      *)
+        echo "ERROR: answer must be 'platform' or 'dev_standards'."
+        ;;
+    esac
+  done
+}
+
+select_template_file() {
+  local relative_path="$1"
+  local preferred="$LOCAL_PATH/presets/$SELECTED_PRESET/templates/$relative_path"
+  local fallback="$LOCAL_PATH/presets/nimbus-code-standards/templates/$relative_path"
+
+  if [[ -f "$preferred" ]]; then
+    echo "$preferred"
+    return 0
+  fi
+
+  if [[ -f "$fallback" ]]; then
+    echo "$fallback"
+    return 0
+  fi
+
+  return 1
+}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -27,15 +85,24 @@ while [[ $# -gt 0 ]]; do
       INTEGRATION="$2"
       shift 2
       ;;
+    --repo-type)
+      REPO_TYPE="$2"
+      shift 2
+      ;;
+    -h|--help)
+      print_usage
+      exit 0
+      ;;
     *)
-      echo "Argumento desconhecido: $1" >&2
+      echo "Unknown argument: $1" >&2
+      print_usage >&2
       exit 1
       ;;
   esac
 done
 
 if ! command -v specify >/dev/null 2>&1; then
-  echo "❌ 'specify' CLI não encontrado. Instale primeiro: https://github.com/github/nimbus-code#-get-started" >&2
+  echo "ERROR: 'specify' CLI not found. Install it first: https://github.com/github/spec-kit" >&2
   exit 1
 fi
 
@@ -44,178 +111,136 @@ WORKDIR="$(pwd)"
 if [[ -z "$LOCAL_PATH" ]]; then
   TMP_CLONE="$(mktemp -d)"
   trap 'rm -rf "$TMP_CLONE"' EXIT
-  echo "→ Clonando $STANDARDS_REPO..."
+  echo "-> Cloning $STANDARDS_REPO..."
   git clone --depth 1 "$STANDARDS_REPO" "$TMP_CLONE" >/dev/null
   LOCAL_PATH="$TMP_CLONE"
 fi
 
-echo "→ Inicializando projeto Nimbus Code em $WORKDIR (integração: $INTEGRATION)..."
+resolve_repo_type
+SELECTED_PRESET="$(preset_for_repo_type "$REPO_TYPE")"
+
+echo "-> Initializing Nimbus Code in $WORKDIR (integration: $INTEGRATION)..."
 specify init --here --integration "$INTEGRATION" --force
 
-echo "→ Instalando preset nimbus-code-standards..."
-specify preset add --dev "$LOCAL_PATH/presets/nimbus-code-standards" --priority 5 \
-  || echo "  (preset já instalado — pulei; use 'specify preset remove nimbus-code-standards' antes para reinstalar)"
+echo "-> Installing preset $SELECTED_PRESET..."
+specify preset add --dev "$LOCAL_PATH/presets/$SELECTED_PRESET" --priority 5   || echo "  (preset already installed - skipped; use 'specify preset remove $SELECTED_PRESET' before reinstalling)"
 
-echo "→ Instalando extensão nimbus-code-backlog-sync..."
-specify extension add --dev "$LOCAL_PATH/extensions/nimbus-code-backlog-sync" \
-  || echo "  (extensão já instalada — pulei; use 'specify extension remove nimbus-code-backlog-sync' antes para reinstalar)"
+echo "-> Installing extension nimbus-code-backlog-sync..."
+specify extension add --dev "$LOCAL_PATH/extensions/nimbus-code-backlog-sync"   || echo "  (extension already installed - skipped; use 'specify extension remove nimbus-code-backlog-sync' before reinstalling)"
 
-echo "→ Instalando workflow nimbus-code-full-cycle..."
-specify workflow add "$LOCAL_PATH/workflows/nimbus-code-full-cycle" \
-  || echo "  (workflow já instalado — pulei; use 'specify workflow remove nimbus-code-full-cycle' antes para reinstalar)"
+echo "-> Installing workflow nimbus-code-full-cycle..."
+specify workflow add "$LOCAL_PATH/workflows/nimbus-code-full-cycle"   || echo "  (workflow already installed - skipped; use 'specify workflow remove nimbus-code-full-cycle' before reinstalling)"
 
-echo "→ Instalando GitHub Action de verificação de atualização (Nimbus Code + bundle Nimbus-Code)..."
+echo "-> Installing update check workflow..."
 UPDATE_CHECK_SRC="$LOCAL_PATH/templates/workflows/update-speckit-and-bundle.yml"
 if [[ -f "$UPDATE_CHECK_SRC" ]]; then
   mkdir -p "$WORKDIR/.github/workflows"
   cp "$UPDATE_CHECK_SRC" "$WORKDIR/.github/workflows/update-speckit-and-bundle.yml"
-  echo "  ✅ .github/workflows/update-speckit-and-bundle.yml instalado."
-  echo "  ℹ Roda semanalmente + sob demanda; nunca aplica atualização sozinho, só abre/atualiza"
-  echo "    uma issue de aviso. Com o secret VPNDEV_STANDARDS_READ_TOKEN (PAT de qualquer"
-  echo "    membro da organização venha-pra-nuvem), também compara a versão mais recente do"
-  echo "    bundle; sem esse secret, compara apenas a versão do Nimbus Code CLI."
-  echo "    Ver 'Versão do Bundle em uso' no README."
+  echo "  OK: .github/workflows/update-speckit-and-bundle.yml installed."
+  echo "  INFO: with VPNDEV_STANDARDS_READ_TOKEN it can compare the latest bundle version."
 else
-  echo "  ⚠ Template update-speckit-and-bundle.yml não encontrado em $UPDATE_CHECK_SRC"
+  echo "  WARN: missing template $UPDATE_CHECK_SRC"
 fi
 
-echo ""
-echo "→ Instalando GitHub Action que garante o GitHub Project do repositório..."
+echo
+echo "-> Installing ensure-github-project workflow..."
 ENSURE_PROJECT_SRC="$LOCAL_PATH/templates/workflows/ensure-github-project.yml"
 if [[ -f "$ENSURE_PROJECT_SRC" ]]; then
   mkdir -p "$WORKDIR/.github/workflows"
   cp "$ENSURE_PROJECT_SRC" "$WORKDIR/.github/workflows/ensure-github-project.yml"
-  echo "  ✅ .github/workflows/ensure-github-project.yml instalado."
-  echo "  ℹ Roda semanalmente + sob demanda; recria o GitHub Project (views + campos"
-  echo "    'Horas Humanas'/'Oportunidade D365') se ele não existir mais — garante que"
-  echo "    este repositório sempre tenha o Project, mesmo que o passo automático abaixo"
-  echo "    tenha sido pulado (ex.: gh CLI indisponível na máquina de quem rodou o"
-  echo "    bootstrap). Requer os secrets VPNDEV_PROJECT_TOKEN (PAT com escopos"
-  echo "    repo+project) e VPNDEV_STANDARDS_READ_TOKEN — configure em Settings →"
-  echo "    Secrets and variables → Actions deste repositório."
+  echo "  OK: .github/workflows/ensure-github-project.yml installed."
+  echo "  INFO: prefers NIMBUS_APP_ID/NIMBUS_APP_PRIVATE_KEY; falls back to VPNDEV_PROJECT_TOKEN during rollout."
 else
-  echo "  ⚠ Template ensure-github-project.yml não encontrado em $ENSURE_PROJECT_SRC"
+  echo "  WARN: missing template $ENSURE_PROJECT_SRC"
 fi
 
-echo ""
-echo "→ Instalando GitHub Action que popula a board do repositório..."
+echo
+echo "-> Installing add-to-repo-project workflow..."
 ADD_TO_REPO_PROJECT_SRC="$LOCAL_PATH/templates/workflows/add-to-repo-project.yml"
 if [[ -f "$ADD_TO_REPO_PROJECT_SRC" ]]; then
   mkdir -p "$WORKDIR/.github/workflows"
   cp "$ADD_TO_REPO_PROJECT_SRC" "$WORKDIR/.github/workflows/add-to-repo-project.yml"
-  echo "  ✅ .github/workflows/add-to-repo-project.yml instalado."
-  echo "  ℹ Adiciona automaticamente toda issue/PR nova à board deste repositório em"
-  echo "    tempo real — sem isso, a board fica criada mas sempre vazia (o"
-  echo "    setup-github-project.sh só cria a board, nunca populava sozinho)."
-  echo "    Requer o secret VPNDEV_PROJECT_TOKEN (mesmo já usado acima)."
+  echo "  OK: .github/workflows/add-to-repo-project.yml installed."
+  echo "  INFO: prefers NIMBUS_APP_ID/NIMBUS_APP_PRIVATE_KEY; falls back to VPNDEV_PROJECT_TOKEN during rollout."
 else
-  echo "  ⚠ Template add-to-repo-project.yml não encontrado em $ADD_TO_REPO_PROJECT_SRC"
+  echo "  WARN: missing template $ADD_TO_REPO_PROJECT_SRC"
 fi
 
-echo ""
-echo "→ Instalando GitHub Action de integração híbrida com DEVSTATS corporativo..."
+echo
+echo "-> Installing DEVSTATS workflow..."
 DEVSTATS_WORKFLOW_SRC="$LOCAL_PATH/templates/workflows/devstats-corporate-integration.yml"
 if [[ -f "$DEVSTATS_WORKFLOW_SRC" ]]; then
   mkdir -p "$WORKDIR/.github/workflows"
   cp "$DEVSTATS_WORKFLOW_SRC" "$WORKDIR/.github/workflows/devstats-corporate-integration.yml"
-  echo "  ✅ .github/workflows/devstats-corporate-integration.yml instalado."
-  echo "  ℹ Emite eventos semânticos de issue/PR + snapshot diário para reconciliação"
-  echo "    central no DEVSTATS. Requer padrão corporativo em nível de organização:"
-  echo "    Secret obrigatório DEVSTATS_TOKEN, Variable obrigatória DEVSTATS_ENDPOINT,"
-  echo "    Variables opcionais DEVSTATS_ENV/DEVSTATS_ENABLED e Secret opcional"
-  echo "    DEVSTATS_CLIENT_ID. Sem credencial/config obrigatória, o workflow falha"
-  echo "    explicitamente (observável)."
+  echo "  OK: .github/workflows/devstats-corporate-integration.yml installed."
 else
-  echo "  ⚠ Template devstats-corporate-integration.yml não encontrado em $DEVSTATS_WORKFLOW_SRC"
+  echo "  WARN: missing template $DEVSTATS_WORKFLOW_SRC"
 fi
 
-echo ""
-echo "ℹ Workflows OPT-IN (copie manualmente quando os pré-requisitos existirem):"
-echo "  • templates/workflows/add-to-pmo-project.yml — conecta este repo ao Portfólio"
-echo "    PMO (1x por organização, ver scripts/setup-pmo-org-project.sh)."
-echo "  • templates/workflows/sync-priority-field.yml — mantém o campo nativo"
-echo "    \"Priority\" sincronizado com o label priority:* em qualquer GitHub Project"
-echo "    ao qual a issue/PR pertença (por-repositório e/ou Portfólio PMO). Sem"
-echo "    edição manual após copiar. Ambos requerem o secret ADD_TO_PROJECT_PAT."
-echo "  • templates/workflows/terraform-plan-gate.yml — bloqueia terraform apply com"
-echo "    destroy até aprovação do owner via GitHub Environment protegido. Copie só"
-echo "    em repositórios que usam Terraform, adapte o working-directory e crie o"
-echo "    Environment 'infra-approval-owner' manualmente (Settings → Environments)."
+echo
+echo "INFO: opt-in workflows:"
+echo "  - templates/workflows/add-to-pmo-project.yml"
+echo "  - templates/workflows/sync-priority-field.yml (prefers NIMBUS_APP_ID/NIMBUS_APP_PRIVATE_KEY; fallback ADD_TO_PROJECT_PAT)"
+echo "  - templates/workflows/terraform-plan-gate.yml"
 
-echo ""
-echo "→ Instalando doc de perfis de custo humano (Júnior/Pleno/Sênior)..."
-COST_PROFILES_SRC="$LOCAL_PATH/presets/nimbus-code-standards/templates/cost-profiles-and-rates.md"
-if [[ -f "$COST_PROFILES_SRC" ]]; then
+echo
+echo "-> Installing cost profile documentation..."
+COST_PROFILES_SRC="$(select_template_file 'cost-profiles-and-rates.md' || true)"
+if [[ -n "$COST_PROFILES_SRC" && -f "$COST_PROFILES_SRC" ]]; then
   mkdir -p "$WORKDIR/docs"
   if [[ -f "$WORKDIR/docs/cost-profiles-and-rates.md" ]]; then
-    echo "  ℹ docs/cost-profiles-and-rates.md já existe — pulei (não sobrescrevo customização local)."
+    echo "  INFO: docs/cost-profiles-and-rates.md already exists - skipped."
   else
     cp "$COST_PROFILES_SRC" "$WORKDIR/docs/cost-profiles-and-rates.md"
-    echo "  ✅ docs/cost-profiles-and-rates.md instalado (taxas padrão: Júnior R\$40/Pleno"
-    echo "     R\$60/Sênior R\$90 por hora — ajuste livremente para o seu projeto)."
+    echo "  OK: docs/cost-profiles-and-rates.md installed."
   fi
 else
-  echo "  ⚠ Template cost-profiles-and-rates.md não encontrado em $COST_PROFILES_SRC"
+  echo "  WARN: missing cost profile template"
 fi
 
-echo ""
-echo "→ Instalando catálogo de reuso (docs/reuse-catalog.yaml)..."
-REUSE_CATALOG_SRC="$LOCAL_PATH/presets/nimbus-code-standards/templates/reuse-catalog.yaml"
-if [[ -f "$REUSE_CATALOG_SRC" ]]; then
+echo
+echo "-> Installing reuse catalog..."
+REUSE_CATALOG_SRC="$(select_template_file 'reuse-catalog.yaml' || true)"
+if [[ -n "$REUSE_CATALOG_SRC" && -f "$REUSE_CATALOG_SRC" ]]; then
   mkdir -p "$WORKDIR/docs"
   if [[ -f "$WORKDIR/docs/reuse-catalog.yaml" ]]; then
-    echo "  ℹ docs/reuse-catalog.yaml já existe — pulei (não sobrescrevo customização local)."
+    echo "  INFO: docs/reuse-catalog.yaml already exists - skipped."
   else
     cp "$REUSE_CATALOG_SRC" "$WORKDIR/docs/reuse-catalog.yaml"
-    echo "  ✅ docs/reuse-catalog.yaml instalado (vazio — preencha conforme features"
-    echo "     introduzirem padrões reaproveitáveis; ver ai-code-quality-and-observability.md"
-    echo "     seção 9)."
+    echo "  OK: docs/reuse-catalog.yaml installed."
   fi
 else
-  echo "  ⚠ Template reuse-catalog.yaml não encontrado em $REUSE_CATALOG_SRC"
+  echo "  WARN: missing reuse catalog template"
 fi
 
-echo ""
-echo "→ Instalando instruções do Copilot (.github/copilot-instructions.md)..."
-COPILOT_INSTRUCTIONS_SRC="$LOCAL_PATH/presets/nimbus-code-standards/templates/project-root/copilot-instructions.md"
-if [[ -f "$COPILOT_INSTRUCTIONS_SRC" ]]; then
+echo
+echo "-> Installing Copilot instructions..."
+COPILOT_INSTRUCTIONS_SRC="$(select_template_file 'project-root/copilot-instructions.md' || true)"
+if [[ -n "$COPILOT_INSTRUCTIONS_SRC" && -f "$COPILOT_INSTRUCTIONS_SRC" ]]; then
   mkdir -p "$WORKDIR/.github"
   if [[ -f "$WORKDIR/.github/copilot-instructions.md" ]]; then
-    echo "  ℹ .github/copilot-instructions.md já existe — pulei (não sobrescrevo customização local)."
+    echo "  INFO: .github/copilot-instructions.md already exists - skipped."
   else
     cp "$COPILOT_INSTRUCTIONS_SRC" "$WORKDIR/.github/copilot-instructions.md"
-    echo "  ✅ .github/copilot-instructions.md instalado — preencha os placeholders"
-    echo "     (<project-name>, <org>/<repo>, stack) e mantenha atualizado a cada"
-    echo "     mudança de arquitetura."
+    echo "  OK: .github/copilot-instructions.md installed."
   fi
 else
-  echo "  ⚠ Template copilot-instructions.md não encontrado em $COPILOT_INSTRUCTIONS_SRC"
+  echo "  WARN: missing Copilot instructions template"
 fi
 
-BUNDLE_VERSION="$(grep -A4 '^bundle:' "$LOCAL_PATH/bundles/nimbus-code-project-bundle/bundle.yml" | grep -E '^\s*version:' | head -1 | sed -E 's/.*"([0-9.]+)".*/\1/')"
-echo ""
-echo "✅ Bundle nimbus-code-project-bundle v${BUNDLE_VERSION} aplicado com sucesso."
-echo "   Registre a versão instalada no README do projeto (ver seção 'Bundle Nimbus-Code' do template de README)."
-echo ""
+BUNDLE_VERSION="$(grep -A4 '^bundle:' "$LOCAL_PATH/bundles/nimbus-code-project-bundle/bundle.yml" | grep -E '^\s*version:' | head -1 | sed -E 's/.*"([0-9.]+)".*//')"
+echo
+echo "OK: bundle nimbus-code-project-bundle v${BUNDLE_VERSION} applied."
+echo "OK: preset installed: $SELECTED_PRESET (repository type: $REPO_TYPE)"
 
-# Criar GitHub Project com as views padrão (opcional, requer GH CLI autenticado)
+auto_assign_hint() {
+  echo "  INFO: to enable auto-assign, configure NIMBUS_APP_ID/NIMBUS_APP_PRIVATE_KEY; COPILOT_AGENT_ASSIGN_TOKEN remains a temporary fallback during rollout."
+}
+
 if command -v gh >/dev/null 2>&1; then
-  echo ""
-  echo "→ Configurando GitHub Project V2 com views padrão..."
-  
-  # Detectar repo owner/name a partir do git remote
+  echo
+  echo "-> Configuring GitHub Project V2 and labels..."
   if GIT_REMOTE=$(git config --get remote.origin.url 2>/dev/null); then
-    # Extrai owner/repo de URLs como:
-    # - https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/meu-repo.git
-    # - git@venha-pra-nuvem.ghe.com:venha-pra-nuvem/meu-repo.git
-    #
-    # Usa expansão de parâmetros em vez de regex com quantificador "lazy"
-    # (`+?`) — o bash padrão do macOS (3.2, por licenciamento GPL) usa ERE
-    # puro, que NÃO suporta quantificadores lazy; `[^/]+?` casava de forma
-    # imprevisível (ou não casava) e, quando casava, incluía o sufixo
-    # ".git" no nome do repo. Isso fazia esta detecção falhar silenciosamente
-    # (cai no "⚠ Não consegui extrair...") em praticamente todo bootstrap
-    # real, já que qualquer remote clonado normalmente termina em ".git".
     REPO_PATH="$GIT_REMOTE"
     if [[ "$REPO_PATH" == git@* ]]; then
       REPO_PATH="${REPO_PATH#*:}"
@@ -227,40 +252,27 @@ if command -v gh >/dev/null 2>&1; then
     if [[ -n "$REPO_PATH" && "$REPO_PATH" == */* ]]; then
       REPO_OWNER="${REPO_PATH%%/*}"
       REPO_NAME="${REPO_PATH#*/}"
-      
-      # Chamar script de setup de project
       SETUP_SCRIPT="$LOCAL_PATH/scripts/setup-github-project.sh"
       if [[ -f "$SETUP_SCRIPT" ]]; then
-        bash "$SETUP_SCRIPT" --repo-owner "$REPO_OWNER" --repo-name "$REPO_NAME" || \
-          echo "  ⚠ Não consegui criar o GitHub Project automaticamente. Execute manualmente:"
-          echo "    bash $SETUP_SCRIPT --repo-owner $REPO_OWNER --repo-name $REPO_NAME"
-      else
-        echo "  ⚠ Script setup-github-project.sh não encontrado"
+        bash "$SETUP_SCRIPT" --repo-owner "$REPO_OWNER" --repo-name "$REPO_NAME" || {
+          echo "  WARN: could not create GitHub Project automatically."
+          echo "  Run manually: bash $SETUP_SCRIPT --repo-owner $REPO_OWNER --repo-name $REPO_NAME"
+        }
       fi
-
-      # Criar/atualizar taxonomia de labels (priority:*, complexity:*, type:*, agent:*, status:*)
-      echo ""
-      echo "→ Configurando taxonomia de labels (priorização e desenvolvimento autônomo)..."
       LABELS_SCRIPT="$LOCAL_PATH/scripts/setup-github-labels.sh"
       if [[ -f "$LABELS_SCRIPT" ]]; then
-        bash "$LABELS_SCRIPT" --repo-owner "$REPO_OWNER" --repo-name "$REPO_NAME" || \
-          echo "  ⚠ Não consegui criar os labels automaticamente. Execute manualmente:"
-          echo "    bash $LABELS_SCRIPT --repo-owner $REPO_OWNER --repo-name $REPO_NAME"
-        echo "  ℹ Para habilitar o auto-assign do Copilot coding agent via label"
-        echo "    'agent:autonomous-ok', copie .github/workflows/agent-auto-assign.yml"
-        echo "    para o repositório e configure o secret COPILOT_AGENT_ASSIGN_TOKEN."
-        echo "    Ver docs/label-taxonomy-and-autonomous-dev.md."
-      else
-        echo "  ⚠ Script setup-github-labels.sh não encontrado"
+        bash "$LABELS_SCRIPT" --repo-owner "$REPO_OWNER" --repo-name "$REPO_NAME" || {
+          echo "  WARN: could not create labels automatically."
+          echo "  Run manually: bash $LABELS_SCRIPT --repo-owner $REPO_OWNER --repo-name $REPO_NAME"
+        }
+        auto_assign_hint
       fi
     else
-      echo "  ⚠ Não consegui extrair owner/repo do git remote: $GIT_REMOTE"
+      echo "  WARN: could not derive owner/repo from remote: $GIT_REMOTE"
     fi
   else
-    echo "  ⚠ Repositório git não configurado (remote.origin.url)"
+    echo "  WARN: remote.origin.url is not configured"
   fi
 else
-  echo "  ⚠ GH CLI não encontrado — pulando criação automática de GitHub Project e labels"
-  echo "    Para criar manualmente, execute: ./scripts/setup-github-project.sh"
-  echo "    e: ./scripts/setup-github-labels.sh"
+  echo "  WARN: gh CLI not found - skipping GitHub Project and label setup"
 fi

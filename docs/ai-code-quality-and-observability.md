@@ -298,8 +298,7 @@ GitHub Copilot**, configurada fora do Nimbus Code em:
 O que **é possível e recomendado** fazer, mesmo sem enforcement técnico:
 documentar uma **lista de prioridade recomendada por tipo de tarefa** como
 orientação para devs e para quem administra a política de modelos da
-organização. Baseado na [documentação oficial de comparação de modelos do
-GitHub Copilot](https://docs.github.com/en/copilot/reference/ai-models/model-comparison):
+organização. Baseado na documentacao oficial de comparacao de modelos do GitHub Copilot:
 
 | Tipo de tarefa | Modelo recomendado (prioridade) |
 | --- | --- |
@@ -401,7 +400,7 @@ gráfico uma vez.
    agrega itens de múltiplos repositórios. Cada repositório que deve
    alimentar esse board instala
    [`templates/workflows/add-to-pmo-project.yml`](../templates/workflows/add-to-pmo-project.yml)
-   (usa a action [`actions/add-to-project`](https://github.com/actions/add-to-project)),
+   (usa a action `actions/add-to-project`),
    apontando para a URL desse project — toda issue/PR nova aparece
    automaticamente lá, sem duplicar cadastro manual.
 2. **Custo real e Oportunidades D365 consolidados** — os campos `Horas
