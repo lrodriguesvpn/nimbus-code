@@ -11,7 +11,8 @@ flowchart TD
     Dev["👤 Dev"]
 
     subgraph speckit["Spec Kit (.specify/)"]
-        SpecifyCmd["/speckit-specify\n(create-new-feature.sh)"]
+        SpecifyCmd["/speckit-specify\n(SKILL.md — cria feature.json direto)"]
+        ConsistencyCheck["check-epic-issue-consistency.sh\ngate final incondicional\n(autocorrige epic_issue)"]
         TasksToIssuesCmd["/speckit-taskstoissues\n(SKILL.md)"]
         HierarchyScript["create-github-issue-hierarchy.sh\nensure-feature / ensure-user-story\nlink-task / set-type"]
         FeatureJSON[".specify/feature.json\n+ epic_issue"]
@@ -30,14 +31,16 @@ flowchart TD
     GHEAPI["☁️ GHE GraphQL/REST API\n(sub-issues, Issue Types, Projects V2)"]
 
     Dev -->|"1. /speckit-specify EPIC_ISSUE=N"| SpecifyCmd
-    SpecifyCmd -->|"persiste epic_issue"| FeatureJSON
+    SpecifyCmd -->|"persiste epic_issue\n(extração inline via prosa)"| FeatureJSON
+    SpecifyCmd -->|"2. gate obrigatório,\nsempre executado"| ConsistencyCheck
+    ConsistencyCheck -->|"lê descrição bruta,\ncompara e autocorrige"| FeatureJSON
 
-    Dev -->|"2. /speckit-taskstoissues"| TasksToIssuesCmd
+    Dev -->|"3. /speckit-taskstoissues"| TasksToIssuesCmd
     TasksToIssuesCmd -->|"lê epic_issue"| FeatureJSON
     TasksToIssuesCmd -->|"invoca (ensure-feature,\nensure-user-story, link-task)"| HierarchyScript
     HierarchyScript -->|"cria Feature/US issues,\naddSubIssue, updateIssueIssueType\n(dedup por marcador oculto)\n(fallback: labels)"| GHEAPI
 
-    Dev -->|"3. setup scripts (bootstrap)"| SetupProject
+    Dev -->|"4. setup scripts (bootstrap)"| SetupProject
     SetupProject -->|"cria Issue Types + views\nhierárquicas no Project V2"| GHEAPI
 
     SetupLabels -->|"cria labels fallback"| GHEAPI
@@ -94,6 +97,16 @@ flowchart TD
 - `create-github-issue-hierarchy.sh` foi adicionado nesta sessão (2026-08-20)
   como o script de deduplicação/vinculação mencionado nesta nota — ver nó
   `create-github-issue-hierarchy` em `graph.yaml`
+- **Confiabilidade da extração de `epic_issue`** (mesma sessão, follow-up): o
+  `/speckit-specify` não invoca `create-new-feature.sh` no caminho principal
+  (ele mesmo cria `feature.json` via prosa do SKILL.md) — então a extração de
+  `EPIC_ISSUE=<N>` dependia de o agente LLM seguir uma instrução no meio de um
+  fluxo longo, sem verificação. Corrigido com defesa em profundidade: (1)
+  `create-new-feature.sh` também extrai o token para quem chama via CLI/hook;
+  (2) novo `check-epic-issue-consistency.sh` faz a checagem determinística e
+  se autocorrige; (3) o SKILL.md ganhou um gate "Mandatory Post-Execution
+  Validation" **incondicional** que sempre roda esse script como último passo,
+  em vez de confiar apenas na prosa do meio do fluxo.
 - O campo `epic_issue` em `feature.json` é **opcional** — sem ele, o fluxo
   funciona normalmente sem criar vinculação hierárquica
 - O fallback via labels é ativado automaticamente quando a consulta de Issue

@@ -53,6 +53,10 @@
   - Persistir `"epic_issue": <N>` em `.specify/feature.json` quando fornecido
   - Documentar no output que o campo pode ser preenchido manualmente depois
   - **Implementado nesta sessão**: nova flag `--epic-issue <N>` (validada como inteiro positivo), merge em `feature.json` como número (não string), refletido em `--json`/texto de saída (`EPIC_ISSUE: N`) e no help. `.github/skills/speckit-specify/SKILL.md` também passou a reconhecer o token `EPIC_ISSUE=<N>` no texto livre do `/speckit-specify` e persistir o mesmo campo. Testado com `--dry-run` e execução real em repo Git isolado (não afeta `main`).
+  - **Reforço de confiabilidade (mesma sessão, follow-up)**: identificado que a extração de `EPIC_ISSUE=<N>` dependia de o agente LLM seguir uma instrução em prosa no meio de um fluxo longo do `/speckit-specify` (o comando não invoca `create-new-feature.sh` no caminho principal — ele mesmo cria o diretório/spec/feature.json via prosa). Corrigido com defesa em profundidade:
+    1. `create-new-feature.sh` agora também extrai `EPIC_ISSUE=<N>` de dentro do próprio texto livre da descrição (não só via `--epic-issue`), removendo o token antes de gerar o slug/short-name — ajuda quem chama o script direto.
+    2. Novo script determinístico `.specify/scripts/bash/check-epic-issue-consistency.sh`: recebe a descrição bruta original, extrai `EPIC_ISSUE=<N>` via regex bash, compara com `feature.json` e se autocorrige (via `jq`, com fallback sem `jq`) se estiver ausente/divergente. Testado com 5+ cenários em repo isolado (sem token, consistente, inconsistente, re-execução idempotente, sem `jq`).
+    3. `.github/skills/speckit-specify/SKILL.md` ganhou uma seção "Mandatory Post-Execution Validation" **incondicional** (não depende de hooks/`extensions.yml`) que instrui o agente a sempre rodar o script acima como último passo, substituindo a dependência de "lembrar no meio do fluxo" por uma checagem final obrigatória e auditável.
 - [x] T009 [US2] Implementar lógica de criação de sub-issues em `/speckit-taskstoissues` (`.specify/workflows/speckit/workflow.yml` ou script associado):
   - Ler `epic_issue` de `feature.json`
   - Criar issue de Feature com `type:Feature`; vinculá-la como sub-issue do Epic (se `epic_issue` definido)
@@ -133,6 +137,7 @@
   - `ghe-sub-issues-hierarchy` — padrão de criação de hierarquia Epic/Feature/US/Task via sub-issues GHE com deduplicação
   - `speckit-deduplication-by-id` — padrão de deduplicação de issues por ID `T00N` em vez de título
   - **Nota**: as duas entradas já existiam (adicionadas numa sessão anterior, antes de a automação real existir). Atualizadas nesta sessão para referenciar o script concreto `create-github-issue-hierarchy.sh` que agora implementa o padrão descrito.
+  - **Follow-up nesta sessão**: adicionada uma terceira entrada, `skill-mid-flow-instruction-reliability-gate`, documentando o padrão de defesa em profundidade (hardening do script + checagem determinística autocorretiva + gate incondicional no SKILL.md) criado para resolver a fragilidade da extração de `epic_issue`, reaproveitável para qualquer outro campo de `feature.json` extraído de texto livre por um SKILL.md.
 
 ---
 

@@ -130,6 +130,29 @@ if [ -z "$FEATURE_DESCRIPTION" ]; then
     exit 1
 fi
 
+# Auto-detect an inline EPIC_ISSUE=<N> token inside the free-text description
+# (specs/005-epic-feature-us-ghe-hierarchy — Camada 1 of the reliability fix).
+# This is a deterministic fallback so epic_issue gets persisted even when the
+# caller (e.g. an LLM-driven skill) forwards the raw description untouched
+# instead of extracting --epic-issue itself. The explicit --epic-issue flag
+# always wins if both are present and disagree (with a warning).
+INLINE_EPIC_ISSUE=$(printf '%s' "$FEATURE_DESCRIPTION" | grep -ioE 'EPIC_ISSUE[[:space:]]*=[[:space:]]*[0-9]+' | head -1 | grep -oE '[0-9]+$' || true)
+if [ -n "$INLINE_EPIC_ISSUE" ]; then
+    # Strip the token from the description so it never leaks into the slug,
+    # short name, or spec content.
+    FEATURE_DESCRIPTION=$(printf '%s' "$FEATURE_DESCRIPTION" | sed -E 's/EPIC_ISSUE[[:space:]]*=[[:space:]]*[0-9]+//gi' | sed -E 's/^[[:space:]]+|[[:space:]]+$//g' | sed -E 's/[[:space:]]+/ /g')
+    if [ -z "$EPIC_ISSUE_INPUT" ]; then
+        EPIC_ISSUE_INPUT="$INLINE_EPIC_ISSUE"
+    elif [ "$EPIC_ISSUE_INPUT" != "$INLINE_EPIC_ISSUE" ]; then
+        echo "[specify] Warning: --epic-issue $EPIC_ISSUE_INPUT conflicts with inline EPIC_ISSUE=$INLINE_EPIC_ISSUE found in the description; using --epic-issue $EPIC_ISSUE_INPUT" >&2
+    fi
+fi
+
+if [ -z "$FEATURE_DESCRIPTION" ]; then
+    echo "Error: Feature description cannot be empty or contain only whitespace after removing EPIC_ISSUE=<N>" >&2
+    exit 1
+fi
+
 MAX_FEATURE_NUMBER=9223372036854775807
 MAX_BRANCH_LENGTH=244
 
