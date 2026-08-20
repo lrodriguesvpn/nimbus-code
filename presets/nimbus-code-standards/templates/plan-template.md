@@ -70,12 +70,15 @@ Para S3/S4, criar também `impact-map.md` na mesma pasta.*
 |---|---|
 | **Estratégia** | `flag` · `direct` · `canary` · `blue-green` *(marcar uma)* |
 | **Feature flag name** | `<nome-da-flag>` — ou `N/A` se não usar flag |
-| **Flag provider** | [ex.: LaunchDarkly, AWS AppConfig, OpenFeature] — ou `N/A` |
+| **Flag provider** | **OpenFeature** (obrigatório como camada de abstração) + provider pluggable por ambiente — ou `N/A` |
 | **Critério de ativação** | [ex.: 10% tráfego por 24h sem aumento de erro rate] |
 | **Critério de rollback** | [ex.: taxa de erro > 0,5% ou p99 > 500ms por 5 min] |
 
 > **Regra**: features S3/S4 **obrigam** estratégia `flag`, `canary` ou `blue-green`
 > — `direct` não é permitido sem justificativa explícita registrada aqui e no ADL.
+>
+> **Regra adicional**: quando houver toggle, o plano **deve** declarar OpenFeature como padrão.
+> O provider específico (LaunchDarkly, AppConfig etc.) fica atrás da API OpenFeature.
 
 **Justificativa para deploy `direct` (se aplicável):**
 [Razão técnica para não usar flag/canary — ex.: migration de schema incompatível
@@ -103,6 +106,18 @@ houver homologações concorrentes.*
 - Decisor de negócio/arquitetura: [nome/time]
 - Regra de precedência entre frentes: [qual comportamento vence em conflito]
 - Evidência registrada no ADL: [link/âncora da decisão]
+
+## Nimbus-Code — Cost Reference
+
+*Obrigatório para features com participação híbrida agente+humano. O objetivo é
+deixar explícito como estimativa e consumo real serão rastreados ao longo do ciclo.*
+
+| Campo | Valor |
+|---|---|
+| **Token estimate range** | ~[X]–[Y] mil tokens (coerente com Classificação de Complexidade) |
+| **Human effort estimate range** | ~[X]–[Y] horas (quando houver execução/revisão humana) |
+| **Tracking method** | [ex.: tabela "Estimativa vs. Consumo Real" no tasks.md + campo "Horas Humanas" no GitHub Project] |
+| **Budget ceiling (optional)** | [ex.: ~US$150] |
 
 ## Nimbus-Code — SLO Gate
 

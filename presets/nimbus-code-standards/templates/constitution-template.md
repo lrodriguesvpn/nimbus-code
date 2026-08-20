@@ -119,24 +119,6 @@
   integração com a estimativa de tokens) em
   [`docs/ai-code-quality-and-observability.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/ai-code-quality-and-observability.md), seção 9.
 
-## Governança Corporativa de IA
-
-- Existe **uma única constituição corporativa para toda IA**. Ela vale para
-  qualquer agente, assistente ou experiência de IA criada, publicada ou
-  operada pela empresa.
-- As ferramentas oficiais de IA da empresa são:
-  - **Microsoft Copilot** para produtividade e colaboração de negócio;
-  - **GitHub Enterprise Copilot** para engenharia e entrega de software.
-- Qualquer agente criado no Microsoft 365 deve seguir a mesma constituição,
-  incluindo regras de compartilhamento, publicação, acesso a dados, ownership
-  humano e revisão periódica.
-- Claude Enterprise e ChatGPT são tratados como ferramentas legadas/temporárias
-  quando usados pela empresa; se forem usados, seguem a mesma constituição e não
-  recebem política paralela.
-- O vocabulário Nimbus (`nimbus.constitution`, `nimbus.discovery`, etc.) é uma
-  camada de aliases sobre o Spec Kit, não uma substituição dos comandos
-  originais.
-
 ## Priorização e Desenvolvimento Autônomo (Labels)
 
 - Todo projeto deve manter a taxonomia de labels do bundle Nimbus-Code criada por

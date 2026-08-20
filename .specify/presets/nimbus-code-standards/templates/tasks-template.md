@@ -41,13 +41,11 @@ Humano: [sim/não]
 ## Referência
 - AC-ID: AC-N
 - Feature: specs/<feature-slug>
-- SPEC KIT COST: https://github.com/venha-pra-nuvem/spec-kit-cost
 ```
 
 - [ ] Toda task com `Responsável.Humano = sim` inclui `Passos Operacionais` completos
 - [ ] `Dependências` está preenchido com `Nenhuma` quando não existir bloqueador
 - [ ] `Referência` inclui AC-ID e link da feature de origem
-- [ ] `SPEC KIT COST` presente quando a task fizer parte do modelo híbrido
 
 ## Nimbus-Code — Checklist de Qualidade de Código, Testes e Observabilidade
 
