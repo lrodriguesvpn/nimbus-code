@@ -85,6 +85,11 @@ relevante ao artefato entregue pela tarefa.*
       uma entrada foi adicionada ao `docs/reuse-catalog.yaml` com `tag`,
       `bounded_context`, `description` e `source` — ver checklist de fechamento
       acima e `docs/ai-code-quality-and-observability.md`, seção 9
+- [ ] Se esta feature gerou retrabalho > 20% do esforço estimado, incidente em produção,
+      decisão arquitetural revertida ou erro de agente documentado: Issue aberta com
+      label `harness:pending`, entrada adicionada ao `docs/harness/harness-catalog.yaml`
+      (usando `docs/harness/incident-template.md` para S3/S4) e Issue fechada com
+      `harness:cataloged` — ver `docs/harness/harness-guide.md`
 - [ ] `retro-template.md` preenchido em `specs/<feature-slug>/retro.md` quando
       a implementação divergiu do plano (grafo mudou, SLO não atingido, bug
       inesperado encontrado) — ver template em

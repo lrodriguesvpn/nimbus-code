@@ -28,6 +28,28 @@ nível de revisão exigido.*
 > Consumo Real de Tokens"). Não é um compromisso exato — é uma faixa para
 > permitir comparar depois.
 
+## Nimbus-Code — Harness Gate
+
+*Preencher ANTES de qualquer gate. Consultar `docs/harness/harness-catalog.yaml`
+por `tags` e `bounded_context` relacionados ao domínio desta feature.
+Se o arquivo estiver vazio, declarar "Catálogo vazio". Nunca deixar em branco.*
+
+> **Como consultar:** `./scripts/harness-search.sh <tag>` — ou `grep` direto no YAML.
+> Consultar também `docs/reuse-catalog.yaml` (padrões de soluções, não de erros).
+
+| Harness consultado (ID) | Padrão de erro evitado | Mitigação preventiva aplicada nesta feature |
+|---|---|---|
+| [HRN-NNNN ou "Nenhum"] | [descrição do padrão] | [como foi endereçado] |
+
+**Resultado da consulta:**
+- [ ] Match encontrado — padrão(ões) de erro relevante(s) declarado(s) acima e mitigado(s)
+- [ ] Nenhum padrão de erro relevante encontrado para este domínio
+- [ ] Catálogo vazio — nenhum padrão disponível para consulta
+
+> Se esta feature gerar retrabalho > 20% ou incidente, o checklist de fechamento do
+> `tasks.md` exige abrir Issue com `harness:pending` e adicionar entrada ao catálogo.
+> Ver `docs/harness/harness-guide.md` para o protocolo completo.
+
 ## Nimbus-Code — Rastreabilidade AC → Teste → Módulo
 
 *Preencher antes de `/nimbus-code-tasks`. Cada critério de aceitação do `spec.md`

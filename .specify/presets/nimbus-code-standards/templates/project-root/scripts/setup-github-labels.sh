@@ -127,6 +127,13 @@ declare -a LABELS=(
   "dora:lead-time|1d76db|Impacta o lead time for changes (tempo do commit até produção)"
   "dora:change-failure-rate|d93f0b|Impacta a taxa de falha de mudança (bug introduzido por deploy, hotfix corretivo, rollback)"
   "dora:mttr|b60205|Impacta o tempo de restauração de serviço (incidente, correção emergencial, recovery)"
+
+  # Harness Engineering — rastreabilidade do ciclo de aprendizado com erros
+  # (ver docs/harness/README.md e docs/harness/harness-guide.md).
+  # Fluxo: harness:pending → preencher harness-catalog.yaml → harness:cataloged
+  "harness:pending|d93f0b|Lição identificada, aguardando catalogação no docs/harness/harness-catalog.yaml"
+  "harness:cataloged|0e8a16|Lição registrada no docs/harness/harness-catalog.yaml — ciclo de aprendizado completo"
+  "harness:blocking|b60205|Padrão de erro crítico catalogado — bloqueia merge até revisão explícita do harness"
 )
 
 echo -e "${BLUE}[1/1]${NC} Criando/atualizando ${#LABELS[@]} labels..."
