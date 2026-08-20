@@ -27,12 +27,14 @@
 
 **Independent Test**: Rodar `setup-github-project.sh` 2x consecutivamente no mesmo repo/org de sandbox; verificar que Issue Types existem e não foram duplicados.
 
-- [ ] T005 [US1] Adicionar função `setup_issue_types` em `scripts/setup-github-project.sh` que:
+- [x] T005 [US1] Adicionar função `setup_issue_types` em `scripts/setup-github-project.sh` que:
   - Consulta `organization.issueTypes` via GraphQL antes de criar
   - Cria apenas os tipos ausentes (idempotente)
   - Detecta ausência de suporte (GHE Server legado) e ativa modo degradado com mensagem clara
   - Tipos a criar: Epic (cor roxo), Feature (cor azul), User Story (cor verde), Task (cor cinza), Bug (cor vermelho)
-- [ ] T006 [US1] Atualizar numeração de passos e resumo final em `scripts/setup-github-project.sh` para incluir o novo passo de Issue Types
+  - **Nota**: já implementado (passo `[4/9]` de `scripts/setup-github-project.sh`) — a lógica está inline no script em vez de extraída para uma função nomeada `setup_issue_types`, mas cobre 100% do requisito (query prévia, criação idempotente por tipo ausente, detecção de modo degradado). Validado em 2026-08-20 rodando `check-issue-types` do novo helper (`.specify/scripts/bash/create-github-issue-hierarchy.sh`) contra `venha-pra-nuvem/nimbus-code-spec-kit-template` — retornou `native` (Issue Types já configurados na org).
+- [x] T006 [US1] Atualizar numeração de passos e resumo final em `scripts/setup-github-project.sh` para incluir o novo passo de Issue Types
+  - **Nota**: já implementado — passo `[4/9]` e resumo final (`[10/10]`) já listam os 5 Issue Types e a orientação de fallback via labels.
 
 **Checkpoint**: Issue Types disponíveis na org — fluxo de filtragem por tipo funciona no board.
 
@@ -44,28 +46,34 @@
 
 **Independent Test**: Executar o fluxo completo para uma feature de exemplo com `epic_issue` definido; verificar no GHE que as issues existem com as relações pai→filho corretas e sem duplicatas em re-execução.
 
-- [ ] T007 [US2] Estender `.specify/feature.json` (schema): documentar campo `epic_issue` (número inteiro, opcional) no arquivo `docs/developer-guide.md` e no arquivo de exemplo `feature.json` se existir
-- [ ] T008 [US2] Atualizar o script de criação de feature (`.specify/scripts/bash/create-new-feature.sh`) para:
+- [x] T007 [US2] Estender `.specify/feature.json` (schema): documentar campo `epic_issue` (número inteiro, opcional) no arquivo `docs/developer-guide.md` e no arquivo de exemplo `feature.json` se existir
+  - **Nota**: documentação já existente em `docs/developer-guide.md` seção 4.3 (Passo 2, com exemplo JSON). Não existe um arquivo de exemplo `feature.json` versionado no repo (é artefato de runtime por feature, não commitado) — nada a atualizar nesse ponto.
+- [x] T008 [US2] Atualizar o script de criação de feature (`.specify/scripts/bash/create-new-feature.sh`) para:
   - Solicitar `EPIC_ISSUE` como parâmetro opcional na inicialização
   - Persistir `"epic_issue": <N>` em `.specify/feature.json` quando fornecido
   - Documentar no output que o campo pode ser preenchido manualmente depois
-- [ ] T009 [US2] Implementar lógica de criação de sub-issues em `/speckit-taskstoissues` (`.specify/workflows/speckit/workflow.yml` ou script associado):
+  - **Implementado nesta sessão**: nova flag `--epic-issue <N>` (validada como inteiro positivo), merge em `feature.json` como número (não string), refletido em `--json`/texto de saída (`EPIC_ISSUE: N`) e no help. `.github/skills/speckit-specify/SKILL.md` também passou a reconhecer o token `EPIC_ISSUE=<N>` no texto livre do `/speckit-specify` e persistir o mesmo campo. Testado com `--dry-run` e execução real em repo Git isolado (não afeta `main`).
+- [x] T009 [US2] Implementar lógica de criação de sub-issues em `/speckit-taskstoissues` (`.specify/workflows/speckit/workflow.yml` ou script associado):
   - Ler `epic_issue` de `feature.json`
   - Criar issue de Feature com `type:Feature`; vinculá-la como sub-issue do Epic (se `epic_issue` definido)
   - Para cada seção `[USN]` em `tasks.md`: criar issue de User Story com `type:User Story`; vinculá-la como sub-issue da Feature
   - Para cada linha `T00N` em cada seção: criar issue de Task com `type:Task`; vinculá-la como sub-issue da US correspondente
-- [ ] T010 [US2] Implementar deduplicação por ID `T00N` no `/speckit-taskstoissues`:
+  - **Implementado nesta sessão**: novo helper `.specify/scripts/bash/create-github-issue-hierarchy.sh` (bash + `gh` CLI, mesmo idioma de `scripts/setup-github-project.sh`) com subcomandos `ensure-feature`, `ensure-user-story`, `link-task` e `set-type`, usando as mutations GraphQL reais `addSubIssue` e `updateIssueIssueType` (confirmadas via introspecção contra `venha-pra-nuvem.ghe.com`) e o campo `subIssuesSummary`/`parent` do schema `Issue`. `.github/skills/speckit-taskstoissues/SKILL.md` foi atualizado para invocar o script no bootstrap da hierarquia e ao vincular cada Task issue.
+- [x] T010 [US2] Implementar deduplicação por ID `T00N` no `/speckit-taskstoissues`:
   - Antes de criar cada issue, verificar se já existe issue com título contendo `T00N`
   - Antes de vincular sub-issue, verificar se o vínculo já existe
   - Registrar no output: "✓ T001 já existe (#N) — verificando vínculo"
-- [ ] T011 [US2] Implementar fallback gracioso para orgs sem Issue Types nativos:
+  - **Implementado nesta sessão**: dedup de Task por `T00N` no título já existia (via MCP `list_issues`); passou a ser complementado pela verificação de vínculo (`link-task` checa o `parent` atual da issue antes de chamar `addSubIssue`). Feature/User Story usam um novo padrão de marcador oculto no corpo (`<!-- speckit-feature-id: ... -->` / `<!-- speckit-us-id: ... -->`), no mesmo estilo já usado por outra automação deste repositório (`security-baseline-finding-id`, ver `specs/007-.../quickstart.md`), com pré-filtro via `gh issue list --search` e confirmação exata via `jq`.
+- [x] T011 [US2] Implementar fallback gracioso para orgs sem Issue Types nativos:
   - Detectar no início se a org suporta Issue Types (query `organization.issueTypes`)
   - Se não: usar labels `type:epic`, `type:feature`, `type:user-story`, `type:task` como substituto
   - Imprimir mensagem clara: `[MODO DEGRADADO] Issue Types não disponíveis — usando labels como fallback`
-- [ ] T012 [US2] Implementar alerta de limite de sub-issues:
+  - **Nota**: detecção/fallback em `scripts/setup-github-project.sh` já existia (passo `[4/9]`). Nesta sessão, a mesma detecção (`check-issue-types`) e o mesmo fallback por label foram implementados de forma independente em `create-github-issue-hierarchy.sh`, para que a criação de Feature/User Story/Task issues em `/speckit-taskstoissues` funcione corretamente também em modo degradado, sem depender de o setup do Project já ter rodado antes.
+- [x] T012 [US2] Implementar alerta de limite de sub-issues:
   - Verificar count de sub-issues existentes antes de adicionar
   - Se `count >= 90`: imprimir aviso de aproximação do limite
   - Se `count >= 100`: abortar com erro claro sugerindo dividir a feature
+  - **Implementado nesta sessão**: `link_sub_issue()` em `create-github-issue-hierarchy.sh` consulta `subIssuesSummary.total` do parent antes de cada vínculo; valores confirmados contra dado real do repo (`venha-pra-nuvem/nimbus-code-spec-kit-template#66` retornou `total: 22`).
 
 **Checkpoint**: Hierarquia Epic → Feature → US → Task funciona ponta a ponta no GHE com deduplicação e fallback.
 
@@ -77,14 +85,16 @@
 
 **Independent Test**: Rodar `setup-github-project.sh` em repo limpo; verificar as 6 views no Project V2. Rodar novamente; verificar que nenhuma view foi duplicada.
 
-- [ ] T013 [US3] Adicionar as 6 novas views ao array `VIEWS` em `scripts/setup-github-project.sh`:
+- [x] T013 [US3] Adicionar as 6 novas views ao array `VIEWS` em `scripts/setup-github-project.sh`:
   - "Board de Epics" (BOARD_LAYOUT, filter `type:"Epic"`)
   - "Board de Features" (BOARD_LAYOUT, filter `type:"Feature"`)
   - "Board de User Stories" (BOARD_LAYOUT, filter `type:"User Story"`)
   - "Sprint Ativo" (BOARD_LAYOUT, sem filtro inicial — orientar customização manual)
   - "Backlog Completo" (TABLE_LAYOUT, sem filtro)
   - "P0 Blocker" (TABLE_LAYOUT, filter `label:"priority:P0-blocker"`) — já existe; não duplicar
-- [ ] T014 [US3] Atualizar o resumo final do `setup-github-project.sh` para listar as novas views e instruções de "group by" manual (a API não suporta `group by` via GraphQL)
+  - **Nota**: já implementado — array `VIEWS` (passo `[3/9]`) já contém as 6 views listadas acima.
+- [x] T014 [US3] Atualizar o resumo final do `setup-github-project.sh` para listar as novas views e instruções de "group by" manual (a API não suporta `group by` via GraphQL)
+  - **Nota**: já implementado — resumo final (`[10/10]`) lista as 8 views (6 novas + 2 legadas) e a nota de que "group by" precisa de ajuste manual na UI.
 
 **Checkpoint**: Views hierárquicas disponíveis no Project V2 sem duplicatas.
 
@@ -96,18 +106,20 @@
 
 **Independent Test**: Pedir a um colaborador que siga apenas o `developer-guide.md` para criar um Epic com uma Feature vinculada — sem ajuda externa.
 
-- [ ] T015 [US4] Adicionar labels de fallback em `scripts/setup-github-labels.sh`:
+- [x] T015 [US4] Adicionar labels de fallback em `scripts/setup-github-labels.sh`:
   - `type:epic` (cor: `6f42c1` — roxo)
   - `type:feature` (cor: `0075ca` — azul)
   - `type:user-story` (cor: `0e8a16` — verde)
   - `type:task` (cor: `cfd3d7` — cinza)
-- [ ] T016 [US4] Adicionar seção "Hierarquia Agile (Epic → Feature → US → Task)" no `docs/developer-guide.md` com:
+  - **Nota**: já implementado — os 4 labels (+ `type:bug`) já existem em `scripts/setup-github-labels.sh`.
+- [x] T016 [US4] Adicionar seção "Hierarquia Agile (Epic → Feature → US → Task)" no `docs/developer-guide.md` com:
   - Visão geral do modelo hierárquico e mapeamento spec↔issue
   - Passos exatos: criar Epic no GHE → rodar `/speckit-specify EPIC_ISSUE=N` → rodar `/speckit-taskstoissues` → ver resultado no board
   - Tabela de mapeamento: `spec.md` = Feature issue, seção `US1` = User Story issue, linha `T001` = Task issue
   - Edge case: o que fazer quando o Epic ainda não existe
   - Edge case: modo degradado (org sem Issue Types)
   - Edge case: Features com múltiplos Epics (instruir divisão)
+  - **Nota**: já implementado — seção 4 completa (4.1–4.6) já cobre todos os itens acima. Ajustada nesta sessão apenas a referência ao script auxiliar recém-criado (`create-github-issue-hierarchy.sh`) que agora executa de fato o que a seção descreve.
 
 **Checkpoint**: Documentação completa — novo colaborador consegue executar o fluxo sem ajuda.
 
@@ -117,9 +129,10 @@
 
 **Purpose**: Registrar padrões reutilizáveis introduzidos por esta feature
 
-- [ ] T017 Adicionar entradas ao `docs/reuse-catalog.yaml`:
+- [x] T017 Adicionar entradas ao `docs/reuse-catalog.yaml`:
   - `ghe-sub-issues-hierarchy` — padrão de criação de hierarquia Epic/Feature/US/Task via sub-issues GHE com deduplicação
   - `speckit-deduplication-by-id` — padrão de deduplicação de issues por ID `T00N` em vez de título
+  - **Nota**: as duas entradas já existiam (adicionadas numa sessão anterior, antes de a automação real existir). Atualizadas nesta sessão para referenciar o script concreto `create-github-issue-hierarchy.sh` que agora implementa o padrão descrito.
 
 ---
 

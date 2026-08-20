@@ -10,6 +10,7 @@ BRANCH_NUMBER=""
 USE_TIMESTAMP=false
 NUMBER_EXPLICIT=false
 BOUNDED_CONTEXTS_INPUT=""
+EPIC_ISSUE_INPUT=""
 ARGS=()
 i=1
 while [ $i -le $# ]; do
@@ -70,8 +71,21 @@ while [ $i -le $# ]; do
             fi
             BOUNDED_CONTEXTS_INPUT="$next_arg"
             ;;
+        --epic-issue)
+            if [ $((i + 1)) -gt $# ]; then
+                echo 'Error: --epic-issue requires a value (GHE Epic issue number)' >&2
+                exit 1
+            fi
+            i=$((i + 1))
+            next_arg="${!i}"
+            if [[ "$next_arg" == --* ]]; then
+                echo 'Error: --epic-issue requires a value (GHE Epic issue number)' >&2
+                exit 1
+            fi
+            EPIC_ISSUE_INPUT="$next_arg"
+            ;;
         --help|-h)
-            echo "Usage: $0 [--json] [--dry-run] [--allow-existing-branch] [--short-name <name>] [--number N] [--timestamp] [--bounded-contexts <slug1,slug2>] <feature_description>"
+            echo "Usage: $0 [--json] [--dry-run] [--allow-existing-branch] [--short-name <name>] [--number N] [--timestamp] [--bounded-contexts <slug1,slug2>] [--epic-issue N] <feature_description>"
             echo ""
             echo "Options:"
             echo "  --json                      Output in JSON format"
@@ -83,6 +97,9 @@ while [ $i -le $# ]; do
             echo "  --bounded-contexts <slugs>  Comma-separated bounded context slugs for multi-repo features."
             echo "                              Slugs are resolved to repositories via docs/bounded-contexts.yaml."
             echo "                              Persisted in .specify/feature.json as bounded_contexts and repos."
+            echo "  --epic-issue N              Optional GHE Epic issue number this feature belongs to."
+            echo "                              Persisted in .specify/feature.json as epic_issue for use by"
+            echo "                              /speckit-taskstoissues (see docs/developer-guide.md, seção 4)."
             echo "  --help, -h                  Show this help message"
             echo ""
             echo "Examples:"
@@ -90,6 +107,7 @@ while [ $i -le $# ]; do
             echo "  $0 'Implement OAuth2 integration for API' --number 5"
             echo "  $0 --timestamp --short-name 'user-auth' 'Add user authentication'"
             echo "  $0 'Order checkout flow' --bounded-contexts 'order-management,billing'"
+            echo "  $0 'Checkout flow' --epic-issue 42"
             exit 0
             ;;
         *)
@@ -391,6 +409,18 @@ if [ -n "$BOUNDED_CONTEXTS_INPUT" ]; then
 fi
 # ---------------------------------------------------------------------------
 
+# Validate --epic-issue: must be a positive integer (a GHE issue number).
+# Persisted as epic_issue in feature.json for /speckit-taskstoissues to read
+# when creating the Feature issue as a sub-issue of this Epic
+# (specs/005-epic-feature-us-ghe-hierarchy).
+if [ -n "$EPIC_ISSUE_INPUT" ]; then
+    if ! [[ "$EPIC_ISSUE_INPUT" =~ ^[0-9]+$ ]] || [ "$EPIC_ISSUE_INPUT" -eq 0 ]; then
+        echo "Error: --epic-issue must be a positive integer (GHE issue number), got '$EPIC_ISSUE_INPUT'" >&2
+        exit 1
+    fi
+fi
+# ---------------------------------------------------------------------------
+
 SPECS_DIR="$REPO_ROOT/specs"
 if [ "$DRY_RUN" != true ]; then
     mkdir -p "$SPECS_DIR"
@@ -558,20 +588,27 @@ if [ "$DRY_RUN" != true ]; then
     _persist_feature_json "$REPO_ROOT" "$FEATURE_DIR"
 
     # Merge bounded_contexts and repos into feature.json (MultiRepo support)
+    # + epic_issue when --epic-issue was provided (specs/005-epic-feature-us-ghe-hierarchy)
     _fj="$REPO_ROOT/.specify/feature.json"
     if command -v jq >/dev/null 2>&1; then
         _fj_tmp=$(jq \
             --argjson bc "$RESOLVED_SLUGS_JSON" \
             --argjson repos "$RESOLVED_REPOS_JSON" \
-            '. + {bounded_contexts: $bc, repos: $repos}' \
+            --arg epic "$EPIC_ISSUE_INPUT" \
+            '. + {bounded_contexts: $bc, repos: $repos} + (if $epic == "" then {} else {epic_issue: ($epic | tonumber)} end)' \
             "$_fj")
         printf '%s\n' "$_fj_tmp" > "$_fj"
     else
         # Minimal fallback: insert fields before the closing brace
         _existing=$(cat "$_fj")
         _existing="${_existing%\}}"
-        printf '%s,"bounded_contexts":%s,"repos":%s}\n' \
-            "$_existing" "$RESOLVED_SLUGS_JSON" "$RESOLVED_REPOS_JSON" > "$_fj"
+        if [ -n "$EPIC_ISSUE_INPUT" ]; then
+            printf '%s,"bounded_contexts":%s,"repos":%s,"epic_issue":%s}\n' \
+                "$_existing" "$RESOLVED_SLUGS_JSON" "$RESOLVED_REPOS_JSON" "$EPIC_ISSUE_INPUT" > "$_fj"
+        else
+            printf '%s,"bounded_contexts":%s,"repos":%s}\n' \
+                "$_existing" "$RESOLVED_SLUGS_JSON" "$RESOLVED_REPOS_JSON" > "$_fj"
+        fi
     fi
 
     # Inform the user how to set feature state in their own shell
@@ -588,7 +625,8 @@ if $JSON_MODE; then
                 --arg feature_num "$FEATURE_NUM" \
                 --argjson bc "$RESOLVED_SLUGS_JSON" \
                 --argjson repos "$RESOLVED_REPOS_JSON" \
-                '{BRANCH_NAME:$branch_name,SPEC_FILE:$spec_file,FEATURE_NUM:$feature_num,bounded_contexts:$bc,repos:$repos,DRY_RUN:true}'
+                --arg epic "$EPIC_ISSUE_INPUT" \
+                '{BRANCH_NAME:$branch_name,SPEC_FILE:$spec_file,FEATURE_NUM:$feature_num,bounded_contexts:$bc,repos:$repos,DRY_RUN:true} + (if $epic == "" then {} else {epic_issue: ($epic|tonumber)} end)'
         else
             jq -cn \
                 --arg branch_name "$BRANCH_NAME" \
@@ -596,13 +634,16 @@ if $JSON_MODE; then
                 --arg feature_num "$FEATURE_NUM" \
                 --argjson bc "$RESOLVED_SLUGS_JSON" \
                 --argjson repos "$RESOLVED_REPOS_JSON" \
-                '{BRANCH_NAME:$branch_name,SPEC_FILE:$spec_file,FEATURE_NUM:$feature_num,bounded_contexts:$bc,repos:$repos}'
+                --arg epic "$EPIC_ISSUE_INPUT" \
+                '{BRANCH_NAME:$branch_name,SPEC_FILE:$spec_file,FEATURE_NUM:$feature_num,bounded_contexts:$bc,repos:$repos} + (if $epic == "" then {} else {epic_issue: ($epic|tonumber)} end)'
         fi
     else
+        _epic_json_field=""
+        [ -n "$EPIC_ISSUE_INPUT" ] && _epic_json_field=",\"epic_issue\":$EPIC_ISSUE_INPUT"
         if [ "$DRY_RUN" = true ]; then
-            printf '{"BRANCH_NAME":"%s","SPEC_FILE":"%s","FEATURE_NUM":"%s","bounded_contexts":%s,"repos":%s,"DRY_RUN":true}\n' "$(json_escape "$BRANCH_NAME")" "$(json_escape "$SPEC_FILE")" "$(json_escape "$FEATURE_NUM")" "$RESOLVED_SLUGS_JSON" "$RESOLVED_REPOS_JSON"
+            printf '{"BRANCH_NAME":"%s","SPEC_FILE":"%s","FEATURE_NUM":"%s","bounded_contexts":%s,"repos":%s,"DRY_RUN":true%s}\n' "$(json_escape "$BRANCH_NAME")" "$(json_escape "$SPEC_FILE")" "$(json_escape "$FEATURE_NUM")" "$RESOLVED_SLUGS_JSON" "$RESOLVED_REPOS_JSON" "$_epic_json_field"
         else
-            printf '{"BRANCH_NAME":"%s","SPEC_FILE":"%s","FEATURE_NUM":"%s","bounded_contexts":%s,"repos":%s}\n' "$(json_escape "$BRANCH_NAME")" "$(json_escape "$SPEC_FILE")" "$(json_escape "$FEATURE_NUM")" "$RESOLVED_SLUGS_JSON" "$RESOLVED_REPOS_JSON"
+            printf '{"BRANCH_NAME":"%s","SPEC_FILE":"%s","FEATURE_NUM":"%s","bounded_contexts":%s,"repos":%s%s}\n' "$(json_escape "$BRANCH_NAME")" "$(json_escape "$SPEC_FILE")" "$(json_escape "$FEATURE_NUM")" "$RESOLVED_SLUGS_JSON" "$RESOLVED_REPOS_JSON" "$_epic_json_field"
         fi
     fi
 else
@@ -612,6 +653,9 @@ else
     if [ "$RESOLVED_SLUGS_JSON" != "[]" ]; then
         echo "BOUNDED_CONTEXTS: $RESOLVED_SLUGS_JSON"
         echo "REPOS: $RESOLVED_REPOS_JSON"
+    fi
+    if [ -n "$EPIC_ISSUE_INPUT" ]; then
+        echo "EPIC_ISSUE: $EPIC_ISSUE_INPUT"
     fi
     if [ "$DRY_RUN" != true ]; then
         printf '# To persist in your shell: export SPECIFY_FEATURE=%s\n' "$(shell_quote "$BRANCH_NAME")"

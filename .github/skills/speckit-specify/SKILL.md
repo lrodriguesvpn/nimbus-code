@@ -103,6 +103,12 @@ Given that feature description, do this:
      ```
      Write the actual resolved directory path value (for example, `specs/003-user-auth`), not the literal string `SPECIFY_FEATURE_DIRECTORY`.
      This allows downstream commands (`/speckit-plan`, `/speckit-tasks`, etc.) to locate the feature directory without relying on git branch name conventions.
+   - **Optional Epic link** (specs/005-epic-feature-us-ghe-hierarchy): scan the raw feature description text for an `EPIC_ISSUE=<N>` token (case-insensitive, `N` a positive integer — the number of an existing Epic issue in the GHE repo). If present:
+     - Strip the `EPIC_ISSUE=<N>` token out of the feature description before using it as spec content.
+     - Merge `"epic_issue": <N>` (as a JSON number, not a string) into `.specify/feature.json` alongside `feature_directory` — do not overwrite other existing keys (`bounded_contexts`, `repos`, etc.) already in that file.
+     - Equivalently, `.specify/scripts/bash/create-new-feature.sh` accepts a `--epic-issue <N>` flag that does this same merge when the feature is created via that script directly.
+     - If `EPIC_ISSUE` is absent, do not add the key at all — downstream `/speckit-taskstoissues` treats a missing `epic_issue` as "no Epic parent" and creates the Feature issue without a parent link (not an error).
+     - **Edge case — Epic does not exist yet**: this command does NOT create the Epic issue automatically (Epics are created manually in the GHE UI or via `gh issue create --label type:epic`, see `docs/developer-guide.md` seção 4.3, Passo 1). If the user did not provide `EPIC_ISSUE`, do not block spec creation — inform them they can add `"epic_issue": <N>` to `.specify/feature.json` manually later, before running `/speckit-taskstoissues`.
 
    **IMPORTANT**:
    - You must only create one feature per `/speckit-specify` invocation

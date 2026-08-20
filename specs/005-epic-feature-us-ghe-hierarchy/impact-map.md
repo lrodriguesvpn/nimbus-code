@@ -13,7 +13,7 @@
 | `scripts/setup-github-project.sh` | Adição de Issue Types + 3 novas views | Médio — criação de Issue Types via GraphQL é irreversível na org (não há `deleteIssueType`) | Testar em org de sandbox antes de rodar em produção; verificar que Issue Types já existentes não são duplicados |
 | `docs/developer-guide.md` | Adição de seção nova (append) | Baixo — sem remoção de conteúdo existente | Revisão de consistência com restante do guide |
 | `/speckit-specify` | Parâmetro `EPIC_ISSUE` opcional | Baixo — sem `EPIC_ISSUE`, comportamento idêntico ao atual | Teste com e sem o parâmetro |
-| `/speckit-taskstoissues` | Lógica de criação de sub-issues e deduplicação | Alto — erros aqui criam issues duplicadas ou vínculos errados no GHE | Deduplicação por ID `T00N` deve ser validada antes do vínculo de sub-issue; testar re-execução |
+| `/speckit-taskstoissues` | Lógica de criação de sub-issues e deduplicação, via novo helper `.specify/scripts/bash/create-github-issue-hierarchy.sh` | Alto — erros aqui criam issues duplicadas ou vínculos errados no GHE | Deduplicação por ID `T00N`/marcador oculto deve ser validada antes do vínculo de sub-issue; testar re-execução; validado com chamadas `--dry-run` e `check-issue-types` somente-leitura contra o repo real |
 
 ---
 

@@ -46,11 +46,17 @@ entries:
     bounded_context: "spec-kit-workflow"
     description: >
       Padrão de criação de hierarquia Epic → Feature → User Story → Task no GHE
-      via sub-issues nativos (GraphQL API). Inclui: detecção de Issue Types da org,
-      fallback gracioso via labels (type:epic/feature/user-story/task) para orgs
-      sem suporte nativo, criação idempotente de views hierárquicas no Project V2,
-      e alerta de limite de 100 sub-issues por parent. Reaproveitar sempre que
-      uma feature precisar criar rastreabilidade hierárquica de issues no GHE.
+      via sub-issues nativos (GraphQL API: addSubIssue, updateIssueIssueType,
+      Issue.subIssuesSummary/parent). Implementado em
+      .specify/scripts/bash/create-github-issue-hierarchy.sh (bash + gh CLI,
+      subcomandos ensure-feature/ensure-user-story/link-task/set-type),
+      invocado por .github/skills/speckit-taskstoissues/SKILL.md. Inclui:
+      detecção de Issue Types da org (mesma query usada em
+      scripts/setup-github-project.sh), fallback gracioso via labels
+      (type:epic/feature/user-story/task) para orgs sem suporte nativo, criação
+      idempotente de views hierárquicas no Project V2, e alerta/abort de limite
+      de sub-issues por parent (aviso >=90, abort >=100). Reaproveitar sempre
+      que uma feature precisar criar rastreabilidade hierárquica de issues no GHE.
     source: "specs/005-epic-feature-us-ghe-hierarchy/plan.md"
     adr: ""
     reuse_count: 0
@@ -58,12 +64,22 @@ entries:
   - tag: "speckit-deduplication-by-id"
     bounded_context: "spec-kit-workflow"
     description: >
-      Padrão de deduplicação de issues geradas pelo /speckit-taskstoissues usando
-      o ID estruturado da tarefa (T00N) como chave — não o título, que pode mudar.
-      Antes de criar cada issue, verifica se já existe no repo uma issue com
-      identificador T00N; antes de vincular sub-issue, verifica se o vínculo já
-      existe. Reaproveitar sempre que um comando Spec Kit precisar ser re-executável
-      sem criar duplicatas no GHE.
+      Padrão de deduplicação de issues geradas por comandos Spec Kit usando um
+      identificador estruturado como chave — não o título, que pode mudar. Para
+      Tasks, o ID é o T00N no título (dedup via GitHub MCP list_issues em
+      /speckit-taskstoissues). Para Feature/User Story (sem um ID numérico
+      natural), o identificador é um marcador oculto no corpo da issue, ex.:
+      `<!-- speckit-feature-id: <feature-slug> -->` /
+      `<!-- speckit-us-id: <feature-slug>#US<N> -->`, pré-filtrado via
+      `gh issue list --search` e confirmado por match exato via jq — o mesmo
+      esquema de marcador já usado por outra automação deste repositório
+      (`security-baseline-finding-id`, ver
+      specs/007-controle-seguranca-ghe-projetos-plataforma/quickstart.md).
+      Implementado em .specify/scripts/bash/create-github-issue-hierarchy.sh.
+      Antes de criar cada issue, verifica se já existe uma correspondente;
+      antes de vincular sub-issue, verifica se o vínculo já existe (consulta o
+      `parent` atual via GraphQL). Reaproveitar sempre que um comando Spec Kit
+      precisar ser re-executável sem criar duplicatas no GHE.
     source: "specs/005-epic-feature-us-ghe-hierarchy/plan.md"
     adr: ""
     reuse_count: 0

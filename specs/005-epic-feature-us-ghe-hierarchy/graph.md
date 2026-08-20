@@ -12,7 +12,8 @@ flowchart TD
 
     subgraph speckit["Spec Kit (.specify/)"]
         SpecifyCmd["/speckit-specify\n(create-new-feature.sh)"]
-        TasksToIssuesCmd["/speckit-taskstoissues\n(workflow.yml)"]
+        TasksToIssuesCmd["/speckit-taskstoissues\n(SKILL.md)"]
+        HierarchyScript["create-github-issue-hierarchy.sh\nensure-feature / ensure-user-story\nlink-task / set-type"]
         FeatureJSON[".specify/feature.json\n+ epic_issue"]
     end
 
@@ -33,7 +34,8 @@ flowchart TD
 
     Dev -->|"2. /speckit-taskstoissues"| TasksToIssuesCmd
     TasksToIssuesCmd -->|"lê epic_issue"| FeatureJSON
-    TasksToIssuesCmd -->|"cria Feature issue\ncomo sub-issue do Epic\n(dedup por T00N ID)\n(fallback: labels)"| GHEAPI
+    TasksToIssuesCmd -->|"invoca (ensure-feature,\nensure-user-story, link-task)"| HierarchyScript
+    HierarchyScript -->|"cria Feature/US issues,\naddSubIssue, updateIssueIssueType\n(dedup por marcador oculto)\n(fallback: labels)"| GHEAPI
 
     Dev -->|"3. setup scripts (bootstrap)"| SetupProject
     SetupProject -->|"cria Issue Types + views\nhierárquicas no Project V2"| GHEAPI
@@ -88,7 +90,10 @@ flowchart TD
 ## Notas de Manutenção
 
 - Atualizar `graph.yaml` e este arquivo se novos módulos forem adicionados
-  durante a implementação (ex.: novo script de deduplicação separado)
+  durante a implementação
+- `create-github-issue-hierarchy.sh` foi adicionado nesta sessão (2026-08-20)
+  como o script de deduplicação/vinculação mencionado nesta nota — ver nó
+  `create-github-issue-hierarchy` em `graph.yaml`
 - O campo `epic_issue` em `feature.json` é **opcional** — sem ele, o fluxo
   funciona normalmente sem criar vinculação hierárquica
 - O fallback via labels é ativado automaticamente quando a consulta de Issue

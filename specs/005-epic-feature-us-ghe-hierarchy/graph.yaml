@@ -3,7 +3,7 @@
 feature: "005-epic-feature-us-ghe-hierarchy"
 complexity: "S3"
 version: 1
-updated_at: "2026-08-18"
+updated_at: "2026-08-20"
 spec_ref: "specs/005-epic-feature-us-ghe-hierarchy/spec.md"
 
 nodes:
@@ -19,8 +19,13 @@ nodes:
 
   - id: "speckit-taskstoissues"
     type: "module"
-    path: ".specify/workflows/speckit/workflow.yml"
-    description: "Comando /speckit-taskstoissues — cria issues de Feature, US e Task no GHE como sub-issues hierarquizadas; implementa deduplicação por T00N ID e fallback via labels"
+    path: ".github/skills/speckit-taskstoissues/SKILL.md"
+    description: "Comando /speckit-taskstoissues — cria issues de Feature, US e Task no GHE como sub-issues hierarquizadas; implementa deduplicação por T00N ID e fallback via labels; invoca create-github-issue-hierarchy.sh para a parte estrutural (Epic/Feature/US + vínculos)"
+
+  - id: "create-github-issue-hierarchy"
+    type: "module"
+    path: ".specify/scripts/bash/create-github-issue-hierarchy.sh"
+    description: "Helper bash + gh CLI (mesmo idioma de scripts/setup-github-project.sh) chamado por /speckit-taskstoissues: cria/reaproveita issues de Feature e User Story (dedup por marcador oculto no corpo), vincula Task/US/Feature como sub-issues via GraphQL addSubIssue, aplica Issue Type nativo via updateIssueIssueType com fallback para labels type:*, e alerta/aborta no limite de 90/100 sub-issues por parent"
 
   - id: "setup-github-project"
     type: "module"
@@ -61,10 +66,16 @@ edges:
     description: "Lê epic_issue de feature.json para vincular Feature issue como sub-issue do Epic"
 
   - src: "speckit-taskstoissues"
+    dst: "create-github-issue-hierarchy"
+    type: "sync"
+    protocol: "shell invocation (subprocess)"
+    description: "Invoca o helper (ensure-feature, ensure-user-story, link-task) para criar/vincular a hierarquia estrutural (Epic/Feature/US/Task) durante a execução do comando"
+
+  - src: "create-github-issue-hierarchy"
     dst: "ghe-api"
     type: "sync"
     protocol: "GraphQL/HTTPS"
-    description: "Cria issues (Feature, US, Task) e vínculos sub-issue via GHE GraphQL API; detecta Issue Types disponíveis para fallback"
+    description: "addSubIssue, updateIssueIssueType, organization.issueTypes, Issue.subIssuesSummary/parent, search (dedup por marcador); gh issue create/edit para labels de fallback"
 
   - src: "setup-github-project"
     dst: "ghe-api"
@@ -99,7 +110,7 @@ edges:
 externals:
   - id: "ghe-graphql-api"
     provider: "GitHub Enterprise Cloud"
-    called_by: ["speckit-taskstoissues", "setup-github-project"]
+    called_by: ["create-github-issue-hierarchy", "setup-github-project"]
     criticality: "high"
     fallback: "labels type:epic/feature/user-story como substituto de Issue Types nativos; sem fallback para criação de sub-issues (requer GHE Cloud ou GHE Server ≥ 3.10)"
 

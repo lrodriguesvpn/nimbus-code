@@ -438,6 +438,12 @@ O comando:
 2. Para cada seção `[USN]` do `tasks.md`: cria a **User Story issue** (`type:User Story`) como sub-issue da Feature
 3. Para cada linha `T00N` de cada seção: cria a **Task issue** (`type:Task`) como sub-issue da User Story
 
+> Internamente, a parte estrutural (criação de Feature/User Story, vínculos de
+> sub-issue e aplicação de Issue Type) é feita por
+> `.specify/scripts/bash/create-github-issue-hierarchy.sh` — um helper bash +
+> `gh` CLI no mesmo padrão de `scripts/setup-github-project.sh`, que pode
+> também ser chamado isoladamente (com `--dry-run`) para depurar o fluxo.
+
 > **Deduplicação**: se o comando for executado novamente, ele identifica issues
 > já existentes pelo ID `T00N` (não pelo título) e não cria duplicatas.
 > Vínculos ausentes são criados sem duplicar a issue.
