@@ -1,0 +1,97 @@
+# graph.yaml — Feature 012: Loop de Melhoria Contínua Nimbus-Code
+
+feature: "012-loop-melhoria-continua"
+complexity: "S3"
+version: 1
+updated_at: "2026-08-20"
+spec_ref: "specs/012-loop-melhoria-continua/spec.md"
+
+nodes:
+  - id: "success-catalog"
+    type: "module"
+    path: "docs/playbooks/success-catalog.yaml"
+    description: "Catálogo irmão do harness-catalog.yaml (feature 011); registra padrões/decisões que funcionaram bem e merecem ser repetidos, com curadoria manual e validação humana obrigatória (FR-007)"
+
+  - id: "process-metrics-report"
+    type: "module"
+    path: "scripts/process-metrics-report.sh"
+    description: "Script bash + gh CLI que calcula os 4 indicadores DORA (deployment frequency, lead time, change failure rate, MTTR) a partir de labels dora:* já aplicados a issues/PRs, sem ferramenta externa de observabilidade"
+
+  - id: "plan-template-playbook-gate"
+    type: "module"
+    path: "presets/nimbus-code-standards/templates/plan-template.md"
+    description: "Recebe a nova seção 'Playbook de Sucesso Gate', espelhando a obrigatoriedade já aplicada ao Harness Gate (feature 011) — nunca deixar em branco"
+
+  - id: "tasks-template-checklist"
+    type: "module"
+    path: "presets/nimbus-code-standards/templates/tasks-template.md"
+    description: "Recebe novo item de checklist de fechamento perguntando 'o que deu certo aqui?', complementar ao item já existente sobre harness:pending/harness:cataloged (feature 011)"
+
+  - id: "harness-catalog"
+    type: "module"
+    path: "docs/harness/harness-catalog.yaml"
+    description: "Catálogo de erros da feature 011 — precedente estrutural direto desta feature; success-catalog.yaml espelha seu formato/disciplina de curadoria"
+
+  - id: "reuse-catalog"
+    type: "module"
+    path: "docs/reuse-catalog.yaml"
+    description: "Recebe entrada referenciando o padrão desta feature (FR-008)"
+
+  - id: "copilot-instructions"
+    type: "module"
+    path: ".github/copilot-instructions.md"
+    description: "Recebe seção 'Playbook de Sucesso' ao lado da seção 'Harness Engineering' já existente (feature 011)"
+
+  - id: "retro-template"
+    type: "module"
+    path: "presets/nimbus-code-standards/templates/feature-artifacts/retro-template.md"
+    description: "Template de retrospectiva já existente, reaproveitado (não recriado) pela cadência proativa desta feature (US3)"
+
+  - id: "ghe-api"
+    type: "external"
+    path: ""
+    description: "GitHub Enterprise Cloud API — leitura de labels/datas de issues e PRs via gh CLI para cálculo de DORA (somente leitura, sem escrita)"
+
+edges:
+  - src: "process-metrics-report"
+    dst: "ghe-api"
+    type: "sync"
+    protocol: "REST/GraphQL via gh CLI (somente leitura)"
+    description: "Lê issues/PRs rotulados dora:* e suas datas de criação/merge/close para calcular os 4 indicadores"
+
+  - src: "plan-template-playbook-gate"
+    dst: "success-catalog"
+    type: "async"
+    protocol: "consulta manual/agente (grep ou script de busca análogo ao harness-search.sh)"
+    description: "Todo novo plan.md consulta o success-catalog.yaml antes de ser finalizado (Playbook de Sucesso Gate)"
+
+  - src: "tasks-template-checklist"
+    dst: "success-catalog"
+    type: "async"
+    protocol: "proposta de entrada (agente propõe, humano valida)"
+    description: "Checklist de fechamento pergunta 'o que deu certo?' e propõe rascunho de entrada no catálogo"
+
+  - src: "tasks-template-checklist"
+    dst: "retro-template"
+    type: "async"
+    protocol: "sinalização proativa por contagem de features"
+    description: "Cadência de N features concluídas dispara sinalização de retrospectiva devida, mesmo sem divergência de plano"
+
+  - src: "success-catalog"
+    dst: "harness-catalog"
+    type: "async"
+    protocol: "documentação/referência cruzada"
+    description: "Os dois catálogos são irmãos (sucesso vs. erro) — uma retrospectiva pode gerar entrada em qualquer um dos dois"
+
+  - src: "copilot-instructions"
+    dst: "success-catalog"
+    type: "async"
+    protocol: "documentation reference"
+    description: "Instrui o agente a consultar o success-catalog.yaml antes de /nimbus-code-plan, mesmo padrão já usado para o harness-catalog.yaml"
+
+externals:
+  - id: "ghe-rest-graphql-api"
+    provider: "GitHub Enterprise Cloud"
+    called_by: ["process-metrics-report"]
+    criticality: "low"
+    fallback: "indicador marcado como 'dados insuficientes' se a consulta falhar ou não houver dado suficiente no período — nunca falha silenciosa nem valor inventado"
