@@ -21,10 +21,16 @@ graph TD
     subgraph "Scripts — .specify/"
         CNF["create-new-feature.sh<br/>(+ --bounded-contexts flag)"]
         FJ[".specify/feature.json<br/>(+ bounded_contexts + repos)"]
+        BATS[".specify/scripts/bash/tests/<br/>create-new-feature.bats<br/>(NOVO — testes unitários)"]
     end
 
     subgraph "Scripts — scripts/"
-        SGP["setup-github-project.sh<br/>(+ linkProjectV2ToRepository)"]
+        SGP["setup-github-project.sh<br/>(+ linkProjectV2ToRepository<br/>+ fix caller cwd, issue 21)"]
+    end
+
+    subgraph "Agent Skills — .github/skills/"
+        SPEC["speckit-specify/SKILL.md<br/>(NOVO — valida Bounded Context)"]
+        T2I["speckit-taskstoissues/SKILL.md<br/>(NOVO — roteia/dedup Tasks cross-repo)"]
     end
 
     subgraph "Externos"
@@ -35,21 +41,31 @@ graph TD
     CNF -->|"lê slugs → resolve repos"| BC
     CNF -->|"persiste bounded_contexts + repos"| FJ
     CNF -->|"subprocess"| YQ
+    BATS -->|"subprocess (bats run)"| CNF
 
     SGP -->|"lê lista de repos"| BC
     SGP -->|"GraphQL/HTTPS"| GHE
     SGP -->|"subprocess"| YQ
+
+    SPEC -->|"valida campo Bounded Context"| BC
+    T2I -->|"lê bounded_contexts/repos (AC-10)"| FJ
+    T2I -->|"resolve slug → repo/autonomous_ok"| BC
+    T2I -->|"cria issues no(s) repo(s) resolvido(s)"| GHE
 
     BCT -.->|"template instantiation"| BC
 
     DG -.->|"documenta"| BC
     DG -.->|"documenta"| CNF
     DG -.->|"documenta"| SGP
+    DG -.->|"documenta"| T2I
 
     style BC fill:#d4edda,stroke:#28a745
     style FJ fill:#fff3cd,stroke:#ffc107
     style GHE fill:#f8d7da,stroke:#dc3545
     style YQ fill:#d1ecf1,stroke:#17a2b8
+    style SPEC fill:#d4edda,stroke:#28a745
+    style T2I fill:#d4edda,stroke:#28a745
+    style BATS fill:#d4edda,stroke:#28a745
 ```
 
 ---
@@ -84,7 +100,7 @@ sequenceDiagram
     Note over Dev,GHE: Criação de issues (/speckit-taskstoissues)
 
     Dev->>GHE: 4. /speckit-taskstoissues
-    Note right of GHE: Epics/Features/USs → Repo Central<br/>Tasks [US1 — auth] → org/svc-auth<br/>Tasks [US2 — orders] → org/svc-orders
+    Note right of GHE: speckit-taskstoissues/SKILL.md resolve o roteamento:<br/>lê feature.json (bounded_contexts/repos) + bounded-contexts.yaml<br/>Epics/Features/USs → Repo Central<br/>Tasks [US1 — auth] → org/svc-auth<br/>Tasks [US2 — orders] → org/svc-orders<br/>Dedup por T00N por repo · erro isolado por repo (AC-8)
     GHE-->>Dev: ✓ Board cross-repo exibe tudo
 ```
 

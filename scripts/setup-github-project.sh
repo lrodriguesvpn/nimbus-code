@@ -527,18 +527,29 @@ mutation($projectId:ID!) {
 fi
 
 # 9. Vincular repos de serviço ao Project V2 (MultiRepo — bounded-contexts.yaml)
-# Lê docs/bounded-contexts.yaml (relativo ao diretório de execução do script ou
-# à raiz do repo detectada via git), extrai os campos repository e os vincula ao
-# Project V2 via GraphQL (mutation linkProjectV2ToRepository).
+# Lê docs/bounded-contexts.yaml relativo à raiz git do diretório de CHAMADA
+# ($PWD via `git rev-parse --show-toplevel`, sem -C) — não ao diretório físico
+# do script — com fallback para o clone do próprio script apenas se o chamador
+# não estiver dentro de um repo git com esse arquivo (ver issue #21). Extrai o
+# campo repository e vincula ao Project V2 via GraphQL (mutation
+# linkProjectV2ToRepository).
 # Requer escopo write:org no token. Erros isolados por repo não abortam o setup.
 echo ""
 echo -e "${BLUE}[9/10]${NC} Vinculando repos de serviço ao Project V2 (MultiRepo)..."
 
-# Locate bounded-contexts.yaml relative to the script or the git root
+# Locate bounded-contexts.yaml relative to the caller's working directory
+# first (the consumer project — see issue #21: resolving via BASH_SOURCE made
+# the script read the template's own bounded-contexts.yaml when invoked by
+# absolute path from another clone). Only fall back to the script's own clone
+# when the caller isn't inside a git repo (or that repo has no such file) —
+# e.g. when developing the template itself from within its own clone.
 _SCRIPT_DIR_SGP="$(CDPATH="" cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-_GIT_ROOT=$(git -C "$_SCRIPT_DIR_SGP" rev-parse --show-toplevel 2>/dev/null || true)
+_GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || true)
 _BC_FILE=""
-for _candidate in "${_GIT_ROOT}/docs/bounded-contexts.yaml" "${_SCRIPT_DIR_SGP}/../docs/bounded-contexts.yaml"; do
+_BC_CANDIDATES=()
+[[ -n "$_GIT_ROOT" ]] && _BC_CANDIDATES+=("${_GIT_ROOT}/docs/bounded-contexts.yaml")
+_BC_CANDIDATES+=("${_SCRIPT_DIR_SGP}/../docs/bounded-contexts.yaml")
+for _candidate in "${_BC_CANDIDATES[@]}"; do
     if [[ -f "$_candidate" ]]; then
         _BC_FILE="$_candidate"
         break
