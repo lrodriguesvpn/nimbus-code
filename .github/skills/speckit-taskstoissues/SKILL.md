@@ -70,7 +70,22 @@ git config --get remote.origin.url
 1. For each task in the list, use the GitHub MCP server to create a new issue in the repository that is representative of the Git remote. Task lines in `tasks.md` start with a markdown checkbox, so first strip the leading `- [ ]` (and any `[P]` / `[US#]` markers) to recover the task ID and its description. Create the issue with a single canonical title of the form `T001: <description>`, with the ID written once followed by the task description (for example, the line `- [ ] T001 Create project structure` becomes the title `T001: Create project structure`).
    - **Skip** any task whose ID is already present in the set of existing issues from the previous step, and report it (for example, `T001 already has an issue, skipping`).
    - Only create issues for tasks that do not yet have a matching issue.
-2. Create the issue body using the Nimbus-Code hybrid task contract so the issue is directly executable by a human or agent without rereading the spec/plan:
+2. **Compute labels before creating each issue**. Every Task issue MUST receive the full mandatory label set below, derived from the task text plus the surrounding section/spec context:
+   - **Type**: always apply `type:task`
+   - **Priority**: infer from the closest explicit marker in the current section/task (`Priority: P0/P1/P2/P3`, `P0-blocker`, etc.); if no explicit priority exists, default to `priority:P2-medium`
+   - **Complexity**: classify the task itself (not just the parent feature) using the S0–S4 scale from the constitution:
+    - `complexity:S0` → documentation/text/checklist-only work
+    - `complexity:S1` → isolated script/config/single-file change
+    - `complexity:S2` → one module/workflow/component with localized validation
+    - `complexity:S3` → cross-module/cross-repo integration or workflow orchestration
+    - `complexity:S4` → architecture/security-sensitive/org-admin/data-sensitive work, including GitHub App creation/installation, org-wide permission changes, or security governance tasks
+    - If still ambiguous after reading the task + plan/spec, inherit the feature complexity declared in `tasks.md`/`plan.md`
+   - **Agent routing**:
+    - apply `agent:needs-human` when the task is tagged `[Humano]`, explicitly says manual/human, belongs to a bounded context with `autonomous_ok: false`, or requires privileged/org-admin/security/GitHub App actions
+    - otherwise apply `agent:autonomous-ok`
+   - **DORA**: add `dora:*` labels only when the task explicitly impacts one of the four DORA domains
+3. **Validate required labels exist in the target repository before issue creation**. If any mandatory label above does not exist (for example `type:task`), stop and report the missing taxonomy clearly, instructing the operator to run `scripts/setup-github-labels.sh` in that repository before retrying. Do not silently create partially labeled Task issues.
+4. Create the issue body using the Nimbus-Code hybrid task contract so the issue is directly executable by a human or agent without rereading the spec/plan:
 
    ```markdown
    ## Contexto
@@ -96,6 +111,13 @@ git config --get remote.origin.url
    Agente: [sim/não]
    Humano: [sim/não]
 
+   ## Labels Aplicadas
+   - priority:...
+   - complexity:...
+   - type:task
+   - agent:...
+   - dora:... (se aplicável)
+
    ## Estimativa de Esforço
    - Tokens (agente): ~X–Y mil
    - Horas (humano): ~X–Y horas
@@ -106,6 +128,7 @@ git config --get remote.origin.url
    ```
 
    If the task does not have an explicit AC or feature link, keep those fields as `N/A` instead of omitting them.
+5. When a Task is human-only and concerns GitHub App, security administration, org-level permissions, or other privileged setup, make the issue body explicit that it requires human execution and include any operator-routing instruction already provided by the caller/project context instead of letting the agent self-assign it.
 
 > [!CAUTION]
 > UNDER NO CIRCUMSTANCES EVER CREATE ISSUES IN REPOSITORIES THAT DO NOT MATCH THE REMOTE URL
