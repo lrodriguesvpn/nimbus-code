@@ -9,7 +9,7 @@
       "version": "1.2.0",
       "description": "Sincroniza specs/tasks do Nimbus Code com JIRA ou Azure DevOps via MCP, como complemento opcional ao fluxo nativo baseado em specs/.",
       "author": "Nimbus-Code",
-      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.7.0/nimbus-code-backlog-sync-1.2.0.zip",
+      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.9.0/nimbus-code-backlog-sync-1.2.0.zip",
       "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template",
       "license": "Proprietary",
       "category": "integration",
