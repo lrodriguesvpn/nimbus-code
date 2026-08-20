@@ -1,0 +1,182 @@
+# Dependency Graph: Controle de Custos (Feature 010)
+
+meta:
+  feature: "010-controle-de-custos"
+  version: "1.0"
+  generated_at: "2026-08-18"
+  author: "Copilot + Nimbus Code workflow"
+
+modules:
+  - id: "cost-collector"
+    name: "services/cost-collector"
+    type: "service"
+    description: "Integração com GitHub Project API (horas humanas) e agent session metadata (tokens). Emite CostRecord para o cost-store."
+    owner: "FinOps Platform"
+    complexity: "S2"
+    dependencies:
+      - "cost-store"
+    consumes:
+      - "GitHub Project API v2 (GraphQL)"
+      - "assistant_usage_events (session store)"
+    exports:
+      - "CostRecord (events)"
+
+  - id: "cost-store"
+    name: "services/cost-store"
+    type: "service"
+    description: "Persistência de CostRecord, CostEstimate, Budget, CostAlert. Schema versionado, append-only para auditoria."
+    owner: "FinOps Platform"
+    complexity: "S2"
+    dependencies: []
+    exports:
+      - "CostRecord (read)"
+      - "CostEstimate (read/write)"
+      - "Budget (read/write)"
+      - "CostAlert (read/write)"
+
+  - id: "cost-aggregator"
+    name: "services/cost-aggregator"
+    type: "service"
+    description: "Jobs batch que produzem CostBenchmark por complexidade e consolidam view de custo por feature/sprint/squad."
+    owner: "FinOps Platform"
+    complexity: "S2"
+    dependencies:
+      - "cost-store"
+    exports:
+      - "CostBenchmark (read)"
+      - "CostSummary (view)"
+
+  - id: "budget-alert-engine"
+    name: "services/budget-alert-engine"
+    type: "service"
+    description: "Motor de alertas: calcula consumo vs. orçamento a cada novo CostRecord; dispara CostAlert e notifica owner quando threshold atingido."
+    owner: "FinOps Platform"
+    complexity: "S2"
+    dependencies:
+      - "cost-store"
+    exports:
+      - "CostAlert (write)"
+      - "Notification (webhook/email/slack)"
+
+  - id: "cost-dashboard"
+    name: "apps/cost-dashboard"
+    type: "web-application"
+    description: "Dashboard consolidado com drill-down por dimensão (tokens, horas humanas), filtros de período/squad/projeto e exportação de relatórios."
+    owner: "FinOps Platform"
+    complexity: "S2"
+    dependencies:
+      - "cost-aggregator"
+      - "cost-store"
+      - "budget-alert-engine"
+    exports:
+      - "REST API (GET /costs, /benchmarks, /budgets)"
+      - "UI (dashboard, alertas, exportação)"
+
+  - id: "plan-template-update"
+    name: ".specify/presets/nimbus-code-standards/templates/plan-template.md"
+    type: "template"
+    description: "Adição de campos obrigatórios de estimativa de custo (tokens + horas humanas) que alimentam o cost-collector."
+    owner: "Dev Platform"
+    complexity: "S1"
+    dependencies:
+      - "cost-store"
+    exports:
+      - "Campos de custo em plan.md (input para cost-collector)"
+
+  - id: "constitution-doc"
+    name: ".specify/memory/constitution.md"
+    type: "reference"
+    description: "Princípios de governança Nimbus-Code (usado na validação de gates)"
+    owner: "Dev Platform"
+    complexity: "S0"
+    dependencies: []
+
+  - id: "reuse-catalog"
+    name: "docs/reuse-catalog.yaml"
+    type: "reference"
+    description: "Catálogo de padrões reutilizáveis (será atualizado após conclusão com tag: cost-control-hybrid)"
+    owner: "Dev Platform"
+    complexity: "S0"
+    dependencies: []
+
+externals:
+  - id: "github-project-api"
+    name: "GitHub Project API v2"
+    url: "https://docs.github.com/en/graphql/reference/objects#projectv2"
+    type: "external-api"
+    description: "API GraphQL para leitura de campos customizados (Horas Humanas) por issue"
+    owner: "GitHub"
+    integration: "cost-collector consome via GraphQL para coletar horas humanas"
+
+  - id: "spec-kit-cost"
+    name: "SPEC KIT COST (GitHub Public)"
+    url: "https://github.com/venha-pra-nuvem/spec-kit-cost"
+    type: "external-project"
+    description: "Framework público de referência para rastreio de custo híbrido (agente + humano)"
+    owner: "Nimbus Code Community"
+    integration: "referenciado em plan.md e nas tasks; não é integração técnica direta no MVP"
+
+  - id: "openfeature-sdk"
+    name: "OpenFeature SDK"
+    url: "https://openfeature.dev"
+    type: "external-sdk"
+    description: "Abstração de feature toggle; usado para rollout gradual do cost-control"
+    owner: "OpenFeature Community"
+    integration: "cost-dashboard e cost-collector usam flag cost_control_v1 via OpenFeature"
+
+  - id: "ghe"
+    name: "GitHub Enterprise"
+    url: "https://venha-pra-nuvem.ghe.com"
+    type: "platform"
+    description: "Plataforma de issues, PR workflow e notificações"
+    owner: "VPN Platform"
+    integration: "budget-alert-engine pode criar GitHub Issues como canal de alerta"
+
+edges:
+  - from: "cost-collector"
+    to: "github-project-api"
+    relationship: "reads (horas humanas via GraphQL)"
+
+  - from: "cost-collector"
+    to: "cost-store"
+    relationship: "writes (CostRecord)"
+
+  - from: "cost-aggregator"
+    to: "cost-store"
+    relationship: "reads (CostRecord, CostEstimate)"
+
+  - from: "cost-aggregator"
+    to: "cost-store"
+    relationship: "writes (CostBenchmark)"
+
+  - from: "budget-alert-engine"
+    to: "cost-store"
+    relationship: "reads (CostRecord, Budget)"
+
+  - from: "budget-alert-engine"
+    to: "cost-store"
+    relationship: "writes (CostAlert)"
+
+  - from: "budget-alert-engine"
+    to: "ghe"
+    relationship: "notifies (GitHub Issue ou webhook)"
+
+  - from: "cost-dashboard"
+    to: "cost-aggregator"
+    relationship: "reads (CostSummary, CostBenchmark)"
+
+  - from: "cost-dashboard"
+    to: "cost-store"
+    relationship: "reads (Budget, CostAlert)"
+
+  - from: "plan-template-update"
+    to: "cost-collector"
+    relationship: "feeds (estimativas registradas no plan.md alimentam cost-store via collector)"
+
+  - from: "cost-dashboard"
+    to: "openfeature-sdk"
+    relationship: "uses (feature flag cost_control_v1)"
+
+  - from: "cost-collector"
+    to: "openfeature-sdk"
+    relationship: "uses (feature flag cost_control_v1)"
