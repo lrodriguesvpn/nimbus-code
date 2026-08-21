@@ -29,6 +29,14 @@
 #   adr:               caminho para o ADR relacionado (opcional)
 #   reuse_count:       nº de vezes que outra feature já referenciou esta entrada
 #                       (incremente manualmente ao reaproveitar — sinal de ROI)
+#   example:           (opcional) trecho estrutural curto — assinatura de
+#                       método/interface, nome de arquivo:linha — nunca corpo
+#                       de método/string literal. Preenchido por
+#                       scripts/harvest-patterns.sh (specs/014-brownfield-
+#                       multirepo-context-awareness/); harvest também grava o
+#                       repositório de origem no campo `source` (formato
+#                       "owner/repo:arquivo:linha") em vez do spec.md quando a
+#                       entrada vem de um harvest em vez de uma feature.
 
 version: 1
 entries:
@@ -228,5 +236,27 @@ entries:
       um repositório precisar consolidar testes fragmentados em um gate único
       sem introduzir framework/infraestrutura nova.
     source: "specs/013-governanca-testes-pr/plan.md"
+    adr: ""
+    reuse_count: 0
+
+  - tag: "brownfield-multirepo-context-graph"
+    bounded_context: "spec-kit-workflow"
+    description: >
+      Padrão de automação para governança de contexto em projetos brownfield
+      multirepo: (1) scripts/generate-context-graph.sh lê
+      docs/bounded-contexts.yaml, analisa manifestos de dependência dos repos
+      de um bounded context (local ou via `gh api` como fallback) e gera
+      graph.yaml/graph.md com nós (`cross_repo: true|false`) e arestas —
+      invocado automaticamente por /speckit-specify antes do plan, com aviso
+      não-bloqueante quando o contexto não tem repos mapeados; (2)
+      scripts/harvest-patterns.sh varre metadados estruturais (nunca corpo de
+      método/string literal) de um repo via allowlist e chama um endpoint LLM
+      configurável (HARVEST_API_URL/HARVEST_API_TOKEN) para propor entradas
+      de docs/reuse-catalog.yaml, com deduplicação por tag — exclusivamente
+      on-demand, nunca em CI. Ambos idempotentes e cobertos por
+      tests/scripts/*.bats. Reaproveitar sempre que um projeto precisar
+      manter o agente ciente de padrões/dependências já existentes em repos
+      brownfield sem depender de o Dev colar exemplos manualmente no prompt.
+    source: "specs/014-brownfield-multirepo-context-awareness/plan.md"
     adr: ""
     reuse_count: 0

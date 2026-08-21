@@ -83,6 +83,20 @@ Para S3/S4, criar também `impact-map.md` na mesma pasta.*
 - [ ] Dependências externas (third-party, cloud) declaradas em `externals` no `graph.yaml`
 - [ ] Grafo será atualizado novamente após `/nimbus-code-implement` se a implementação divergir do plano
 
+### Grafo do Contexto (Multi-Repo Brownfield)
+
+*Preencher apenas quando esta feature pertence a um bounded context registrado
+em `docs/bounded-contexts.yaml` com repos mapeados — ver
+specs/014-brownfield-multirepo-context-awareness/. Se o contexto não estiver
+mapeado, declarar "N/A — bounded context não mapeado em docs/bounded-contexts.yaml".*
+
+| Campo | Valor |
+|---|---|
+| **Bounded context** | [slug registrado em docs/bounded-contexts.yaml, ou "N/A"] |
+| **Grafo do contexto** | [link para o `graph.yaml`/`graph.md` gerado por `scripts/generate-context-graph.sh` no início do `/speckit-specify`, ou "N/A"] |
+| **Dependências relevantes para esta feature** | [repos do contexto cujas mudanças afetam ou são afetadas por esta feature, com base no grafo] |
+| **Padrões de harvest aplicáveis** | [entradas de `docs/reuse-catalog.yaml` originadas de `scripts/harvest-patterns.sh` relevantes a esta feature, se houver, ou "Nenhuma"] |
+
 ## Nimbus-Code — Estratégia de Release
 
 *Declarar antes de `/nimbus-code-tasks`. Para S3/S4, esta escolha alimenta o

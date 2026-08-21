@@ -40,12 +40,12 @@ nodes:
 
   - id: "generate-context-graph-tests"
     type: "module"
-    path: "scripts/tests/generate-context-graph.bats"
+    path: "tests/scripts/generate-context-graph.bats"
     description: "Testes unitários bats-core para generate-context-graph.sh (AC-1, AC-5, AC-6)"
 
   - id: "harvest-patterns-tests"
     type: "module"
-    path: "scripts/tests/harvest-patterns.bats"
+    path: "tests/scripts/harvest-patterns.bats"
     description: "Testes unitários bats-core para harvest-patterns.sh (AC-3, idempotência)"
 
   - id: "copilot-instructions-template"

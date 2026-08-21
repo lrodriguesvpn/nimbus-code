@@ -179,6 +179,34 @@ humana constante. Instalada via `scripts/setup-github-labels.sh`.
 
 ---
 
+## Grafo de Contexto Multi-Repo (Brownfield)
+
+> **Passo obrigatório antes de qualquer `/nimbus-code-plan` em projeto
+> brownfield multirepo**: consulte `specs/<feature>/graph.yaml` do bounded
+> context ativo (gerado automaticamente por `/speckit-specify` via
+> `scripts/generate-context-graph.sh` quando o contexto está registrado em
+> `docs/bounded-contexts.yaml` — ver
+> specs/014-brownfield-multirepo-context-awareness/) **antes** de propor
+> qualquer decisão arquitetural que afete mais de um repositório do contexto.
+> Referencie o grafo no Architecture Decision Log do `plan.md` (seção "Grafo
+> do Contexto").
+
+- Se `docs/bounded-contexts.yaml` tiver o contexto mapeado mas o
+  `graph.yaml` da feature ainda não existir, rode manualmente
+  `scripts/generate-context-graph.sh <context-slug> --feature <feature-slug>`
+  antes de continuar — não proponha arquitetura multi-repo sem o grafo.
+- Se o contexto não estiver mapeado em `docs/bounded-contexts.yaml`, isso não
+  bloqueia o fluxo — sinalize o aviso e prossiga sem o grafo (ver edge case
+  de specs/014-brownfield-multirepo-context-awareness/spec.md).
+- `scripts/harvest-patterns.sh` (varredura de padrões técnicos existentes via
+  LLM, alimenta `docs/reuse-catalog.yaml`) é **exclusivamente on-demand,
+  nunca automático nem em CI** — só é executado quando um humano o invoca
+  explicitamente. Se o catálogo de reuso já tiver entradas originadas de
+  harvest para o bounded context ativo, declare quais se aplicam na seção
+  "Padrão reutilizado encontrado?" do `plan.md`, junto às entradas manuais.
+
+---
+
 ## Modelo Híbrido (Agente + Humano) e Controle de Custo
 
 Toda tarefa em modo híbrido (agente gera a maior parte, humano revisa/ajusta)

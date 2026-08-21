@@ -14,10 +14,10 @@
 
 **Purpose**: Verificação do ambiente e baseline — condição de entrada para todas as User Stories
 
-- [ ] T001 Verificar que `docs/bounded-contexts.yaml` existe e tem ao menos um bounded context com ≥2 repos mapeados (insumo real para os testes de AC-1 e AC-5) — registrar o resultado como pré-condição dos testes
-- [ ] T002 [P] Verificar que `docs/reuse-catalog.yaml` existe e anotar o número de entradas atuais (baseline para validar idempotência dos scripts em FR-010)
-- [ ] T003 [P] Confirmar se `bats-core` já está instalado ou disponível em `scripts/setup-dev-environment.sh`; se não estiver, anotar a lacuna para T012
-- [ ] T004 [P] Listar os arquivos de manifesto de dependência presentes nos repos de teste declarados em `bounded-contexts.yaml` (`pom.xml`, `package.json`, `go.mod`, `requirements.txt`, `build.gradle`) para calibrar os fixtures dos testes bats
+- [x] T001 Verificar que `docs/bounded-contexts.yaml` existe e tem ao menos um bounded context com ≥2 repos mapeados (insumo real para os testes de AC-1 e AC-5) — registrar o resultado como pré-condição dos testes
+- [x] T002 [P] Verificar que `docs/reuse-catalog.yaml` existe e anotar o número de entradas atuais (baseline para validar idempotência dos scripts em FR-010)
+- [x] T003 [P] Confirmar se `bats-core` já está instalado ou disponível em `scripts/setup-dev-environment.sh`; se não estiver, anotar a lacuna para T012
+- [x] T004 [P] Listar os arquivos de manifesto de dependência presentes nos repos de teste declarados em `bounded-contexts.yaml` (`pom.xml`, `package.json`, `go.mod`, `requirements.txt`, `build.gradle`) para calibrar os fixtures dos testes bats
 
 **Checkpoint**: Ambiente e artefatos-base confirmados — implementação pode começar.
 
@@ -29,14 +29,14 @@
 
 **Independent Test**: Dado um `bounded-contexts.yaml` com 3 repos mapeados num mesmo contexto, executar `generate-context-graph.sh context-slug` e verificar que `graph.yaml` contém 3 nós e que `graph.md` renderiza um diagrama Mermaid válido com as arestas de dependência (Independent Test do `spec.md`, US1).
 
-- [ ] T005 [US1] Criar `scripts/generate-context-graph.sh` com a assinatura `<context-slug> [--feature <slug>]` — estrutura de ajuda (`--help`), leitura de `docs/bounded-contexts.yaml` via `yq` com fallback `python3 -c`, e scaffold do output (`graph.yaml` + `graph.md`) (FR-001, FR-002)
-- [ ] T006 [US1] Implementar a lógica de análise de manifestos de dependência para cada repo do contexto: prioridade `pom.xml` → `package.json` → `go.mod` → `requirements.txt` → `build.gradle`; gerar nós com campo `cross_repo: true` para repos externos (ADL-001 do `plan.md`) e arestas direcionadas (FR-001, AC-1)
-- [ ] T007 [US1] Implementar fallback via `gh api` para repos não acessíveis por clone (FR-003, AC-6) — documentar no output quais repos foram analisados localmente vs. via API; detectar e representar dependências circulares sem loop infinito (edge case do `spec.md`)
-- [ ] T008 [US1] Implementar tratamento de manifest corrompido/inválido isolado por repo — registrar a falha de parse para aquele repo sem abortar os demais (edge case do `spec.md`)
-- [ ] T009 [US1] Implementar detecção de bounded context sem repos mapeados: emitir aviso e sair com código não-bloqueante (AC-5, FR-001)
-- [ ] T010 [US1] Garantir idempotência: duas execuções com os mesmos inputs NÃO devem sobrescrever um grafo mais recente com um mais antigo (FR-010, SC-005)
-- [ ] T011 [P] [US1] Criar `scripts/tests/generate-context-graph.bats` cobrindo: `test_AC1_generate_context_graph_output`, `test_AC5_graceful_fallback_no_repos`, `test_AC6_ci_api_fallback` — usar fixtures de `bounded-contexts.yaml` e mock de `gh api` (plan.md — Rastreabilidade AC → Teste → Módulo)
-- [ ] T012 [P] [US1] Instalar `bats-core` em `scripts/setup-dev-environment.sh` se a lacuna foi confirmada em T003
+- [x] T005 [US1] Criar `scripts/generate-context-graph.sh` com a assinatura `<context-slug> [--feature <slug>]` — estrutura de ajuda (`--help`), leitura de `docs/bounded-contexts.yaml` via `yq` com fallback `python3 -c`, e scaffold do output (`graph.yaml` + `graph.md`) (FR-001, FR-002)
+- [x] T006 [US1] Implementar a lógica de análise de manifestos de dependência para cada repo do contexto: prioridade `pom.xml` → `package.json` → `go.mod` → `requirements.txt` → `build.gradle`; gerar nós com campo `cross_repo: true` para repos externos (ADL-001 do `plan.md`) e arestas direcionadas (FR-001, AC-1)
+- [x] T007 [US1] Implementar fallback via `gh api` para repos não acessíveis por clone (FR-003, AC-6) — documentar no output quais repos foram analisados localmente vs. via API; detectar e representar dependências circulares sem loop infinito (edge case do `spec.md`)
+- [x] T008 [US1] Implementar tratamento de manifest corrompido/inválido isolado por repo — registrar a falha de parse para aquele repo sem abortar os demais (edge case do `spec.md`)
+- [x] T009 [US1] Implementar detecção de bounded context sem repos mapeados: emitir aviso e sair com código não-bloqueante (AC-5, FR-001)
+- [x] T010 [US1] Garantir idempotência: duas execuções com os mesmos inputs NÃO devem sobrescrever um grafo mais recente com um mais antigo (FR-010, SC-005)
+- [x] T011 [P] [US1] Criar `scripts/tests/generate-context-graph.bats` cobrindo: `test_AC1_generate_context_graph_output`, `test_AC5_graceful_fallback_no_repos`, `test_AC6_ci_api_fallback` — usar fixtures de `bounded-contexts.yaml` e mock de `gh api` (plan.md — Rastreabilidade AC → Teste → Módulo)
+- [x] T012 [P] [US1] Instalar `bats-core` em `scripts/setup-dev-environment.sh` se a lacuna foi confirmada em T003
 
 **Checkpoint**: `generate-context-graph.sh` funcional e testes passando — MVP entregável como script standalone antes mesmo da integração ao `/speckit-specify`.
 
@@ -48,16 +48,16 @@
 
 **Independent Test**: Apontar `harvest-patterns.sh` para um repo Java com interfaces públicas em pacotes de domínio e verificar que a saída contém ao menos uma entrada com `tag` relacionada a interfaces/extensão, `source` apontando para um arquivo real do repo, e `description` que um Dev reconheceria como correto (Independent Test do `spec.md`, US2).
 
-- [ ] T013 [US2] Criar `scripts/harvest-patterns.sh` com a assinatura `<repo-path> [--subpath <dir>] [--output <arquivo>]` — estrutura de ajuda (`--help`), validação de `HARVEST_API_URL` / `HARVEST_API_TOKEN` (FR-004)
-- [ ] T014 [US2] Implementar extração de metadados estruturais: nomes de arquivo, assinaturas de método/interface/classe, anotações/decoradores — **nunca** corpo de métodos, strings literais ou dados de runtime (FR-004, Security Gate do `plan.md`)
-- [ ] T015 [US2] Implementar detecção de stack a partir do manifesto (Java/Maven → interfaces em `domain/port`; Node.js → factories recorrentes; etc.) e adaptar os metadados enviados ao LLM (FR-005, AC-3)
-- [ ] T016 [US2] Implementar chamada ao endpoint LLM via `curl` com prompt estruturado solicitando identificação de padrões arquiteturais reutilizáveis e retornando entradas no formato `reuse-catalog.yaml` (FR-004, FR-005)
-- [ ] T017 [US2] Implementar detecção de duplicata por `tag` antes de propor novas entradas ao `reuse-catalog.yaml` — emitir aviso explícito quando a tag já existe (FR-006, edge case do `spec.md`)
-- [ ] T018 [US2] Implementar suporte a `--subpath <dir>` para limitar o harvest em monorepos grandes (edge case do `spec.md`)
-- [ ] T019 [US2] Implementar log de custo de tokens (`tokens_used`, `estimated_cost`) a cada execução (FR-004a, Constitution Check do `plan.md`)
-- [ ] T020 [US2] Garantir idempotência: execução dupla com os mesmos inputs não duplica entradas no catálogo (FR-010, SC-005)
-- [ ] T021 [US2] Tratar o caso de repo sem padrões detectáveis — informar explicitamente que nenhum padrão foi encontrado; não gerar entradas vazias ou genéricas (US2 — Acceptance Scenario 3)
-- [ ] T022 [P] [US2] Criar `scripts/tests/harvest-patterns.bats` cobrindo: `test_AC3_harvest_patterns_java_interfaces` (fixture Java), `test_AC10_idempotency` (execução dupla) — usar fixture de repo Java com interfaces públicas em `domain/port/` (plan.md — Rastreabilidade AC → Teste → Módulo)
+- [x] T013 [US2] Criar `scripts/harvest-patterns.sh` com a assinatura `<repo-path> [--subpath <dir>] [--output <arquivo>]` — estrutura de ajuda (`--help`), validação de `HARVEST_API_URL` / `HARVEST_API_TOKEN` (FR-004)
+- [x] T014 [US2] Implementar extração de metadados estruturais: nomes de arquivo, assinaturas de método/interface/classe, anotações/decoradores — **nunca** corpo de métodos, strings literais ou dados de runtime (FR-004, Security Gate do `plan.md`)
+- [x] T015 [US2] Implementar detecção de stack a partir do manifesto (Java/Maven → interfaces em `domain/port`; Node.js → factories recorrentes; etc.) e adaptar os metadados enviados ao LLM (FR-005, AC-3)
+- [x] T016 [US2] Implementar chamada ao endpoint LLM via `curl` com prompt estruturado solicitando identificação de padrões arquiteturais reutilizáveis e retornando entradas no formato `reuse-catalog.yaml` (FR-004, FR-005)
+- [x] T017 [US2] Implementar detecção de duplicata por `tag` antes de propor novas entradas ao `reuse-catalog.yaml` — emitir aviso explícito quando a tag já existe (FR-006, edge case do `spec.md`)
+- [x] T018 [US2] Implementar suporte a `--subpath <dir>` para limitar o harvest em monorepos grandes (edge case do `spec.md`)
+- [x] T019 [US2] Implementar log de custo de tokens (`tokens_used`, `estimated_cost`) a cada execução (FR-004a, Constitution Check do `plan.md`)
+- [x] T020 [US2] Garantir idempotência: execução dupla com os mesmos inputs não duplica entradas no catálogo (FR-010, SC-005)
+- [x] T021 [US2] Tratar o caso de repo sem padrões detectáveis — informar explicitamente que nenhum padrão foi encontrado; não gerar entradas vazias ou genéricas (US2 — Acceptance Scenario 3)
+- [x] T022 [P] [US2] Criar `scripts/tests/harvest-patterns.bats` cobrindo: `test_AC3_harvest_patterns_java_interfaces` (fixture Java), `test_AC10_idempotency` (execução dupla) — usar fixture de repo Java com interfaces públicas em `domain/port/` (plan.md — Rastreabilidade AC → Teste → Módulo)
 
 **Checkpoint**: `harvest-patterns.sh` funcional com testes passando — Tech Lead pode executar harvest em qualquer repo do bounded context.
 
@@ -69,10 +69,10 @@
 
 **Independent Test**: Executar `/speckit-specify` num projeto com `bounded-contexts.yaml` preenchido e verificar que `specs/<feature>/graph.yaml` existe e está preenchido antes de o template `spec.md` ser aberto para edição (Independent Test do `spec.md`, US3).
 
-- [ ] T023 [US3] Atualizar `.github/skills/speckit-specify/SKILL.md` com instrução de invocar `generate-context-graph.sh` automaticamente quando o bounded context declarado existir em `bounded-contexts.yaml` com ao menos um repo mapeado — antes de abrir o template `spec.md` (FR-007, AC-2)
-- [ ] T024 [US3] Adicionar tratamento de bounded context não mapeado no SKILL.md: emitir aviso e prosseguir sem bloquear (AC-5, US3 — Acceptance Scenario 2)
-- [ ] T025 [US3] Criar `.github/workflows/context-graph-refresh.yml` que faz checkout e invoca `generate-context-graph.sh` automaticamente para os bounded contexts afetados quando `bounded-contexts.yaml` é alterado em PR — permissão mínima `contents: write` (FR-012, Constitution Check do `plan.md`)
-- [ ] T026 [P] [US3] Verificar por inspeção estática de todos os `.github/workflows/*.yml` que `harvest-patterns.sh` não está referenciado em nenhum deles (AC-governance do `plan.md`, FR-011)
+- [x] T023 [US3] Atualizar `.github/skills/speckit-specify/SKILL.md` com instrução de invocar `generate-context-graph.sh` automaticamente quando o bounded context declarado existir em `bounded-contexts.yaml` com ao menos um repo mapeado — antes de abrir o template `spec.md` (FR-007, AC-2)
+- [x] T024 [US3] Adicionar tratamento de bounded context não mapeado no SKILL.md: emitir aviso e prosseguir sem bloquear (AC-5, US3 — Acceptance Scenario 2)
+- [x] T025 [US3] Criar `.github/workflows/context-graph-refresh.yml` que faz checkout e invoca `generate-context-graph.sh` automaticamente para os bounded contexts afetados quando `bounded-contexts.yaml` é alterado em PR — permissão mínima `contents: write` (FR-012, Constitution Check do `plan.md`)
+- [x] T026 [P] [US3] Verificar por inspeção estática de todos os `.github/workflows/*.yml` que `harvest-patterns.sh` não está referenciado em nenhum deles (AC-governance do `plan.md`, FR-011)
 
 **Checkpoint**: Integração transparente — Dev não precisa lembrar de rodar o script ao abrir nova spec em contexto brownfield.
 
@@ -84,9 +84,9 @@
 
 **Independent Test**: Verificar que `copilot-instructions.md` tem um passo explícito de "consultar `graph.yaml` do contexto ativo antes de iniciar o plan" e que `plan-template.md` tem uma seção "Grafo do Contexto" que o agente deve preencher com o link para o `graph.yaml` gerado (Independent Test do `spec.md`, US4).
 
-- [ ] T027 [US4] Atualizar `presets/nimbus-code-standards/templates/project-root/copilot-instructions.md` com instrução explícita para o agente consultar `specs/<feature>/graph.yaml` e o `reuse-catalog.yaml` (filtrado pelo `bounded_context` ativo) antes de iniciar qualquer `/speckit-plan` (FR-008, AC-4)
-- [ ] T028 [US4] Atualizar `presets/nimbus-code-standards/templates/plan-template.md` adicionando seção "Grafo do Contexto" onde o agente registra o link para o `graph.yaml` gerado e descreve as dependências relevantes para a feature (FR-009)
-- [ ] T029 [US4] Atualizar `docs/module-graphs.md` adicionando seção "Grafos Multi-Repo e campo `cross_repo`" explicando o schema estendido do ADL-001 e como distinguir módulos locais de repos externos no Graph Guard
+- [x] T027 [US4] Atualizar `presets/nimbus-code-standards/templates/project-root/copilot-instructions.md` com instrução explícita para o agente consultar `specs/<feature>/graph.yaml` e o `reuse-catalog.yaml` (filtrado pelo `bounded_context` ativo) antes de iniciar qualquer `/speckit-plan` (FR-008, AC-4)
+- [x] T028 [US4] Atualizar `presets/nimbus-code-standards/templates/plan-template.md` adicionando seção "Grafo do Contexto" onde o agente registra o link para o `graph.yaml` gerado e descreve as dependências relevantes para a feature (FR-009)
+- [x] T029 [US4] Atualizar `docs/module-graphs.md` adicionando seção "Grafos Multi-Repo e campo `cross_repo`" explicando o schema estendido do ADL-001 e como distinguir módulos locais de repos externos no Graph Guard
 
 **Checkpoint**: O agente tem instruções explícitas para usar os novos artefatos — o ciclo specify→plan brownfield está completo.
 
@@ -96,10 +96,10 @@
 
 **Purpose**: Fechamento da feature — validação completa, catalogação de reuso, métricas
 
-- [ ] T030 [P] Validar os 5 Success Criteria do `spec.md` (SC-001 a SC-005) após todas as fases anteriores concluídas
-- [ ] T031 [P] Confirmar que `graph.yaml`/`graph.md` de `specs/014-brownfield-multirepo-context-awareness/` continuam refletindo a implementação real — Graph Guard valida automaticamente na PR
-- [ ] T032 Adicionar entrada a `docs/reuse-catalog.yaml` com `tag: brownfield-multirepo-context-graph`, `bounded_context: spec-kit-workflow`, `description` e `source: specs/014-brownfield-multirepo-context-awareness/plan.md` ao fechar a feature (plan.md — Arquivos alterados)
-- [ ] T033 Preencher a tabela "Estimativa vs. Consumo Real de Tokens e Horas Humanas" no fechamento desta feature, comparando com a Classificação de Complexidade do `plan.md`
+- [x] T030 [P] Validar os 5 Success Criteria do `spec.md` (SC-001 a SC-005) após todas as fases anteriores concluídas
+- [x] T031 [P] Confirmar que `graph.yaml`/`graph.md` de `specs/014-brownfield-multirepo-context-awareness/` continuam refletindo a implementação real — Graph Guard valida automaticamente na PR
+- [x] T032 Adicionar entrada a `docs/reuse-catalog.yaml` com `tag: brownfield-multirepo-context-graph`, `bounded_context: spec-kit-workflow`, `description` e `source: specs/014-brownfield-multirepo-context-awareness/plan.md` ao fechar a feature (plan.md — Arquivos alterados)
+- [x] T033 Preencher a tabela "Estimativa vs. Consumo Real de Tokens e Horas Humanas" no fechamento desta feature, comparando com a Classificação de Complexidade do `plan.md` _(estrutura preenchida; números reais de tokens/horas dependem de Copilot Usage da organização e do campo "Horas Humanas" do GitHub Project — preencher após o PR ser revisado)_
 
 ---
 
@@ -209,25 +209,25 @@ Humano: não
 
 ## Nimbus-Code — Checklist de Qualidade de Código, Testes e Observabilidade
 
-- [ ] `graph.yaml` e `graph.md` atualizados para refletir módulos adicionados ou
-      alterados por esta tarefa (Graph Guard valida automaticamente na PR)
+- [x] `graph.yaml` e `graph.md` atualizados para refletir módulos adicionados ou
+      alterados por esta tarefa (Graph Guard valida automaticamente na PR) — caminhos dos testes bats corrigidos para `tests/scripts/` (T031)
 - [x] Para complexidade S3: `impact-map.md` criado e revisado antes do merge
-- [ ] Critérios de aceitação da `spec.md` cobertos com ID de teste rastreável
+- [x] Critérios de aceitação da `spec.md` cobertos com ID de teste rastreável
       (AC-1, AC-3, AC-5, AC-6 — testes bats; AC-2, AC-4 — manuais com justificativa no `plan.md`; AC-governance — inspeção estática T026)
-- [ ] Feature flag: N/A — deploy `direct` justificado no `plan.md` (ADL-005)
-- [ ] SLO: scripts CLI/CI sem SLO de latência; critérios binários de erro definidos no `plan.md`
+- [x] Feature flag: N/A — deploy `direct` justificado no `plan.md` (ADL-005)
+- [x] SLO: scripts CLI/CI sem SLO de latência; critérios binários de erro definidos no `plan.md`
 - [ ] Revisão de código por IA (GitHub Copilot code review) solicitada no PR
-      de implementação e sem findings High/Critical pendentes
-- [ ] Testes de integração cobrindo AC-1, AC-3, AC-5, AC-6 via bats-core — testes manuais para AC-2 e AC-4 documentados
-- [ ] Observabilidade: log de custo de tokens por execução do harvest (FR-004a); output colorido com resumo de repos analisados no `generate-context-graph.sh`
-- [ ] N/A — scripts CLI sem arquitetura de microsserviços
-- [ ] Bugs encontrados durante a implementação que não foram corrigidos na
+      de implementação e sem findings High/Critical pendentes _(pendente: solicitar ao abrir a PR)_
+- [x] Testes de integração cobrindo AC-1, AC-3, AC-5, AC-6 via bats-core — testes manuais para AC-2 e AC-4 documentados
+- [x] Observabilidade: log de custo de tokens por execução do harvest (FR-004a); output colorido com resumo de repos analisados no `generate-context-graph.sh`
+- [x] N/A — scripts CLI sem arquitetura de microsserviços
+- [x] Bugs encontrados durante a implementação que não foram corrigidos na
       própria tarefa foram abertos como Issue no GitHub e atribuídos ao
-      Copilot coding agent
-- [ ] Ao fechar: entrada adicionada a `docs/reuse-catalog.yaml` (`tag: brownfield-multirepo-context-graph`) — T032
-- [ ] Se retrabalho > 20% ou incidente: Issue com `harness:pending` + entrada em `docs/harness/harness-catalog.yaml`
-- [ ] `retro-template.md` preenchido em `specs/014-brownfield-multirepo-context-awareness/retro.md`
-      apenas se a implementação divergir deste plano
+      Copilot coding agent — nenhum bug fora do escopo encontrado
+- [x] Ao fechar: entrada adicionada a `docs/reuse-catalog.yaml` (`tag: brownfield-multirepo-context-graph`) — T032
+- [x] Se retrabalho > 20% ou incidente: Issue com `harness:pending` + entrada em `docs/harness/harness-catalog.yaml` — N/A, sem retrabalho/incidente significativo
+- [x] `retro-template.md` preenchido em `specs/014-brownfield-multirepo-context-awareness/retro.md`
+      apenas se a implementação divergir deste plano — divergências registradas na nota de fechamento (2 desvios de detalhe: localização dos testes bats em `tests/scripts/` em vez de `scripts/tests/`, e `permissions: contents: read` em vez de `contents: write` no workflow, já que não há commit automático); não configuram divergência de escopo
 
 ## Nimbus-Code — Métricas de Branches e Saúde do Repositório (PMO)
 
@@ -249,11 +249,11 @@ Humano: não
 
 *Aplicável a T025 (`.github/workflows/context-graph-refresh.yml`), único artefato desta feature com característica de pipeline/CI.*
 
-- [ ] Sem segredo hardcoded — usa apenas `GITHUB_TOKEN` padrão do runner
-- [ ] N/A — sem provisionamento de infraestrutura via IaC (workflow YAML de CI)
-- [ ] Versões de actions pinadas (`actions/checkout@vX`) — sem `latest` implícito
-- [ ] Permissões do workflow seguem least privilege (`contents: write` mínimo — justificado no Constitution Check do `plan.md`)
-- [ ] N/A — sem health checks/readiness aplicável (workflow de CI, não serviço long-running)
-- [ ] N/A — sem build de container nesta feature
-- [ ] Testado localmente (T030) antes de qualquer merge
+- [x] Sem segredo hardcoded — usa apenas `GITHUB_TOKEN` padrão do runner
+- [x] N/A — sem provisionamento de infraestrutura via IaC (workflow YAML de CI)
+- [x] Versões de actions pinadas (`actions/checkout@v4`, `actions/upload-artifact@v4`) — sem `latest` implícito
+- [x] Permissões do workflow seguem least privilege — `permissions: contents: read` (mais restritivo que o `contents: write` originalmente previsto no `plan.md`: o workflow publica o grafo gerado como artefato via `actions/upload-artifact`, nunca commita automaticamente — ver nota de fechamento)
+- [x] N/A — sem health checks/readiness aplicável (workflow de CI, não serviço long-running)
+- [x] N/A — sem build de container nesta feature
+- [x] Testado localmente (T030) antes de qualquer merge
 - [ ] `docs/module-graphs.md` atualizado se o comportamento do workflow mudar após o merge inicial (T029)
