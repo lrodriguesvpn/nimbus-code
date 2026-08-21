@@ -194,8 +194,9 @@ Como **agente IA iniciando um `/speckit-plan`**, eu preciso de instruções expl
 - **FR-001**: O script `generate-context-graph.sh <context-slug> [--feature <slug>]` DEVE ler `docs/bounded-contexts.yaml`, identificar os repos do contexto declarado, analisar os arquivos de manifesto de dependências de cada repo (prioridade: `pom.xml` → `package.json` → `go.mod` → `requirements.txt` → `build.gradle`) e gerar `specs/<feature>/graph.yaml` com nós e arestas.
 - **FR-002**: O script `generate-context-graph.sh` DEVE gerar `specs/<feature>/graph.md` com diagrama Mermaid correspondente ao `graph.yaml` gerado, legível sem ferramentas externas (renderizável pelo GitHub).
 - **FR-003**: O script `generate-context-graph.sh` DEVE aceitar os repos diretamente por clone local (quando disponíveis) ou via GitHub API (`gh api`) como fallback — e documentar claramente quais repos foram analisados localmente vs. via API.
-- **FR-004**: O script `harvest-patterns.sh <repo-path> [--subpath <dir>] [--output <arquivo>]` DEVE analisar o código do repo/subpath informado e produzir entradas no formato `reuse-catalog.yaml` para padrões estruturais recorrentes encontrados, agnóstico à stack mas com detecção especializada para Java, Node.js, Go e Python.
-- **FR-005**: O script `harvest-patterns.sh` DEVE identificar como padrões candidatos, no mínimo: interfaces/protocolos públicos em pacotes de domínio ou extensão, classes base abstratas com múltiplas implementações, anotações/decoradores recorrentes em mais de 30% dos arquivos de um pacote, e convenções de nomenclatura recorrentes em pontos de integração.
+- **FR-004**: O script `harvest-patterns.sh <repo-path> [--subpath <dir>] [--output <arquivo>]` DEVE enviar o código do repo/subpath para um LLM via API (ex.: Copilot API / OpenAI-compatible endpoint) e solicitar a identificação de padrões arquiteturais reutilizáveis, produzindo entradas no formato `reuse-catalog.yaml`. O endpoint e o token de autenticação são configuráveis via variáveis de ambiente (`HARVEST_API_URL`, `HARVEST_API_TOKEN`).
+- **FR-004a**: Por ser baseado em LLM, o `harvest-patterns.sh` é estritamente **on-demand** (nunca em CI automático) e seu custo de tokens DEVE ser estimado e registrado em log a cada execução (`tokens_used`, `estimated_cost`). O Dev revisa as entradas candidatas antes de qualquer merge no `reuse-catalog.yaml`.
+- **FR-005**: O `harvest-patterns.sh` DEVE instruir o LLM a identificar como padrões candidatos, no mínimo: interfaces/protocolos públicos em pacotes de domínio ou extensão, classes base abstratas com múltiplas implementações, anotações/decoradores recorrentes em mais de 30% dos arquivos de um pacote, e convenções de nomenclatura recorrentes em pontos de integração — mas o LLM pode identificar padrões adicionais semanticamente relevantes que análise estática não encontraria.
 - **FR-006**: O script `harvest-patterns.sh` DEVE verificar duplicatas por `tag` antes de propor novas entradas ao `reuse-catalog.yaml` e emitir aviso quando uma tag já existe.
 - **FR-007**: O skill `/speckit-specify` (`SKILL.md`) DEVE invocar `generate-context-graph.sh` automaticamente quando o bounded context declarado existir em `bounded-contexts.yaml` com ao menos um repo mapeado, antes de abrir o template `spec.md`.
 - **FR-008**: O `copilot-instructions.md` DEVE incluir instrução explícita para o agente consultar `specs/<feature>/graph.yaml` e o `reuse-catalog.yaml` (filtrado pelo `bounded_context` ativo) antes de iniciar qualquer `/speckit-plan`.
@@ -229,6 +230,14 @@ Como **agente IA iniciando um `/speckit-plan`**, eu preciso de instruções expl
 
 - Os repos declarados em `bounded-contexts.yaml` podem não estar disponíveis para clone local no ambiente do agente — o fallback via GitHub API é obrigatório para o `generate-context-graph.sh`.
 - O harvest IA requer acesso de leitura ao código do repo — em repos privados, o `GITHUB_TOKEN` ou GitHub App com permissão de leitura deve estar disponível.
-- A detecção de padrões pelo `harvest-patterns.sh` é heurística e nunca exaustiva — o Dev é responsável por revisar as entradas candidatas antes de fazer merge no `reuse-catalog.yaml`. O script não substitui revisão humana de padrões arquiteturais.
+- A detecção de padrões pelo `harvest-patterns.sh` é semântica via LLM e nunca exaustiva — o Dev é responsável por revisar as entradas candidatas antes de fazer merge no `reuse-catalog.yaml`. O script não substitui revisão humana de padrões arquiteturais.
 - Esta feature não resolve o problema de acesso de leitura ao código-fonte dos outros repos durante a execução do agente (quando ele está redigindo o plan ou as tasks) — ela resolve o problema de memória organizacional: cataloga o padrão antes, para que o agente o encontre no catálogo sem precisar acessar o repo em tempo real.
 - A integração ao `/speckit-specify` depende da estrutura atual do `SKILL.md` do speckit-specify — qualquer mudança estrutural no skill deve ser feita de forma backward-compatible.
+
+---
+
+## Clarifications
+
+### Session 2026-08-21
+
+- Q: O `harvest-patterns.sh` deve usar LLM via API ou análise estática determinística para identificar padrões? → A: LLM via API (ex.: Copilot API) — análise semântica. Endpoint e token configuráveis via `HARVEST_API_URL` / `HARVEST_API_TOKEN`. Custo de tokens registrado em log a cada execução. Exclusivamente on-demand (nunca em CI automático).
