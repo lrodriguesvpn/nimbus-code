@@ -209,3 +209,24 @@ entries:
     source: "specs/007-controle-seguranca-ghe-projetos-plataforma/plan.md"
     adr: "docs/adr/0008-github-app-para-varredura-de-seguranca-org-wide.md"
     reuse_count: 0
+
+  - tag: "single-mandatory-test-gate"
+    bounded_context: "spec-kit-workflow"
+    description: >
+      Padrão de gate único de testes obrigatório em PR: um script central
+      (scripts/run-tests.sh) descobre e executa todos os formatos de teste já
+      aceitos pelo bundle (Bats-core e scripts .test.sh simples), agregando um
+      resultado consolidado e identificando o primeiro segmento que falhar. O
+      workflow de CI (.github/workflows/test-suite.yml) apenas invoca esse
+      mesmo script dentro do runner — garantindo paridade local/CI por
+      construção, não por manutenção paralela de duas listas de comandos.
+      Inclui matriz de decisão de formato (docs/testing-policy.md) e
+      governança de exceções (Exception Record no ADL do plan.md) para evitar
+      nova fragmentação de suíte. Rollout faseado recomendado: modo relatório
+      (não bloqueante) por um período de observação, promovido a "required
+      status check" só após decisão humana explícita. Reaproveitar sempre que
+      um repositório precisar consolidar testes fragmentados em um gate único
+      sem introduzir framework/infraestrutura nova.
+    source: "specs/013-governanca-testes-pr/plan.md"
+    adr: ""
+    reuse_count: 0

@@ -105,7 +105,7 @@ harness cataloga **o que deu errado** — e como evitar que dê errado de novo.
     - not-null-without-default
     - ci-gap
     - billing-service
-  source_pr: "https://github.com/org/repo/pull/123"
+  source_pr: "https://ghe.example.com/org/repo/pull/123"
   similar_contexts:
     - payment-service
     - subscription-service
