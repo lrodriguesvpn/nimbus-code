@@ -44,7 +44,10 @@ if command -v npm >/dev/null 2>&1; then
     echo "==> bats ${BATS_VERSION} já instalado — pulando."
   else
     echo "==> Instalando bats-core ${BATS_VERSION} via npm (usado por scripts/run-tests.sh)..."
-    npm install -g "bats@${BATS_VERSION}"
+    if ! npm install -g "bats@${BATS_VERSION}" 2>/dev/null; then
+      echo "==> Instalação sem privilégios falhou (prefixo global não gravável) — tentando via sudo..."
+      sudo npm install -g "bats@${BATS_VERSION}"
+    fi
   fi
 else
   echo "::warning::npm não encontrado no PATH — não foi possível instalar bats. Verifique a feature 'node' do devcontainer."
