@@ -202,6 +202,77 @@ Features S4 exigem:
 - Revisão humana obrigatória (não apenas Copilot)
 - Modelo mais forte (GPT-5.5 / Claude Opus) no agente
 
+## Grafos Multi-Repo e campo `cross_repo`
+
+> Introduzido por
+> [`specs/014-brownfield-multirepo-context-awareness`](/specs/014-brownfield-multirepo-context-awareness/spec.md).
+
+Em projetos brownfield multirepo, o "grafo de módulos" de uma feature
+individual (seção acima) coexiste com um **grafo de bounded context** —
+gerado automaticamente por `scripts/generate-context-graph.sh` a partir de
+`docs/bounded-contexts.yaml` — que mostra como os *repositórios* de um mesmo
+bounded context dependem uns dos outros, e não apenas como os *módulos* de
+uma única feature se relacionam.
+
+### Quando cada grafo se aplica
+
+| Grafo | Escopo | Gerado por | Arquivo |
+|---|---|---|---|
+| Grafo de módulos (feature) | Módulos dentro do repo desta feature | Agente, manualmente, ao escrever `plan.md` (seção acima) | `specs/<feature>/graph.yaml` |
+| Grafo de contexto (multi-repo) | Repositórios de um bounded context inteiro | `scripts/generate-context-graph.sh`, automaticamente via `/speckit-specify` | `specs/<feature>/graph.yaml` (schema estendido, ver abaixo) — sobrescrito/mesclado quando o contexto tem repos mapeados |
+
+### Campo `cross_repo`
+
+Todo node de um grafo de contexto multi-repo pode declarar `cross_repo:
+true|false` (ADL-001 de `specs/014-brownfield-multirepo-context-awareness/plan.md`):
+
+```yaml
+nodes:
+  - id: "org-svc-billing"
+    type: "repo"
+    repository: "org/svc-billing"
+    cross_repo: true   # repo diferente do repo onde esta feature está sendo implementada
+    manifest_source: "gh-api"   # ou "local:<caminho>", ou "unavailable"
+```
+
+- `cross_repo: false` — o node representa o próprio repositório onde a
+  feature está sendo desenvolvida (módulo "local").
+- `cross_repo: true` — o node representa um repositório **externo** ao repo
+  atual, mas parte do mesmo bounded context.
+
+**Por que isso importa para o Graph Guard**: sem este campo, o Graph Guard
+não tem como diferenciar "módulo local não encontrado" (possível erro real —
+a feature deveria ter criado o módulo mas não criou) de "repo externo,
+naturalmente fora do checkout atual" (esperado, não é um erro). O campo
+`cross_repo` permite ao Graph Guard aplicar regras diferentes para cada caso,
+evitando falsos positivos em contextos multirepo.
+
+### Fluxo de geração automática
+
+1. `/speckit-specify` verifica se o "Bounded Context" da nova feature está
+   registrado em `docs/bounded-contexts.yaml` com repos mapeados.
+2. Se sim, invoca `scripts/generate-context-graph.sh <slug> --feature <feature-slug>`
+   automaticamente, **antes** de o `spec.md` ser finalizado — o grafo já
+   existe quando o agente começa o `/speckit-plan`.
+3. Se o contexto não tiver repos mapeados (ou `docs/bounded-contexts.yaml`
+   não existir), o fluxo emite um aviso e prossegue sem bloquear — mapear o
+   contexto é uma decisão do time, não um pré-requisito da spec.
+4. O agente deve consultar esse grafo (seção "Grafo do Contexto" do
+   `plan.md`) antes de propor qualquer decisão arquitetural que atravesse
+   mais de um repositório do contexto — ver `.github/copilot-instructions.md`,
+   seção "Grafo de Contexto Multi-Repo (Brownfield)".
+
+### Harvest de padrões (`harvest-patterns.sh`) — complementar, não parte do grafo
+
+`scripts/harvest-patterns.sh` (mesma feature 014) é um mecanismo
+**complementar** ao grafo de contexto: em vez de mapear repositórios e suas
+dependências, ele varre metadados estruturais de um repo específico e
+propõe entradas para `docs/reuse-catalog.yaml`. É **exclusivamente
+on-demand** — nunca invocado automaticamente por `/speckit-specify` nem por
+nenhum workflow de CI (diferente de `generate-context-graph.sh`, que roda
+automaticamente). Ver `docs/reuse-catalog.yaml` para o schema das entradas
+resultantes (campo `example` opcional).
+
 ## Referências
 
 - Templates: `presets/nimbus-code-standards/templates/feature-artifacts/`
