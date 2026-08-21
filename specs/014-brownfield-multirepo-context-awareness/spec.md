@@ -242,3 +242,9 @@ Como **agente IA iniciando um `/speckit-plan`**, eu preciso de instruções expl
 
 - Q: O `harvest-patterns.sh` deve usar LLM via API ou análise estática determinística para identificar padrões? → A: LLM via API (ex.: Copilot API) — análise semântica. Endpoint e token configuráveis via `HARVEST_API_URL` / `HARVEST_API_TOKEN`. Custo de tokens registrado em log a cada execução. Exclusivamente on-demand (nunca em CI automático).
 - Q: Qual estratégia de segurança aplicar ao enviar código de repos proprietários ao LLM? → A: Apenas metadados estruturais (nomes de arquivo, assinaturas de método/interface/classe, anotações) — nunca corpo de métodos, strings literais ou dados de runtime. Compatível com políticas corporativas que proíbem envio de código-fonte completo para APIs externas.
+- Q1 (Formato `graph.yaml` multi-repo): Schema **estendido** com campo `cross_repo: true` nos nodes que representam repos externos — distingue módulo local de repo externo para o Graph Guard.
+- Q2 (Localização dos scripts): `scripts/` — junto com `setup-github-project.sh` e demais scripts do bundle.
+- Q3 (Output do harvest): Direto no `docs/reuse-catalog.yaml` com aviso de duplicata por `tag`. Dev revisa via `git diff` antes de commit — sem arquivo candidato separado.
+- Q4 (Dependência com feature 006): Feature 006 está 100% implementada (20/20 tasks). A feature 014 usa diretamente o schema existente de `docs/bounded-contexts.yaml` sem necessidade de extensão.
+- Q5 (Integração ao `/speckit-specify`): Instrução no `SKILL.md` (agente invoca o script on-demand) **+** workflow de CI `.github/workflows/context-graph-refresh.yml` que roda `generate-context-graph.sh` automaticamente quando `bounded-contexts.yaml` é alterado.
+- Q6 (Bounded context sem repos mapeados): **Aviso + prossegue** sem bloquear (AC-5 confirmado) — o Dev pode mapear o contexto depois sem interrupção do fluxo de spec.
