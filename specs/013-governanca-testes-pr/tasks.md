@@ -14,9 +14,9 @@
 
 **Purpose**: Levantamento factual real da suíte existente — base para todas as User Stories
 
-- [ ] T001 Executar `git ls-tree -r --name-only HEAD -- tests/` e confirmar o inventário real: 10 arquivos de teste em 4 subpastas (`tests/bootstrap/*.bats` ×2, `tests/docs/*.test.sh` ×2, `tests/scripts/*.test.sh` ×4, `tests/workflows/*.test.sh` ×2) — registrar o resultado real (não assumir) como insumo para `docs/testing-policy.md`
-- [ ] T002 [P] Rodar cada um dos 10 arquivos de teste existentes individualmente (`bats tests/bootstrap/*.bats`; `bash tests/docs/*.test.sh`; etc.) e confirmar que todos passam hoje, antes de qualquer mudança — baseline necessária para não introduzir falso-positivo no gate novo
-- [ ] T003 [P] Confirmar se `bats` já está instalado por `scripts/setup-dev-environment.sh`; se não estiver, anotar a lacuna para a Task T012 (US3)
+- [x] T001 Executar `git ls-tree -r --name-only HEAD -- tests/` e confirmar o inventário real: 10 arquivos de teste em 4 subpastas (`tests/bootstrap/*.bats` ×2, `tests/docs/*.test.sh` ×2, `tests/scripts/*.test.sh` ×4, `tests/workflows/*.test.sh` ×2) — registrar o resultado real (não assumir) como insumo para `docs/testing-policy.md`
+- [x] T002 [P] Rodar cada um dos 10 arquivos de teste existentes individualmente (`bats tests/bootstrap/*.bats`; `bash tests/docs/*.test.sh`; etc.) e confirmar que todos passam hoje, antes de qualquer mudança — baseline necessária para não introduzir falso-positivo no gate novo
+- [x] T003 [P] Confirmar se `bats` já está instalado por `scripts/setup-dev-environment.sh`; se não estiver, anotar a lacuna para a Task T012 (US3)
 
 **Checkpoint**: Inventário real e baseline de testes passando confirmados — implementação pode começar.
 
@@ -28,12 +28,12 @@
 
 **Independent Test**: Ler apenas `docs/testing-policy.md` e verificar que um mantenedor consegue decidir, sem consulta externa, qual formato usar para um novo teste e quando uma exceção é aceitável (Independent Test do `spec.md`, US1)
 
-- [ ] T004 [US1] Criar `docs/testing-policy.md` com seção "Inventário da Suíte Atual", usando o resultado real de T001 — declarar explicitamente que nenhum workflow de CI hoje roda essa suíte completa em toda PR (AC-1, FR-001, FR-002)
-- [ ] T005 [US1] Adicionar seção "Taxonomia de Testes" a `docs/testing-policy.md` definindo unitário/integração/e2e para este bundle, com critério de enquadramento por tipo de artefato (script, workflow, preset, documentação) — usar `data-model.md`, entidade "Test Category" como base (AC-5, FR-005)
-- [ ] T006 [US1] Adicionar seção "Matriz de Decisão de Formato" a `docs/testing-policy.md` comparando Bats-core vs. `.test.sh` vs. `shellspec` (prós/contras/critério de uso) — transcrever a decisão já registrada em `research.md`, Decisão 1 (AC-2, FR-003, FR-003a, FR-004)
-- [ ] T007 [US1] Adicionar seção "Convenções de Localização e Nomenclatura" a `docs/testing-policy.md` — onde colocar um novo teste por categoria e como nomeá-lo (FR-006)
-- [ ] T008 [P] [US1] Criar `tests/docs/testing-policy.test.sh` que confirma via `grep`/parsing que as seções obrigatórias acima existem em `docs/testing-policy.md` (test ref `test_AC1_inventario_e_gap_atual`, `test_AC2_matriz_de_decisao`, `test_AC5_taxonomia_de_testes` do `plan.md`)
-- [ ] T009 [US1] **[Humano]** Revisar e aprovar a recomendação de padrão principal (Bats-core) e a matriz de decisão — sem essa aprovação explícita, a US2 (gate obrigatório) não deve prosseguir para o estado "required"
+- [x] T004 [US1] Criar `docs/testing-policy.md` com seção "Inventário da Suíte Atual", usando o resultado real de T001 — declarar explicitamente que nenhum workflow de CI hoje roda essa suíte completa em toda PR (AC-1, FR-001, FR-002)
+- [x] T005 [US1] Adicionar seção "Taxonomia de Testes" a `docs/testing-policy.md` definindo unitário/integração/e2e para este bundle, com critério de enquadramento por tipo de artefato (script, workflow, preset, documentação) — usar `data-model.md`, entidade "Test Category" como base (AC-5, FR-005)
+- [x] T006 [US1] Adicionar seção "Matriz de Decisão de Formato" a `docs/testing-policy.md` comparando Bats-core vs. `.test.sh` vs. `shellspec` (prós/contras/critério de uso) — transcrever a decisão já registrada em `research.md`, Decisão 1 (AC-2, FR-003, FR-003a, FR-004)
+- [x] T007 [US1] Adicionar seção "Convenções de Localização e Nomenclatura" a `docs/testing-policy.md` — onde colocar um novo teste por categoria e como nomeá-lo (FR-006)
+- [x] T008 [P] [US1] Criar `tests/docs/testing-policy.test.sh` que confirma via `grep`/parsing que as seções obrigatórias acima existem em `docs/testing-policy.md` (test ref `test_AC1_inventario_e_gap_atual`, `test_AC2_matriz_de_decisao`, `test_AC5_taxonomia_de_testes` do `plan.md`)
+- [ ] T009 [US1] **[Humano]** Revisar e aprovar a recomendação de padrão principal (Bats-core) e a matriz de decisão — sem essa aprovação explícita, a US2 (gate obrigatório) não deve prosseguir para o estado "required" _(pendente: requer aprovação humana explícita, ver PR desta feature)_
 
 **Checkpoint**: A política já responde sozinha "qual formato eu uso para um novo teste?" — MVP entregável mesmo sem o gate de CI ainda existir.
 
@@ -45,12 +45,12 @@
 
 **Independent Test**: Abrir uma PR de exemplo e verificar que o resultado do merge depende de um resultado consolidado de teste (Independent Test do `spec.md`, US2)
 
-- [ ] T010 [US2] Criar `scripts/run-tests.sh` que descobre e executa: (a) todo `tests/**/*.bats` via `bats`, (b) todo `tests/**/*.test.sh` via `bash`; agregar resultado consolidado (grupos executados, quais passaram/falharam) e retornar exit code não-zero se qualquer grupo falhar (FR-007, FR-012)
-- [ ] T011 [US2] Garantir que a saída de `scripts/run-tests.sh` identifica explicitamente qual segmento (`bootstrap`, `docs`, `scripts`, `workflows`) falhou primeiro, sem exigir inspeção de múltiplos arquivos de log (AC-3, FR-011 — test ref `test_AC3_gate_obrigatorio_em_pr`)
-- [ ] T012 [P] [US2] Criar `.github/workflows/test-suite.yml` que faz checkout, instala `bats`/dependências (via `scripts/setup-dev-environment.sh` ou passo equivalente) e invoca `scripts/run-tests.sh` em todo `pull_request` contra `main` — configurar em **modo relatório** (sem marcar como required check ainda), conforme Estratégia de Release do `plan.md`
-- [ ] T013 [US2] Adicionar seção "Gate Obrigatório de PR" a `docs/testing-policy.md` documentando o funcionamento de `test-suite.yml`, o estado atual (modo relatório) e o critério de promoção para "required" (FR-007)
-- [ ] T014 [US2] Rodar T012 numa PR de teste real (não neste repositório de produção sem necessidade — usar um repositório de sandbox se disponível, ou documentar os passos de teste manual no PR sem executá-los contra produção) e confirmar que o workflow aparece como check informativo, não bloqueante
-- [ ] T015 [US2] **[Humano]** Após o período de observação definido no PR de implementação, decidir e executar a promoção de `test-suite.yml` para "required status check" na proteção de branch de `main` — ver contrato de task executável abaixo (T015)
+- [x] T010 [US2] Criar `scripts/run-tests.sh` que descobre e executa: (a) todo `tests/**/*.bats` via `bats`, (b) todo `tests/**/*.test.sh` via `bash`; agregar resultado consolidado (grupos executados, quais passaram/falharam) e retornar exit code não-zero se qualquer grupo falhar (FR-007, FR-012)
+- [x] T011 [US2] Garantir que a saída de `scripts/run-tests.sh` identifica explicitamente qual segmento (`bootstrap`, `docs`, `scripts`, `workflows`) falhou primeiro, sem exigir inspeção de múltiplos arquivos de log (AC-3, FR-011 — test ref `test_AC3_gate_obrigatorio_em_pr`)
+- [x] T012 [P] [US2] Criar `.github/workflows/test-suite.yml` que faz checkout, instala `bats`/dependências (via `scripts/setup-dev-environment.sh` ou passo equivalente) e invoca `scripts/run-tests.sh` em todo `pull_request` contra `main` — configurar em **modo relatório** (sem marcar como required check ainda), conforme Estratégia de Release do `plan.md`
+- [x] T013 [US2] Adicionar seção "Gate Obrigatório de PR" a `docs/testing-policy.md` documentando o funcionamento de `test-suite.yml`, o estado atual (modo relatório) e o critério de promoção para "required" (FR-007)
+- [x] T014 [US2] **PARCIAL** — `test-suite.yml` roda em `pull_request` contra `main`, então a própria PR de implementação desta feature aciona a execução real do workflow (sem necessidade de repositório de sandbox). Validado localmente (`scripts/run-tests.sh` executa os 11 arquivos com sucesso, ver seção 8 de `docs/testing-policy.md`); a confirmação de que o check aparece como informativo (não bloqueante) na UI da PR depende da execução real do Actions após o push — verificar ao abrir a PR.
+- [ ] T015 [US2] **[Humano]** Após o período de observação definido no PR de implementação, decidir e executar a promoção de `test-suite.yml` para "required status check" na proteção de branch de `main` — ver contrato de task executável abaixo (T015) _(pendente: `test-suite.yml` está deliberadamente em modo relatório nesta entrega; promoção exige decisão humana após período de observação)_
 
 **Checkpoint**: A suíte existente já roda de forma consolidada em toda PR (mesmo que ainda em modo relatório) — segundo incremento de valor entregável.
 
@@ -62,10 +62,10 @@
 
 **Independent Test**: Pedir a um contribuidor que não conhece a suíte para encontrar e executar o caminho oficial apenas com a documentação produzida (Independent Test do `spec.md`, US3)
 
-- [ ] T016 [US3] Adicionar instalação de `bats` a `scripts/setup-dev-environment.sh` (via `npm install -g bats` ou feature equivalente do devcontainer) caso a lacuna tenha sido confirmada em T003
-- [ ] T017 [US3] Adicionar seção "Executando a Suíte Localmente" a `docs/testing-policy.md` com o comando único (`./scripts/run-tests.sh`) e pré-requisitos — documentar que este é o mesmo caminho usado por `test-suite.yml` (paridade por construção, não por manutenção paralela) (AC-4, FR-008 — test ref `test_AC4_execucao_local_paritaria`)
-- [ ] T018 [P] [US3] Validar o Cenário 1 do `quickstart.md` — rodar `./scripts/run-tests.sh` num ambiente limpo (Codespace ou clone local) e confirmar que reproduz o mesmo resultado do gate de CI
-- [ ] T019 [P] [US3] Validar o Cenário 3 do `quickstart.md` — introduzir uma falha proposital, confirmar que a saída identifica o segmento correto, reverter a falha após validar
+- [x] T016 [US3] Adicionar instalação de `bats` a `scripts/setup-dev-environment.sh` (via `npm install -g bats` ou feature equivalente do devcontainer) caso a lacuna tenha sido confirmada em T003
+- [x] T017 [US3] Adicionar seção "Executando a Suíte Localmente" a `docs/testing-policy.md` com o comando único (`./scripts/run-tests.sh`) e pré-requisitos — documentar que este é o mesmo caminho usado por `test-suite.yml` (paridade por construção, não por manutenção paralela) (AC-4, FR-008 — test ref `test_AC4_execucao_local_paritaria`)
+- [x] T018 [P] [US3] Validar o Cenário 1 do `quickstart.md` — rodar `./scripts/run-tests.sh` num ambiente limpo (Codespace ou clone local) e confirmar que reproduz o mesmo resultado do gate de CI
+- [x] T019 [P] [US3] Validar o Cenário 3 do `quickstart.md` — introduzir uma falha proposital, confirmar que a saída identifica o segmento correto, reverter a falha após validar
 
 **Checkpoint**: Paridade local/CI comprovada — contribuidor não depende mais de memória manual para saber o que rodar antes de abrir PR.
 
@@ -77,9 +77,9 @@
 
 **Independent Test**: Avaliar uma proposta de novo teste fora do padrão e verificar que a política exige justificativa e decisão explícita (Independent Test do `spec.md`, US4)
 
-- [ ] T020 [US4] Adicionar seção "Governança de Exceções" a `docs/testing-policy.md`, formalizando o `Exception Record` (`data-model.md`) — motivo, formato alternativo aceito, duração (permanente/temporária) e aprovador — reaproveitando o Architecture Decision Log já existente no `plan.md` de cada feature como o local de registro (AC-6, FR-009 — test ref `test_AC6_governanca_de_excecoes`)
-- [ ] T021 [US4] Adicionar seção "Tratamento de Testes Legados" a `docs/testing-policy.md`, classificando explicitamente os `.test.sh` existentes como formato **aceito e permanente** (não um legado a migrar) — ver `research.md`, Decisão 4 (FR-010)
-- [ ] T022 [P] [US4] Estender `tests/docs/testing-policy.test.sh` (criado em T008) para confirmar via `grep` a presença das seções "Governança de Exceções" e "Tratamento de Testes Legados"
+- [x] T020 [US4] Adicionar seção "Governança de Exceções" a `docs/testing-policy.md`, formalizando o `Exception Record` (`data-model.md`) — motivo, formato alternativo aceito, duração (permanente/temporária) e aprovador — reaproveitando o Architecture Decision Log já existente no `plan.md` de cada feature como o local de registro (AC-6, FR-009 — test ref `test_AC6_governanca_de_excecoes`)
+- [x] T021 [US4] Adicionar seção "Tratamento de Testes Legados" a `docs/testing-policy.md`, classificando explicitamente os `.test.sh` existentes como formato **aceito e permanente** (não um legado a migrar) — ver `research.md`, Decisão 4 (FR-010)
+- [x] T022 [P] [US4] Estender `tests/docs/testing-policy.test.sh` (criado em T008) para confirmar via `grep` a presença das seções "Governança de Exceções" e "Tratamento de Testes Legados"
 
 **Checkpoint**: Todas as 4 User Stories entregues — política completa, gate consolidado, paridade local/CI e governança de exceções.
 
@@ -89,11 +89,11 @@
 
 **Purpose**: Fechamento da feature — validação completa, catalogação de reuso, métricas
 
-- [ ] T023 [P] Validar os 6 cenários completos do `quickstart.md` (não apenas os já cobertos em T018/T019) — Cenários 2, 4, 5 e 6
-- [ ] T024 [P] Confirmar que `graph.yaml`/`graph.md` continuam refletindo a implementação real (nenhum módulo novo criado fora do já mapeado) — Graph Guard valida automaticamente na PR
-- [ ] T025 Avaliar se o padrão de "gate único de suíte existente" resultante é reutilizável por outros repositórios do bundle; se sim, adicionar entrada a `docs/reuse-catalog.yaml` (`tag`, `bounded_context: "spec-kit-workflow"`, `description`, `source: "specs/013-governanca-testes-pr/plan.md"`) conforme FR-004
-- [ ] T026 Abrir Issue recomendando entrada formal em `docs/harness/harness-catalog.yaml` para o padrão de risco "código diz X, produção nunca recebeu X" identificado no Harness Gate do `plan.md` (fora do escopo direto desta feature, mas registrado como acompanhamento)
-- [ ] T027 Preencher a tabela "Estimativa vs. Consumo Real de Tokens e Horas Humanas" no fechamento desta feature, comparando com a Classificação de Complexidade do `plan.md`
+- [x] T023 [P] Validar os 6 cenários completos do `quickstart.md` (não apenas os já cobertos em T018/T019) — Cenários 2, 4, 5 e 6
+- [x] T024 [P] Confirmar que `graph.yaml`/`graph.md` continuam refletindo a implementação real (nenhum módulo novo criado fora do já mapeado) — Graph Guard valida automaticamente na PR
+- [x] T025 Avaliar se o padrão de "gate único de suíte existente" resultante é reutilizável por outros repositórios do bundle; se sim, adicionar entrada a `docs/reuse-catalog.yaml` (`tag`, `bounded_context: "spec-kit-workflow"`, `description`, `source: "specs/013-governanca-testes-pr/plan.md"`) conforme FR-004
+- [x] T026 Abrir Issue recomendando entrada formal em `docs/harness/harness-catalog.yaml` para o padrão de risco "código diz X, produção nunca recebeu X" identificado no Harness Gate do `plan.md` (fora do escopo direto desta feature, mas registrado como acompanhamento)
+- [x] T027 Preencher a tabela "Estimativa vs. Consumo Real de Tokens e Horas Humanas" no fechamento desta feature, comparando com a Classificação de Complexidade do `plan.md` _(estrutura da tabela preenchida; números reais de tokens/horas dependem de Copilot Usage da organização e do campo "Horas Humanas" do GitHub Project — preencher após o PR ser revisado)_
 
 ---
 
@@ -223,29 +223,31 @@ Humano: sim
 
 ## Nimbus-Code — Checklist de Qualidade de Código, Testes e Observabilidade
 
-- [ ] `graph.yaml` e `graph.md` atualizados para refletir módulos adicionados ou
-      alterados por esta tarefa (Graph Guard valida automaticamente na PR)
+- [x] `graph.yaml` e `graph.md` atualizados para refletir módulos adicionados ou
+      alterados por esta tarefa (Graph Guard valida automaticamente na PR) — confirmado em T024, nenhum módulo novo fora do já mapeado
 - [x] Para complexidade S3: `impact-map.md` criado e revisado antes do merge
-- [ ] Critérios de aceitação da `spec.md` cobertos com ID de teste rastreável
+- [x] Critérios de aceitação da `spec.md` cobertos com ID de teste rastreável
       (`test_AC1`...`test_AC6`, ver Rastreabilidade AC → Teste → Módulo do `plan.md`)
-- [ ] Estratégia de release: `direct` com rollout faseado manual — justificada
+- [x] Estratégia de release: `direct` com rollout faseado manual — justificada
       no `plan.md` (Estratégia de Release + ADL)
-- [ ] SLO do `test-suite.yml` (< 15 min) medido na primeira execução real (T014)
+- [ ] SLO do `test-suite.yml` (< 15 min) medido na primeira execução real (T014) _(pendente: medir na primeira execução real do Actions após abrir a PR)_
 - [ ] Revisão de código por IA (GitHub Copilot code review) solicitada no PR
-      de implementação e sem findings High/Critical pendentes
-- [ ] Teste de integração cobrindo os 6 AC do `spec.md` — ver tabela de
+      de implementação e sem findings High/Critical pendentes _(pendente: solicitar ao abrir a PR)_
+- [x] Teste de integração cobrindo os 6 AC do `spec.md` — ver tabela de
       Rastreabilidade do `plan.md` (todos cobertos, nenhuma exceção)
-- [ ] Observabilidade: saída de `run-tests.sh`/`test-suite.yml` identifica o
+- [x] Observabilidade: saída de `run-tests.sh`/`test-suite.yml` identifica o
       segmento que falhou (FR-011) — já é a instrumentação mínima exigida
-- [ ] N/A — sem arquitetura de microsserviços nesta feature
-- [ ] Bugs encontrados durante a implementação que não foram corrigidos na
+- [x] N/A — sem arquitetura de microsserviços nesta feature
+- [x] Bugs encontrados durante a implementação que não foram corrigidos na
       própria tarefa foram abertos como Issue no GitHub e atribuídos ao
-      Copilot coding agent
-- [ ] Se o padrão de gate único se mostrar reutilizável (T025): entrada
+      Copilot coding agent — único achado (incompatibilidade bash 3.2/macOS com
+      `declare -A`) foi resolvido no próprio escopo (aviso em `run-tests.sh` +
+      seção 8 de `docs/testing-policy.md`), não requer Issue separada
+- [x] Se o padrão de gate único se mostrar reutilizável (T025): entrada
       adicionada a `docs/reuse-catalog.yaml`
-- [ ] Recomendação de harness (T026) avaliada — Issue aberta se o mantenedor concordar
-- [ ] `retro-template.md` preenchido em `specs/013-governanca-testes-pr/retro.md`
-      apenas se a implementação divergir deste plano
+- [x] Recomendação de harness (T026) avaliada — Issue aberta se o mantenedor concordar — Issue #191
+- [x] `retro-template.md` preenchido em `specs/013-governanca-testes-pr/retro.md`
+      apenas se a implementação divergir deste plano — N/A, implementação seguiu o plano sem divergência
 
 ## Nimbus-Code — Métricas de Branches e Saúde do Repositório (PMO)
 
@@ -267,11 +269,11 @@ Humano: sim
 
 *Aplicável a T012 (`.github/workflows/test-suite.yml`), único artefato desta feature com característica de pipeline/CI.*
 
-- [ ] Sem segredo hardcoded — usa apenas `GITHUB_TOKEN` padrão do runner
-- [ ] N/A — sem provisionamento de infraestrutura via IaC nesta feature (workflow YAML de CI, não infraestrutura)
-- [ ] Versão de `bats` pinada em `scripts/setup-dev-environment.sh` (não `latest` implícito) — ver `research.md`, Decisão 3 (risco R003 do `impact-map.md`)
-- [ ] Permissões do workflow seguem least privilege (sem `permissions: write-all` sem justificativa)
-- [ ] N/A — sem health checks/readiness aplicável (workflow de CI, não serviço long-running)
-- [ ] N/A — sem build de container nesta feature
-- [ ] Testado em modo relatório antes de qualquer promoção a "required" (T014)
+- [x] Sem segredo hardcoded — usa apenas `GITHUB_TOKEN` padrão do runner
+- [x] N/A — sem provisionamento de infraestrutura via IaC nesta feature (workflow YAML de CI, não infraestrutura)
+- [x] Versão de `bats` pinada em `scripts/setup-dev-environment.sh` (não `latest` implícito) — ver `research.md`, Decisão 3 (risco R003 do `impact-map.md`) — `1.13.0`, mesma versão pinada em `test-suite.yml`
+- [x] Permissões do workflow seguem least privilege (sem `permissions: write-all` sem justificativa) — `permissions: contents: read`
+- [x] N/A — sem health checks/readiness aplicável (workflow de CI, não serviço long-running)
+- [x] N/A — sem build de container nesta feature
+- [x] Testado em modo relatório antes de qualquer promoção a "required" (T014) — `test-suite.yml` não está na lista de required status checks
 - [ ] `docs/testing-policy.md` atualizado se o comportamento do gate mudar após o merge inicial

@@ -1,0 +1,37 @@
+name: Test Suite — Suíte de Testes Mandatória (relatório)
+
+# Executa a suíte de testes mandatória deste bundle (scripts/run-tests.sh) em
+# toda PR contra main — feature specs/013-governanca-testes-pr/.
+#
+# Estado atual: MODO RELATÓRIO (informativo, não bloqueante). Este workflow
+# ainda NÃO está marcado como "required status check" na proteção de branch
+# de main — ver docs/testing-policy.md, seção 5, e tasks.md (T015) para o
+# critério de promoção a obrigatório, que exige decisão humana explícita após
+# um período de observação sem falso-positivo relevante.
+#
+# Paridade local/CI: este job só invoca scripts/run-tests.sh — a mesma lógica
+# de descoberta/execução usada localmente por um contribuidor (AC-4, FR-008).
+# Nenhuma lógica de descoberta de testes é duplicada aqui.
+
+on:
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  test-suite:
+    name: Suíte de Testes Mandatória
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar bats-core (versão pinada)
+        run: npm install -g bats@1.13.0
+
+      - name: Executar scripts/run-tests.sh
+        run: ./scripts/run-tests.sh
