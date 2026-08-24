@@ -1,13 +1,10 @@
 <!--
 Sync Impact Report
-- Version change: unversioned -> 1.0.0
-- Modified principles:
-  - Sessões de Agente, Branches e Isolamento de Código (regras de PR para develop/main)
+- Version change: 1.0.0 -> 1.1.0
+- Modified principles: (none)
 - Added sections:
-  - Governança de Promoção entre Branches
-  - Governança (versionamento, emendas e compliance)
-- Removed sections:
-  - Bloco de placeholders do template original da constituição
+  - Paridade Obrigatória entre Este Repositório e os Templates dos Presets
+- Removed sections: (none)
 - Follow-up TODOs:
   - TODO(RATIFICATION_DATE): confirmar data oficial de ratificação inicial da constituição.
 -->
@@ -359,6 +356,46 @@ Ver o detalhamento técnico de como aplicar estas regras em:
   do Comitê Nimbus, com registro explícito da decisão no próprio PR.
 - Sem esse registro de aprovação do Comitê Nimbus, o merge em `main` é proibido.
 
+## Paridade Obrigatória entre Este Repositório e os Templates dos Presets
+
+> **Este repositório é o projeto template.** Tudo o que é decidido, corrigido
+> ou reforçado aqui — regras, instruções, catálogos, scripts — só produz efeito
+> real para o resto da organização quando também existe nos templates dos
+> presets. Uma regra que só existe neste repositório e nunca chega ao template
+> é, na prática, uma regra que não existe para ninguém além deste repositório.
+
+- Este repositório (`nimbus-code-spec-kit-template`) é a fonte única de
+  verdade dos presets/bundles/extensões/workflows distribuídos para todos os
+  demais repositórios da Nimbus-Code via `bootstrap.sh` e
+  `update-speckit-and-bundle.yml`.
+- **Nunca editar apenas `.specify/memory/constitution.md` ou
+  `.github/copilot-instructions.md` deste repositório** sem replicar a mesma
+  mudança, no mesmo Pull Request, para:
+  - `presets/nimbus-code-standards/templates/constitution-template.md` e
+    `templates/project-root/copilot-instructions.md` (e as respectivas cópias
+    espelho em `.specify/presets/nimbus-code-standards/templates/`);
+  - `presets/nimbus-code-platform-standards/templates/`, quando a regra também
+    se aplicar a repositórios de plataforma/cliente.
+- Editar somente o arquivo local sem propagar a mudança para o template
+  correspondente é violação desta constituição, mesmo que passe despercebida
+  em revisão superficial de PR — regras de idioma, branch/promoção, Harness
+  Engineering e Playbook de Sucesso já foram encontradas divergindo dessa
+  forma nesta sessão e tiveram que ser retroativamente sincronizadas.
+- Todo script, catálogo YAML (`docs/harness/harness-catalog.yaml`,
+  `docs/playbooks/success-catalog.yaml`, `docs/playbooks/retro-cadence-state.yaml`,
+  `docs/reuse-catalog.yaml`, `docs/bounded-contexts.yaml`) ou documento que
+  passe a ser referenciado por `copilot-instructions.md`/`constitution.md`
+  **deve existir fisicamente** em `templates/project-root/<mesmo-caminho>` de
+  todo preset aplicável — referenciar um caminho no texto shipado sem o
+  arquivo existir no template é bug da mesma gravidade que uma regra ausente.
+- Antes de qualquer bump de versão (`release:major`/`minor`/`patch`) deste
+  repositório: auditar a paridade entre este repositório e os templates dos
+  presets (seções de `copilot-instructions.md`/`constitution.md`, catálogos
+  YAML de exemplo, scripts referenciados, `ISSUE_TEMPLATE`, taxonomia de
+  labels). Divergência encontrada bloqueia a publicação até correção — ver
+  `scripts/validate-issue-template-parity.sh` como precedente de verificação
+  automatizada equivalente.
+
 ## Governança
 
 - Esta constituição prevalece sobre convenções locais conflitantes de fluxo,
@@ -375,4 +412,4 @@ Ver o detalhamento técnico de como aplicar estas regras em:
 - TODO(RATIFICATION_DATE): confirmar data oficial da primeira ratificação
   institucional desta constituição.
 
-**Version**: 1.0.0 | **Ratified**: TODO(RATIFICATION_DATE) | **Last Amended**: 2026-08-24
+**Version**: 1.1.0 | **Ratified**: TODO(RATIFICATION_DATE) | **Last Amended**: 2026-08-24

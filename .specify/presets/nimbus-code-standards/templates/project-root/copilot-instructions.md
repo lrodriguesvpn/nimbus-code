@@ -208,6 +208,49 @@ humana constante. Instalada via `scripts/setup-github-labels.sh`.
   harvest para o bounded context ativo, declare quais se aplicam na seção
   "Padrão reutilizado encontrado?" do `plan.md`, junto às entradas manuais.
 
+## Harness Engineering (Aprendizado com Erros)
+
+> **Passo obrigatório antes de qualquer `/nimbus-code-plan`**: consulte também
+> `docs/harness/harness-catalog.yaml` buscando por `tags` e `bounded_context`
+> relacionados ao domínio da feature — ANTES de redigir o `plan.md`.
+>
+> Use `./scripts/harness-search.sh <tag>` ou `grep` direto no arquivo.
+
+- Se encontrar match: declare na seção **"Harness Gate"** do `plan.md`:
+  - ID(s) do harness consultado(s)
+  - Padrão de erro evitado
+  - Como foi mitigado preventivamente nesta feature
+- Se não encontrar match: declare explicitamente `"Nenhum padrão de erro relevante
+  encontrado"` na seção "Harness Gate" — **nunca deixar em branco**.
+- Se o catálogo estiver vazio: declare `"Catálogo vazio — nenhum padrão disponível"`.
+- Se durante a implementação você (agente) perceber que está prestes a cometer um
+  padrão catalogado no harness: **pare imediatamente** e informe o Dev antes de continuar.
+- Ao fechar uma feature com retrabalho > 20% ou incidente: abrir Issue com label
+  `harness:pending` e preencher entrada no `harness-catalog.yaml`.
+- Detalhamento completo: `docs/harness/harness-guide.md`.
+
+---
+
+## Playbook de Sucesso (Aprendizado com Acertos)
+
+> **Passo obrigatório antes de qualquer `/nimbus-code-plan`**: consulte também
+> `docs/playbooks/success-catalog.yaml` buscando por `tags` e `bounded_context`
+> relacionados ao domínio da feature — ANTES de redigir o `plan.md`.
+>
+> Use `grep -i "<tag>" docs/playbooks/success-catalog.yaml` para busca rápida.
+
+- Se encontrar match: declare na seção **"Playbook de Sucesso Gate"** do `plan.md`:
+  - ID(s) do playbook consultado(s)
+  - O que funcionou
+  - Como foi reaplicado nesta feature
+- Se não encontrar match: declare explicitamente `"Nenhum padrão relevante encontrado"`
+  na seção "Playbook de Sucesso Gate" — **nunca deixar em branco**.
+- Se o catálogo estiver vazio: declare `"Catálogo vazio — nenhum padrão disponível"`.
+- Ao fechar uma feature com padrão digno de repetição: o checklist de fechamento do
+  `tasks.md` pergunta "o que deu certo?". Registrar em `docs/playbooks/success-catalog.yaml`
+  (requer validação humana antes de catalogar).
+- Detalhamento completo: `docs/playbooks/README.md`.
+
 ---
 
 ## Modelo Híbrido (Agente + Humano) e Controle de Custo
@@ -265,6 +308,65 @@ preset, **não implemente a preferência silenciosamente em nenhuma direção**:
 
 ---
 
+## Rastreamento de Custo Real por Fase (spec-kit-cost)
+
+**Extensão integrada**: [spec-kit-cost](https://github.com/Quratulain-bilal/spec-kit-cost) (instalada automaticamente via `bootstrap.sh`)
+
+Todo feature no Nimbus Code tem um custo financeiro real (tokens × preço). Use os
+comandos abaixo para rastrear, comparar e reportar custos:
+
+### Workflow Padrão
+
+Após cada fase (specify, plan, tasks, implement), registre o custo:
+
+```bash
+/speckit.cost.track phase=specify input_tokens=12345 output_tokens=3210
+/speckit.cost.track phase=plan input_tokens=28400 output_tokens=9150
+/speckit.cost.track phase=tasks input_tokens=15000 output_tokens=4800
+/speckit.cost.track phase=implement input_tokens=180000 output_tokens=52000
+```
+
+### Comandos Disponíveis
+
+| Comando | Propósito |
+|---|---|
+| `/speckit.cost.track phase=<fase> input_tokens=X output_tokens=Y` | Registrar custo da fase |
+| `/speckit.cost.report` | Breakdown de custo por fase e total |
+| `/speckit.cost.budget set scope=feature amount=20` | Definir orçamento por feature |
+| `/speckit.cost.compare` | Comparar custo projetado entre LLMs (Claude, Copilot, Gemini, etc.) |
+| `/speckit.cost.export format=csv source=summary out=./report.csv` | Exportar para BI/finance |
+
+### Onde Encontrar Token Counts
+
+- **Copilot Agent**: Resumo de fim de sessão mostra "Tokens: IN=X, OUT=Y"
+- **Claude/ChatGPT**: Interface nativa mostra contador de tokens
+- **Logs/Transcript**: Verifique a saída do agente ou transcrição
+
+### Configuração de Preços
+
+Se sua organização negocia taxas diferentes com Claude/OpenAI/Google, edite:
+
+```
+.specify/cost/cost-config.yml  →  pricing.rates
+```
+
+Mudanças se aplicam a todos os `/speckit.cost.track` futuros.
+
+### Armazenamento
+
+Dados de custo são locais e diff-friendly:
+
+```
+.specify/cost/
+├── ledger.jsonl     # Append-only: um registro por /speckit.cost.track
+└── summary.json     # Totalizados por feature/phase/integração
+```
+
+**Privacidade**: Armazena apenas contagens de tokens e metadados — sem prompts,
+respostas ou segredos.
+
+---
+
 ## Referências
 
 - [Manual de Sessões Remotas e Branches](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/agent-session-manual.md)
@@ -274,3 +376,4 @@ preset, **não implemente a preferência silenciosamente em nenhuma direção**:
 - [Labels — Priorização e Desenvolvimento Autônomo](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/label-taxonomy-and-autonomous-dev.md)
 - [Modelo Híbrido e Estimativa de Tokens](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/ai-code-quality-and-observability.md#8-modelo-híbrido-agentes-de-ia--humanos-codando-juntos)
 - [Catálogo de Reuso](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/ai-code-quality-and-observability.md#9-catálogo-de-reuso--reduzindo-custo-de-tokens-com-conteúdo-já-existente)
+- [Rastreamento de Custo — Cost Tracking Workflow](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/cost-tracking-workflow.md)

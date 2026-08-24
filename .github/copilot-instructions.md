@@ -180,6 +180,8 @@ humana constante. Instalada via `scripts/setup-github-labels.sh`.
 - Detalhamento completo:
   `docs/ai-code-quality-and-observability.md`, seção 9.
 
+---
+
 ## Grafo de Contexto Multi-Repo (Brownfield)
 
 > **Passo obrigatório antes de qualquer `/nimbus-code-plan` em projeto
@@ -306,6 +308,65 @@ preset, **não implemente a preferência silenciosamente em nenhuma direção**:
 
 ---
 
+## Rastreamento de Custo Real por Fase (spec-kit-cost)
+
+**Extensão integrada**: [spec-kit-cost](https://github.com/Quratulain-bilal/spec-kit-cost) (instalada automaticamente via `bootstrap.sh`)
+
+Todo feature no Nimbus Code tem um custo financeiro real (tokens × preço). Use os
+comandos abaixo para rastrear, comparar e reportar custos:
+
+### Workflow Padrão
+
+Após cada fase (specify, plan, tasks, implement), registre o custo:
+
+```bash
+/speckit.cost.track phase=specify input_tokens=12345 output_tokens=3210
+/speckit.cost.track phase=plan input_tokens=28400 output_tokens=9150
+/speckit.cost.track phase=tasks input_tokens=15000 output_tokens=4800
+/speckit.cost.track phase=implement input_tokens=180000 output_tokens=52000
+```
+
+### Comandos Disponíveis
+
+| Comando | Propósito |
+|---|---|
+| `/speckit.cost.track phase=<fase> input_tokens=X output_tokens=Y` | Registrar custo da fase |
+| `/speckit.cost.report` | Breakdown de custo por fase e total |
+| `/speckit.cost.budget set scope=feature amount=20` | Definir orçamento por feature |
+| `/speckit.cost.compare` | Comparar custo projetado entre LLMs (Claude, Copilot, Gemini, etc.) |
+| `/speckit.cost.export format=csv source=summary out=./report.csv` | Exportar para BI/finance |
+
+### Onde Encontrar Token Counts
+
+- **Copilot Agent**: Resumo de fim de sessão mostra "Tokens: IN=X, OUT=Y"
+- **Claude/ChatGPT**: Interface nativa mostra contador de tokens
+- **Logs/Transcript**: Verifique a saída do agente ou transcrição
+
+### Configuração de Preços
+
+Se sua organização negocia taxas diferentes com Claude/OpenAI/Google, edite:
+
+```
+.specify/cost/cost-config.yml  →  pricing.rates
+```
+
+Mudanças se aplicam a todos os `/speckit.cost.track` futuros.
+
+### Armazenamento
+
+Dados de custo são locais e diff-friendly:
+
+```
+.specify/cost/
+├── ledger.jsonl     # Append-only: um registro por /speckit.cost.track
+└── summary.json     # Totalizados por feature/phase/integração
+```
+
+**Privacidade**: Armazena apenas contagens de tokens e metadados — sem prompts,
+respostas ou segredos.
+
+---
+
 ## Referências
 
 - [Manual de Sessões Remotas e Branches](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/agent-session-manual.md)
@@ -315,3 +376,4 @@ preset, **não implemente a preferência silenciosamente em nenhuma direção**:
 - [Labels — Priorização e Desenvolvimento Autônomo](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/label-taxonomy-and-autonomous-dev.md)
 - [Modelo Híbrido e Estimativa de Tokens](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/ai-code-quality-and-observability.md#8-modelo-híbrido-agentes-de-ia--humanos-codando-juntos)
 - [Catálogo de Reuso](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/ai-code-quality-and-observability.md#9-catálogo-de-reuso--reduzindo-custo-de-tokens-com-conteúdo-já-existente)
+- [Rastreamento de Custo — Cost Tracking Workflow](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/cost-tracking-workflow.md)

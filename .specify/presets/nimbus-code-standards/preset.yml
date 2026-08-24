@@ -4,13 +4,17 @@ preset:
   id: "nimbus-code-standards"
   name: "Nimbus-Code — Padrões de Governança"
   version: "1.13.0"
-  description: "Constituição base, grafos de módulos obrigatórios (incluindo grafo de contexto multi-repo para brownfield), escala S0–S4 com estimativa de tokens e ajuste por projeto, catálogo de reuso de conteúdo para reduzir custo de tokens, SLO Gate, estratégia de release, ADRs, taxonomia de labels de priorização/desenvolvimento autônomo/DORA, modelo híbrido humano+agente, framework DevSecOps, regras de isolamento de sessões de agente (1 agente por arquivo, fases, limpeza de branches perdidas) e manual operacional de uso de agentes remotos da Nimbus-Code, aplicados sobre os templates nativos do Nimbus Code."
+  description: "Constituição base, grafos de módulos obrigatórios (incluindo grafo de contexto multi-repo para brownfield), escala S0–S4 com estimativa de tokens e ajuste por projeto, catálogo de reuso de conteúdo para reduzir custo de tokens, SLO Gate, estratégia de release, ADRs, taxonomia de labels de priorização/desenvolvimento autônomo/DORA, modelo híbrido humano+agente, framework DevSecOps, regras de isolamento de sessões de agente (1 agente por arquivo, fases, limpeza de branches perdidas), rastreamento de custo financeiro real (tokens × preço) por fase SDD, e manual operacional de uso de agentes remotos da Nimbus-Code, aplicados sobre os templates nativos do Nimbus Code."
   author: "Nimbus-Code"
   repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
   license: "Proprietary"
 
 requires:
   speckit_version: ">=0.16.0"
+  extensions:
+    - id: "cost"
+      version: ">=1.0.0"
+      repository: "https://github.com/Quratulain-bilal/spec-kit-cost"
 
 provides:
   templates:
@@ -123,6 +127,86 @@ provides:
       file: "templates/reuse-catalog.yaml"
       description: "Catálogo machine-readable de padrões/ADRs reaproveitáveis por tag/bounded-context, referenciado por ponteiro em vez de duplicado — ver docs/ai-code-quality-and-observability.md, seção 9."
 
+    # Configuração de rastreamento de custo financeiro real (tokens × preço)
+    # por fase SDD — copiado para .specify/cost/cost-config.yml no projeto.
+    # Permite tracking de custo real (input × output tokens × modelo × preço)
+    # e comparação de custo entre integrations (Claude, Copilot, Gemini, etc.).
+    - type: "template"
+      name: "cost-config"
+      file: "templates/project-root/.specify/cost/cost-config-template.yml"
+      strategy: "copy"
+      description: "Configuração de rastreamento de custo financeiro real por fase SDD — tabelas de preço por integração e limites de orçamento por feature/fase."
+
+    # Harness Engineering — catálogo de aprendizado organizacional com erros,
+    # guia de uso, template de post-mortem e script de busca. Consultado pelo
+    # agente antes de qualquer /nimbus-code-plan (ver instrução em
+    # copilot-instructions.md e Harness Gate do plan-template.md).
+    - type: "template"
+      name: "harness-catalog"
+      file: "templates/project-root/docs/harness/harness-catalog.yaml"
+      description: "Catálogo machine-readable de padrões de erro/incidente por tag e bounded_context — copiado para docs/harness/harness-catalog.yaml."
+
+    - type: "template"
+      name: "harness-readme"
+      file: "templates/project-root/docs/harness/README.md"
+      description: "Conceito, fluxo de uso e tabela de arquivos do Harness Engineering — copiado para docs/harness/README.md."
+
+    - type: "template"
+      name: "harness-guide"
+      file: "templates/project-root/docs/harness/harness-guide.md"
+      description: "Protocolo de consulta/escrita de entradas do harness e ciclo de vida pending → cataloged — copiado para docs/harness/harness-guide.md."
+
+    - type: "template"
+      name: "harness-incident-template"
+      file: "templates/project-root/docs/harness/incident-template.md"
+      description: "Template de post-mortem (5 Whys, timeline, ações preventivas) — copiado para docs/harness/incident-template.md."
+
+    - type: "template"
+      name: "harness-search-script"
+      file: "templates/project-root/scripts/harness-search.sh"
+      strategy: "copy"
+      description: "Script de busca rápida no harness-catalog.yaml por tag/bounded_context — copiado para scripts/harness-search.sh."
+
+    # Playbook de Sucesso — catálogo de padrões que funcionaram bem (contraparte
+    # positiva do Harness Engineering), cadência de revisão de métricas DORA e
+    # estado do contador de retrospectiva proativa (feature 012).
+    - type: "template"
+      name: "playbooks-success-catalog"
+      file: "templates/project-root/docs/playbooks/success-catalog.yaml"
+      description: "Catálogo machine-readable de padrões de sucesso por tag e bounded_context — copiado para docs/playbooks/success-catalog.yaml."
+
+    - type: "template"
+      name: "playbooks-readme"
+      file: "templates/project-root/docs/playbooks/README.md"
+      description: "Conceito, fluxo de uso e cadência de revisão de métricas DORA do Playbook de Sucesso — copiado para docs/playbooks/README.md."
+
+    - type: "template"
+      name: "playbooks-retro-cadence-state"
+      file: "templates/project-root/docs/playbooks/retro-cadence-state.yaml"
+      description: "Contador de features concluídas desde a última retrospectiva, usado para sinalização proativa — copiado para docs/playbooks/retro-cadence-state.yaml."
+
+    # Scripts de automação referenciados diretamente pelo copilot-instructions.md
+    # shipado (Grafo de Contexto Multi-Repo, Playbook de Sucesso/DORA) — sem
+    # esta cópia, o agente do projeto consumidor seria instruído a rodar um
+    # script que não existe no repositório.
+    - type: "template"
+      name: "generate-context-graph-script"
+      file: "templates/project-root/scripts/generate-context-graph.sh"
+      strategy: "copy"
+      description: "Gera specs/<feature>/graph.yaml a partir dos manifestos de dependência do bounded context ativo — copiado para scripts/generate-context-graph.sh."
+
+    - type: "template"
+      name: "harvest-patterns-script"
+      file: "templates/project-root/scripts/harvest-patterns.sh"
+      strategy: "copy"
+      description: "Varredura on-demand de padrões técnicos existentes (via LLM) para alimentar docs/reuse-catalog.yaml — copiado para scripts/harvest-patterns.sh."
+
+    - type: "template"
+      name: "process-metrics-report-script"
+      file: "templates/project-root/scripts/process-metrics-report.sh"
+      strategy: "copy"
+      description: "Calcula os 4 indicadores DORA a partir das labels dora:* e verifica a cadência de retrospectiva proativa — copiado para scripts/process-metrics-report.sh."
+
 tags:
   - "governance"
   - "security"
@@ -139,9 +223,15 @@ tags:
   - "token-estimation"
   - "dora-metrics"
   - "finops"
+  - "cost-tracking"
+  - "budget-management"
+  - "roi-metrics"
   - "pmo-portfolio"
   - "incident-management"
   - "d365"
   - "reuse-catalog"
   - "agent-session-governance"
   - "branch-hygiene"
+  - "harness-engineering"
+  - "success-playbooks"
+  - "brownfield-context-graph"
