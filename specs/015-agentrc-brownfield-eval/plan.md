@@ -70,6 +70,9 @@ specs/015-agentrc-brownfield-eval/plan.md
 specs/015-agentrc-brownfield-eval/research.md
 specs/015-agentrc-brownfield-eval/data-model.md
 specs/015-agentrc-brownfield-eval/quickstart.md
+specs/015-agentrc-brownfield-eval/comparison-matrix.md
+specs/015-agentrc-brownfield-eval/evidence-register.md
+specs/015-agentrc-brownfield-eval/recommendation.md
 ```
 
 ### Arquivos não aplicáveis
@@ -220,4 +223,3 @@ comportamento novo; é uma avaliação documental que termina em recomendação.
 - `quickstart.md`
 - `graph.yaml`
 - `graph.md`
-

@@ -1,5 +1,1 @@
-{
-  "feature_directory": "specs/017-nimbus-digital-engineer-platform",
-  "bounded_contexts": [],
-  "repos": []
-}
+{"feature_directory":"specs/017-nimbus-digital-engineer-platform"}

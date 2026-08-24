@@ -20,14 +20,22 @@ traceable to the evidence gathered.
    and current repo artifacts.
 3. Open [data-model.md](./data-model.md) and confirm the matrix captures
    Capability, EvidenceSource, Conflict and Recommendation.
-4. Open [graph.yaml](./graph.yaml) and [graph.md](./graph.md) and confirm the
+4. Open [comparison-matrix.md](./comparison-matrix.md) and confirm every compared
+   capability has a classification (complementar/duplicada/conflitante/não aplicável)
+   and evidence IDs.
+5. Open [evidence-register.md](./evidence-register.md) and confirm all key claims
+   in the comparison matrix are traceable to evidence records.
+6. Open [recommendation.md](./recommendation.md) and confirm there is exactly one
+   final recommendation and, if adoption-oriented, a minimal pilot scope with exit criteria.
+7. Open [graph.yaml](./graph.yaml) and [graph.md](./graph.md) and confirm the
    context graph exists for `spec-kit-workflow`.
-5. Verify the plan does **not** introduce `impact-map.md`, because this feature
+8. Verify the plan does **not** introduce `impact-map.md`, because this feature
    is S2 and does not change runtime behavior.
-6. Confirm the final recommendation is one of:
+9. Confirm the final recommendation is one of:
    - adopt
    - adopt with restrictions
    - reject
+10. Confirm release strategy is `direct` and rollout/toggle remains N/A for this feature.
 
 ## Expected Outcome
 
@@ -41,4 +49,4 @@ traceable to the evidence gathered.
 - [ ] Current Nimbus Code governance artifacts reviewed
 - [ ] Conflicts identified and classified
 - [ ] Recommendation is unique and actionable
-
+- [ ] Next step package contains responsável, prazo, status and escopo

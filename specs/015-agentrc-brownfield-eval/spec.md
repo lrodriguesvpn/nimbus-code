@@ -145,8 +145,8 @@ Como decisor de engenharia, quero uma recomendação clara sobre adotar ou não 
 
 - **SC-001**: 100% das capacidades relevantes do fluxo atual e do AgentRC aparecem na matriz comparativa final.
 - **SC-002**: 100% dos itens comparados recebem classificação explícita de complementar, duplicado, conflitante ou não aplicável.
-- **SC-003**: A equipe consegue chegar a uma decisão final em uma única revisão formal do relatório, sem pedir uma segunda rodada de pesquisa básica.
-- **SC-004**: Ao final, existe uma recomendação clara com próximo passo definido em 100% dos casos avaliados.
+- **SC-003**: A decisão final (adotar, adotar com restrições ou rejeitar) é registrada em até 5 dias úteis após a conclusão da matriz comparativa, com ata de revisão única contendo aprovador e justificativa.
+- **SC-004**: Em 100% dos casos avaliados, o relatório final inclui próximo passo no formato mínimo: responsável, prazo, status (Go/No-Go) e escopo.
 
 ## Assumptions
 

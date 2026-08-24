@@ -1,0 +1,51 @@
+contract: delivery-handoff
+version: 1.0.0
+description: Contrato do pacote final de handoff para cliente
+
+payload:
+  required:
+    - intake_entry_id
+    - result_summary
+    - quality_evidence
+    - acceptance_evidence
+    - cost_ai_tokens
+    - cost_human_hours
+    - final_decision
+    - pending_owners
+  properties:
+    intake_entry_id:
+      type: string
+    result_summary:
+      type: string
+    quality_evidence:
+      type: array
+      minItems: 1
+      items:
+        type: string
+    acceptance_evidence:
+      type: array
+      minItems: 1
+      items:
+        type: string
+    cost_ai_tokens:
+      type: number
+      minimum: 0
+    cost_human_hours:
+      type: number
+      minimum: 0
+    pending_items:
+      type: array
+      items:
+        type: string
+    pending_owners:
+      type: array
+      items:
+        type: string
+      description: Responsáveis por cada pendência registrada
+    next_steps:
+      type: array
+      items:
+        type: string
+    final_decision:
+      type: string
+      enum: [approved, approved_with_conditions, rejected]
