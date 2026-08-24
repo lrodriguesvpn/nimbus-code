@@ -13,7 +13,7 @@ metadata:
 ## Contexto
 
 Este comando roda tipicamente como hook (`after_specify`/`after_tasks`) dos comandos
-nativos `nimbus-code.specify`/`nimbus-code.tasks`, mas também pode ser invocado manualmente
+nativos `speckit.specify`/`speckit.tasks`, mas também pode ser invocado manualmente
 a qualquer momento sobre a feature ativa (`.specify/feature.json`).
 
 ## Pré-condições

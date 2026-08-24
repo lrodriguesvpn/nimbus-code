@@ -148,12 +148,12 @@ Implementei o bundle 100% automático no IOX. Estatísticas reais:
 
 ```
 Per feature:
-  /nimbus-code.constitution: 80k
-  /nimbus-code.specify: 60k
-  /nimbus-code.plan: 150k
-  /nimbus-code.tasks: 80k
-  /nimbus-code.implement: 250k
-  /nimbus-code.converge: 100k
+  /speckit.constitution: 80k
+  /speckit.specify: 60k
+  /speckit.plan: 150k
+  /speckit.tasks: 80k
+  /speckit.implement: 250k
+  /speckit.converge: 100k
   ─────────────────
   TOTAL: 720k tokens = USD 1.30 (Haiku)
 

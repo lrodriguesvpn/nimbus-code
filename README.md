@@ -133,9 +133,9 @@ leia **obrigatoriamente** [`docs/brownfield-best-practices.md`](docs/brownfield-
 - Estratégia para múltiplas homologações com Feature Toggle.
 - Troubleshooting comum e estratégias de migração incremental.
 
-**TL;DR do brownfield**: sempre rode `/nimbus-code.constitution` **antes** de qualquer
+**TL;DR do brownfield**: sempre rode `/speckit.constitution` **antes** de qualquer
 feature (análise profunda do código existente é essencial); use
-`/nimbus-code.converge` **sempre** após `implement`; aceite múltiplos passes e
+`/speckit.converge` **sempre** após `implement`; aceite múltiplos passes e
 documentar exceções no Architecture Decision Log.
 
 Para o cenário de branches concorrentes (3+ homologações ativas), veja também

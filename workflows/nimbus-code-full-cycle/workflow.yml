@@ -33,7 +33,7 @@ inputs:
 
 steps:
   - id: specify
-    command: nimbus-code.specify
+    command: speckit.specify
     integration: "{{ inputs.integration }}"
     input:
       args: "{{ inputs.spec }}"
@@ -46,7 +46,7 @@ steps:
     on_reject: abort
 
   - id: plan
-    command: nimbus-code.plan
+    command: speckit.plan
     integration: "{{ inputs.integration }}"
     input:
       args: "{{ inputs.spec }}"
@@ -70,7 +70,7 @@ steps:
     on_reject: abort
 
   - id: tasks
-    command: nimbus-code.tasks
+    command: speckit.tasks
     integration: "{{ inputs.integration }}"
     note: "Sem branch — gera specs/<feature>/tasks.md apenas."
 
@@ -89,12 +89,12 @@ steps:
 # ────────────────────────────────────────────────────────────────────────────
 
   - id: implement
-    command: nimbus-code.implement
+    command: speckit.implement
     integration: "{{ inputs.integration }}"
     note: "Branch criado aqui — feature/fase-{N}-{slug} → develop."
 
   - id: converge
-    command: nimbus-code.converge
+    command: speckit.converge
     integration: "{{ inputs.integration }}"
     description: |
       Compara o código implementado com spec.md, plan.md e tasks.md.

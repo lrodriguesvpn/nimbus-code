@@ -161,13 +161,13 @@ Use esta variação só se você **quiser separar conscientemente** a criação 
 
 Este é o passo que resolve "como o Nimbus Code entende o código". **Não existe um
 comando dedicado de "scan"** — a varredura acontece dentro do próprio
-`/nimbus-code.constitution`, sendo explícito no prompt para o agente analisar a
+`/speckit.constitution`, sendo explícito no prompt para o agente analisar a
 fundo antes de escrever qualquer princípio. Use este prompt (adaptado do
 walkthrough oficial de brownfield do time do Spec Kit (demo ASP.NET brownfield)
 do próprio time do Nimbus Code):
 
 ```
-/nimbus-code.constitution Este é um projeto brownfield já existente, sem
+/speckit.constitution Este é um projeto brownfield já existente, sem
 constituição prévia. Analise o código-fonte de forma exaustiva e em
 profundidade — não superficialmente, use quantas iterações forem necessárias
 para explorar a estrutura de pastas, stack, padrões de arquitetura, convenções
@@ -206,7 +206,7 @@ usarmos como contexto na spec.
 
 (Troque "Azure DevOps" por "JIRA" e "work items" por "issues" conforme a
 ferramenta do time — ver seção 3 para o MCP necessário.) Esse resumo entra
-como contexto adicional no prompt do `/nimbus-code.specify` seguinte — ele não
+como contexto adicional no prompt do `/speckit.specify` seguinte — ele não
 substitui a leitura do código feita no passo 2.3, complementa com o "porquê"
 por trás de decisões que só existem no board, não no código.
 
@@ -217,14 +217,14 @@ do Nimbus Code (ver [`workflows/nimbus-code-full-cycle/README.md`](../workflows/
 para a variante com gate de DevSecOps da Nimbus-Code):
 
 ```
-/nimbus-code.specify   → descreve a feature nova (não retro-especifique o app inteiro)
-/nimbus-code.clarify    → (opcional) reduz ambiguidade antes de planejar
-/nimbus-code.plan       → plano técnico (já usa o que o agente aprendeu do código real)
-/nimbus-code.checklist  → (opcional) "testes unitários" da própria spec
-/nimbus-code.tasks      → lista de tarefas ordenada por dependência
-/nimbus-code.analyze    → (opcional, somente leitura) checa consistência spec/plan/tasks
-/nimbus-code.implement  → executa as tarefas (pode levar múltiplos passes em repo grande)
-/nimbus-code.converge   → depois do implement: compara código real vs spec/plan/tasks
+/speckit.specify   → descreve a feature nova (não retro-especifique o app inteiro)
+/speckit.clarify    → (opcional) reduz ambiguidade antes de planejar
+/speckit.plan       → plano técnico (já usa o que o agente aprendeu do código real)
+/speckit.checklist  → (opcional) "testes unitários" da própria spec
+/speckit.tasks      → lista de tarefas ordenada por dependência
+/speckit.analyze    → (opcional, somente leitura) checa consistência spec/plan/tasks
+/speckit.implement  → executa as tarefas (pode levar múltiplos passes em repo grande)
+/speckit.converge   → depois do implement: compara código real vs spec/plan/tasks
                       e anexa o que faltar como novas tarefas — repita
                       implement → converge até sair "✅ Converged"
 ```
@@ -241,7 +241,7 @@ comandos do Spec Kit. O comando original continua válido.
 - `analyze` → `nimbus.validate`
 - `converge` → `nimbus.release`
 
-`/nimbus-code.converge` é especialmente útil em brownfield porque é comum já
+`/speckit.converge` é especialmente útil em brownfield porque é comum já
 existir implementação parcial/legada na mesma área da feature nova — ele é
 **append-only** (nunca edita/apaga código, só pode adicionar tarefas).
 
@@ -252,14 +252,14 @@ existir implementação parcial/legada na mesma área da feature nova — ele é
 - **DO** começar pelo `bootstrap.sh` quando o repo brownfield ainda não tem
   Spec Kit/Nimbus Code — ele já faz o `specify init --here` e instala o bundle
   padrão da Nimbus-Code no mesmo fluxo.
-- **DO** rodar `/nimbus-code.constitution` como o passo **1 da primeira feature**,
+- **DO** rodar `/speckit.constitution` como o passo **1 da primeira feature**,
   depois da inicialização do ambiente, com o prompt de análise profunda —
   deixar o agente entender o código existente custa iterações iniciais mas
   economiza em toda feature subsequente.
 - **DO** manter `constitution.md`, `spec.md` e `plan.md` como **artefatos vivos**
   — eles são sempre reescritos/atualizados conforme a realidade muda, não são
   cópia estática do que foi feito uma vez.
-- **DO** usar `/nimbus-code.converge` **sempre** depois do `implement` — é
+- **DO** usar `/speckit.converge` **sempre** depois do `implement` — é
   append-only, busca gaps, e é essencial em brownfield onde código legado já
   toca a mesma área da feature nova.
 - **DO** fazer **múltiplos passes** de `implement` → converge em features
@@ -269,10 +269,10 @@ existir implementação parcial/legada na mesma área da feature nova — ele é
   rastreável (ex.: framework IaC diferente do padrão Terraform, por compliance
   nativo do Azure Policy).
 - **DO** revisar a análise profunda gerada pelo agente (iterações 1-N do
-  `/nimbus-code.constitution`) **como insumo, não como verdade absoluta** — o agente
+  `/speckit.constitution`) **como insumo, não como verdade absoluta** — o agente
   pode interpretar padrões errado ou superestimar certa convenção. Edite
   `constitution.md` se necessário antes de prosseguir para features.
-- **DO** rodar `/nimbus-code.analyze` **antes** de implementar — a carga cognitiva
+- **DO** rodar `/speckit.analyze` **antes** de implementar — a carga cognitiva
   de ambiguidades em spec/plan/tasks é exponencial; pague o custo cedo.
 - **DO** manter `.specify/` versionado no git — é parte da história do projeto,
   não é lixo de build. `.specify/memory/` (com artefatos) sim, mas pelo menos
@@ -280,22 +280,22 @@ existir implementação parcial/legada na mesma área da feature nova — ele é
 
 ### ❌ DONTs — armadilhas comuns em brownfield
 
-- **DON'T** pular o `/nimbus-code.constitution` achando que "vamos especificar
+- **DON'T** pular o `/speckit.constitution` achando que "vamos especificar
   features normalmente" — sem princípios derivados do código existente, cada
   feature é um caos; o agente toma decisões contraditórias.
 - **DON'T** tentar retro-especificar **todo** o código existente num único
-  `/nimbus-code.specify` — isso sobrecarrega o agente e gera uma "spec" gigante e
+  `/speckit.specify` — isso sobrecarrega o agente e gera uma "spec" gigante e
   inútil. Especifique **só a mudança incremental** (o que é novo/alterado, não
   o que já existe).
 - **DON'T** editar `spec.md`/`plan.md`/`tasks.md` manualmente depois que foram
   gerados — se precisa ajustar, reegere os artefatos com os comandos correspondentes
-  (ex.: `/nimbus-code.specify` de novo com um prompt ajustado, não edite `spec.md`
+  (ex.: `/speckit.specify` de novo com um prompt ajustado, não edite `spec.md`
   diretamente). Exceção: adicionar observações/notas contextuais, OK; mudar
   requisito/design, não.
-- **DON'T** ignorar o `/nimbus-code.converge` achando que "implementamos tudo o que
+- **DON'T** ignorar o `/speckit.converge` achando que "implementamos tudo o que
   foi pedido" — converter sempre encontra lacunas que não eram óbvias na spec
   original. É parte do ciclo, não é falha.
-- **DON'T** usar `/nimbus-code.implement` uma única vez em repo grande esperando que
+- **DON'T** usar `/speckit.implement` uma única vez em repo grande esperando que
   saia perfeito — quebre em stages (Setup, Foundational, depois user story por
   story), valide cada uma, continue. Vários passes pequenos > um pass gigante.
 - **DON'T** deixar `constitution.md` desatualizado quando princípios mudam — se
@@ -307,7 +307,7 @@ existir implementação parcial/legada na mesma área da feature nova — ele é
 - **DON'T** confundir "Nimbus Code" com "gerador de código" — o Nimbus Code é um
   **framework de documentação estruturada** que *alimenta* um gerador (o agente).
   Se o agente gera código ruim, a spec estava ambígua; volte e clarifique (via
-  `/nimbus-code.clarify` ou `/nimbus-code.specify`), não culpe o Nimbus Code.
+  `/speckit.clarify` ou `/speckit.specify`), não culpe o Nimbus Code.
 
 ### 2.7. Checklist pré-primeiro-ciclo para brownfield
 
@@ -316,7 +316,7 @@ Antes de rodar a primeira feature em um brownfield, valide:
 - [ ] `bootstrap.sh` rodou com sucesso no repo brownfield
 - [ ] `.specify/` foi criado (via `bootstrap.sh` ou via `specify init --here`, se você optou por separar)
 - [ ] Bundle `nimbus-code-project-bundle` instalado (veja `.specify/presets/` e `.specify/extensions/`)
-- [ ] `/nimbus-code.constitution` executado com o prompt de **análise profunda** (seção 2.3)
+- [ ] `/speckit.constitution` executado com o prompt de **análise profunda** (seção 2.3)
 - [ ] `constitution.md` revisado/editado manualmente se necessário
 - [ ] `.specify/` adicionado ao git e versionado
 - [ ] README do projeto atualizado com a seção de Nimbus Code (ver [`templates/README-bundle-section.md`](../templates/README-bundle-section.md))
@@ -339,7 +339,7 @@ do agente, o Nimbus Code não instala nem verifica isso).
 ### Prompt para Azure DevOps
 
 ```
-/nimbus-code.specify Busque o work item #1234 no Azure DevOps (organização
+/speckit.specify Busque o work item #1234 no Azure DevOps (organização
 <org>, projeto <projeto>) via MCP e construa a especificação desta feature a
 partir do título, descrição e critérios de aceitação dele. Se algo estiver
 ambíguo, incompleto ou contraditório, liste como observação a esclarecer —
@@ -349,7 +349,7 @@ não invente detalhes que não estão no work item.
 ### Prompt para JIRA
 
 ```
-/nimbus-code.specify Busque a issue <PROJ-123> no JIRA via MCP Atlassian Rovo e
+/speckit.specify Busque a issue <PROJ-123> no JIRA via MCP Atlassian Rovo e
 construa a especificação desta feature a partir do resumo, descrição e
 critérios de aceitação dela. Se algo estiver ambíguo, incompleto ou
 contraditório, liste como observação a esclarecer — não invente detalhes que
@@ -363,7 +363,7 @@ para dentro da spec é sempre feita via prompt manual como acima — o Nimbus Co
 não tem um comando dedicado de importação nesse sentido.
 
 Depois de gerar a spec a partir do card, continue o ciclo normal
-(`/nimbus-code.clarify` → `/nimbus-code.plan` → ... ) como na seção 2.5.
+(`/speckit.clarify` → `/speckit.plan` → ... ) como na seção 2.5.
 
 ## 4. Hierarquia Agile (Epic → Feature → US → Task) no GHE
 
@@ -529,15 +529,15 @@ visual por tipo fica menos rica.
 
 | Comando | Quando usar | Obrigatório? |
 |---|---|---|
-| `/nimbus-code.constitution` | Uma vez por projeto (ou ao mudar princípios); em brownfield, com o prompt de análise profunda da seção 2.3 | Sim, uma vez |
-| `/nimbus-code.specify` | Toda feature nova — descreve o quê/porquê, não a stack | Sim |
-| `/nimbus-code.clarify` | Quando a spec tem áreas ambíguas | Recomendado |
-| `/nimbus-code.plan` | Depois da spec aprovada — stack e arquitetura | Sim |
-| `/nimbus-code.checklist` | Validar completude da própria spec antes de detalhar tarefas | Opcional |
-| `/nimbus-code.tasks` | Gera `tasks.md` a partir do plano | Sim |
-| `/nimbus-code.analyze` | Checagem cruzada spec/plan/tasks antes de implementar | Recomendado |
-| `/nimbus-code.implement` | Executa as tarefas | Sim |
-| `/nimbus-code.converge` | Depois do implement — garante que nada ficou faltando vs. spec/plan/tasks | Recomendado, essencial em brownfield |
+| `/speckit.constitution` | Uma vez por projeto (ou ao mudar princípios); em brownfield, com o prompt de análise profunda da seção 2.3 | Sim, uma vez |
+| `/speckit.specify` | Toda feature nova — descreve o quê/porquê, não a stack | Sim |
+| `/speckit.clarify` | Quando a spec tem áreas ambíguas | Recomendado |
+| `/speckit.plan` | Depois da spec aprovada — stack e arquitetura | Sim |
+| `/speckit.checklist` | Validar completude da própria spec antes de detalhar tarefas | Opcional |
+| `/speckit.tasks` | Gera `tasks.md` a partir do plano | Sim |
+| `/speckit.analyze` | Checagem cruzada spec/plan/tasks antes de implementar | Recomendado |
+| `/speckit.implement` | Executa as tarefas | Sim |
+| `/speckit.converge` | Depois do implement — garante que nada ficou faltando vs. spec/plan/tasks | Recomendado, essencial em brownfield |
 
 ---
 
@@ -575,10 +575,10 @@ flowchart TD
     A[Spec, Plan e Tasks continuam válidos] --> B[Implementação apresentou erro]
     B --> C{O erro altera objetivo, regra ou aceite?}
     C -- Não --> D[Corrigir código]
-    D --> E[/nimbus-code.converge]
+    D --> E[/speckit.converge]
     E --> F{Converge encontrou gaps?}
     F -- Sim --> G[Append de novas tasks na mesma feature]
-    G --> H[/nimbus-code.implement]
+    G --> H[/speckit.implement]
     H --> I[Rodar converge de novo]
     F -- Não --> J[Feature pronta para PR/revisão]
 ```
@@ -588,12 +588,12 @@ flowchart TD
 ```mermaid
 flowchart TD
     A[Problema descoberto] --> B{A ambiguidade está na intenção da feature?}
-    B -- Sim --> C[/nimbus-code.clarify ou edição da mesma spec]
+    B -- Sim --> C[/speckit.clarify ou edição da mesma spec]
     C --> D[Atualizar a mesma spec.md]
     D --> E[Revisar plan.md]
     E --> F[Regenerar ou atualizar tasks.md]
-    F --> G[/nimbus-code.implement]
-    G --> H[/nimbus-code.converge]
+    F --> G[/speckit.implement]
+    G --> H[/speckit.converge]
     H --> I[PR/revisão]
 ```
 
@@ -608,8 +608,8 @@ flowchart TD
     D -- Não --> F[Manter spec e seguir]
     E --> G[Atualizar tasks.md]
     F --> G
-    G --> H[/nimbus-code.implement]
-    H --> I[/nimbus-code.converge]
+    G --> H[/speckit.implement]
+    H --> I[/speckit.converge]
 ```
 
 #### Ordem operacional recomendada
