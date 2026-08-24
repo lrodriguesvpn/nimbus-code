@@ -207,12 +207,78 @@ EOF
   [ "$status" -eq 0 ]  # Brownfield should return 0 (manifest references src)
 }
 
+@test "AC-2: detect_has_relevant_application_code function identifies brownfield (dotnet csproj)" {
+  TEMP_DIR=$(mktemp -d)
+  trap 'rm -rf "$TEMP_DIR"' EXIT
+
+  cd "$TEMP_DIR"
+  touch MyApp.csproj
+
+  cat > test_detection.sh << 'EOF'
+    set -euo pipefail
+    WORKDIR="$(pwd)"
+
+    detect_has_relevant_application_code() {
+      local application_dirs=(
+        "src" "app" "packages" "services" "frontend" "backend"
+        "lib" "config" "routes" "controllers" "models" "components"
+      )
+
+      for dir in "${application_dirs[@]}"; do
+        [[ -d "$WORKDIR/$dir" ]] || continue
+        if find "$WORKDIR/$dir" -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.jsx' -o -name '*.py' -o -name '*.go' -o -name '*.java' -o -name '*.cs' -o -name '*.rb' \) 2>/dev/null | grep -q .; then
+          return 0
+        fi
+      done
+
+      local manifest_files=(
+        "package.json" "pom.xml" "build.gradle" "Makefile" "Dockerfile"
+        "pyproject.toml" "setup.py" "go.mod" "Cargo.toml"
+      )
+
+      for manifest in "${manifest_files[@]}"; do
+        if [[ -f "$WORKDIR/$manifest" ]] && grep -Eq 'src|app|packages|services|frontend|backend' "$WORKDIR/$manifest" 2>/dev/null; then
+          return 0
+        fi
+      done
+
+      if find "$WORKDIR" -type f \( -name '*.csproj' -o -name '*.fsproj' \) 2>/dev/null | grep -q .; then
+        return 0
+      fi
+
+      local test_dirs=("__tests__" "test" "tests" "spec" "specs")
+      for test_dir in "${test_dirs[@]}"; do
+        [[ -d "$WORKDIR/$test_dir" ]] || continue
+        while IFS= read -r test_file; do
+          [[ -n "$test_file" ]] || continue
+          case "$test_file" in
+            *bootstrap*|*infra*|*setup*)
+              continue
+              ;;
+            *)
+              return 0
+              ;;
+          esac
+        done < <(find "$WORKDIR/$test_dir" -type f \( -name '*.test.*' -o -name '*.spec.*' -o -name '*_test.*' -o -name '*_spec.*' \) 2>/dev/null)
+      done
+
+      return 1
+    }
+
+    detect_has_relevant_application_code
+    exit $?
+EOF
+
+  run bash test_detection.sh
+  [ "$status" -eq 0 ]  # Brownfield should return 0 (csproj present)
+}
+
 @test "bootstrap.sh includes classification step in main flow" {
   run bash -lc 'set -euo pipefail; cd "$1"; grep -q "Classifying repository context" bootstrap.sh' _ "$REPO_ROOT"
   [ "$status" -eq 0 ]
 }
 
-@test "bootstrap.sh outputs context classification in summary" {
-  run bash -lc 'set -euo pipefail; cd "$1"; grep -q "classified as" bootstrap.sh' _ "$REPO_ROOT"
+@test "bootstrap.sh outputs explicit context classification guidance" {
+  run bash -lc 'set -euo pipefail; cd "$1"; grep -q "Interpretation: no relevant application code was found" bootstrap.sh && grep -q "Interpretation: relevant application code is present" bootstrap.sh && grep -q "repository classified as" bootstrap.sh' _ "$REPO_ROOT"
   [ "$status" -eq 0 ]
 }

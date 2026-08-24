@@ -27,10 +27,12 @@ satélites.
 2. Confirme em [research.md](./research.md) linhas 11–24 que a decisão greenfield baseia-se apenas em presença de `relevant application code` (definido em [plan.md](./plan.md) linhas 47–48)
 3. Verifique em [contracts/topology-intake.contract.md](./contracts/topology-intake.contract.md) linhas 52–53 que esses artefatos isolados NÃO contam como brownfield
 4. Confirme que o campo `has_relevant_application_code = false` leva o intake para greenfield (Decision Rules, linha 26)
-5. **Assertion**: O fluxo bootstrap apresenta a questão mono vs multirepo *antes* de qualquer sugestão de topologia
+5. **Assertion**: O fluxo bootstrap apresenta explicitamente a classificação greenfield e a interpretação de ausência de código relevante antes de qualquer sugestão de topologia
+6. **Assertion**: A validação cobre FR-001 e SC-001 porque o bootstrap registra a classificação antes de avançar
 
 **Files involved**: 
 - `bootstrap.sh` (detector de `relevant application code` no intake)
+- `README.md` (orientação de onboarding greenfield/brownfield)
 - `docs/developer-guide.md` (seção "Greenfield Intake")
 - `spec.md` (AC-1)
 - `research.md` (Decision 1)
@@ -47,10 +49,12 @@ satélites.
 2. Confirme em [data-model.md](./data-model.md) linhas 67–68 que `has_relevant_application_code = true` implica brownfield
 3. Verifique em [contracts/topology-intake.contract.md](./contracts/topology-intake.contract.md) linha 26 que esse fluxo segue para "Mandar diretamente para o fluxo brownfield"
 4. Confirme que a sugestão padrão de satélites NÃO é feita neste fluxo
-5. **Assertion**: O processo respeita o histórico existente do produto e não força decomposição prematura
+5. **Assertion**: O fluxo bootstrap apresenta explicitamente a classificação brownfield e a interpretação de presença de código relevante
+6. **Assertion**: A validação continua cobrindo FR-001 e SC-001, agora no caminho brownfield, antes de qualquer orientação estrutural adicional
 
 **Files involved**:
 - `bootstrap.sh` (detector de código em `src/`, `app/`, `services/`)
+- `README.md` (orientação de onboarding greenfield/brownfield)
 - `docs/developer-guide.md` (seção "Brownfield Intake")
 - `spec.md` (AC-2)
 - `research.md` (Decision 1, lines 13–24)
