@@ -1,3 +1,16 @@
+<!--
+Sync Impact Report
+- Version change: unversioned -> 1.0.0
+- Modified principles:
+  - Sessões de Agente, Branches e Isolamento de Código (regras de PR para develop/main)
+- Added sections:
+  - Governança de Promoção entre Branches
+  - Governança (versionamento, emendas e compliance)
+- Removed sections:
+  - Bloco de placeholders do template original da constituição
+- Follow-up TODOs:
+  - TODO(RATIFICATION_DATE): confirmar data oficial de ratificação inicial da constituição.
+-->
 # Princípios Não-Negociáveis da Nimbus-Code
 
 <!--
@@ -283,8 +296,16 @@ operacionais concretas.*
   O agente **não deve editar** nenhum arquivo fora dessa lista — se o fizer, o
   PR é rejeitado e uma nova sessão é iniciada com instrução mais precisa.
 - **Nada muda sem aprovação via PR**: agentes nunca fazem merge diretamente.
-  Todo trabalho produzido por agente chega a `develop` ou `main` exclusivamente
-  via Pull Request revisado e aprovado pelo Dev.
+  Todo trabalho produzido por agente chega **exclusivamente** a `develop` via
+  Pull Request revisado e aprovado.
+- **Proibição de publicação direta em `main` por agente**: nenhum agente pode
+  abrir PR para `main`, mergear em `main` ou publicar release em `main`.
+- **Fluxo obrigatório de promoção para `main`**: após aprovação e merge em
+  `develop`, a promoção para `main` ocorre por workflow dedicado que cria PR de
+  `develop` para `main`.
+- **Gate reforçado para PR de `develop` → `main`**: esse PR exige aprovação
+  ampliada, incluindo reunião formal do Comitê Nimbus com evidência registrada
+  da decisão (ata, comentário de aprovação ou registro equivalente no PR).
 - **Branches perdidas são dívida técnica**: qualquer branch sem PR aberto
   associado ou sem commit há mais de 3 dias deve ser deletada. Branch mergeada
   é deletada imediatamente após o merge. A contagem de branches perdidas é uma
@@ -326,53 +347,32 @@ Ver o detalhamento técnico de como aplicar estas regras em:
 - [`docs/module-graphs.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/module-graphs.md) — grafos de módulos, Graph Guard, templates
 - [`docs/adr-guide.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/adr-guide.md) — como criar e manter ADRs organizacionais
 
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+## Governança de Promoção entre Branches
 
-## Core Principles
+- Branch de integração obrigatória para trabalho de produto: `develop`.
+- Branch de produção: `main`, protegida contra contribuição direta de agentes.
+- Qualquer mudança funcional, técnica ou documental versionada por agente deve
+  entrar primeiro via PR em `develop`.
+- A promoção de `develop` para `main` é feita somente por workflow oficial que
+  abre PR automático `develop` → `main`.
+- O PR `develop` → `main` só pode ser aprovado após rito de aprovação reforçada
+  do Comitê Nimbus, com registro explícito da decisão no próprio PR.
+- Sem esse registro de aprovação do Comitê Nimbus, o merge em `main` é proibido.
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+## Governança
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+- Esta constituição prevalece sobre convenções locais conflitantes de fluxo,
+  branch, revisão e autorização de merge.
+- Toda alteração desta constituição deve ser feita via PR, com justificativa
+  explícita, impacto esperado e plano de comunicação.
+- Política de versionamento da constituição:
+  - MAJOR: remoção ou redefinição incompatível de regra mandatória;
+  - MINOR: inclusão de nova regra mandatória ou novo gate de governança;
+  - PATCH: clarificações sem mudança de comportamento esperado.
+- Revisão de compliance:
+  - Toda revisão de PR deve verificar aderência às regras desta constituição;
+  - Violações bloqueiam merge até correção ou exceção formal aprovada.
+- TODO(RATIFICATION_DATE): confirmar data oficial da primeira ratificação
+  institucional desta constituição.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
-
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
-
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
-
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
-
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
-
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
-
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
-
-## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
-
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
-
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: TODO(RATIFICATION_DATE) | **Last Amended**: 2026-08-24

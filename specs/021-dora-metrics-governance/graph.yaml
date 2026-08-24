@@ -1,0 +1,19 @@
+# graph.yaml — Bounded Context: spec-kit-workflow
+# Gerado automaticamente por scripts/generate-context-graph.sh — specs/014-brownfield-multirepo-context-awareness/
+
+bounded_context: "spec-kit-workflow"
+version: 1
+generated_at: "2026-08-24T19:19:07Z"
+
+nodes:
+  - id: "venha-pra-nuvem-nimbus-code-spec-kit-template"
+    type: "repo"
+    repository: "venha-pra-nuvem/nimbus-code-spec-kit-template"
+    cross_repo: false
+    manifest_source: "unavailable"
+
+edges:
+  []
+
+unanalyzed_repos:
+  - "venha-pra-nuvem/nimbus-code-spec-kit-template"

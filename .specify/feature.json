@@ -1,5 +1,5 @@
 {
-  "feature_directory": "specs/020-satellite-repo-governance",
+  "feature_directory": "specs/021-dora-metrics-governance",
   "bounded_contexts": [
     "spec-kit-workflow"
   ],
