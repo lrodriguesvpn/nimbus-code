@@ -217,11 +217,11 @@ Humano: revisão de PR
 ```
 
 - [x] T006-T009 concluídos (Phase 2)
-- [ ] T010 (`harness-search.sh`) concluído
-- [ ] T011-T012 (templates) concluídos sem quebrar conteúdo existente
-- [ ] T013 (copilot-instructions) concluído com instrução imperativa
-- [ ] T014 (labels) concluído e idempotente
-- [ ] T015 (reuse-catalog) concluído
+- [x] T010 (`harness-search.sh`) concluído
+- [x] T011-T012 (templates) concluídos sem quebrar conteúdo existente
+- [x] T013 (copilot-instructions) concluído com instrução imperativa
+- [x] T014 (labels) concluído e idempotente
+- [x] T015 (reuse-catalog) concluído
 
 ## Nimbus-Code — Checklist de Qualidade de Código, Testes e Observabilidade
 

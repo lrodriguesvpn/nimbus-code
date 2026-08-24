@@ -48,6 +48,7 @@ produto e reforça o repo central do produto como fonte única de verdade para
 - artefatos isolados como `README`, `LICENSE`, `.gitignore`, workflows, templates, `.editorconfig`, pastas vazias, scripts de setup ou esqueleto sem código executável **não** contam, sozinhos, como `relevant application code`.
 - `decision_reason` = texto curto em linguagem natural contendo: motivo principal da escolha, trade-off esperado e papel/responsável que confirmou a decisão.
 - `domain ownership` = time, papel ou repositório responsável por cada domínio satélite proposto ou customizado.
+- Persistência obrigatória do intake greenfield em `.specify/feature.json` no objeto `topology_decision` (delivery_model, reason, owner e domínios).
 
 **Constraints**:
 - esta feature não cobre bugfixes já tratados separadamente no bootstrap

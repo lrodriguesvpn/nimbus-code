@@ -23,6 +23,7 @@ Representa a decisão estrutural do produto durante o fluxo greenfield.
 - `decision_reason`: justificativa explícita para a escolha, incluindo motivo principal e trade-off esperado
 - `decision_owner`: papel ou responsável que confirmou a escolha
 - `recorded_in_feature`: referência da feature onde a decisão ficou registrada
+- `recorded_in_feature_json`: objeto `topology_decision` persistido em `.specify/feature.json`
 
 ### SatelliteDomainProposal
 
@@ -69,6 +70,7 @@ Representa a regra operacional de alinhamento entre repo central e satélites.
 - `relevant_code_indicators` deve permanecer vazio quando apenas README, licença, setup mínimo, workflows ou templates estiverem presentes
 - `delivery_model` não pode ser definido sem `decision_reason`
 - `decision_reason` deve registrar motivo principal e trade-off esperado em texto legível por humanos
+- `decision_owner` deve identificar o papel/time responsável pela decisão
 - Produtos `multirepo` devem ter pelo menos uma `SatelliteDomainProposal`
 - Toda `SatelliteDomainProposal` do tipo `custom` deve informar `justification` e `ownership`
 - Repositórios com `role = central` (repo central) devem ter `stores_specs = true`
