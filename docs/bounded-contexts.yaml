@@ -47,6 +47,20 @@ contexts:
     team: "a definir"
     autonomous_ok: false  # ainda sem primeira revisão humana pós-migração
 
+  - slug: "nimbuscode-harvest-gateway"
+    description: >
+      Gateway multicloud compartilhado que traduz o contrato genérico de
+      scripts/harvest-patterns.sh (repo/stack/prompt/metadata → padrões
+      arquiteturais) em chamadas de inferência reais a Azure AI Foundry,
+      Google (Vertex AI/Gemini) ou AWS Bedrock, com modelo selecionável dentro
+      de cada provedor. Endpoint único usado por todos os repositórios
+      satélite via HARVEST_API_URL/HARVEST_API_TOKEN de nível de organização —
+      ver specs/022-nimbuscode-harvest-gateway/.
+    repository: "venha-pra-nuvem/nimbus-harvest-gateway"
+    stack: "Azure Functions (Python)"
+    team: "platform"
+    autonomous_ok: false  # infraestrutura nova, sem primeira revisão humana ainda
+
 # Exemplos para projetos reais (descomente e ajuste):
 #
 #   - slug: "identity"

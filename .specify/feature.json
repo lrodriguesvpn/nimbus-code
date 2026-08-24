@@ -1,9 +1,9 @@
 {
-  "feature_directory": "specs/012-loop-melhoria-continua",
+  "feature_directory": "specs/022-nimbuscode-harvest-gateway",
   "bounded_contexts": [
-    "spec-kit-workflow"
+    "nimbuscode-harvest-gateway"
   ],
   "repos": [
-    "venha-pra-nuvem/nimbus-code-spec-kit-template"
+    "venha-pra-nuvem/nimbus-harvest-gateway"
   ]
 }

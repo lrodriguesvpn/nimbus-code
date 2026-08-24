@@ -1,0 +1,19 @@
+# graph.yaml — Bounded Context: nimbuscode-harvest-gateway
+# Gerado automaticamente por scripts/generate-context-graph.sh — specs/014-brownfield-multirepo-context-awareness/
+
+bounded_context: "nimbuscode-harvest-gateway"
+version: 1
+generated_at: "2026-08-24T23:15:49Z"
+
+nodes:
+  - id: "venha-pra-nuvem-nimbus-harvest-gateway"
+    type: "repo"
+    repository: "venha-pra-nuvem/nimbus-harvest-gateway"
+    cross_repo: true
+    manifest_source: "unavailable"
+
+edges:
+  []
+
+unanalyzed_repos:
+  - "venha-pra-nuvem/nimbus-harvest-gateway"
