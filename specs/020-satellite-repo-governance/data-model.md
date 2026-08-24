@@ -40,7 +40,7 @@ Representa o papel de um repositório no ecossistema do produto.
 
 **Fields**
 - `repository_name`
-- `role`: `central` ou `satellite`
+- `role`: `central` (repo central) ou `satellite` (repo satélite)
 - `stores_specs`: boolean
 - `stores_code`: boolean
 - `receives_routed_tasks`: boolean
@@ -59,7 +59,7 @@ Representa a regra operacional de alinhamento entre repo central e satélites.
 
 - Um `BootstrapContext` leva a exatamente uma `TopologyDecision` quando o modo detectado é `greenfield`
 - Uma `TopologyDecision` do tipo `multirepo` gera uma ou mais `SatelliteDomainProposal`
-- Um `RepositoryRole` do tipo `central` referencia vários `RepositoryRole` do tipo `satellite`
+- Um `RepositoryRole` do tipo `central` (repo central) referencia vários `RepositoryRole` do tipo `satellite` (repo satélite)
 - Toda `SatelliteDomainProposal` depende de uma `SyncGovernanceRule` para permanecer alinhada ao bundle oficial
 
 ## Validation Rules
@@ -71,6 +71,6 @@ Representa a regra operacional de alinhamento entre repo central e satélites.
 - `decision_reason` deve registrar motivo principal e trade-off esperado em texto legível por humanos
 - Produtos `multirepo` devem ter pelo menos uma `SatelliteDomainProposal`
 - Toda `SatelliteDomainProposal` do tipo `custom` deve informar `justification` e `ownership`
-- Repositórios com `role = central` devem ter `stores_specs = true`
-- Repositórios com `role = satellite` devem ter `stores_specs = false` como padrão operacional
+- Repositórios com `role = central` (repo central) devem ter `stores_specs = true`
+- Repositórios com `role = satellite` (repo satélite) devem ter `stores_specs = false` como padrão operacional
 - `direct_main_update_allowed` deve permanecer `false`
