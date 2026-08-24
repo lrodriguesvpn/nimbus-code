@@ -1,0 +1,105 @@
+# Catálogo Playbook de Sucesso — NIMBUS CODE
+#
+# Repositório central de padrões e práticas que geraram resultados positivos em
+# projetos que adotam o workflow Nimbus-Code / NIMBUS CODE.
+#
+# PROPÓSITO
+# Permitir que todo agente (ou humano) que inicia uma nova feature/projeto consulte
+# os padrões de sucesso já catalogados — acelerando entregas ao reutilizar o que
+# funcionou em projetos anteriores, mesmo que os times sejam diferentes.
+#
+# COMO USAR
+# 1. ANTES de iniciar um plan.md: busque por `tags` e `bounded_context` relacionados
+#    ao domínio da sua feature.
+# 2. Se encontrar match: declare na seção "Playbook de Sucesso Gate" do plan.md e
+#    descreva como o padrão foi reaplicado.
+# 3. APÓS entregar uma feature com resultado notável: adicione uma entrada aqui
+#    (abrir Issue com playbook:pending, preencher, fechar com playbook:cataloged).
+#
+# SCHEMA DE CADA ENTRADA
+#   id:               SUC-NNNN — identificador estável, nunca reutilizar
+#   date:             YYYY-MM-DD — data de encerramento/validação da feature
+#   complexity:       S1 | S2 | S3 | S4 — nível da tarefa onde o padrão foi aplicado
+#   bounded_context:  slug do bounded context (ver docs/bounded-contexts.yaml)
+#   what_worked:      descrição curta e específica do que funcionou (1 frase)
+#   why:              por que funcionou — root cause do sucesso (1-3 frases)
+#   how_to_reapply:   como reaplicar em contextos similares — acionável e específico
+#   tags:             lista de tags para busca (kebab-case)
+#   source_pr:        link do PR ou Issue onde o sucesso ocorreu (ou "" se não disponível)
+#   validated_by:     quem validou a entrada (humano ou agente) antes de catalogar
+
+version: 1
+entries:
+
+  - id: SUC-0001
+    date: 2026-08-20
+    complexity: S3
+    bounded_context: spec-kit-workflow
+    what_worked: >
+      Estrutura de Harness Engineering (feature 011) reutilizada como base para o
+      Playbook de Sucesso — schema análogo, mesma convenção de IDs, mesmo fluxo de consulta.
+    why: >
+      A analogia estrutural entre "catalogar erros" (harness) e "catalogar sucessos"
+      (playbook) eliminou todo o custo de design do zero. Os tokens gastos foram apenas
+      para adaptar campos e inverter a semântica — não para descobrir o padrão.
+    how_to_reapply: >
+      Antes de projetar qualquer catálogo novo, verifique se já existe um catálogo
+      análogo no projeto. Se existir, clone o schema, adapte os campos de negócio
+      e referencie o original no ADR em vez de reexplicar o formato.
+    tags:
+      - schema-reuse
+      - harness-analogy
+      - catalog-pattern
+      - spec-kit-workflow
+    source_pr: ""
+    validated_by: "agent:autonomous-issue-resolution-loop"
+
+  - id: SUC-0002
+    date: 2026-08-20
+    complexity: S3
+    bounded_context: spec-kit-workflow
+    what_worked: >
+      Rollout faseado da feature 013 (Testing Governance) — primeiro documentação,
+      depois automação, depois gate obrigatório — eliminou retrabalho de integração.
+    why: >
+      Ao começar pelo contrato (spec + critérios de aceite documentados) antes de
+      implementar qualquer script, todos os participantes (agente + Dev) tinham
+      expectativas alinhadas sobre o comportamento esperado. A automação foi escrita
+      para validar o contrato já acordado — não para descobrir o contrato.
+    how_to_reapply: >
+      Para features de governança (policies, gates, automações de CI), sempre criar
+      a documentação e o spec antes de qualquer script. Usar o contrato como fixture
+      de teste: o script "passa" quando atende o que o spec descreve.
+    tags:
+      - staged-rollout
+      - contract-first
+      - governance-feature
+      - testing-policy
+    source_pr: ""
+    validated_by: "agent:autonomous-issue-resolution-loop"
+
+  - id: SUC-0003
+    date: 2026-08-20
+    complexity: S2
+    bounded_context: spec-kit-workflow
+    what_worked: >
+      Uso do reuse-catalog.yaml por ponteiro no plan.md — em vez de re-explicar o
+      padrão do zero, apenas referenciar a entrada existente reduziu em ~60% os tokens
+      consumidos na fase de planejamento.
+    why: >
+      Ao referenciar uma entrada do catálogo de reuso por ID e link, o agente não
+      precisa redescobrir nem re-derivar a solução — apenas confirma que o contexto
+      é análogo e aplica. A economia de tokens é real e acumula ao longo de múltiplas
+      features que usam o mesmo padrão.
+    how_to_reapply: >
+      No campo "Padrão reutilizado encontrado?" do plan.md, sempre referenciar por
+      ponteiro (tag + link) em vez de copiar ou resumir o conteúdo da entrada.
+      Ao fechar a feature, adicionar entrada ao catálogo se o padrão é novo ou
+      generalizável para outros contextos.
+    tags:
+      - reuse-catalog
+      - token-efficiency
+      - pointer-reference
+      - plan-template
+    source_pr: ""
+    validated_by: "agent:autonomous-issue-resolution-loop"

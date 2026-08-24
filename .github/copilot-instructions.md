@@ -226,6 +226,28 @@ humana constante. Instalada via `scripts/setup-github-labels.sh`.
 
 ---
 
+## Playbook de Sucesso (Aprendizado com Acertos)
+
+> **Passo obrigatório antes de qualquer `/nimbus-code-plan`**: consulte também
+> `docs/playbooks/success-catalog.yaml` buscando por `tags` e `bounded_context`
+> relacionados ao domínio da feature — ANTES de redigir o `plan.md`.
+>
+> Use `grep -i "<tag>" docs/playbooks/success-catalog.yaml` para busca rápida.
+
+- Se encontrar match: declare na seção **"Playbook de Sucesso Gate"** do `plan.md`:
+  - ID(s) do playbook consultado(s)
+  - O que funcionou
+  - Como foi reaplicado nesta feature
+- Se não encontrar match: declare explicitamente `"Nenhum padrão relevante encontrado"`
+  na seção "Playbook de Sucesso Gate" — **nunca deixar em branco**.
+- Se o catálogo estiver vazio: declare `"Catálogo vazio — nenhum padrão disponível"`.
+- Ao fechar uma feature com padrão digno de repetição: o checklist de fechamento do
+  `tasks.md` pergunta "o que deu certo?". Registrar em `docs/playbooks/success-catalog.yaml`
+  (requer validação humana antes de catalogar).
+- Detalhamento completo: `docs/playbooks/README.md`.
+
+---
+
 ## Modelo Híbrido (Agente + Humano) e Controle de Custo
 
 Toda tarefa em modo híbrido (agente gera a maior parte, humano revisa/ajusta)

@@ -272,3 +272,20 @@ entries:
     source: "specs/014-brownfield-multirepo-context-awareness/plan.md"
     adr: ""
     reuse_count: 0
+
+  - tag: "success-playbook-pattern"
+    bounded_context: "spec-kit-workflow"
+    description: >
+      Padrão de catálogo de sucessos (Playbook de Sucesso) como simétrico ao
+      harness-catalog.yaml: (1) docs/playbooks/success-catalog.yaml registra
+      padrões/decisões que funcionaram bem (schema análogo ao harness, IDs SUC-NNNN);
+      (2) plan-template.md recebe seção "Playbook de Sucesso Gate" obrigatória antes
+      de qualquer gate — buscar por tag/bounded_context, declarar match ou ausência,
+      nunca deixar em branco; (3) tasks-template.md recebe item de fechamento
+      "o que deu certo?" com resposta "Nada relevante a registrar" como válida;
+      (4) copilot-instructions.md instrui o agente a consultar o catálogo antes de
+      /nimbus-code-plan. Reaproveitar sempre que um projeto precisar de memória
+      organizacional de acertos além da memória de erros já coberta pelo harness.
+    source: "specs/012-loop-melhoria-continua/plan.md"
+    adr: ""
+    reuse_count: 0

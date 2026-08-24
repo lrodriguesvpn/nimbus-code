@@ -90,10 +90,16 @@ relevante ao artefato entregue pela tarefa.*
       label `harness:pending`, entrada adicionada ao `docs/harness/harness-catalog.yaml`
       (usando `docs/harness/incident-template.md` para S3/S4) e Issue fechada com
       `harness:cataloged` — ver `docs/harness/harness-guide.md`
+- [ ] O que deu certo nesta feature que vale a pena repetir? Registrar uma entrada em
+      `docs/playbooks/success-catalog.yaml` se houver padrão generalizável identificado.
+      Resposta "Nada relevante a registrar" é válida — nunca deixar em branco.
+      Requer validação humana antes de catalogar — ver `docs/playbooks/README.md`
 - [ ] `retro-template.md` preenchido em `specs/<feature-slug>/retro.md` quando
       a implementação divergiu do plano (grafo mudou, SLO não atingido, bug
       inesperado encontrado) — ver template em
       `presets/nimbus-code-standards/templates/feature-artifacts/retro-template.md`
+      (via proativa: `scripts/process-metrics-report.sh --check-retro-cadence`
+      sinaliza quando a cadência de retrospectivas periódicas está devida)
 
 ## Nimbus-Code — Métricas de Branches e Saúde do Repositório (PMO)
 
