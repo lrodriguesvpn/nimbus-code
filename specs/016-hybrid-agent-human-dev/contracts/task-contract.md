@@ -118,7 +118,7 @@ corretamente.
 
 ## Passos Operacionais
 
-1. Clone/pull branch `feature/005-hybrid-agent-human-dev`
+1. Clone/pull branch `feature/016-hybrid-agent-human-dev`
 2. Abra arquivo `.specify/presets/nimbus-code-standards/templates/spec-template.md`
 3. Localize seção "## Nimbus-Code — Objetivo e Contexto" (~ linha 40)
 4. Insira novo bloco "## Hybrid Collaboration Model" ANTES dessa linha

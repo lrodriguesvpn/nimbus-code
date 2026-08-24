@@ -128,6 +128,13 @@ specify preset add --dev "$LOCAL_PATH/presets/$SELECTED_PRESET" --priority 5   |
 echo "-> Installing extension nimbus-code-backlog-sync..."
 specify extension add --dev "$LOCAL_PATH/extensions/nimbus-code-backlog-sync"   || echo "  (extension already installed - skipped; use 'specify extension remove nimbus-code-backlog-sync' before reinstalling)"
 
+echo "-> Installing extension cost (spec-kit-cost)..."
+if command -v specify >/dev/null 2>&1; then
+  specify extension install cost --version ">=1.0.0" >/dev/null 2>&1 || echo "  INFO: cost extension requires 'specify extension install cost' (network install from GitHub)"
+else
+  echo "  WARN: specify CLI not available for cost extension installation"
+fi
+
 echo "-> Installing workflow nimbus-code-full-cycle..."
 specify workflow add "$LOCAL_PATH/workflows/nimbus-code-full-cycle"   || echo "  (workflow already installed - skipped; use 'specify workflow remove nimbus-code-full-cycle' before reinstalling)"
 
@@ -276,3 +283,24 @@ if command -v gh >/dev/null 2>&1; then
 else
   echo "  WARN: gh CLI not found - skipping GitHub Project and label setup"
 fi
+
+# Install version synchronization hooks
+echo
+echo "-> Installing git hooks for version synchronization..."
+HOOKS_SCRIPT="$LOCAL_PATH/scripts/install-hooks.sh"
+if [[ -f "$HOOKS_SCRIPT" ]]; then
+  bash "$HOOKS_SCRIPT" || {
+    echo "  WARN: could not install hooks automatically."
+    echo "  Run manually: bash $HOOKS_SCRIPT"
+  }
+else
+  echo "  WARN: install-hooks.sh not found"
+fi
+
+echo
+echo "✅ Bootstrap complete!"
+echo ""
+echo "Next steps:"
+echo "  1. Review docs/version-synchronization.md for version management"
+echo "  2. Run: ./scripts/validate-versions.sh to verify all versions are synced"
+echo "  3. Configure your project in specs/<feature>/spec.md"

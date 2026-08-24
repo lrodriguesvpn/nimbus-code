@@ -9,7 +9,7 @@
 **Input**: User description: Creation and governance of the VPN-SKILLS repository by organization; centralized remote skills management (without project copies); rigorous CI/CD, versioning, and evolution cycle control; reference of this repository in code/platform templates; bootstrap initialization to support the SPECKIT workflow in this new repository.
 
 > **Retrofit de contrato híbrido (2026-08-20)**: esta spec foi criada em 2026-08-12,
-> antes de `specs/005-hybrid-agent-human-dev/` tornar obrigatório o cabeçalho
+> antes de `specs/016-hybrid-agent-human-dev/` tornar obrigatório o cabeçalho
 > Nimbus-Code, os critérios de aceitação em formato `AC-N` (BDD) e o bloco de
 > Cost Reference. Os blocos abaixo foram retrofitados durante a revisão de
 > convergência/replanejamento desta feature — ver `plan.md`, seção "Known Gaps",
@@ -255,4 +255,3 @@ As a **VPN Skills Consumer (Platform Team)**, I need to **discover, filter, and 
 - **Assumption 7**: Compliance and discovery tooling can be built using standard APIs (GitHub API, REST endpoints, or CLI) without requiring deep integrations into project build systems (v1 scope).
 
 - **Assumption 8**: Mobile/frontend-specific skills are out of scope for the initial VPN-SKILLS repository — focus is on infrastructure, security, and DevOps-related skills.
-

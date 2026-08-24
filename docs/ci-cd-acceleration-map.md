@@ -69,7 +69,7 @@ provisionado), os dois comandos locais mapeados acima como "Sim" foram
 Bash/Python do devcontainer de referência):
 
 - `.specify/scripts/bash/validate-hybrid-contracts.sh` → `OK: hybrid contracts
-  validated in specs/005-hybrid-agent-human-dev/fixtures` (mesmo script
+  validated in specs/016-hybrid-agent-human-dev/fixtures` (mesmo script
   invocado pelo step "Validar contratos híbridos..." do
   [validate-manifests.yml](/.github/workflows/validate-manifests.yml))
 - Bloco Python de validação de schema (mesma lógica embutida no step "Validar

@@ -112,7 +112,7 @@ query GetHumanHours($projectId: ID!, $after: String) {
 - SDKs disponíveis para Node.js, Python, Go, Java e .NET: https://openfeature.dev/docs/reference/technologies/
 - Provider env-var disponível como provider minimalista para bootstrap
 - Providers de produção (Flagsmith, LaunchDarkly, etc.) plugáveis sem mudança de código de negócio
-- Padrão já adotado como referência arquitetural na feature 005 (ADR-5 de 005-hybrid-agent-human-dev)
+- Padrão já adotado como referência arquitetural na feature 016 (ADR-5 de 016-hybrid-agent-human-dev)
 
 ---
 
