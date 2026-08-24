@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-08-24T20:15:00Z",
+  "updated_at": "2026-08-24T22:00:36Z",
   "catalog_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/extensions/catalog.json",
   "extensions": {
     "nimbus-code-backlog-sync": {

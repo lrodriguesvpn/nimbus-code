@@ -79,18 +79,18 @@ DevSecOps (ver [`workflow.yml`](../workflows/nimbus-code-full-cycle/workflow.yml
 
 ```mermaid
 flowchart TD
-    START(["Início: inputs.spec"]) --> SPECIFY["nimbus-code.specify"]
+    START(["Início: inputs.spec"]) --> SPECIFY["speckit.specify"]
     SPECIFY --> HOOK1{{"extensão nimbus-code-backlog-sync\nhook after_specify (opcional)"}}
     HOOK1 --> GATE1{"Gate: review-spec\napprove/reject"}
     GATE1 -- reject --> ABORT1(["abort"])
-    GATE1 -- approve --> PLAN["nimbus-code.plan\n(preset injeta Security/DevSecOps Gate\n+ Architecture Decision Log no plan.md)"]
+    GATE1 -- approve --> PLAN["speckit.plan\n(preset injeta Security/DevSecOps Gate\n+ Architecture Decision Log no plan.md)"]
     PLAN --> GATE2{"Gate: devsecops-gate\nroteiro de implantação\navaliado e aprovado?"}
     GATE2 -- reject --> ABORT2(["abort"])
-    GATE2 -- approve --> TASKS["nimbus-code.tasks\n(preset anexa checklist\nde qualidade infra/deploy)"]
+    GATE2 -- approve --> TASKS["speckit.tasks\n(preset anexa checklist\nde qualidade infra/deploy)"]
     TASKS --> HOOK2{{"extensão nimbus-code-backlog-sync\nhook after_tasks (opcional)"}}
     HOOK2 --> GATE3{"Gate: review-tasks\napprove/reject"}
     GATE3 -- reject --> ABORT3(["abort"])
-    GATE3 -- approve --> IMPLEMENT["nimbus-code.implement"]
+    GATE3 -- approve --> IMPLEMENT["speckit.implement"]
     IMPLEMENT --> END(["Fim"])
 
     style GATE1 fill:#ffd,stroke:#a90

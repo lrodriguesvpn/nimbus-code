@@ -1,0 +1,121 @@
+name: Agent Auto-Assign — Desenvolvimento Autônomo por Label
+
+# Quando o label `agent:autonomous-ok` é aplicado a uma issue, atribui
+# automaticamente o GitHub Copilot coding agent.
+#
+# Autenticação:
+#   - Preferencial: GitHub App (`NIMBUS_APP_ID` + `NIMBUS_APP_PRIVATE_KEY`)
+#   - Fallback temporário: `COPILOT_AGENT_ASSIGN_TOKEN`
+#
+# O fallback permanece durante o rollout porque esta automação já existe em
+# produção e não pode parar enquanto o GitHub App organizacional não estiver
+# provisionado.
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  auto-assign-copilot:
+    name: Atribuir Copilot coding agent
+    runs-on: ubuntu-latest
+    if: github.event.label.name == 'agent:autonomous-ok'
+    steps:
+      - name: Generate GitHub App installation token
+        id: app-token
+        if: ${{ secrets.NIMBUS_APP_ID != '' && secrets.NIMBUS_APP_PRIVATE_KEY != '' }}
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.NIMBUS_APP_ID }}
+          private-key: ${{ secrets.NIMBUS_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          github-api-url: ${{ github.api_url }}
+          permission-metadata: read
+          permission-issues: write
+
+      - name: Resolve auth token (App or PAT fallback)
+        id: resolve-token
+        run: |
+          if [ -n "${{ steps.app-token.outputs.token }}" ]; then
+            echo "token=${{ steps.app-token.outputs.token }}" >> "$GITHUB_OUTPUT"
+            echo "::notice::Autenticado via GitHub App (instalação de curta duração)."
+          elif [ -n "${{ secrets.COPILOT_AGENT_ASSIGN_TOKEN }}" ]; then
+            echo "token=${{ secrets.COPILOT_AGENT_ASSIGN_TOKEN }}" >> "$GITHUB_OUTPUT"
+            echo "::warning::GitHub App não configurado — usando token legado de fallback (rollout em andamento; ver docs/github-app-auth-snippet.md)."
+          else
+            echo "::error::Nenhuma credencial configurada. Defina NIMBUS_APP_ID/NIMBUS_APP_PRIVATE_KEY ou COPILOT_AGENT_ASSIGN_TOKEN."
+            exit 1
+          fi
+
+      - name: Verificar guardrails e coletar labels da issue
+        id: guard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          LABELS=$(gh api "repos/${{ github.repository }}/issues/${{ github.event.issue.number }}" --jq '[.labels[].name] | join(",")')
+          ASSIGNEES=$(gh api "repos/${{ github.repository }}/issues/${{ github.event.issue.number }}" --jq '[.assignees[].login] | join(",")')
+          echo "labels=$LABELS" >> "$GITHUB_OUTPUT"
+          echo "assignees=$ASSIGNEES" >> "$GITHUB_OUTPUT"
+
+          SKIP=""
+          if echo ",$LABELS," | grep -q ",agent:needs-human,"; then
+            SKIP="a issue tem agent:needs-human (exige humano no loop)"
+          elif echo ",$LABELS," | grep -q ",complexity:S4,"; then
+            SKIP="a issue tem complexity:S4 (revisão humana obrigatória pela constituição Nimbus-Code)"
+          elif echo ",$LABELS," | grep -q ",type:incident,"; then
+            SKIP="a issue tem type:incident (originada de ocorrência/produção — revisão humana obrigatória independente da complexidade, pela constituição Nimbus-Code)"
+          elif echo ",$LABELS," | grep -q ",status:blocked,"; then
+            SKIP="a issue tem status:blocked"
+          elif [[ -n "$ASSIGNEES" ]]; then
+            SKIP="a issue já tem assignee(s): $ASSIGNEES"
+          fi
+          echo "skip=$SKIP" >> "$GITHUB_OUTPUT"
+
+      - name: Comentar e abortar (guardrail violada)
+        if: steps.guard.outputs.skip != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment "${{ github.event.issue.number }}" \
+            --repo "${{ github.repository }}" \
+            --body "?? **Auto-assign ao Copilot coding agent não disparado**: ${{ steps.guard.outputs.skip }}. Remova o(s) bloqueio(s) e reaplique o label \`agent:autonomous-ok\` se ainda quiser desenvolvimento autônomo, ou atribua manualmente."
+
+      - name: Extrair prioridade para contexto do agente
+        id: priority
+        if: steps.guard.outputs.skip == ''
+        run: |
+          LABELS="${{ steps.guard.outputs.labels }}"
+          PRIORITY="não classificada — trate como priority:P2-medium por padrão"
+          for p in P0-blocker P1-high P2-medium P3-low; do
+            if echo ",$LABELS," | grep -q ",priority:${p},"; then
+              PRIORITY="priority:${p}"
+              break
+            fi
+          done
+          echo "value=$PRIORITY" >> "$GITHUB_OUTPUT"
+
+      - name: Atribuir Copilot coding agent à issue
+        if: steps.guard.outputs.skip == ''
+        env:
+          GH_TOKEN: ${{ steps.resolve-token.outputs.token }}
+        run: |
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/assignees" \
+            -f "assignees[]=copilot-swe-agent[bot]" \
+            -f "agent_assignment[custom_instructions]=Prioridade desta issue no backlog: ${{ steps.priority.outputs.value }}. Siga os gates obrigatórios do preset nimbus-code-standards (Security/DevSecOps Gate, Module Dependency Graph, SLO Gate) descritos em copilot-instructions.md antes de abrir o PR."
+
+      - name: Confirmar atribuição
+        if: steps.guard.outputs.skip == ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment "${{ github.event.issue.number }}" \
+            --repo "${{ github.repository }}" \
+            --body "?? Issue atribuída ao GitHub Copilot coding agent para desenvolvimento autônomo (${{ steps.priority.outputs.value }}). Acompanhe o progresso na aba **Agents** do repositório."

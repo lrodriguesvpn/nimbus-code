@@ -19,7 +19,7 @@ especificar**.
 
 ## A Constituição é o passo crítico
 
-Em greenfield, `/nimbus-code.constitution` é rápido: você define os princípios que
+Em greenfield, `/speckit.constitution` é rápido: você define os princípios que
 quer ("TDD", "functional programming", etc.) e segue.
 
 Em brownfield, **a constituição é um ato de **escaneamento e derivação***:
@@ -76,19 +76,19 @@ Repos brownfield grandes frequentemente têm:
 Por isso, é muito comum:
 
 ```
-Pass 1: /nimbus-code.implement → completa tarefas 1-5, agente marca tarefas 6-10
+Pass 1: /speckit.implement → completa tarefas 1-5, agente marca tarefas 6-10
         como "requer validação do developer" ou encontra erro em compilação.
 Validar output do pass 1.
 
-Pass 2: /nimbus-code.implement → completa tarefas 6-10.
+Pass 2: /speckit.implement → completa tarefas 6-10.
 Validar output do pass 2.
 
-/nimbus-code.converge → encontra 3 gaps (ex.: falta testes de integração).
+/speckit.converge → encontra 3 gaps (ex.: falta testes de integração).
 Converge anexa essas 3 como novas tarefas.
 
-Pass 3: /nimbus-code.implement → completa as 3 tarefas de gap.
+Pass 3: /speckit.implement → completa as 3 tarefas de gap.
 
-/nimbus-code.converge → ✅ Converged. Fim.
+/speckit.converge → ✅ Converged. Fim.
 ```
 
 Isso **não é sinal de falha** — é esperado. O agente está explorando o código
@@ -96,7 +96,7 @@ real e identificando lacunas que a spec original não cobria. Converge é
 append-only (nunca edita/apaga código já escrito), então é seguro rodar
 quantas vezes for necessário.
 
-**Dica prática**: após cada pass de `implement`, sempre rode `/nimbus-code.converge`
+**Dica prática**: após cada pass de `implement`, sempre rode `/speckit.converge`
 antes de seguir para a próxima feature. Nunca deixe gaps pendentes.
 
 ## Quando editar artefatos SDD manualmente vs. regenerar
@@ -110,9 +110,9 @@ antes de seguir para a próxima feature. Nunca deixe gaps pendentes.
 
 ### Regenerar com o comando (recomendado):
 
-- **Mudar requisito** (parte da spec) → `/nimbus-code.specify` de novo
-- **Mudar design/stack** (parte do plano) → `/nimbus-code.plan` de novo
-- **Mudar dependências entre tarefas** → `/nimbus-code.tasks` de novo
+- **Mudar requisito** (parte da spec) → `/speckit.specify` de novo
+- **Mudar design/stack** (parte do plano) → `/speckit.plan` de novo
+- **Mudar dependências entre tarefas** → `/speckit.tasks` de novo
 
 Por quê? Porque a alteração propaga — se você muda spec manualmente mas o
 `plan.md` antigo fica, o `plan.md` fica inconsistente com a spec. Regenerar
@@ -156,7 +156,7 @@ já em andamento, outras já fechadas.
 
 O Nimbus Code não importa o backlog inteiro automaticamente, mas você pode:
 
-1. **Ler contexto histórico**: antes de `/nimbus-code.specify`, peça ao agente (via
+1. **Ler contexto histórico**: antes de `/speckit.specify`, peça ao agente (via
    prompt manual) um resumo dos cards relacionados dos últimos meses (seção 2.4
    do `developer-guide.md`). Isso entra como contexto adicional.
 
@@ -183,12 +183,12 @@ outra mudança de código. Recomendação:
 ```
 1. Nova branch: git checkout -b feature/meu-card-123-descricao
 2. Rodaprincipal init --here se primeira feature, ou pule se já feito
-3. /nimbus-code.specify → gera spec.md
-4. /nimbus-code.plan → gera plan.md
-5. /nimbus-code.tasks → gera tasks.md
+3. /speckit.specify → gera spec.md
+4. /speckit.plan → gera plan.md
+5. /speckit.tasks → gera tasks.md
 6. Commit: git add .specify/features/ && git commit -m "spec: meu-card-123"
-7. /nimbus-code.implement → implementa tarefas
-8. /nimbus-code.converge → checa gaps
+7. /speckit.implement → implementa tarefas
+8. /speckit.converge → checa gaps
 9. Commit: git add . && git commit -m "implement: meu-card-123 — converged"
 10. git push origin feature/meu-card-123-descricao
 11. Abra PR normal
@@ -223,13 +223,13 @@ Isso é seguro e permite ramp-up gradual da equipe.
 
 ## Troubleshooting brownfield comum
 
-### Problema: `/nimbus-code.constitution` leva muito tempo e o agente não converge
+### Problema: `/speckit.constitution` leva muito tempo e o agente não converge
 
 **Causa**: repo muito grande ou estrutura interna complexa faz o agente perder
 o fio.
 
 **Solução**:
-- Reduza o escopo inicial: se o repo tem 50 módulos, focar `/nimbus-code.constitution`
+- Reduza o escopo inicial: se o repo tem 50 módulos, focar `/speckit.constitution`
   só nos 3-5 mais críticos inicialmente.
 - Parta de um "slice" do código (ex.: "considere como principais os módulos em
   `src/core/` e não se preocupe com o resto por agora").
@@ -241,9 +241,9 @@ o fio.
 **Causa**: feature especificada era grande demais; ou spec foi ambígua.
 
 **Solução**:
-- Reegere `/nimbus-code.tasks` pedindo explicitamente phases menores ("separe em
+- Reegere `/speckit.tasks` pedindo explicitamente phases menores ("separe em
   3 phases: Setup, Core, Polish, com máx 10 tarefas cada").
-- Ou volte a `/nimbus-code.clarify` / `/nimbus-code.specify` redefinindo escopo menor
+- Ou volte a `/speckit.clarify` / `/speckit.specify` redefinindo escopo menor
   ("só implementar leitura primeiro, escrita é v2").
 
 ### Problema: `implement` começou bem mas falhou no meio (compilação, erro de teste)
@@ -251,13 +251,13 @@ o fio.
 **Esperado** em brownfield grande. Opções:
 
 - Se erro é óbvio (typo, import faltando), corrija manualmente, commit, e rode
-  `/nimbus-code.implement` de novo (vai continuar do próximo task).
-- Se erro é conceitual, volta a `/nimbus-code.plan` ou `/nimbus-code.tasks`, regenera,
-  rodeia `/nimbus-code.implement` novamente.
+  `/speckit.implement` de novo (vai continuar do próximo task).
+- Se erro é conceitual, volta a `/speckit.plan` ou `/speckit.tasks`, regenera,
+  rodeia `/speckit.implement` novamente.
 
 Nunca force a conclusão se houver erro; converge vai pegar depois.
 
-### Problema: `/nimbus-code.converge` acha muitos gaps mesmo depois de implement
+### Problema: `/speckit.converge` acha muitos gaps mesmo depois de implement
 
 **Esperado** em brownfield. Gaps podem ser:
 
@@ -267,7 +267,7 @@ Nunca force a conclusão se houver erro; converge vai pegar depois.
   mais casos na prática).
 - Documentação faltando.
 
-Rode `/nimbus-code.implement` novamente nas tarefas de gap, depois `/nimbus-code.converge`
+Rode `/speckit.implement` novamente nas tarefas de gap, depois `/speckit.converge`
 de novo. Repita até converged.
 
 ## Referências
