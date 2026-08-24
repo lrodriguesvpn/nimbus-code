@@ -78,7 +78,7 @@ nimbus-code-project-bundle v1.0.0
 
 **Bootstrap automático:**
 ```bash
-curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bootstrap.sh | bash
+curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/refs/heads/main/bootstrap.sh | bash
 ```
 
 **Resultado:** projeto pronto em ~15 min (antes: 3-4 dias)

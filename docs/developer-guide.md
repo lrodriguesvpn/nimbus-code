@@ -58,7 +58,7 @@ Já documentado em detalhe no [README raiz](../README.md#como-um-projeto-novo-j�
 Resumo:
 
 ```bash
-curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bootstrap.sh | bash
+curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/refs/heads/main/bootstrap.sh | bash
 ```
 
 Isso já deixa o projeto com `specify init` feito e o bundle
@@ -125,7 +125,7 @@ board — antes de escrever a primeira spec.
 
 ```bash
 cd meu-repo-existente
-curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bootstrap.sh | bash
+curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/refs/heads/main/bootstrap.sh | bash
 ```
 
 Para **repo brownfield que ainda não tem Spec Kit/Nimbus Code**, este é o ponto
@@ -140,7 +140,7 @@ bootstrap complementar da Nimbus-Code no mesmo fluxo**.
 ```bash
 cd meu-repo-existente
 specify init --here --integration copilot --force
-curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bootstrap.sh | bash
+curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/refs/heads/main/bootstrap.sh | bash
 ```
 
 Use esta variação só se você **quiser separar conscientemente** a criação da

@@ -24,7 +24,7 @@ Status: ⏳ Em andamento
 
 - [ ] Nimbus Code CLI (`specify`) instalado localmente e validado com `specify check`
 - [ ] Repositório clonado em `[PLACEHOLDER: caminho local]`
-- [ ] Executado: `cd [PLACEHOLDER: caminho] && curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bootstrap.sh | bash`
+- [ ] Executado: `cd [PLACEHOLDER: caminho] && curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/refs/heads/main/bootstrap.sh | bash`
 - [ ] Confirmado que o bootstrap criou `.specify/` e instalou o bundle padrão
 - [ ] Se optamos por separar a inicialização: `specify init --here --integration copilot --force` executado antes do bootstrap
 - [ ] GitHub Project V2 criado automaticamente pelo bootstrap (URL: [PLACEHOLDER: link do project])
