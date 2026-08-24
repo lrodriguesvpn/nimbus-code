@@ -115,8 +115,14 @@ Siga este roteiro sem pular etapas:
      regras), preservando 100% do conteúdo específico deste projeto.
    - Se um arquivo novo do template (ex.: `docs/harness/`, `docs/playbooks/`,
      `scripts/generate-context-graph.sh`, `scripts/harvest-patterns.sh`,
-     `scripts/process-metrics-report.sh`) ainda não existir neste projeto,
-     copie-o integralmente — são artefatos aditivos, seguros de criar.
+     `scripts/process-metrics-report.sh`, `.github/workflows/graph-guard.yml`,
+     `.github/workflows/agent-auto-assign.yml`) ainda não existir neste
+     projeto, copie-o integralmente — são artefatos aditivos, seguros de criar.
+   - Se este projeto tiver `.github/workflows/tag-release-on-main.yml`,
+     `release-impact-advisor.yml` ou `release-readiness-gate.yml` copiados de
+     uma versão antiga do template, **remova-os** — eram bugs de empacotamento
+     (referenciavam `bundles/*/bundle.yml`/`catalog.json` que só existem no
+     repositório-fonte) e foram retirados do preset a partir desta versão.
    - Se este projeto ainda não tiver a seção "Idioma dos Artefatos" na
      constituição, ou não tiver "Harness Engineering"/"Playbook de Sucesso"
      no `copilot-instructions.md`, adicione-as (são regras aditivas desta
