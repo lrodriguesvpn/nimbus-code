@@ -228,3 +228,18 @@ After completing all 8 validation scenarios above, the implementation **must sat
 - ✓ Domain baseline accelerates decomposition without rigidity
 - ✓ Central repo consolidation is now documented and enforced
 - ✓ Satellite alignment mechanism is clear and auditable
+
+## Validation Execution Log (2026-08-24)
+
+- ✅ V1 + V2 (AC-1/AC-2): heurística greenfield/brownfield confirmada em `bootstrap.sh` e testes `tests/bootstrap/bootstrap-entrypoints.bats`.
+- ✅ V3 (AC-3): captura de `delivery_model`, `decision_reason` e `decision_owner` implementada no bootstrap com persistência em `.specify/feature.json`.
+- ✅ V4 + V5 (AC-4/AC-5): handoff explícito para baseline FRONT/BACK/DESIGN/DATA/JOBS adaptável com justificativa + ownership registrado.
+- ✅ V6 (AC-6): regra de fonte única no Repo Central reforçada em `docs/developer-guide.md`, `docs/bounded-contexts.yaml` e template brownfield.
+- ✅ V7 (AC-7): processo central → satélite via workflow oficial de update reforçado em `docs/developer-guide.md`, `README.md` e `templates/workflows/update-speckit-and-bundle.yml`.
+- ✅ V8 (FR-011): separação governança permanente vs bugfix operacional preservada e consolidada nos arquivos de processo.
+
+**Comando executado (evidência):**
+
+```bash
+bats tests/bootstrap/bootstrap-entrypoints.bats
+```

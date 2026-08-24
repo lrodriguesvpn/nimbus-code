@@ -8,6 +8,10 @@ name: Verificar atualizações do Nimbus Code e do bundle Nimbus-Code
 # conforme a política em
 # https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template#versão-do-bundle-em-uso--política-de-atualização
 #
+# Em topologia multirepo, este workflow é o mecanismo oficial de alinhamento
+# contínuo entre Repo Central e satélites. Satélite não deve aplicar mudanças
+# estruturais por commit direto no main: sempre por PR revisado.
+#
 # O secret VPNDEV_STANDARDS_READ_TOKEN (PAT de qualquer membro da organização
 # venha-pra-nuvem) é recomendado para verificar a versão mais recente do bundle.
 # Se não estiver configurado, o workflow continua e compara apenas a versão do

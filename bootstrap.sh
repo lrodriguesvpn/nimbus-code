@@ -7,11 +7,17 @@ LOCAL_PATH=""
 INTEGRATION="${SPECKIT_INTEGRATION_DEFAULT:-copilot}"
 REPO_TYPE=""
 SELECTED_PRESET=""
+DELIVERY_MODEL=""
+DECISION_REASON=""
+DECISION_OWNER=""
+SATELLITE_DOMAINS=""
+CUSTOM_DOMAIN_JUSTIFICATION=""
+CUSTOM_DOMAIN_OWNERSHIP=""
 
 print_usage() {
   cat <<'EOF'
 Usage:
-  ./bootstrap.sh [--local <path>] [--integration <copilot|claude|gemini>] [--repo-type <platform|dev_standards>]
+  ./bootstrap.sh [--local <path>] [--integration <copilot|claude|gemini>] [--repo-type <platform|dev_standards>] [--delivery-model <monorepo|multirepo>] [--decision-reason <text>] [--decision-owner <team|role>] [--satellite-domains <CSV>] [--custom-domain-justification <text>] [--custom-domain-ownership <text>]
 EOF
 }
 
@@ -61,6 +67,170 @@ resolve_repo_type() {
         ;;
     esac
   done
+}
+
+read_interactive_value() {
+  local prompt="$1"
+  local result_var="$2"
+  local value=""
+
+  if [[ -t 0 ]]; then
+    printf '%s' "$prompt"
+    IFS= read -r value
+  elif [[ -r /dev/tty ]]; then
+    printf '%s' "$prompt" > /dev/tty
+    IFS= read -r value < /dev/tty
+  fi
+
+  printf -v "$result_var" '%s' "$value"
+}
+
+require_non_empty_value() {
+  local var_name="$1"
+  local prompt="$2"
+  local non_interactive_error="$3"
+  local current=""
+
+  eval "current=\"\${$var_name:-}\""
+
+  while [[ -z "$current" ]]; do
+    if [[ -t 0 || -r /dev/tty ]]; then
+      read_interactive_value "$prompt" current
+    else
+      echo "ERROR: $non_interactive_error" >&2
+      exit 1
+    fi
+  done
+
+  printf -v "$var_name" '%s' "$current"
+}
+
+resolve_delivery_model() {
+  local prompt='? For greenfield, choose delivery model [monorepo/multirepo] '
+
+  while true; do
+    if [[ -n "$DELIVERY_MODEL" ]]; then
+      case "$DELIVERY_MODEL" in
+        monorepo|multirepo)
+          return
+          ;;
+        *)
+          echo "ERROR: invalid --delivery-model '$DELIVERY_MODEL'. Use 'monorepo' or 'multirepo'." >&2
+          exit 1
+          ;;
+      esac
+    fi
+
+    if [[ -t 0 || -r /dev/tty ]]; then
+      read_interactive_value "$prompt" DELIVERY_MODEL
+    else
+      echo "ERROR: --delivery-model is required in fully non-interactive greenfield mode. Use --delivery-model monorepo or --delivery-model multirepo." >&2
+      exit 1
+    fi
+  done
+}
+
+normalize_satellite_domains() {
+  local domains="$1"
+  echo "$domains" | tr '[:lower:]' '[:upper:]' | tr -d ' ' | sed -E 's/,+/,/g; s/^,+//; s/,+$//'
+}
+
+resolve_greenfield_topology_decision() {
+  local baseline_domains="FRONT,BACK,DESIGN,DATA,JOBS"
+  local domains_prompt='? Suggested satellite baseline is FRONT/BACK/DESIGN/DATA/JOBS. Press ENTER to accept or provide CSV to adapt it: '
+  local domains_input=""
+
+  [[ "${DETECTED_CONTEXT:-}" == "greenfield" ]] || return 0
+
+  echo "-> Capturing topology decision for greenfield intake..."
+  resolve_delivery_model
+
+  require_non_empty_value \
+    "DECISION_REASON" \
+    "? Why did you choose ${DELIVERY_MODEL}? (main reason + expected trade-off) " \
+    "--decision-reason is required in fully non-interactive greenfield mode."
+
+  require_non_empty_value \
+    "DECISION_OWNER" \
+    "? Who is confirming this structural decision? (team/role) " \
+    "--decision-owner is required in fully non-interactive greenfield mode."
+
+  if [[ "$DELIVERY_MODEL" == "multirepo" ]]; then
+    if [[ -n "$SATELLITE_DOMAINS" ]]; then
+      domains_input="$SATELLITE_DOMAINS"
+    elif [[ -t 0 || -r /dev/tty ]]; then
+      read_interactive_value "$domains_prompt" domains_input
+    else
+      domains_input="$baseline_domains"
+    fi
+
+    if [[ -z "$domains_input" ]]; then
+      SATELLITE_DOMAINS="$baseline_domains"
+    else
+      SATELLITE_DOMAINS="$(normalize_satellite_domains "$domains_input")"
+    fi
+
+    if [[ "$SATELLITE_DOMAINS" != "$baseline_domains" ]]; then
+      require_non_empty_value \
+        "CUSTOM_DOMAIN_JUSTIFICATION" \
+        "? Why are you adapting the baseline domains? " \
+        "--custom-domain-justification is required when --satellite-domains differs from FRONT,BACK,DESIGN,DATA,JOBS."
+
+      require_non_empty_value \
+        "CUSTOM_DOMAIN_OWNERSHIP" \
+        "? Who owns the custom domain topology? (team/role/repo) " \
+        "--custom-domain-ownership is required when --satellite-domains differs from FRONT,BACK,DESIGN,DATA,JOBS."
+    fi
+
+    echo "  Handoff: define/confirm satellite domains after the first structural spec in the Repo Central."
+    echo "  Baseline recommendation: FRONT/BACK/DESIGN/DATA/JOBS (adaptable with explicit ownership)."
+  else
+    SATELLITE_DOMAINS=""
+  fi
+}
+
+persist_topology_decision() {
+  local feature_file="$WORKDIR/.specify/feature.json"
+  local timestamp
+  local domains_json="[]"
+
+  [[ "${DETECTED_CONTEXT:-}" == "greenfield" ]] || return 0
+
+  if [[ ! -f "$feature_file" ]]; then
+    echo "  WARN: .specify/feature.json not found; skipping topology decision persistence."
+    return 0
+  fi
+
+  if [[ -n "$SATELLITE_DOMAINS" ]]; then
+    domains_json="$(printf '%s' "$SATELLITE_DOMAINS" | tr ',' '\n' | sed '/^$/d' | jq -R . | jq -s .)"
+  fi
+
+  timestamp="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+
+  jq \
+    --arg dm "$DELIVERY_MODEL" \
+    --arg dr "$DECISION_REASON" \
+    --arg do "$DECISION_OWNER" \
+    --arg cj "$CUSTOM_DOMAIN_JUSTIFICATION" \
+    --arg co "$CUSTOM_DOMAIN_OWNERSHIP" \
+    --arg ci "$CONTEXT_INDICATOR" \
+    --arg ts "$timestamp" \
+    --argjson domains "$domains_json" \
+    '
+    .topology_decision = {
+      delivery_model: $dm,
+      decision_reason: $dr,
+      decision_owner: $do,
+      satellite_domains: $domains,
+      custom_domain_justification: (if $cj == "" then null else $cj end),
+      custom_domain_ownership: (if $co == "" then null else $co end),
+      context_indicator: $ci,
+      recorded_at: $ts
+    }
+    ' "$feature_file" > "$feature_file.tmp"
+
+  mv "$feature_file.tmp" "$feature_file"
+  echo "  OK: topology decision persisted to .specify/feature.json."
 }
 
 select_template_file() {
@@ -175,6 +345,30 @@ while [[ $# -gt 0 ]]; do
       REPO_TYPE="$2"
       shift 2
       ;;
+    --delivery-model)
+      DELIVERY_MODEL="$2"
+      shift 2
+      ;;
+    --decision-reason)
+      DECISION_REASON="$2"
+      shift 2
+      ;;
+    --decision-owner)
+      DECISION_OWNER="$2"
+      shift 2
+      ;;
+    --satellite-domains)
+      SATELLITE_DOMAINS="$2"
+      shift 2
+      ;;
+    --custom-domain-justification)
+      CUSTOM_DOMAIN_JUSTIFICATION="$2"
+      shift 2
+      ;;
+    --custom-domain-ownership)
+      CUSTOM_DOMAIN_OWNERSHIP="$2"
+      shift 2
+      ;;
     -h|--help)
       print_usage
       exit 0
@@ -214,9 +408,11 @@ else
   echo "  Interpretation: no relevant application code was found, so the repo follows the greenfield path."
 fi
 echo "  Evidence: $CONTEXT_INDICATOR"
+  resolve_greenfield_topology_decision
 
-echo "-> Initializing Nimbus Code in $WORKDIR (integration: $INTEGRATION)..."
-specify init --here --integration "$INTEGRATION" --force
+  echo "-> Initializing Nimbus Code in $WORKDIR (integration: $INTEGRATION)..."
+  specify init --here --integration "$INTEGRATION" --force
+  persist_topology_decision
 
 echo "-> Installing preset $SELECTED_PRESET..."
 specify preset add --dev "$LOCAL_PATH/presets/$SELECTED_PRESET" --priority 5   || echo "  (preset already installed - skipped; use 'specify preset remove $SELECTED_PRESET' before reinstalling)"
@@ -336,6 +532,12 @@ echo
 echo "OK: bundle nimbus-code-project-bundle v${BUNDLE_VERSION} applied."
 echo "OK: preset installed: $SELECTED_PRESET (repository type: $REPO_TYPE)"
 echo "OK: repository classified as $DETECTED_CONTEXT (reason: $CONTEXT_INDICATOR)"
+if [[ "${DETECTED_CONTEXT:-}" == "greenfield" ]]; then
+  echo "OK: topology decision recorded: $DELIVERY_MODEL (owner: $DECISION_OWNER)"
+  if [[ "$DELIVERY_MODEL" == "multirepo" ]]; then
+    echo "OK: suggested satellite domains: ${SATELLITE_DOMAINS:-FRONT,BACK,DESIGN,DATA,JOBS}"
+  fi
+fi
 
 auto_assign_hint() {
   echo "  INFO: to enable auto-assign, configure NIMBUS_APP_ID/NIMBUS_APP_PRIVATE_KEY; COPILOT_AGENT_ASSIGN_TOKEN remains a temporary fallback during rollout."

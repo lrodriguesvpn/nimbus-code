@@ -35,7 +35,7 @@ graph TD
 ## Notas
 
 - `bootstrap-context-classifier` evita que repositórios quase vazios sejam tratados como brownfield real.
-- `topology-decision-intake` transforma mono vs multirepo em decisão rastreável.
+- `topology-decision-intake` transforma mono vs multirepo em decisão rastreável e persistida em `.specify/feature.json`.
 - `domain-topology-guide` acelera a primeira decomposição sem engessar produtos diferentes.
 - `central-spec-governance` reforça o repo central como fonte única de verdade para specs.
 - `satellite-sync-policy` reaproveita o mecanismo oficial de alinhamento do bundle entre central e satélites.

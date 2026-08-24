@@ -38,6 +38,7 @@ relação entre repo central e satélites.
 | `recommended_domain_baseline` | Lista sugerida de domínios satélite para multirepo |
 | `repository_governance_rule` | Regra formal sobre repo central e satélites |
 | `satellite_update_rule` | Regra oficial de alinhamento central → satélite |
+| `feature_json_topology_record` | Persistência de `topology_decision` em `.specify/feature.json` para rastreabilidade do intake |
 
 ## Invariants
 
@@ -53,3 +54,4 @@ relação entre repo central e satélites.
 - Não considerar, sozinhos, `README`, `LICENSE`, `.gitignore`, workflows, templates, scripts de setup ou pastas vazias como sinal suficiente de brownfield.
 - O campo `decision_reason` deve registrar, em texto curto, o motivo principal da escolha e o trade-off esperado.
 - O campo `custom_domain_ownership` deve identificar claramente o time, papel ou repo responsável por cada domínio fora da baseline.
+- Para `requested_delivery_model = multirepo`, a baseline FRONT/BACK/DESIGN/DATA/JOBS é sugestão inicial; a adaptação acontece após a primeira spec estrutural, com justificativa e ownership.

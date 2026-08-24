@@ -282,3 +282,13 @@ EOF
   run bash -lc 'set -euo pipefail; cd "$1"; grep -q "Interpretation: no relevant application code was found" bootstrap.sh && grep -q "Interpretation: relevant application code is present" bootstrap.sh && grep -q "repository classified as" bootstrap.sh' _ "$REPO_ROOT"
   [ "$status" -eq 0 ]
 }
+
+@test "AC-3: bootstrap defines topology decision flags for greenfield intake" {
+  run bash -lc 'set -euo pipefail; cd "$1"; grep -q -- "--delivery-model" bootstrap.sh && grep -q -- "--decision-reason" bootstrap.sh && grep -q -- "--decision-owner" bootstrap.sh && grep -q "resolve_greenfield_topology_decision" bootstrap.sh' _ "$REPO_ROOT"
+  [ "$status" -eq 0 ]
+}
+
+@test "AC-3: bootstrap persists topology decision in .specify/feature.json" {
+  run bash -lc 'set -euo pipefail; cd "$1"; grep -q "topology_decision" bootstrap.sh && grep -q "decision_reason" bootstrap.sh && grep -q "decision_owner" bootstrap.sh && grep -q "satellite_domains" bootstrap.sh' _ "$REPO_ROOT"
+  [ "$status" -eq 0 ]
+}

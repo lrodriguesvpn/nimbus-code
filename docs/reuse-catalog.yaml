@@ -289,3 +289,20 @@ entries:
     source: "specs/012-loop-melhoria-continua/plan.md"
     adr: ""
     reuse_count: 0
+
+  - tag: "greenfield-multirepo-governance-baseline"
+    bounded_context: "spec-kit-workflow"
+    description: >
+      Padrão de intake greenfield no bootstrap com: (1) classificação explícita
+      greenfield/brownfield por código de aplicação relevante; (2) decisão
+      obrigatória monorepo vs multirepo com `decision_reason` e `decision_owner`;
+      (3) persistência da decisão em `.specify/feature.json` (`topology_decision`);
+      (4) baseline recomendada de domínios FRONT/BACK/DESIGN/DATA/JOBS para
+      multirepo, adaptável com justificativa e ownership; (5) reforço operacional
+      de que `specs/` vive apenas no Repo Central e satélites recebem código/tasks
+      com alinhamento contínuo via workflow oficial de update por PR revisado.
+      Reaproveitar em produtos greenfield multirepo que precisem governança
+      centralizada sem engessar a decomposição por domínio.
+    source: "specs/020-satellite-repo-governance/plan.md"
+    adr: ""
+    reuse_count: 0
