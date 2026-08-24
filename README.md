@@ -382,6 +382,14 @@ Este repositório fornece arquivos prontos para copiar em projetos que usam o Ni
 | [`templates/workflows/update-speckit-and-bundle.yml`](templates/workflows/update-speckit-and-bundle.yml) | GitHub Action automática para notificar atualizações do bundle | `.github/workflows/update-speckit-and-bundle.yml` (todos os projetos) |
 | [`templates/workflows/devstats-corporate-integration.yml`](templates/workflows/devstats-corporate-integration.yml) | GitHub Action padrão de integração híbrida com DEVSTATS corporativo (evento + snapshot + reprocessamento manual) | `.github/workflows/devstats-corporate-integration.yml` (todos os projetos Nimbus-Code) |
 
+Além destes, o preset `nimbus-code-standards` já instala automaticamente (sem
+cópia manual) os seguintes workflows de governança em `.github/workflows/` de
+todo projeto consumidor: `graph-guard.yml` (bloqueia PR que altera código sem
+atualizar `graph.yaml`/`graph.md`), `agent-auto-assign.yml` (atribui o Copilot
+coding agent quando `agent:autonomous-ok` é aplicado), `promote-develop-to-main.yml`
+(abre o PR de promoção `develop` -> `main`), `normalize-issue-bodies.yml` e
+`close-referenced-issues-fallback.yml`.
+
 **Para brownfield especificamente**: depois de rodar `specify init` e o
 `bootstrap.sh`, copie o checklist para o seu `.specify/`:
 
