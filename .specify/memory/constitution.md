@@ -224,6 +224,31 @@
   "Bounded Context" — se não encontrar match, informa o Dev e propõe a adição
   em vez de usar um nome inventado.
 
+## Idioma dos Artefatos
+
+- **Todo artefato de código deve ser escrito em inglês**: nomes de arquivos de
+  código, diretórios de código, símbolos, identificadores, testes automatizados,
+  mensagens estruturais de erro, schemas, contratos e textos operacionais
+  embarcados no código devem usar inglês como idioma padrão.
+- **Comentários dentro de arquivos de código seguem o idioma já predominante do
+  arquivo ou módulo**: se o código já usa comentários explicativos em português,
+  isso pode ser preservado para consistência local; fora dessa exceção, prefira
+  comentários novos em inglês.
+- **Toda documentação versionada deve ser escrita em português**: `README`,
+  `docs/`, `specs/`, ADRs, runbooks, FAQs, guias operacionais e checklists de
+  documentação usam português como idioma oficial, salvo necessidade explícita de
+  interoperabilidade externa registrada em ADR.
+- **Termos técnicos canônicos podem permanecer em inglês dentro da documentação em português**:
+  nomes consolidados de frameworks, artefatos, papéis do processo, templates,
+  taxonomias de backlog e headings técnicos amplamente reconhecidos no fluxo
+  Nimbus Code (ex.: `EPIC`, `FEATURE`, `User Story`, `Feature Specification`,
+  `Implementation Plan`, `Tasks`, `Requirements`, `Acceptance Scenarios`) não
+  precisam ser traduzidos quando a tradução reduzir clareza operacional,
+  rastreabilidade ou alinhamento com ferramentas, templates e automações.
+- Misturar português e inglês sem critério no mesmo artefato é violação de
+  consistência. Se houver necessidade de exceção, ela deve ser justificada no
+  `plan.md` ou em ADR quando tiver impacto duradouro.
+
 ## Modo de Operação do Agente por Complexidade (S0–S4)
 
 *Regras de comportamento do agente Copilot de acordo com o nível de complexidade
@@ -351,4 +376,3 @@ Ver o detalhamento técnico de como aplicar estas regras em:
 
 **Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
 <!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
-

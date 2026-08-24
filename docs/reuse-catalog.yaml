@@ -117,6 +117,18 @@ entries:
     source: "specs/005-epic-feature-us-ghe-hierarchy/plan.md"
     adr: ""
     reuse_count: 0
+  - tag: "process-recovery-flow-decision-model"
+    bounded_context: "spec-kit-workflow"
+    description: >
+      Padrão para decidir correção de rota em features já existentes sem abrir
+      nova spec por reflexo. Define quando usar `clarify`, quando atualizar a
+      mesma `spec.md`, quando atualizar o mesmo `plan.md`, quando executar
+      `converge` e quando um novo recorte de valor realmente exige nova spec.
+      Reaproveitar sempre que um projeto precisar formalizar governança de
+      correção de rota entre spec, plan, tasks e implementação.
+    source: "specs/019-process-recovery-flow/plan.md"
+    adr: ""
+    reuse_count: 0
   - tag: "subtree-repo-extraction"
     bounded_context: "spec-kit-workflow"
     description: >

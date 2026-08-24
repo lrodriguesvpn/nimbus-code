@@ -1,5 +1,5 @@
 {
-  "feature_directory": "specs/018-nimbus-agent-intake",
+  "feature_directory": "specs/020-satellite-repo-governance",
   "bounded_contexts": [
     "spec-kit-workflow"
   ],

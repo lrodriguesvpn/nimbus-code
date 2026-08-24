@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "updated_at": "2026-08-23T20:43:00Z",
-  "catalog_url": "https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/presets/catalog.json",
+  "catalog_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/presets/catalog.json",
   "presets": {
     "nimbus-code-standards": {
       "name": "Nimbus-Code — Padrões de Governança",

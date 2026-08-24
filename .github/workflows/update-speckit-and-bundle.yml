@@ -54,7 +54,7 @@ jobs:
             echo "::warning::Secret VPNDEV_STANDARDS_READ_TOKEN não configurado; verificação de atualização do bundle será ignorada."
           else
             if ! LATEST_BUNDLE=$(curl -fsSL -H "Authorization: token ${VPNDEV_TOKEN}" \
-              https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bundles/catalog.json \
+              https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bundles/catalog.json \
               | python3 -c "import json,sys;print(json.load(sys.stdin)['bundles']['nimbus-code-project-bundle']['version'])" 2>/dev/null); then
               LATEST_BUNDLE=""
               echo "::warning::Não foi possível consultar o catalog.json do bundle; verificação de atualização do bundle será ignorada nesta execução."

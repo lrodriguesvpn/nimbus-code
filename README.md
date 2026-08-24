@@ -165,10 +165,18 @@ plataforma — GitHub, Microsoft 365, Azure, Google Workspace, GCP) estão em
 ## Como um projeto novo já nasce com isso
 
 ```bash
-curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/refs/heads/main/bootstrap.sh | bash
+curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bootstrap.sh | bash
 ```
 
 Isso executa `specify init` (se ainda nao inicializado), exige a selecao explicita do tipo de repositorio (`platform` ou `dev_standards`) e instala preset + extensao + workflow na versao publicada mais recente da branch `main`.
+
+**Alternativa mais robusta para troubleshooting, VPN/proxy ou shell com pipe restrito:**
+
+```bash
+curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bootstrap.sh \
+  -o /tmp/nimbus-bootstrap.sh
+bash /tmp/nimbus-bootstrap.sh
+```
 
 
 ### Bônus: GitHub Project criado automaticamente (garantido em todo repo)
@@ -355,7 +363,7 @@ Este repositório fornece arquivos prontos para copiar em projetos que usam o Ni
 `bootstrap.sh`, copie o checklist para o seu `.specify/`:
 
 ```bash
-curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/templates/BROWNFIELD-SETUP-CHECKLIST.md \
+curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/templates/BROWNFIELD-SETUP-CHECKLIST.md \
   > .specify/BROWNFIELD-SETUP-CHECKLIST.md
 git add .specify/BROWNFIELD-SETUP-CHECKLIST.md
 ```
@@ -389,19 +397,19 @@ Para registrar os catálogos uma vez por projeto (ou uma vez por máquina, em
 
 ```bash
 specify preset catalog add \
-  https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/presets/catalog.json \
+  https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/presets/catalog.json \
   --name nimbus-code --priority 5 --install-allowed
 
 specify extension catalog add \
-  https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/extensions/catalog.json \
+  https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/extensions/catalog.json \
   --name nimbus-code --install-allowed
 
 specify workflow catalog add \
-  https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/workflows/catalog.json \
+  https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/workflows/catalog.json \
   --name nimbus-code
 
 specify bundle catalog add \
-  https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bundles/catalog.json \
+  https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bundles/catalog.json \
   --id nimbus-code --priority 5 --policy install-allowed
 ```
 
@@ -412,7 +420,7 @@ funciona como um comando único, em qualquer diretório (novo ou existente).
 > `venha-pra-nuvem`, fora do público). Isso simplifica bastante o acesso em
 > relação a um repositório privado: qualquer membro autenticado da
 > organização — incluindo um token de máquina/CI que seja membro da org —
-> já enxerga `raw.venha-pra-nuvem.ghe.com/...` sem precisar ser adicionado
+> já enxerga `venha-pra-nuvem.ghe.com/.../raw/main/...` sem precisar ser adicionado
 > como colaborador deste repositório especificamente. Ainda assim, requisições
 > HTTP simples (`curl`, e o fetcher interno do `specify` CLI) **exigem um
 > token de autenticação** (não é o mesmo mecanismo usado por `git clone`/`gh`,

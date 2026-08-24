@@ -7,6 +7,8 @@
 # Estratégia MultiRepo:
 #   Este Repo Central hospeda specs/, docs/ e o board (GitHub Project V2).
 #   Cada contexto tem seu próprio repo de código onde o Copilot Agent abre PRs.
+#   Repos satélite não devem manter specs/ locais: toda spec continua no Repo
+#   Central do produto, e o satélite recebe apenas código/tasks/PRs roteados.
 #
 # Como registrar um novo microsserviço:
 #   1. Adicione uma entrada abaixo com slug, description, repository, stack,

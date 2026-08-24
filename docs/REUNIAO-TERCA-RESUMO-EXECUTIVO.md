@@ -56,7 +56,7 @@ Os dois presets fazem parte do **`nimbus-code-project-bundle`**, que inclui tamb
 Bootstrap em um único comando:
 
 ```bash
-curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/refs/heads/main/bootstrap.sh | bash
+curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bootstrap.sh | bash
 ```
 
 ---

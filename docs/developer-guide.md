@@ -58,11 +58,20 @@ Já documentado em detalhe no [README raiz](../README.md#como-um-projeto-novo-j�
 Resumo:
 
 ```bash
-curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/refs/heads/main/bootstrap.sh | bash
+curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bootstrap.sh | bash
 ```
 
 Isso já deixa o projeto com `specify init` feito e o bundle
 `nimbus-code-project-bundle` (preset + extensão + workflow) instalado.
+
+**Alternativa recomendada quando o time precisa depurar, rodar atrás de VPN/proxy
+ou evitar qualquer fragilidade de `curl | bash`:**
+
+```bash
+curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bootstrap.sh \
+  -o /tmp/nimbus-bootstrap.sh
+bash /tmp/nimbus-bootstrap.sh
+```
 
 ### 1.1. GitHub Project criado automaticamente (e garantido continuamente)
 
@@ -125,7 +134,7 @@ board — antes de escrever a primeira spec.
 
 ```bash
 cd meu-repo-existente
-curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/refs/heads/main/bootstrap.sh | bash
+curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bootstrap.sh | bash
 ```
 
 Para **repo brownfield que ainda não tem Spec Kit/Nimbus Code**, este é o ponto
@@ -140,7 +149,7 @@ bootstrap complementar da Nimbus-Code no mesmo fluxo**.
 ```bash
 cd meu-repo-existente
 specify init --here --integration copilot --force
-curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/refs/heads/main/bootstrap.sh | bash
+curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bootstrap.sh | bash
 ```
 
 Use esta variação só se você **quiser separar conscientemente** a criação da
@@ -532,6 +541,165 @@ visual por tipo fica menos rica.
 
 ---
 
+### 4.7. Manual operacional — quando a feature já existe, mas surgem erros funcionais ou de arquitetura
+
+Este é o cenário clássico de **correção de rota**, não de criação de feature do zero.
+O ponto central do processo Nimbus Code é separar **erro de implementação** de
+**mudança na fonte de verdade**.
+
+#### Regra-mãe
+
+- Se o problema está no **código** e a intenção original continua válida, a fonte
+  de verdade **não muda**: use `implement` e `converge`.
+- Se o problema está na **intenção, escopo, regra de negócio ou critério de aceite**,
+  a fonte de verdade **mudou**: atualize a **mesma spec** (com `clarify` quando
+  precisar estruturar a ambiguidade) e depois reflita isso em `plan.md` e `tasks.md`.
+- **Nova spec** só existe quando o trabalho virou **outra feature**: novo recorte
+  de valor, novo rollout, novo owner, novo Epic/Feature, ou mudança grande o
+  bastante para perder identidade com a spec atual.
+
+#### Matriz de decisão
+
+| Sintoma encontrado | A fonte de verdade mudou? | Ação principal | A spec atualiza? | Cria nova spec? | O converge entra? |
+|---|---|---|---|---|---|
+| Bug funcional no código, mas `spec.md`/`plan.md` continuam corretos | Não | Corrigir implementação e/ou rodar `converge` para anexar tarefas faltantes | Não | Não | Sim |
+| Critério de aceite estava ambíguo ou incompleto | Sim | Atualizar a **mesma** `spec.md`; usar `clarify` se precisar resolver ambiguidades | Sim | Não | Só depois de novo `implement` |
+| Arquitetura planejada ficou inválida, mas o objetivo de negócio continua o mesmo | Parcialmente | Atualizar a **mesma** `plan.md` e regenerar/refinar `tasks.md` | Só se o impacto alterar comportamento esperado | Não | Só depois de novo `implement` |
+| Descobriu-se um escopo adicional independente do problema original | Sim, mas em outro recorte | Abrir **nova spec** | Não na spec antiga, salvo referência cruzada | Sim | Não como primeira ação |
+| A entrega foi feita, mas sobrou gap entre artefato e código | Não | Rodar `converge` | Não | Não | Sim, é o comando certo |
+
+#### Fluxo 1 — erro de implementação, sem mudar a intenção
+
+```mermaid
+flowchart TD
+    A[Spec, Plan e Tasks continuam válidos] --> B[Implementação apresentou erro]
+    B --> C{O erro altera objetivo, regra ou aceite?}
+    C -- Não --> D[Corrigir código]
+    D --> E[/nimbus-code.converge]
+    E --> F{Converge encontrou gaps?}
+    F -- Sim --> G[Append de novas tasks na mesma feature]
+    G --> H[/nimbus-code.implement]
+    H --> I[Rodar converge de novo]
+    F -- Não --> J[Feature pronta para PR/revisão]
+```
+
+#### Fluxo 2 — erro de especificação, regra ou escopo
+
+```mermaid
+flowchart TD
+    A[Problema descoberto] --> B{A ambiguidade está na intenção da feature?}
+    B -- Sim --> C[/nimbus-code.clarify ou edição da mesma spec]
+    C --> D[Atualizar a mesma spec.md]
+    D --> E[Revisar plan.md]
+    E --> F[Regenerar ou atualizar tasks.md]
+    F --> G[/nimbus-code.implement]
+    G --> H[/nimbus-code.converge]
+    H --> I[PR/revisão]
+```
+
+#### Fluxo 3 — erro de arquitetura, mas mesma feature
+
+```mermaid
+flowchart TD
+    A[Objetivo de negócio continua o mesmo] --> B[Arquitetura atual não atende]
+    B --> C[Atualizar o mesmo plan.md]
+    C --> D{Mudou comportamento esperado do usuário?}
+    D -- Sim --> E[Atualizar também a mesma spec.md]
+    D -- Não --> F[Manter spec e seguir]
+    E --> G[Atualizar tasks.md]
+    F --> G
+    G --> H[/nimbus-code.implement]
+    H --> I[/nimbus-code.converge]
+```
+
+#### Ordem operacional recomendada
+
+1. **Diagnostique onde está o erro**
+   - Código? → siga pelo fluxo de `implement` + `converge`
+   - Intenção/aceite? → atualize a **mesma spec**
+   - Arquitetura/plano? → atualize o **mesmo plan**
+2. **Não use `converge` para reescrever intenção**
+   - `converge` é **append-only em `tasks.md`**
+   - ele **não altera** `spec.md`
+   - ele **não altera** `plan.md`
+3. **Não abra nova spec por reflexo**
+   - nova spec é exceção de particionamento, não mecanismo padrão de correção
+4. **Se a spec mudou, trate `plan.md` e `tasks.md` como derivadas**
+   - spec primeiro
+   - plan depois
+   - tasks depois
+   - implement/converge no final
+
+#### Critério oficial para abrir nova spec
+
+Abra uma nova spec **somente** quando pelo menos um dos pontos abaixo for verdadeiro:
+
+- o trabalho virou uma **nova entrega de valor** independente;
+- a mudança pede **rollout próprio**, owner próprio ou janela própria;
+- o problema identificado gera uma **segunda feature** e não apenas correção da atual;
+- a relação com a spec original vira apenas referência histórica.
+
+Caso contrário, o padrão é: **atualizar a mesma spec e continuar o ciclo nela**.
+
+**Exemplos de borda que continuam na mesma feature:**
+
+- o critério de aceite estava incompleto e precisa ser corrigido na mesma `spec.md`;
+- a arquitetura falhou, mas o objetivo de negócio e o rollout continuam os mesmos;
+- o bug apareceu depois do merge, mas continua sendo correção da entrega original.
+
+**Exemplos de borda que viram nova spec:**
+
+- surgiu uma nova entrega de valor com owner, rollout ou janela própria;
+- o trabalho deixa de ser correção e passa a ser um novo desdobramento funcional;
+- a spec original passa a servir só como antecedente histórico.
+
+### 4.8. FAQ — correção de rota de spec/plan/tasks
+
+**A implementação ficou errada. Eu rodo `clarify` de novo?**  
+Só se o erro revelar que a **spec estava ambígua ou incompleta**. Se o problema é
+apenas o código ter ficado incorreto frente à spec atual, `clarify` não é o
+próximo passo; corrija a implementação e rode `converge`.
+
+**`converge` atualiza a `spec.md`?**  
+Não. `converge` é append-only em `tasks.md`. Ele só anexa novas tarefas de
+fechamento de gap entre a implementação e os artefatos já existentes.
+
+**`converge` atualiza o `plan.md`?**  
+Não. Se o plano arquitetural ficou errado, atualize o **mesmo `plan.md`** antes
+de voltar para `tasks`/`implement`.
+
+**Quando eu atualizo a mesma spec?**  
+Quando a mudança continua sendo a mesma feature, mas a intenção, os critérios de
+aceite, edge cases ou hipóteses de negócio precisam ser corrigidos.
+
+**Quando eu crio uma nova spec?**  
+Quando o que surgiu deixou de ser correção da feature atual e passou a ser uma
+nova entrega de valor, um desdobramento independente ou um novo recorte de rollout.
+
+**Se eu atualizar a spec, preciso mexer em `tasks.md` também?**  
+Sim. No processo Nimbus Code, `tasks.md` deriva de `spec.md` + `plan.md`. Se a
+fonte de verdade mudou, as tasks precisam ser regeneradas ou refinadas.
+
+**Posso pular `converge` depois de corrigir a rota?**  
+Não é recomendado. `converge` é a verificação final de que não ficou nenhum gap
+entre artefato e implementação após a correção.
+
+**O que eu faço se existe dúvida entre “corrigir a spec” e “abrir uma nova spec”?**  
+Use esta pergunta de corte: *se eu remover o histórico antigo, o novo trabalho ainda
+faz sentido como continuação da mesma feature?*  
+Se sim, atualize a mesma spec. Se não, abra uma nova.
+
+**E se o erro foi descoberto antes mesmo de existir `plan.md`?**  
+Atualize primeiro a mesma `spec.md`, normalize a intenção da feature e só então
+gere ou regenere o `plan.md`.
+
+**E se o erro foi descoberto depois do merge em produção?**  
+O fluxo de correção de rota continua válido para artefatos (`spec.md`, `plan.md`,
+`tasks.md`), mas a decisão de hotfix, rollback ou janela de release segue o
+processo operacional de release do projeto.
+
+---
+
 ## 5. MultiRepo — Registrando Microsserviços
 
 Esta seção descreve a estratégia **1 Repo Central de Specs + N Repos por
@@ -652,7 +820,43 @@ Após rodar `setup-github-project.sh`:
 > **NOTA**: `Group by` e `Iteration` não são configuráveis via API GraphQL —
 > configure manualmente na UI de cada view após a criação.
 
-### 5.6. Edge cases
+### 5.6. Processo operacional para repos satélite
+
+Quando um bounded context aponta para um **repo satélite** (repo de código,
+microsserviço, frontend, mobile, lib ou infra), siga sempre este fluxo:
+
+1. Rode o `bootstrap.sh` **dentro do repo satélite** para instalar labels,
+   workflows e o bundle padronizado do Nimbus Code.
+2. Mantenha o workflow
+   [update-speckit-and-bundle.yml](../.github/workflows/update-speckit-and-bundle.yml)
+   ativo no satélite. Ele é a verificação contínua para manter o satélite
+   alinhado com o Repo Central.
+3. Quando o Repo Central publicar mudança de preset/extensão/workflow/bundle,
+   deixe a issue semanal do `update-speckit-and-bundle.yml` abrir o diagnóstico
+   automaticamente **ou** dispare o workflow manualmente no satélite.
+4. Aplique a atualização do bundle no satélite via PR normal, com diff revisado;
+   a atualização **nunca** deve ser aplicada diretamente na branch principal do
+   satélite.
+
+**Resumo operacional:** o Repo Central dita o padrão; o repo satélite consome o
+mesmo bundle e atualiza por PR a partir do diagnóstico do workflow semanal.
+
+### 5.7. Política: `specs/` só existe no Repo Central
+
+Em topologia multi-repo, **todo artefato de spec fica exclusivamente no Repo
+Central do produto**:
+
+- `spec.md`, `plan.md`, `tasks.md`, `research.md`, `graph.yaml`, `graph.md` e
+  checklists ficam no Repo Central.
+- Repos satélite recebem **código, testes, IaC, PRs e issues roteadas** a partir
+  do Repo Central.
+- Se uma mudança nascer num repo satélite, o fluxo correto é **abrir ou atualizar
+  a spec no Repo Central primeiro** e só depois roteá-la para o satélite.
+
+Isso evita drift de processo, duplicação de artefatos e conflito entre múltiplas
+fontes de verdade.
+
+### 5.8. Edge cases
 
 **Org sem suporte ao `linkProjectV2ToRepository` (GHE Server < 3.8)**
 

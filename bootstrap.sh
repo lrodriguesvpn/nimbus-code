@@ -30,6 +30,8 @@ preset_for_repo_type() {
 }
 
 resolve_repo_type() {
+  local prompt='? Is this repository platform/client or dev standards? [platform/dev_standards] '
+
   if [[ -n "$REPO_TYPE" ]]; then
     if [[ -z "$(preset_for_repo_type "$REPO_TYPE")" ]]; then
       echo "ERROR: invalid --repo-type '$REPO_TYPE'. Use 'platform' or 'dev_standards'." >&2
@@ -38,14 +40,18 @@ resolve_repo_type() {
     return
   fi
 
-  if [[ ! -t 0 ]]; then
-    echo "ERROR: --repo-type is required in non-interactive mode. Use --repo-type platform or --repo-type dev_standards." >&2
-    exit 1
-  fi
-
   while true; do
-    printf '? Is this repository platform/client or dev standards? [platform/dev_standards] '
-    read -r REPO_TYPE
+    if [[ -t 0 ]]; then
+      printf '%s' "$prompt"
+      read -r REPO_TYPE
+    elif [[ -r /dev/tty ]]; then
+      printf '%s' "$prompt" > /dev/tty
+      read -r REPO_TYPE < /dev/tty
+    else
+      echo "ERROR: --repo-type is required in fully non-interactive mode. Use --repo-type platform or --repo-type dev_standards." >&2
+      exit 1
+    fi
+
     case "$REPO_TYPE" in
       platform|dev_standards)
         return
@@ -303,4 +309,4 @@ echo ""
 echo "Next steps:"
 echo "  1. Review docs/version-synchronization.md for version management"
 echo "  2. Run: ./scripts/validate-versions.sh to verify all versions are synced"
-echo "  3. Configure your project in specs/<feature>/spec.md"
+echo "  3. If this is the Repo Central, create/update specs/<feature>/spec.md there; if this is a satellite repo, keep specs only in the product central repo and route code tasks here."

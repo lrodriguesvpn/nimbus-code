@@ -244,7 +244,7 @@ bash ./scripts/setup-github-labels.sh --repo-owner venha-pra-nuvem --repo-name m
 
 # 2. Copiar o workflow de auto-assign
 mkdir -p .github/workflows
-curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/.github/workflows/agent-auto-assign.yml \
+curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/.github/workflows/agent-auto-assign.yml \
   > .github/workflows/agent-auto-assign.yml
 git add .github/workflows/agent-auto-assign.yml
 

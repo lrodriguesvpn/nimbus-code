@@ -1,0 +1,82 @@
+feature: "020-satellite-repo-governance"
+bounded_context: "spec-kit-workflow"
+version: 1
+
+modules:
+  - id: bootstrap-context-classifier
+    type: script
+    owner: platform
+    responsibilities:
+      - Classificar a entrada do repo como greenfield ou brownfield
+      - Explicar a classificação ao operador do bootstrap
+  - id: topology-decision-intake
+    type: script
+    owner: platform
+    responsibilities:
+      - Coletar a decisão entre monorepo e multirepo
+      - Registrar a justificativa da decisão estrutural
+  - id: domain-topology-guide
+    type: governance
+    owner: architecture-board
+    responsibilities:
+      - Sugerir baseline de domínios satélite após a primeira spec estrutural
+      - Permitir adaptação da baseline com justificativa e ownership explícitos
+  - id: central-spec-governance
+    type: governance
+    owner: architecture-board
+    responsibilities:
+      - Declarar o repo central como fonte única de verdade de specs
+      - Proibir specs locais em satélites como prática padrão
+  - id: satellite-sync-policy
+    type: workflow-governance
+    owner: platform
+    responsibilities:
+      - Manter satélites alinhados ao bundle oficial
+      - Exigir atualização por PR revisado
+  - id: onboarding-documentation
+    type: documentation
+    owner: platform
+    responsibilities:
+      - Explicar o fluxo greenfield/brownfield
+      - Explicar mono vs multirepo e o papel de repo central/satélites
+
+dependencies:
+  - from: bootstrap-context-classifier
+    to: topology-decision-intake
+    kind: sync
+    protocol: script-flow
+  - from: topology-decision-intake
+    to: domain-topology-guide
+    kind: sync
+    protocol: governance-reference
+  - from: topology-decision-intake
+    to: central-spec-governance
+    kind: sync
+    protocol: governance-reference
+  - from: central-spec-governance
+    to: satellite-sync-policy
+    kind: sync
+    protocol: operational-policy
+  - from: onboarding-documentation
+    to: bootstrap-context-classifier
+    kind: sync
+    protocol: documentation-reference
+  - from: onboarding-documentation
+    to: domain-topology-guide
+    kind: sync
+    protocol: documentation-reference
+  - from: onboarding-documentation
+    to: central-spec-governance
+    kind: sync
+    protocol: documentation-reference
+
+externals:
+  - id: bounded-context-registry
+    type: file
+    reference: "docs/bounded-contexts.yaml"
+  - id: bundle-update-workflow
+    type: workflow-template
+    reference: "templates/workflows/update-speckit-and-bundle.yml"
+  - id: central-project-board
+    type: github-project
+    reference: "GitHub Project V2 central do produto"
