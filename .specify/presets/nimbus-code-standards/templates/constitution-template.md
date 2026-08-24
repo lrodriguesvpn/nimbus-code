@@ -224,6 +224,31 @@
   "Bounded Context" — se não encontrar match, informa o Dev e propõe a adição
   em vez de usar um nome inventado.
 
+## Idioma dos Artefatos
+
+- **Todo artefato de código deve ser escrito em inglês**: nomes de arquivos de
+  código, diretórios de código, símbolos, identificadores, testes automatizados,
+  mensagens estruturais de erro, schemas, contratos e textos operacionais
+  embarcados no código devem usar inglês como idioma padrão.
+- **Comentários dentro de arquivos de código seguem o idioma já predominante do
+  arquivo ou módulo**: se o código já usa comentários explicativos em português,
+  isso pode ser preservado para consistência local; fora dessa exceção, prefira
+  comentários novos em inglês.
+- **Toda documentação versionada deve ser escrita em português**: `README`,
+  `docs/`, `specs/`, ADRs, runbooks, FAQs, guias operacionais e checklists de
+  documentação usam português como idioma oficial, salvo necessidade explícita de
+  interoperabilidade externa registrada em ADR.
+- **Termos técnicos canônicos podem permanecer em inglês dentro da documentação em português**:
+  nomes consolidados de frameworks, artefatos, papéis do processo, templates,
+  taxonomias de backlog e headings técnicos amplamente reconhecidos no fluxo
+  Nimbus Code (ex.: `EPIC`, `FEATURE`, `User Story`, `Feature Specification`,
+  `Implementation Plan`, `Tasks`, `Requirements`, `Acceptance Scenarios`) não
+  precisam ser traduzidos quando a tradução reduzir clareza operacional,
+  rastreabilidade ou alinhamento com ferramentas, templates e automações.
+- Misturar português e inglês sem critério no mesmo artefato é violação de
+  consistência. Se houver necessidade de exceção, ela deve ser justificada no
+  `plan.md` ou em ADR quando tiver impacto duradouro.
+
 ## Modo de Operação do Agente por Complexidade (S0–S4)
 
 *Regras de comportamento do agente Copilot de acordo com o nível de complexidade
@@ -258,8 +283,16 @@ operacionais concretas.*
   O agente **não deve editar** nenhum arquivo fora dessa lista — se o fizer, o
   PR é rejeitado e uma nova sessão é iniciada com instrução mais precisa.
 - **Nada muda sem aprovação via PR**: agentes nunca fazem merge diretamente.
-  Todo trabalho produzido por agente chega a `develop` ou `main` exclusivamente
-  via Pull Request revisado e aprovado pelo Dev.
+  Todo trabalho produzido por agente chega **exclusivamente** a `develop` via
+  Pull Request revisado e aprovado.
+- **Proibição de publicação direta em `main` por agente**: nenhum agente pode
+  abrir PR para `main`, mergear em `main` ou publicar release em `main`.
+- **Fluxo obrigatório de promoção para `main`**: após aprovação e merge em
+  `develop`, a promoção para `main` ocorre por workflow dedicado que cria PR de
+  `develop` para `main`.
+- **Gate reforçado para PR de `develop` → `main`**: esse PR exige aprovação
+  ampliada, incluindo reunião formal do Comitê Nimbus com evidência registrada
+  da decisão (ata, comentário de aprovação ou registro equivalente no PR).
 - **Branches perdidas são dívida técnica**: qualquer branch sem PR aberto
   associado ou sem commit há mais de 3 dias deve ser deletada. Branch mergeada
   é deletada imediatamente após o merge. A contagem de branches perdidas é uma
@@ -300,5 +333,17 @@ Ver o detalhamento técnico de como aplicar estas regras em:
 - [`docs/ai-code-quality-and-observability.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/ai-code-quality-and-observability.md) — revisão por IA, seleção de modelos S0–S4, estimativa de tokens, modelo híbrido humano+agente, tracing, gestão de bugs
 - [`docs/module-graphs.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/module-graphs.md) — grafos de módulos, Graph Guard, templates
 - [`docs/adr-guide.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/adr-guide.md) — como criar e manter ADRs organizacionais
+
+## Governança de Promoção entre Branches
+
+- Branch de integração obrigatória para trabalho de produto: `develop`.
+- Branch de produção: `main`, protegida contra contribuição direta de agentes.
+- Qualquer mudança funcional, técnica ou documental versionada por agente deve
+  entrar primeiro via PR em `develop`.
+- A promoção de `develop` para `main` é feita somente por workflow oficial que
+  abre PR automático `develop` → `main`.
+- O PR `develop` → `main` só pode ser aprovado após rito de aprovação reforçada
+  do Comitê Nimbus, com registro explícito da decisão no próprio PR.
+- Sem esse registro de aprovação do Comitê Nimbus, o merge em `main` é proibido.
 
 {CORE_TEMPLATE}

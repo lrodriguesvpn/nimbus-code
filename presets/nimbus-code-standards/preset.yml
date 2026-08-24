@@ -137,6 +137,76 @@ provides:
       strategy: "copy"
       description: "Configuração de rastreamento de custo financeiro real por fase SDD — tabelas de preço por integração e limites de orçamento por feature/fase."
 
+    # Harness Engineering — catálogo de aprendizado organizacional com erros,
+    # guia de uso, template de post-mortem e script de busca. Consultado pelo
+    # agente antes de qualquer /nimbus-code-plan (ver instrução em
+    # copilot-instructions.md e Harness Gate do plan-template.md).
+    - type: "template"
+      name: "harness-catalog"
+      file: "templates/project-root/docs/harness/harness-catalog.yaml"
+      description: "Catálogo machine-readable de padrões de erro/incidente por tag e bounded_context — copiado para docs/harness/harness-catalog.yaml."
+
+    - type: "template"
+      name: "harness-readme"
+      file: "templates/project-root/docs/harness/README.md"
+      description: "Conceito, fluxo de uso e tabela de arquivos do Harness Engineering — copiado para docs/harness/README.md."
+
+    - type: "template"
+      name: "harness-guide"
+      file: "templates/project-root/docs/harness/harness-guide.md"
+      description: "Protocolo de consulta/escrita de entradas do harness e ciclo de vida pending → cataloged — copiado para docs/harness/harness-guide.md."
+
+    - type: "template"
+      name: "harness-incident-template"
+      file: "templates/project-root/docs/harness/incident-template.md"
+      description: "Template de post-mortem (5 Whys, timeline, ações preventivas) — copiado para docs/harness/incident-template.md."
+
+    - type: "template"
+      name: "harness-search-script"
+      file: "templates/project-root/scripts/harness-search.sh"
+      strategy: "copy"
+      description: "Script de busca rápida no harness-catalog.yaml por tag/bounded_context — copiado para scripts/harness-search.sh."
+
+    # Playbook de Sucesso — catálogo de padrões que funcionaram bem (contraparte
+    # positiva do Harness Engineering), cadência de revisão de métricas DORA e
+    # estado do contador de retrospectiva proativa (feature 012).
+    - type: "template"
+      name: "playbooks-success-catalog"
+      file: "templates/project-root/docs/playbooks/success-catalog.yaml"
+      description: "Catálogo machine-readable de padrões de sucesso por tag e bounded_context — copiado para docs/playbooks/success-catalog.yaml."
+
+    - type: "template"
+      name: "playbooks-readme"
+      file: "templates/project-root/docs/playbooks/README.md"
+      description: "Conceito, fluxo de uso e cadência de revisão de métricas DORA do Playbook de Sucesso — copiado para docs/playbooks/README.md."
+
+    - type: "template"
+      name: "playbooks-retro-cadence-state"
+      file: "templates/project-root/docs/playbooks/retro-cadence-state.yaml"
+      description: "Contador de features concluídas desde a última retrospectiva, usado para sinalização proativa — copiado para docs/playbooks/retro-cadence-state.yaml."
+
+    # Scripts de automação referenciados diretamente pelo copilot-instructions.md
+    # shipado (Grafo de Contexto Multi-Repo, Playbook de Sucesso/DORA) — sem
+    # esta cópia, o agente do projeto consumidor seria instruído a rodar um
+    # script que não existe no repositório.
+    - type: "template"
+      name: "generate-context-graph-script"
+      file: "templates/project-root/scripts/generate-context-graph.sh"
+      strategy: "copy"
+      description: "Gera specs/<feature>/graph.yaml a partir dos manifestos de dependência do bounded context ativo — copiado para scripts/generate-context-graph.sh."
+
+    - type: "template"
+      name: "harvest-patterns-script"
+      file: "templates/project-root/scripts/harvest-patterns.sh"
+      strategy: "copy"
+      description: "Varredura on-demand de padrões técnicos existentes (via LLM) para alimentar docs/reuse-catalog.yaml — copiado para scripts/harvest-patterns.sh."
+
+    - type: "template"
+      name: "process-metrics-report-script"
+      file: "templates/project-root/scripts/process-metrics-report.sh"
+      strategy: "copy"
+      description: "Calcula os 4 indicadores DORA a partir das labels dora:* e verifica a cadência de retrospectiva proativa — copiado para scripts/process-metrics-report.sh."
+
 tags:
   - "governance"
   - "security"
@@ -162,3 +232,6 @@ tags:
   - "reuse-catalog"
   - "agent-session-governance"
   - "branch-hygiene"
+  - "harness-engineering"
+  - "success-playbooks"
+  - "brownfield-context-graph"

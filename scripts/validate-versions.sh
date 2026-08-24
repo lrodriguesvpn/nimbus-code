@@ -33,12 +33,12 @@ FIX_MODE="${1:-}"
 
 log_error() {
   echo -e "${RED}[ERROR]${NC} $*" >&2
-  ((ERRORS++))
+  ERRORS=$((ERRORS + 1))
 }
 
 log_warn() {
   echo -e "${YELLOW}[WARN]${NC} $*" >&2
-  ((WARNINGS++))
+  WARNINGS=$((WARNINGS + 1))
 }
 
 log_ok() {

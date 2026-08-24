@@ -208,6 +208,49 @@ humana constante. Instalada via `scripts/setup-github-labels.sh`.
   harvest para o bounded context ativo, declare quais se aplicam na seção
   "Padrão reutilizado encontrado?" do `plan.md`, junto às entradas manuais.
 
+## Harness Engineering (Aprendizado com Erros)
+
+> **Passo obrigatório antes de qualquer `/nimbus-code-plan`**: consulte também
+> `docs/harness/harness-catalog.yaml` buscando por `tags` e `bounded_context`
+> relacionados ao domínio da feature — ANTES de redigir o `plan.md`.
+>
+> Use `./scripts/harness-search.sh <tag>` ou `grep` direto no arquivo.
+
+- Se encontrar match: declare na seção **"Harness Gate"** do `plan.md`:
+  - ID(s) do harness consultado(s)
+  - Padrão de erro evitado
+  - Como foi mitigado preventivamente nesta feature
+- Se não encontrar match: declare explicitamente `"Nenhum padrão de erro relevante
+  encontrado"` na seção "Harness Gate" — **nunca deixar em branco**.
+- Se o catálogo estiver vazio: declare `"Catálogo vazio — nenhum padrão disponível"`.
+- Se durante a implementação você (agente) perceber que está prestes a cometer um
+  padrão catalogado no harness: **pare imediatamente** e informe o Dev antes de continuar.
+- Ao fechar uma feature com retrabalho > 20% ou incidente: abrir Issue com label
+  `harness:pending` e preencher entrada no `harness-catalog.yaml`.
+- Detalhamento completo: `docs/harness/harness-guide.md`.
+
+---
+
+## Playbook de Sucesso (Aprendizado com Acertos)
+
+> **Passo obrigatório antes de qualquer `/nimbus-code-plan`**: consulte também
+> `docs/playbooks/success-catalog.yaml` buscando por `tags` e `bounded_context`
+> relacionados ao domínio da feature — ANTES de redigir o `plan.md`.
+>
+> Use `grep -i "<tag>" docs/playbooks/success-catalog.yaml` para busca rápida.
+
+- Se encontrar match: declare na seção **"Playbook de Sucesso Gate"** do `plan.md`:
+  - ID(s) do playbook consultado(s)
+  - O que funcionou
+  - Como foi reaplicado nesta feature
+- Se não encontrar match: declare explicitamente `"Nenhum padrão relevante encontrado"`
+  na seção "Playbook de Sucesso Gate" — **nunca deixar em branco**.
+- Se o catálogo estiver vazio: declare `"Catálogo vazio — nenhum padrão disponível"`.
+- Ao fechar uma feature com padrão digno de repetição: o checklist de fechamento do
+  `tasks.md` pergunta "o que deu certo?". Registrar em `docs/playbooks/success-catalog.yaml`
+  (requer validação humana antes de catalogar).
+- Detalhamento completo: `docs/playbooks/README.md`.
+
 ---
 
 ## Modelo Híbrido (Agente + Humano) e Controle de Custo
