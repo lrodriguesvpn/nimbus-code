@@ -56,6 +56,30 @@ produto e reforça o repo central do produto como fonte única de verdade para
 - a topologia sugerida de domínios deve acelerar, sem virar taxonomia rígida
 - o mecanismo oficial de atualização do bundle entre central e satélites deve permanecer auditável via PR
 
+## Escopo Consolidado: Governança Permanente vs. Bugfix Operacional (FR-011)
+
+**Governança Permanente — Regras de Processo (EM ESCOPO desta feature 020)**:
+- Classificação greenfield vs brownfield baseada em presença de código de aplicação relevante
+- Decisão entre monorepo e multirepo com registro obrigatório de justificativa, trade-off esperado e ownership
+- Sugestão de topologia inicial de domínios satélite (FRONT/BACK/DESIGN/DATA/JOBS) como baseline recomendada, não rígida
+- Regra permanente: repo central como fonte única de verdade para specs, planos, tasks, grafos e checklists
+- Regra permanente: repositórios satélite recebem código, testes, IaC, PRs e tasks roteadas, mas não mantêm artefatos locais de spec
+- Mecanismo oficial e auditável de alinhamento central → satélite por PR revisado, sem bypass direto em branch principal
+- Definições operacionais explícitas: `relevant application code`, `decision_reason`, `domain ownership`
+- Documentação de processo em `docs/developer-guide.md`, `docs/bounded-contexts.yaml`, `README.md` e templates
+
+**Bugfix Operacional — Correções Técnicas Pontuais (FORA DO ESCOPO desta feature 020)**:
+- Erros de URL quebrada no bootstrap
+- Regressões de leitura interativa (pipe, heredocs)
+- Regressões de execução de comandos shell
+- Erros de escape de caracteres em prompts
+- Correções de compatibilidade de versão do Bash
+- Outros defects no bootstrap já identificados como backlog de manutenção
+
+> **Justificativa**: Separar governança (permanente, tranversal, que altera fluxo de entrada de todos os projetos greenfield futuros) de bugfix operacional (correcional, puntual, que melhora a qualidade atual da ferramenta) reduz risco de confundir regras arquiteturais com ajustes técnicos isolados. Isso garante rastreabilidade clara de quais decisões são estruturantes e quais são manutenção.
+
+> **Política de PR**: PRs desta feature devem detalhar se a mudança pertence a "Governança Permanente" ou, se houver acidental overlap com bugfix, declarar isso explicitamente e separar em PR distinta.
+
 **Scale/Scope**: todos os produtos da organização que adotarem o bootstrap Nimbus Code daqui em diante; efeito transversal sobre repo central, satélites e fluxo de onboarding greenfield
 
 ## Constitution Check
