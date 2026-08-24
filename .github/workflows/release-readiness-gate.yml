@@ -7,7 +7,7 @@ on:
 
 permissions:
   contents: read
-  pull-requests: read
+  pull-requests: write
 
 jobs:
   release-readiness:
@@ -53,13 +53,6 @@ jobs:
               return;
             }
 
-            if (releaseLabels.length !== 1) {
-              core.setFailed(
-                `PR toca superfície de release e deve ter exatamente 1 label release:* (major|minor|patch|skip). Labels encontrados: ${releaseLabels.join(", ") || "nenhum"}`,
-              );
-              return;
-            }
-
             const versionFiles = [
               "bundles/nimbus-code-project-bundle/bundle.yml",
               "bundles/nimbus-code-platform-bundle/bundle.yml",
@@ -77,6 +70,23 @@ jobs:
 
             const touchedVersionFile = changed.some((f) => versionFiles.includes(f));
             const touchedCatalogFile = changed.some((f) => catalogFiles.includes(f));
+
+            if (releaseLabels.length !== 1) {
+              if (!touchedVersionFile && !touchedCatalogFile) {
+                core.info("Docs-only release surface change detected. Auto-labeling with release:skip.");
+                await github.rest.issues.addLabels({
+                  owner,
+                  repo,
+                  issue_number: pr.number,
+                  labels: ["release:skip"],
+                });
+                return;
+              }
+              core.setFailed(
+                `PR toca superfície de release e deve ter exatamente 1 label release:* (major|minor|patch|skip). Labels encontrados: ${releaseLabels.join(", ") || "nenhum"}`,
+              );
+              return;
+            }
 
             if (releaseLabels[0] !== "release:skip") {
               if (!touchedVersionFile) {
