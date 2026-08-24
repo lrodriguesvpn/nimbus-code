@@ -1,1 +1,5 @@
-{"feature_directory":"specs/015-agentrc-brownfield-eval"}
+{
+  "feature_directory": "specs/017-nimbus-digital-engineer-platform",
+  "bounded_contexts": [],
+  "repos": []
+}
