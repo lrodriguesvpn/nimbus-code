@@ -698,6 +698,42 @@ O fluxo de correção de rota continua válido para artefatos (`spec.md`, `plan.
 `tasks.md`), mas a decisão de hotfix, rollback ou janela de release segue o
 processo operacional de release do projeto.
 
+### 4.9. Recuperação de "issues perdidas" (implementadas, mas ainda abertas)
+
+Quando PRs são mergeadas sem `Closes #<n>` / `Fixes #<n>`, as issues podem ficar
+abertas mesmo com implementação concluída.
+
+#### Causa raiz recorrente
+
+- O corpo da PR lista issue apenas como texto/tabela (ex.: `#288`, `#289`), sem
+  keyword de fechamento.
+- Resultado: o GitHub não registra vínculo de auto-close.
+
+#### Correção permanente aplicada
+
+- Workflow de fallback: [close-referenced-issues-fallback.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/close-referenced-issues-fallback.yml)
+  fecha issues abertas referenciadas na PR mergeada (incluindo seção
+  "Issues Resolvidas"), quando o auto-close padrão não ocorreu.
+- Instrução obrigatória no Copilot: sempre usar `Closes #<n>` no corpo da PR.
+
+#### Prompt padrão (time) — triagem e correção de issues perdidas
+
+```text
+Faça triagem de issues abertas e identifique "issues perdidas" (implementadas, mas ainda abertas).
+
+Objetivo:
+1) Listar issues `type:task` abertas cujo T-ID esteja marcado como [x] no `tasks.md` da mesma feature.
+2) Para cada issue perdida, validar evidência em PR mergeada (arquivos alterados + descrição da PR).
+3) Fechar somente casos de alta confiança com comentário padrão:
+   "Fechada por triagem: implementação já mergeada em PR #<n>, porém sem auto-close keyword."
+4) Para os casos não conclusivos, comentar com pendência e manter aberta.
+5) No final, gerar relatório: fechadas, pendentes, risco/ambiguidade e ações recomendadas.
+
+Regras obrigatórias:
+- Em toda PR futura, incluir `Closes #<n>` ou `Fixes #<n>` para cada issue resolvida.
+- Não usar apenas menções soltas `#<n>` em tabela/texto.
+```
+
 ---
 
 ## 5. MultiRepo — Registrando Microsserviços
@@ -910,6 +946,54 @@ repo git com esse arquivo.
   mapeia cada um dos 15 ACs desta feature a um passo de validação (automatizado
   onde possível; manual onde depende de uma API GHE real ou do comportamento
   do agente).
+
+## 6. Release semi-automático (Preset/Bundle/Workflow)
+
+### 6.1. Objetivo
+
+Padronizar quando criar nova versão e impedir publicação fora do fluxo
+`develop` -> `main`.
+
+### 6.2. Labels de impacto de release
+
+Classifique cada PR que toca superfície de bundle/preset com um label:
+
+- `release:major` — breaking change
+- `release:minor` — nova capacidade compatível
+- `release:patch` — correção compatível
+- `release:skip` — sem impacto de versão
+
+> O script [setup-github-labels.sh](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/scripts/setup-github-labels.sh)
+> cria/atualiza esses labels.
+
+### 6.3. Recomendação automática de bump em `develop`
+
+Ao merge de PR em `develop`, o workflow
+[release-impact-advisor.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/release-impact-advisor.yml)
+registra recomendação na issue `Release Candidate: develop` (`release:pending`).
+
+### 6.4. PR automático de promoção `develop` -> `main`
+
+O workflow
+[promote-develop-to-main.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/promote-develop-to-main.yml)
+abre/atualiza o PR de promoção e solicita revisão para aprovadores configurados
+nas variáveis do repositório:
+
+- `NIMBUS_MAIN_PR_REVIEWERS` (lista CSV de usuários)
+- `NIMBUS_MAIN_PR_REVIEW_TEAMS` (lista CSV de times)
+
+### 6.5. Gate humano obrigatório antes da tag
+
+Mesmo com automação, o merge para `main` exige:
+
+- aprovação dos revisores/owner designados;
+- aprovação do Comitê Nimbus registrada no PR.
+
+### 6.6. Publicação da versão
+
+Após merge em `main`, crie a tag `vX.Y.Z`. O workflow
+[release.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/release.yml)
+agora valida que a tag aponta para commit da `main` antes de publicar.
 
 ## Documentos relacionados neste repositório
 

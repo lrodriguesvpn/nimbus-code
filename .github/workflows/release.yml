@@ -19,6 +19,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validar que a tag aponta para commit promovido em main
+        run: |
+          git fetch origin main --depth=1
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" "origin/main"; then
+            echo "ERRO: a tag ${GITHUB_REF_NAME} não está em um commit da main."
+            echo "Publique versão apenas após PR develop -> main aprovado e mergeado."
+            exit 1
+          fi
 
       - name: Empacotar preset nimbus-code-standards
         run: |
