@@ -159,3 +159,50 @@ deste projeto e o novo conteúdo do template (não um caso puramente aditivo),
 pare, documente o conflito no PR e peça decisão explícita do Dev — nunca
 resolva um conflito de conteúdo escolhendo um lado silenciosamente.
 ```
+
+## Por que aparecem "erros" na aba Actions que nem rodaram nenhum job?
+
+Depois de qualquer push em `main`/`develop`, é comum ver alguns workflows
+listados como `failure` na aba Actions **mesmo sem terem executado nenhum
+step** — e com um detalhe estranho: o nome exibido não é o `name:` amigável
+do workflow, é o **caminho literal do arquivo** (ex.:
+`.github/workflows/sync-priority-field.yml` em vez de "Sincronizar campo
+Priority com label priority:*").
+
+**O que está acontecendo**: o GitHub tenta avaliar **todo** workflow do
+repositório a cada push, mesmo os que não são disparados por `push` (ex.:
+workflows com `on: issues: types: [labeled]`, `on: schedule` ou
+`on: pull_request`). Quando o gatilho declarado não bate com o evento que
+ocorreu, o GitHub ainda assim cria uma entrada de execução para esse
+workflow — sem rodar nenhum job real — e a marca como `failure`, exibindo o
+caminho do arquivo por não ter conseguido resolver o `name:` naquele
+contexto de avaliação. Isso **não indica nenhum problema no conteúdo do
+arquivo** — é um comportamento (confuso, mas documentado como conhecido)
+da própria plataforma GitHub Actions.
+
+### Como diferenciar um erro fantasma de um erro real
+
+| Sinal | Fantasma (ignorar) | Real (investigar) |
+|---|---|---|
+| Nome exibido na lista de runs | Caminho do arquivo (`.github/workflows/x.yml`) | Nome amigável (`name:` do workflow) |
+| Quantidade de jobs executados | `0` | `1` ou mais |
+| Tem log de step algum | Não | Sim |
+
+**Comando pra confirmar com certeza**, dado o ID do run (visível na URL ou
+via `gh run list`):
+
+```bash
+gh api repos/<org>/<repo>/actions/runs/<RUN_ID>/jobs -q '.total_count'
+# 0  → é o fenômeno fantasma, pode ignorar
+# >0 → é uma execução real; leia os logs do job que falhou
+```
+
+Ou direto pelo `gh run view`:
+
+```bash
+gh run view <RUN_ID> --repo <org>/<repo> --json name,conclusion,jobs -q '{name, conclusion, jobs: (.jobs | length)}'
+```
+
+Se `jobs` vier `0`, é fantasma — não precisa abrir issue nem investigar mais.
+Se vier `>0`, aí sim vale olhar `gh run view <RUN_ID> --log-failed` para o
+motivo real.
