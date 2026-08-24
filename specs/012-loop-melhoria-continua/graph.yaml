@@ -47,6 +47,16 @@ nodes:
     path: "presets/nimbus-code-standards/templates/feature-artifacts/retro-template.md"
     description: "Template de retrospectiva já existente, reaproveitado (não recriado) pela cadência proativa desta feature (US3)"
 
+  - id: "retro-cadence-state"
+    type: "module"
+    path: "docs/playbooks/retro-cadence-state.yaml"
+    description: "Arquivo de estado do contador de retrospectivas proativas (features_since_last_retro, retro_cadence_n, last_retro_date)"
+
+  - id: "playbooks-readme"
+    type: "module"
+    path: "docs/playbooks/README.md"
+    description: "Documentação do diretório docs/playbooks/ — conceito, fluxo, tabela comparativa com harness, cadência DORA"
+
   - id: "ghe-api"
     type: "external"
     path: ""

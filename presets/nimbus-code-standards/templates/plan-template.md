@@ -50,6 +50,27 @@ Se o arquivo estiver vazio, declarar "Catálogo vazio". Nunca deixar em branco.*
 > `tasks.md` exige abrir Issue com `harness:pending` e adicionar entrada ao catálogo.
 > Ver `docs/harness/harness-guide.md` para o protocolo completo.
 
+## Nimbus-Code — Playbook de Sucesso Gate
+
+*Preencher ANTES de qualquer gate. Consultar `docs/playbooks/success-catalog.yaml`
+por `tags` e `bounded_context` relacionados ao domínio desta feature.
+Se o arquivo estiver vazio, declarar "Catálogo vazio". Nunca deixar em branco.*
+
+> **Como consultar:** `grep -i "<tag>" docs/playbooks/success-catalog.yaml`
+
+| Padrão consultado (ID) | O que funcionou | Como foi reaplicado nesta feature |
+|---|---|---|
+| [SUC-NNNN ou "Nenhum"] | [descrição do padrão] | [como foi aplicado] |
+
+**Resultado da consulta:**
+- [ ] Match encontrado — padrão(ões) de sucesso relevante(s) declarado(s) acima e reaplicado(s)
+- [ ] Nenhum padrão relevante encontrado para este domínio
+- [ ] Catálogo vazio — nenhum padrão disponível para consulta
+
+> Se esta feature produzir um padrão digno de repetição, o checklist de fechamento do
+> `tasks.md` pergunta "o que deu certo aqui?". Registrar em `docs/playbooks/success-catalog.yaml`.
+> Ver `docs/playbooks/README.md` para o protocolo completo.
+
 ## Nimbus-Code — Rastreabilidade AC → Teste → Módulo
 
 *Preencher antes de `/nimbus-code-tasks`. Cada critério de aceitação do `spec.md`
