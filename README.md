@@ -412,6 +412,9 @@ apontam para esses assets e são atualizados no mesmo PR que muda a versão.
 1. **Durante PRs para `develop`**
    - Classifique a PR com um label `release:*`:
      - `release:major`, `release:minor`, `release:patch` ou `release:skip`.
+   - O gate
+     [`.github/workflows/release-readiness-gate.yml`](.github/workflows/release-readiness-gate.yml)
+     falha se a PR tocar superfície de release sem exatamente um label `release:*`.
 2. **Ao merge em `develop`**
    - O workflow
      [`.github/workflows/release-impact-advisor.yml`](.github/workflows/release-impact-advisor.yml)
@@ -421,7 +424,9 @@ apontam para esses assets e são atualizados no mesmo PR que muda a versão.
      [`.github/workflows/promote-develop-to-main.yml`](.github/workflows/promote-develop-to-main.yml)
      abre/atualiza PR `develop` -> `main` e solicita aprovadores configurados.
 4. **Publicação da versão**
-   - Depois do PR `develop` -> `main` aprovado e mergeado, crie a tag `vX.Y.Z`.
+   - Depois do PR `develop` -> `main` aprovado e mergeado, o workflow
+     [`.github/workflows/tag-release-on-main.yml`](.github/workflows/tag-release-on-main.yml)
+     cria/pusha a tag `vX.Y.Z` com base em `bundles/nimbus-code-project-bundle/bundle.yml`.
    - O workflow de release valida que a tag está em commit da `main` e então publica.
 
 Para registrar os catálogos uma vez por projeto (ou uma vez por máquina, em

@@ -966,6 +966,18 @@ Classifique cada PR que toca superfície de bundle/preset com um label:
 > O script [setup-github-labels.sh](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/scripts/setup-github-labels.sh)
 > cria/atualiza esses labels.
 
+### 6.2.1. Gate automático para não depender de memória humana
+
+O workflow
+[release-readiness-gate.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/release-readiness-gate.yml)
+roda em toda PR para `develop` e bloqueia merge quando:
+
+- a PR toca superfície de release (`presets/`, `extensions/`, `workflows/`,
+  `bundles/`, docs de release e scripts de versionamento) sem label `release:*`;
+- há mais de um label `release:*`;
+- a PR foi classificada como `release:major|minor|patch` mas não atualizou
+  arquivo de versão e `catalog.json`.
+
 ### 6.3. Recomendação automática de bump em `develop`
 
 Ao merge de PR em `develop`, o workflow
@@ -991,9 +1003,12 @@ Mesmo com automação, o merge para `main` exige:
 
 ### 6.6. Publicação da versão
 
-Após merge em `main`, crie a tag `vX.Y.Z`. O workflow
+Após merge em `main`, o workflow
+[tag-release-on-main.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/tag-release-on-main.yml)
+cria/pusha a tag `vX.Y.Z` automaticamente com base na versão do bundle. Em
+seguida, o workflow
 [release.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/release.yml)
-agora valida que a tag aponta para commit da `main` antes de publicar.
+publica os assets, validando que a tag aponta para commit da `main`.
 
 ## Documentos relacionados neste repositório
 

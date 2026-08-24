@@ -45,6 +45,10 @@ Use labels por PR (`release:major`, `release:minor`, `release:patch`,
 pelo workflow
 [release-impact-advisor.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/release-impact-advisor.yml).
 
+Além disso, o gate
+[release-readiness-gate.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/release-readiness-gate.yml)
+bloqueia PR para `develop` sem classificação correta de `release:*`.
+
 ## O PR `develop` -> `main` pode ser automático com aprovador?
 
 Sim. O workflow
@@ -59,3 +63,10 @@ cria/atualiza esse PR e pede review para os aprovadores configurados nas vars:
 Não. A tag `vX.Y.Z` deve ser criada só depois do merge em `main`. O workflow
 [release.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/release.yml)
 valida isso e falha se a tag não estiver em commit da `main`.
+
+## Quem cria a tag agora?
+
+Após merge em `main`, o workflow
+[tag-release-on-main.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/tag-release-on-main.yml)
+cria/pusha a tag automaticamente usando a versão definida em
+`bundles/nimbus-code-project-bundle/bundle.yml`. Se a tag já existir, ele não duplica.
