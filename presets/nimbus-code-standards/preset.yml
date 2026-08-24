@@ -3,14 +3,18 @@ schema_version: "1.0"
 preset:
   id: "nimbus-code-standards"
   name: "Nimbus-Code — Padrões de Governança"
-  version: "1.11.0"
-  description: "Constituição base, grafos de módulos obrigatórios (incluindo grafo de contexto multi-repo para brownfield), escala S0–S4 com estimativa de tokens e ajuste por projeto, catálogo de reuso de conteúdo para reduzir custo de tokens, SLO Gate, estratégia de release, ADRs, taxonomia de labels de priorização/desenvolvimento autônomo/DORA, modelo híbrido humano+agente, framework DevSecOps, regras de isolamento de sessões de agente (1 agente por arquivo, fases, limpeza de branches perdidas) e manual operacional de uso de agentes remotos da Nimbus-Code, aplicados sobre os templates nativos do Nimbus Code."
+  version: "1.12.0"
+  description: "Constituição base, grafos de módulos obrigatórios (incluindo grafo de contexto multi-repo para brownfield), escala S0–S4 com estimativa de tokens e ajuste por projeto, catálogo de reuso de conteúdo para reduzir custo de tokens, SLO Gate, estratégia de release, ADRs, taxonomia de labels de priorização/desenvolvimento autônomo/DORA, modelo híbrido humano+agente, framework DevSecOps, regras de isolamento de sessões de agente (1 agente por arquivo, fases, limpeza de branches perdidas), rastreamento de custo financeiro real (tokens × preço) por fase SDD, e manual operacional de uso de agentes remotos da Nimbus-Code, aplicados sobre os templates nativos do Nimbus Code."
   author: "Nimbus-Code"
   repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
   license: "Proprietary"
 
 requires:
   speckit_version: ">=0.16.0"
+  extensions:
+    - id: "cost"
+      version: ">=1.0.0"
+      repository: "https://github.com/Quratulain-bilal/spec-kit-cost"
 
 provides:
   templates:
@@ -123,6 +127,16 @@ provides:
       file: "templates/reuse-catalog.yaml"
       description: "Catálogo machine-readable de padrões/ADRs reaproveitáveis por tag/bounded-context, referenciado por ponteiro em vez de duplicado — ver docs/ai-code-quality-and-observability.md, seção 9."
 
+    # Configuração de rastreamento de custo financeiro real (tokens × preço)
+    # por fase SDD — copiado para .specify/cost/cost-config.yml no projeto.
+    # Permite tracking de custo real (input × output tokens × modelo × preço)
+    # e comparação de custo entre integrations (Claude, Copilot, Gemini, etc.).
+    - type: "template"
+      name: "cost-config"
+      file: "templates/project-root/.specify/cost/cost-config-template.yml"
+      strategy: "copy"
+      description: "Configuração de rastreamento de custo financeiro real por fase SDD — tabelas de preço por integração e limites de orçamento por feature/fase."
+
 tags:
   - "governance"
   - "security"
@@ -139,6 +153,9 @@ tags:
   - "token-estimation"
   - "dora-metrics"
   - "finops"
+  - "cost-tracking"
+  - "budget-management"
+  - "roi-metrics"
   - "pmo-portfolio"
   - "incident-management"
   - "d365"

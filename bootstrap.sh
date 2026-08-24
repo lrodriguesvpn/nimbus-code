@@ -128,6 +128,13 @@ specify preset add --dev "$LOCAL_PATH/presets/$SELECTED_PRESET" --priority 5   |
 echo "-> Installing extension nimbus-code-backlog-sync..."
 specify extension add --dev "$LOCAL_PATH/extensions/nimbus-code-backlog-sync"   || echo "  (extension already installed - skipped; use 'specify extension remove nimbus-code-backlog-sync' before reinstalling)"
 
+echo "-> Installing extension cost (spec-kit-cost)..."
+if command -v specify >/dev/null 2>&1; then
+  specify extension install cost --version ">=1.0.0" >/dev/null 2>&1 || echo "  INFO: cost extension requires 'specify extension install cost' (network install from GitHub)"
+else
+  echo "  WARN: specify CLI not available for cost extension installation"
+fi
+
 echo "-> Installing workflow nimbus-code-full-cycle..."
 specify workflow add "$LOCAL_PATH/workflows/nimbus-code-full-cycle"   || echo "  (workflow already installed - skipped; use 'specify workflow remove nimbus-code-full-cycle' before reinstalling)"
 
