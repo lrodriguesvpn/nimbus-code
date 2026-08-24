@@ -38,5 +38,5 @@ Humano: sim.
 ## Referência
 
 - AC-ID: AC-2
-- Feature: 005-hybrid-agent-human-dev
+- Feature: 016-hybrid-agent-human-dev
 - SPEC KIT COST: https://github.com/venha-pra-nuvem/spec-kit-cost

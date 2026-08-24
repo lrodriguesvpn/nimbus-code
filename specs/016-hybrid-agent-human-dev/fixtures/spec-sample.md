@@ -4,7 +4,7 @@
 
 | Campo | Valor |
 |---|---|
-| Feature slug | 005-hybrid-agent-human-dev |
+| Feature slug | 016-hybrid-agent-human-dev |
 
 ## Nimbus-Code — SLO Alvo desta Feature
 

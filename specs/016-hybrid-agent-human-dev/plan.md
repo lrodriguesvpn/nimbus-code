@@ -1,6 +1,6 @@
 # Implementation Plan: Hybrid Agent-Human Delivery Templates
 
-**Branch**: `005-hybrid-agent-human-dev`
+**Branch**: `016-hybrid-agent-human-dev`
 
 **Created**: 2026-08-18
 
@@ -229,7 +229,7 @@ Checklist:
 
 ### Quickstart Validation Guide
 
-**Arquivo**: `specs/005-hybrid-agent-human-dev/quickstart.md`
+**Arquivo**: `specs/016-hybrid-agent-human-dev/quickstart.md`
 
 **Validação E2E proposta**:
 1. Inicializar novo projeto piloto com preset Nimbus-Code

@@ -1,7 +1,7 @@
 # Dependency Graph: Hybrid Agent-Human Delivery Templates (Feature 005)
 
 meta:
-  feature: "005-hybrid-agent-human-dev"
+  feature: "016-hybrid-agent-human-dev"
   version: "1.0"
   generated_at: "2025-01-31"
   author: "Copilot + Nimbus Code workflow"
@@ -141,12 +141,12 @@ modules:
       - "plan-template"
       - "task-template"
     consumes:
-      - "specs/005-hybrid-agent-human-dev/fixtures/*"
+      - "specs/016-hybrid-agent-human-dev/fixtures/*"
     exports:
       - "validation status (pass/fail)"
 
   - id: "hybrid-fixtures"
-    name: "specs/005-hybrid-agent-human-dev/fixtures/"
+    name: "specs/016-hybrid-agent-human-dev/fixtures/"
     type: "artifact"
     description: "Amostras de saída para validação de contrato híbrido"
     owner: "Dev Platform"

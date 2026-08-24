@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-TARGET_DIR="${1:-specs/005-hybrid-agent-human-dev/fixtures}"
+TARGET_DIR="${1:-specs/016-hybrid-agent-human-dev/fixtures}"
 
 require_file() {
   local file="$1"

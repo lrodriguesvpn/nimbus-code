@@ -3,7 +3,7 @@
 - **Status:** Aprovado
 - **Data:** 2026-08-18
 - **Decisores:** Tech Lead + Dev Platform
-- **Relacionada à feature:** `specs/005-hybrid-agent-human-dev`
+- **Relacionada à feature:** `specs/016-hybrid-agent-human-dev`
 
 ## Contexto
 

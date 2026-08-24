@@ -299,8 +299,8 @@ if reference:
     if inline_user_story and inline_user_story.lower() not in reference.lower():
         reference = f"{reference}\n- User Story: {inline_user_story}"
 if not reference:
-    if "specs/005-hybrid-agent-human-dev" in body:
-        reference = "- AC-ID: N/A\n- Feature: specs/005-hybrid-agent-human-dev"
+    if "specs/016-hybrid-agent-human-dev" in body:
+        reference = "- AC-ID: N/A\n- Feature: specs/016-hybrid-agent-human-dev"
     elif any(keyword.lower() in body.lower() for keyword in ["docs/ai-governance", "m365"]):
         reference = "- AC-ID: N/A\n- Feature: docs/ai-governance"
     else:

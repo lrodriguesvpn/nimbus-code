@@ -293,7 +293,7 @@ Comando de validação automatizada:
 Resultado esperado:
 
 ```text
-OK: hybrid contracts validated in specs/005-hybrid-agent-human-dev/fixtures
+OK: hybrid contracts validated in specs/016-hybrid-agent-human-dev/fixtures
 ```
 
 ---

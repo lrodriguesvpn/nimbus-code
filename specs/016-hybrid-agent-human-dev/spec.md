@@ -1,6 +1,6 @@
 # Feature Specification: Hybrid Agent-Human Delivery Templates
 
-**Feature Branch**: `[005-hybrid-agent-human-dev]`
+**Feature Branch**: `[016-hybrid-agent-human-dev]`
 
 **Created**: 2026-08-18
 
@@ -15,7 +15,7 @@ a seleção de modelo do agente.*
 
 | Campo | Valor |
 |---|---|
-| **Feature slug** | `hybrid-agent-human-dev` |
+| **Feature slug** | `016-hybrid-agent-human-dev` |
 | **Complexidade estimada** | S3 |
 | **Bounded Context** | Developer Experience & Governance |
 | **PR de referência / Issue** | novo |

@@ -14,9 +14,9 @@
 
 ## Nimbus-Code — Module Dependency Graph
 
-- specs/005-hybrid-agent-human-dev/graph.yaml
-- specs/005-hybrid-agent-human-dev/graph.md
-- specs/005-hybrid-agent-human-dev/impact-map.md
+- specs/016-hybrid-agent-human-dev/graph.yaml
+- specs/016-hybrid-agent-human-dev/graph.md
+- specs/016-hybrid-agent-human-dev/impact-map.md
 
 ## Nimbus-Code — Estratégia de Release
 

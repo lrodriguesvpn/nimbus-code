@@ -140,7 +140,7 @@ The VPN-SKILLS system comprises 5 primary components:
 | **Requirement Traceability** | ✅ PASS | AC → test mapping presente em `quickstart.md` |
 | **Module Dependency Graph** | ✅ PASS | `graph.yaml` + `graph.md` completos; edges de autenticação unificados sob GitHub App (ADL-004) |
 | **Impact Map (S3)** | ✅ PASS | `impact-map.md` completo; itens de auth reconciliados com ADL-004 |
-| **Security & DevSecOps** | ✅ PASS (com ressalva) | Estratégia de auth unificada via ADL-004; **pendente**: alinhar `spec.md`/`tasks.md` desta feature ao contrato híbrido obrigatório introduzido por `specs/005-hybrid-agent-human-dev/` (cabeçalho Nimbus-Code, AC-N formal, tabela de SLO, Cost Reference) — ver "Known Gaps" abaixo |
+| **Security & DevSecOps** | ✅ PASS (com ressalva) | Estratégia de auth unificada via ADL-004; **pendente**: alinhar `spec.md`/`tasks.md` desta feature ao contrato híbrido obrigatório introduzido por `specs/016-hybrid-agent-human-dev/` (cabeçalho Nimbus-Code, AC-N formal, tabela de SLO, Cost Reference) — ver "Known Gaps" abaixo |
 | **SLO Gate** | ✅ PASS | SLOs definidos em `impact-map.md` (API <1s cached, <3s uncached; 99.5% uptime) |
 | **Release Strategy** | ✅ PASS | ADL-003 (`direct` strategy, sem feature flag) |
 
@@ -469,4 +469,3 @@ já foram aplicadas na primeira revisão. Status atualizado abaixo:*
 - [graph.yaml](graph.yaml) — Module dependency configuration
 - [graph.md](graph.md) — Architecture diagrams and visualizations
 - [impact-map.md](impact-map.md) — Risk analysis, gates, and rollback plans
-
