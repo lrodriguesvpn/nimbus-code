@@ -15,6 +15,7 @@ modules:
     responsibilities:
       - Coletar a decisão entre monorepo e multirepo
       - Registrar a justificativa da decisão estrutural
+      - Persistir o registro de decisão em `.specify/feature.json`
   - id: domain-topology-guide
     type: governance
     owner: architecture-board

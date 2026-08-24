@@ -85,6 +85,12 @@ Status: ⏳ Em andamento
 - [ ] PR aberta e revisão de código completa (incluindo Copilot review obrigatória)
 - [ ] Merge realizado
 
+### Regra adicional para projetos multirepo
+
+- [ ] Confirmado que o repositório atual é o **Repo Central** antes de criar/editar `specs/`
+- [ ] Se este repo for satélite, nenhuma pasta `specs/` local foi criada
+- [ ] Demandas originadas no satélite foram registradas no Repo Central antes do roteamento
+
 ## Fase 5: Documentação Pós-Setup
 
 - [ ] Este checklist finalizado e commitado (git add `.specify/BROWNFIELD-SETUP-CHECKLIST.md`)

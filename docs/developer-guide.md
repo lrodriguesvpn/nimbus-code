@@ -873,6 +873,13 @@ microsserviço, frontend, mobile, lib ou infra), siga sempre este fluxo:
 4. Aplique a atualização do bundle no satélite via PR normal, com diff revisado;
    a atualização **nunca** deve ser aplicada diretamente na branch principal do
    satélite.
+5. No intake greenfield do `bootstrap.sh`, registre explicitamente:
+   - `delivery_model`: `monorepo` ou `multirepo`
+   - `decision_reason`: motivo principal + trade-off esperado
+   - `decision_owner`: quem aprovou a decisão estrutural
+6. Se o `delivery_model` for `multirepo`, use FRONT/BACK/DESIGN/DATA/JOBS como
+   baseline recomendada e adapte apenas com justificativa e ownership explícitos.
+   Esse ajuste ocorre **após a primeira spec estrutural** no Repo Central.
 
 **Resumo operacional:** o Repo Central dita o padrão; o repo satélite consome o
 mesmo bundle e atualiza por PR a partir do diagnóstico do workflow semanal.
@@ -891,6 +898,10 @@ Central do produto**:
 
 Isso evita drift de processo, duplicação de artefatos e conflito entre múltiplas
 fontes de verdade.
+
+**Regra prática para o time:** se uma demanda nascer no satélite, a decisão de
+escopo e artefatos de spec continua no Repo Central; o satélite recebe apenas o
+roteamento de implementação.
 
 ### 5.8. Edge cases
 

@@ -86,7 +86,15 @@ flowchart TD
     I --> A
 ```
 
-O bootstrap agora exige a selecao explicita do tipo de repositorio (`platform` ou `dev_standards`) antes de instalar qualquer preset. Em CI/automacao, use `--repo-type` para evitar falha explicita em modo nao interativo.
+O bootstrap agora exige a seleção explícita do tipo de repositório (`platform`
+ou `dev_standards`) antes de instalar qualquer preset. Em CI/automação, use
+`--repo-type` para evitar falha explícita em modo não interativo.
+
+No fluxo greenfield, o bootstrap também registra a decisão estrutural
+`monorepo` vs `multirepo` com justificativa e owner (`--delivery-model`,
+`--decision-reason`, `--decision-owner`). Quando a escolha for `multirepo`,
+a baseline recomendada FRONT/BACK/DESIGN/DATA/JOBS é usada como ponto de
+partida adaptável (com justificativa + ownership explícitos).
 
 ## O que este repositório contém
 

@@ -29,7 +29,7 @@
 
 - [x] T004 Atualizar `bootstrap.sh` para introduzir uma etapa explícita de classificação `greenfield` vs `brownfield` baseada em presença de código de aplicação relevante
 - [x] T005 [P] Adicionar fixtures e asserções iniciais de teste para classificação de contexto em `tests/bootstrap/bootstrap-entrypoints.bats`
-- [ ] T006 [P] Atualizar `specs/020-satellite-repo-governance/graph.yaml`, `specs/020-satellite-repo-governance/graph.md` e `specs/020-satellite-repo-governance/impact-map.md` se a implementação final exigir refinamento nos módulos planejados
+- [x] T006 [P] Atualizar `specs/020-satellite-repo-governance/graph.yaml`, `specs/020-satellite-repo-governance/graph.md` e `specs/020-satellite-repo-governance/impact-map.md` se a implementação final exigir refinamento nos módulos planejados
 
 **Checkpoint**: o bootstrap já tem o gancho estrutural da classificação inicial, e a feature tem lastro de teste/traçabilidade antes de avançar por user story.
 
@@ -55,11 +55,11 @@
 
 **Independent Test**: percorrer o fluxo greenfield e confirmar que não é possível concluir a escolha estrutural sem registrar o motivo.
 
-- [ ] T012 [P] [US2] Implementar o prompt e a captura da decisão `monorepo` vs `multirepo` em `bootstrap.sh`
-- [ ] T013 [US2] Exigir e persistir a justificativa da decisão estrutural no fluxo operacional descrito em `bootstrap.sh` e `.specify/feature.json`
-- [ ] T014 [P] [US2] Atualizar `specs/020-satellite-repo-governance/contracts/topology-intake.contract.md` e `specs/020-satellite-repo-governance/data-model.md` para refletir o formato final do registro da decisão
-- [ ] T015 [US2] Cobrir AC-3 com testes shell/asserções em `tests/bootstrap/bootstrap-entrypoints.bats`
-- [ ] T016 [US2] Validar US2 contra AC-3, FR-002, FR-003 e SC-002 em `specs/020-satellite-repo-governance/quickstart.md`
+- [x] T012 [P] [US2] Implementar o prompt e a captura da decisão `monorepo` vs `multirepo` em `bootstrap.sh`
+- [x] T013 [US2] Exigir e persistir a justificativa da decisão estrutural no fluxo operacional descrito em `bootstrap.sh` e `.specify/feature.json`
+- [x] T014 [P] [US2] Atualizar `specs/020-satellite-repo-governance/contracts/topology-intake.contract.md` e `specs/020-satellite-repo-governance/data-model.md` para refletir o formato final do registro da decisão
+- [x] T015 [US2] Cobrir AC-3 com testes shell/asserções em `tests/bootstrap/bootstrap-entrypoints.bats`
+- [x] T016 [US2] Validar US2 contra AC-3, FR-002, FR-003 e SC-002 em `specs/020-satellite-repo-governance/quickstart.md`
 
 ---
 
@@ -69,11 +69,11 @@
 
 **Independent Test**: seguir o fluxo greenfield multirepo e confirmar que FRONT, BACK, DESIGN, DATA e JOBS aparecem como baseline recomendada, com espaço explícito para adaptação.
 
-- [ ] T017 [P] [US3] Atualizar `bootstrap.sh` para fazer o handoff explícito do fluxo multirepo para a definição de domínios após a primeira spec estrutural
-- [ ] T018 [US3] Implementar em `docs/developer-guide.md` a sugestão da baseline FRONT/BACK/DESIGN/DATA/JOBS na orientação pós-primeira-spec, exigindo justificativa e ownership explícitos em domínios adaptados
-- [ ] T020 [P] [US3] Atualizar `README.md` com a recomendação de baseline de domínios satélite e o momento correto de aplicação em projetos greenfield multirepo
-- [ ] T021 [US3] Sincronizar `specs/020-satellite-repo-governance/research.md`, `specs/020-satellite-repo-governance/data-model.md` e `specs/020-satellite-repo-governance/contracts/topology-intake.contract.md` com a regra final de baseline adaptável, formato mínimo de justificativa e definição de ownership
-- [ ] T022 [US3] Validar US3 contra AC-4, AC-5, FR-004, FR-005, FR-006 e SC-003 em `specs/020-satellite-repo-governance/quickstart.md`
+- [x] T017 [P] [US3] Atualizar `bootstrap.sh` para fazer o handoff explícito do fluxo multirepo para a definição de domínios após a primeira spec estrutural
+- [x] T018 [US3] Implementar em `docs/developer-guide.md` a sugestão da baseline FRONT/BACK/DESIGN/DATA/JOBS na orientação pós-primeira-spec, exigindo justificativa e ownership explícitos em domínios adaptados
+- [x] T020 [P] [US3] Atualizar `README.md` com a recomendação de baseline de domínios satélite e o momento correto de aplicação em projetos greenfield multirepo
+- [x] T021 [US3] Sincronizar `specs/020-satellite-repo-governance/research.md`, `specs/020-satellite-repo-governance/data-model.md` e `specs/020-satellite-repo-governance/contracts/topology-intake.contract.md` com a regra final de baseline adaptável, formato mínimo de justificativa e definição de ownership
+- [x] T022 [US3] Validar US3 contra AC-4, AC-5, FR-004, FR-005, FR-006 e SC-003 em `specs/020-satellite-repo-governance/quickstart.md`
 
 ---
 
@@ -83,11 +83,11 @@
 
 **Independent Test**: revisar a documentação e confirmar que ela separa claramente o papel do repo central do papel do satélite, inclusive quando uma demanda nasce no satélite.
 
-- [ ] T023 [P] [US4] Expandir a seção MultiRepo em `docs/developer-guide.md` para declarar explicitamente que `spec.md`, `plan.md`, `tasks.md`, grafos, contratos e checklists vivem apenas no repo central
-- [ ] T024 [US4] Atualizar `docs/bounded-contexts.yaml` com a formulação final da política “specs só no repo central”
-- [ ] T025 [P] [US4] Atualizar `README.md` para refletir o papel do repo central versus satélites no onboarding greenfield
-- [ ] T026 [US4] Atualizar `templates/BROWNFIELD-SETUP-CHECKLIST.md` para evitar que o fluxo brownfield sugira `specs/` locais em satélites
-- [ ] T027 [US4] Validar US4 contra AC-6, FR-007 e FR-008 em `specs/020-satellite-repo-governance/quickstart.md`
+- [x] T023 [P] [US4] Expandir a seção MultiRepo em `docs/developer-guide.md` para declarar explicitamente que `spec.md`, `plan.md`, `tasks.md`, grafos, contratos e checklists vivem apenas no repo central
+- [x] T024 [US4] Atualizar `docs/bounded-contexts.yaml` com a formulação final da política “specs só no repo central”
+- [x] T025 [P] [US4] Atualizar `README.md` para refletir o papel do repo central versus satélites no onboarding greenfield
+- [x] T026 [US4] Atualizar `templates/BROWNFIELD-SETUP-CHECKLIST.md` para evitar que o fluxo brownfield sugira `specs/` locais em satélites
+- [x] T027 [US4] Validar US4 contra AC-6, FR-007 e FR-008 em `specs/020-satellite-repo-governance/quickstart.md`
 
 ---
 
@@ -97,10 +97,10 @@
 
 **Independent Test**: verificar que a documentação e os templates deixam inequívoco que o satélite se atualiza pelo mecanismo oficial e sempre por PR revisado.
 
-- [ ] T028 [P] [US5] Atualizar `docs/developer-guide.md` com o processo operacional central → satélite baseado no workflow oficial de update
-- [ ] T029 [US5] Atualizar `templates/workflows/update-speckit-and-bundle.yml` para reforçar, via comentários/documentação inline, o papel do workflow no alinhamento entre repo central e satélites
-- [ ] T030 [P] [US5] Atualizar `README.md` para explicar quando e como o workflow oficial deve ser usado em satélites bootstrapados
-- [ ] T031 [US5] Validar US5 contra AC-7, FR-009, FR-010 e SC-004 em `specs/020-satellite-repo-governance/quickstart.md`
+- [x] T028 [P] [US5] Atualizar `docs/developer-guide.md` com o processo operacional central → satélite baseado no workflow oficial de update
+- [x] T029 [US5] Atualizar `templates/workflows/update-speckit-and-bundle.yml` para reforçar, via comentários/documentação inline, o papel do workflow no alinhamento entre repo central e satélites
+- [x] T030 [P] [US5] Atualizar `README.md` para explicar quando e como o workflow oficial deve ser usado em satélites bootstrapados
+- [x] T031 [US5] Validar US5 contra AC-7, FR-009, FR-010 e SC-004 em `specs/020-satellite-repo-governance/quickstart.md`
 
 ---
 
@@ -108,10 +108,10 @@
 
 **Objetivo**: concluir a consistência final, cobertura de testes e artefatos de governança da feature.
 
-- [ ] T032 [P] Consolidar a consistência terminológica e a separação FR-011 entre governança permanente e bugfix operacional em `bootstrap.sh`, `README.md`, `docs/developer-guide.md`, `docs/bounded-contexts.yaml` e `templates/BROWNFIELD-SETUP-CHECKLIST.md`
-- [ ] T033 [P] Atualizar `specs/020-satellite-repo-governance/plan.md`, `specs/020-satellite-repo-governance/graph.yaml`, `specs/020-satellite-repo-governance/graph.md` e `specs/020-satellite-repo-governance/impact-map.md` para refletir a implementação final
-- [ ] T034 Adicionar entrada reutilizável de governança greenfield multi-repo em `docs/reuse-catalog.yaml`
-- [ ] T035 Executar a validação final dos cenários AC-1 a AC-7 e da separação FR-011 em `specs/020-satellite-repo-governance/quickstart.md`
+- [x] T032 [P] Consolidar a consistência terminológica e a separação FR-011 entre governança permanente e bugfix operacional em `bootstrap.sh`, `README.md`, `docs/developer-guide.md`, `docs/bounded-contexts.yaml` e `templates/BROWNFIELD-SETUP-CHECKLIST.md`
+- [x] T033 [P] Atualizar `specs/020-satellite-repo-governance/plan.md`, `specs/020-satellite-repo-governance/graph.yaml`, `specs/020-satellite-repo-governance/graph.md` e `specs/020-satellite-repo-governance/impact-map.md` para refletir a implementação final
+- [x] T034 Adicionar entrada reutilizável de governança greenfield multi-repo em `docs/reuse-catalog.yaml`
+- [x] T035 Executar a validação final dos cenários AC-1 a AC-7 e da separação FR-011 em `specs/020-satellite-repo-governance/quickstart.md`
 
 ---
 

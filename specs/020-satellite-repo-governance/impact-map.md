@@ -8,7 +8,7 @@
 
 | Módulo | Tipo de impacto | Risco | Mitigação |
 |---|---|---|---|
-| `bootstrap.sh` | Extensão do fluxo de intake e handoff para multirepo | Médio — bootstrap é ponto crítico de entrada | Introduzir comportamento adicional só no ramo greenfield; manter bugfixes fora desta feature e não antecipar criação de satélites antes da primeira spec |
+| `bootstrap.sh` | Extensão do fluxo de intake, registro da decisão de topologia e handoff para multirepo | Médio — bootstrap é ponto crítico de entrada | Introduzir comportamento adicional só no ramo greenfield; validar prompts não interativos e manter bugfixes fora desta feature |
 | `docs/developer-guide.md` | Ampliação do manual operacional | Baixo | Revisão de consistência com a seção MultiRepo existente |
 | `docs/bounded-contexts.yaml` | Reforço normativo do papel de repo central/satélite | Baixo | Limitar a mudança à governança, sem alterar slugs existentes |
 | `README.md` | Atualização do onboarding | Baixo | Ajustar somente as seções relacionadas a greenfield/multirepo |

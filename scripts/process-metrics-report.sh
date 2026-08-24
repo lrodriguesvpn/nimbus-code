@@ -30,12 +30,20 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ -z "$REPO_OWNER" || -z "$REPO_NAME" || -z "$SINCE" || -z "$UNTIL" ]]; then
-  echo "Uso: $0 --repo-owner <org> --repo-name <repo> --since <YYYY-MM-DD> --until <YYYY-MM-DD>" >&2
+if [[ -z "$REPO_OWNER" || -z "$REPO_NAME" ]]; then
+  echo "Uso: $0 --repo-owner <org> --repo-name <repo> [--since <YYYY-MM-DD>] [--until <YYYY-MM-DD>] [--check-retro-cadence]" >&2
   exit 1
 fi
 
 REPO="${REPO_OWNER}/${REPO_NAME}"
+
+if [[ -z "$UNTIL" ]]; then
+  UNTIL="$(date -u +%Y-%m-%d)"
+fi
+
+if [[ -z "$SINCE" ]]; then
+  SINCE="$(date -u -v-30d +%Y-%m-%d 2>/dev/null || date -u -d '30 days ago' +%Y-%m-%d)"
+fi
 
 # --- Helper: list closed issues with a given label ---
 list_issues_with_label() {
@@ -218,10 +226,35 @@ if [[ "$CHECK_RETRO_CADENCE" == "true" ]]; then
   if [[ -f "$CADENCE_FILE" ]]; then
     FEATURES_SINCE=$(grep "features_since_last_retro:" "$CADENCE_FILE" 2>/dev/null | awk '{print $2}' | tr -d '"' || echo "0")
     CADENCE_N=$(grep "retro_cadence_n:" "$CADENCE_FILE" 2>/dev/null | awk '{print $2}' | tr -d '"' || echo "5")
-    if [[ "${FEATURES_SINCE:-0}" -ge "${CADENCE_N:-5}" ]]; then
-      echo "⚠️  RETROSPECTIVA PROATIVA SUGERIDA"
-      echo "   ${FEATURES_SINCE} features concluídas desde a última retro (cadência: a cada ${CADENCE_N})."
-      echo "   Considere agendar retrospectiva antes da próxima feature."
+    LAST_RETRO_DATE=$(grep "last_retro_date:" "$CADENCE_FILE" 2>/dev/null | awk '{print $2}' | tr -d '"' || echo "null")
+
+    FEATURES_SINCE="${FEATURES_SINCE:-0}"
+    CADENCE_N="${CADENCE_N:-5}"
+    LAST_RETRO_DATE="${LAST_RETRO_DATE:-null}"
+
+    if ! [[ "$FEATURES_SINCE" =~ ^[0-9]+$ ]]; then FEATURES_SINCE=0; fi
+    if ! [[ "$CADENCE_N" =~ ^[0-9]+$ ]]; then CADENCE_N=5; fi
+
+    FEATURES_SINCE=$((FEATURES_SINCE + 1))
+
+    python3 - <<PY
+from pathlib import Path
+import re
+p = Path("$CADENCE_FILE")
+txt = p.read_text()
+txt = re.sub(r'^features_since_last_retro:\\s*.*$', f'features_since_last_retro: $FEATURES_SINCE', txt, flags=re.M)
+if not re.search(r'^features_since_last_retro:\\s*', txt, flags=re.M):
+    txt += f'\\nfeatures_since_last_retro: $FEATURES_SINCE\\n'
+p.write_text(txt)
+PY
+
+    if [[ "$FEATURES_SINCE" -ge "$CADENCE_N" ]]; then
+      echo "⚠️  Retrospectiva devida — ${FEATURES_SINCE} features concluídas desde ${LAST_RETRO_DATE}."
+      echo "   Use presets/nimbus-code-standards/templates/feature-artifacts/retro-template.md"
+      echo "   para registrar a retro e, após realizá-la, resetar features_since_last_retro para 0."
+      echo ""
+    else
+      echo "ℹ️  Cadência de retrospectiva: ${FEATURES_SINCE}/${CADENCE_N} features desde ${LAST_RETRO_DATE}."
       echo ""
     fi
   else
