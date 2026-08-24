@@ -165,7 +165,7 @@ plataforma — GitHub, Microsoft 365, Azure, Google Workspace, GCP) estão em
 ## Como um projeto novo já nasce com isso
 
 ```bash
-curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/bootstrap.sh | bash
+curl -fsSL https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/refs/heads/main/bootstrap.sh | bash
 ```
 
 Isso executa `specify init` (se ainda nao inicializado), exige a selecao explicita do tipo de repositorio (`platform` ou `dev_standards`) e instala preset + extensao + workflow na versao publicada mais recente da branch `main`.
