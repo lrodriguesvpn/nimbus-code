@@ -15,9 +15,9 @@
 
 **Objetivo**: preparar os artefatos e pontos de entrada compartilhados antes de alterar o comportamento do bootstrap e a documentação operacional.
 
-- [ ] T001 Consolidar o escopo final e a separação formal entre governança permanente e bugfix operacional em `specs/020-satellite-repo-governance/plan.md`
-- [ ] T002 [P] Alinhar `specs/020-satellite-repo-governance/research.md`, `specs/020-satellite-repo-governance/data-model.md` e `specs/020-satellite-repo-governance/contracts/topology-intake.contract.md` para usar a mesma terminologia de `greenfield`, `brownfield`, `monorepo`, `multirepo`, `repo central` e `repo satélite`
-- [ ] T003 [P] Preparar a baseline de validação em `specs/020-satellite-repo-governance/quickstart.md` com os cenários AC-1 a AC-7 e referências aos arquivos candidatos de implementação
+- [x] T001 Consolidar o escopo final e a separação formal entre governança permanente e bugfix operacional em `specs/020-satellite-repo-governance/plan.md`
+- [x] T002 [P] Alinhar `specs/020-satellite-repo-governance/research.md`, `specs/020-satellite-repo-governance/data-model.md` e `specs/020-satellite-repo-governance/contracts/topology-intake.contract.md` para usar a mesma terminologia de `greenfield`, `brownfield`, `monorepo`, `multirepo`, `repo central` e `repo satélite`
+- [x] T003 [P] Preparar a baseline de validação em `specs/020-satellite-repo-governance/quickstart.md` com os cenários AC-1 a AC-7 e referências aos arquivos candidatos de implementação
 
 **Checkpoint**: artefatos da feature usam a mesma linguagem e deixam claro que esta entrega não absorve bugfixes técnicos paralelos.
 
@@ -27,8 +27,8 @@
 
 **Objetivo**: estabelecer a infraestrutura mínima de implementação e rastreabilidade antes das user stories.
 
-- [ ] T004 Atualizar `bootstrap.sh` para introduzir uma etapa explícita de classificação `greenfield` vs `brownfield` baseada em presença de código de aplicação relevante
-- [ ] T005 [P] Adicionar fixtures e asserções iniciais de teste para classificação de contexto em `tests/bootstrap/bootstrap-entrypoints.bats`
+- [x] T004 Atualizar `bootstrap.sh` para introduzir uma etapa explícita de classificação `greenfield` vs `brownfield` baseada em presença de código de aplicação relevante
+- [x] T005 [P] Adicionar fixtures e asserções iniciais de teste para classificação de contexto em `tests/bootstrap/bootstrap-entrypoints.bats`
 - [ ] T006 [P] Atualizar `specs/020-satellite-repo-governance/graph.yaml`, `specs/020-satellite-repo-governance/graph.md` e `specs/020-satellite-repo-governance/impact-map.md` se a implementação final exigir refinamento nos módulos planejados
 
 **Checkpoint**: o bootstrap já tem o gancho estrutural da classificação inicial, e a feature tem lastro de teste/traçabilidade antes de avançar por user story.
@@ -41,11 +41,11 @@
 
 **Independent Test**: executar os cenários com um repositório quase vazio e com um repositório contendo código de aplicação relevante e confirmar que o fluxo diverge corretamente.
 
-- [ ] T007 [P] [US1] Implementar a heurística de “código de aplicação relevante” em `bootstrap.sh`
-- [ ] T008 [US1] Adicionar mensagens operacionais explícitas para explicar a classificação `greenfield` ou `brownfield` em `bootstrap.sh`
-- [ ] T009 [P] [US1] Cobrir os cenários AC-1 e AC-2 com fixtures/asserções shell em `tests/bootstrap/bootstrap-entrypoints.bats`
-- [ ] T010 [US1] Atualizar a documentação do onboarding inicial em `README.md` para refletir a distinção entre greenfield e brownfield
-- [ ] T011 [US1] Validar US1 contra AC-1, AC-2, FR-001 e SC-001 em `specs/020-satellite-repo-governance/quickstart.md`
+- [x] T007 [P] [US1] Implementar a heurística de “código de aplicação relevante” em `bootstrap.sh`
+- [x] T008 [US1] Adicionar mensagens operacionais explícitas para explicar a classificação `greenfield` ou `brownfield` em `bootstrap.sh`
+- [x] T009 [P] [US1] Cobrir os cenários AC-1 e AC-2 com fixtures/asserções shell em `tests/bootstrap/bootstrap-entrypoints.bats`
+- [x] T010 [US1] Atualizar a documentação do onboarding inicial em `README.md` para refletir a distinção entre greenfield e brownfield
+- [x] T011 [US1] Validar US1 contra AC-1, AC-2, FR-001 e SC-001 em `specs/020-satellite-repo-governance/quickstart.md`
 
 ---
 

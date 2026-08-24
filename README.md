@@ -170,6 +170,21 @@ curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-
 
 Isso executa `specify init` (se ainda nao inicializado), exige a selecao explicita do tipo de repositorio (`platform` ou `dev_standards`) e instala preset + extensao + workflow na versao publicada mais recente da branch `main`.
 
+### Bootstrap intake: greenfield vs brownfield
+
+Antes de seguir para qualquer outra etapa, o `bootstrap.sh` classifica o
+repositório como **greenfield** ou **brownfield** com base em `relevant
+application code`.
+
+- **Greenfield**: repositórios com apenas `README`, `LICENSE`, workflows,
+  templates, scripts de setup ou esqueleto mínimo sem implementação real.
+- **Brownfield**: repositórios que já contêm código de aplicação relevante em
+  diretórios como `src/`, `app/`, `packages/`, `services/`, `frontend/` e
+  `backend`, ou manifests/testes já conectados a esse código.
+
+O resultado aparece no console com a interpretação operacional da escolha para
+facilitar validação humana e alinhamento com a [quickstart](specs/020-satellite-repo-governance/quickstart.md).
+
 **Alternativa mais robusta para troubleshooting, VPN/proxy ou shell com pipe restrito:**
 
 ```bash
