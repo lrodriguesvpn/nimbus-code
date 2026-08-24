@@ -25,6 +25,9 @@ regras são não-negociáveis:
    e informe o Dev — nunca edite silenciosamente fora do escopo.
 2. **Não faça merge.** Ao finalizar, abra um PR para `develop` com o checklist
    da fase preenchido. O merge é decisão exclusiva do Dev após revisão.
+   **Obrigatório no corpo do PR:** para cada issue implementada, inclua
+   `Closes #<n>` (ou `Fixes #<n>`). Só mencionar `#<n>` em texto/tabela não
+   fecha a issue automaticamente.
 3. **1 branch por sessão.** Não crie branches adicionais além do declarado no
    início da sessão. Se a tarefa exigir mais do que o escopo permite, **pare e
    informe** — não subdivida por conta própria em novos branches.
