@@ -276,3 +276,24 @@ if command -v gh >/dev/null 2>&1; then
 else
   echo "  WARN: gh CLI not found - skipping GitHub Project and label setup"
 fi
+
+# Install version synchronization hooks
+echo
+echo "-> Installing git hooks for version synchronization..."
+HOOKS_SCRIPT="$LOCAL_PATH/scripts/install-hooks.sh"
+if [[ -f "$HOOKS_SCRIPT" ]]; then
+  bash "$HOOKS_SCRIPT" || {
+    echo "  WARN: could not install hooks automatically."
+    echo "  Run manually: bash $HOOKS_SCRIPT"
+  }
+else
+  echo "  WARN: install-hooks.sh not found"
+fi
+
+echo
+echo "✅ Bootstrap complete!"
+echo ""
+echo "Next steps:"
+echo "  1. Review docs/version-synchronization.md for version management"
+echo "  2. Run: ./scripts/validate-versions.sh to verify all versions are synced"
+echo "  3. Configure your project in specs/<feature>/spec.md"
