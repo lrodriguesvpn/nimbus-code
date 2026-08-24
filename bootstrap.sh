@@ -81,6 +81,67 @@ select_template_file() {
   return 1
 }
 
+detect_has_relevant_application_code() {
+  # Check for relevant application code directories
+  local application_dirs=(
+    "src" "app" "packages" "services" "frontend" "backend"
+    "lib" "config" "routes" "controllers" "models" "components"
+  )
+  
+  for dir in "${application_dirs[@]}"; do
+    if [[ -d "$WORKDIR/$dir" && -n "$(find "$WORKDIR/$dir" -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.jsx' -o -name '*.py' -o -name '*.go' -o -name '*.java' -o -name '*.cs' -o -name '*.rb' \) 2>/dev/null | head -1)" ]]; then
+      return 0
+    fi
+  done
+
+  # Check for build/runtime manifests connected to application code
+  local manifest_files=(
+    "package.json" "pom.xml" "build.gradle" "Makefile" "Dockerfile"
+    "pyproject.toml" "setup.py" "go.mod" "Cargo.toml" ".csproj"
+  )
+  
+  for manifest in "${manifest_files[@]}"; do
+    if [[ -f "$WORKDIR/$manifest" ]]; then
+      # Check if manifest references application code
+      if grep -q "src\|app\|packages\|services\|frontend\|backend" "$WORKDIR/$manifest" 2>/dev/null; then
+        return 0
+      fi
+    fi
+  done
+
+  # Check for application tests (but not setup/infrastructure tests)
+  local test_dirs=("__tests__" "test" "tests" "spec" "specs")
+  for test_dir in "${test_dirs[@]}"; do
+    if [[ -d "$WORKDIR/$test_dir" ]]; then
+      local test_files=$(find "$WORKDIR/$test_dir" -type f \( -name '*.test.*' -o -name '*.spec.*' -o -name '*_test.*' -o -name '*_spec.*' \) 2>/dev/null | head -1)
+      if [[ -n "$test_files" ]]; then
+        # Exclude bootstrap/infrastructure tests
+        if ! echo "$test_files" | grep -q "bootstrap\|infra\|setup"; then
+          return 0
+        fi
+      fi
+    fi
+  done
+
+  # No relevant application code found
+  return 1
+}
+
+classify_repository_context() {
+  local classification="greenfield"
+  local indicator_list=""
+
+  if detect_has_relevant_application_code; then
+    classification="brownfield"
+    indicator_list="Application code detected in src/, packages/, frontend/, backend/, or build manifests"
+  else
+    indicator_list="No relevant application code found; only README, LICENSE, workflows, setup scripts, or minimal templates"
+  fi
+
+  echo "$classification"
+  echo "$indicator_list"
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --local)
@@ -124,6 +185,11 @@ fi
 
 resolve_repo_type
 SELECTED_PRESET="$(preset_for_repo_type "$REPO_TYPE")"
+
+echo "-> Classifying repository context (greenfield vs brownfield)..."
+read -r DETECTED_CONTEXT CONTEXT_INDICATOR <<< "$(classify_repository_context)"
+echo "  Detected: $DETECTED_CONTEXT"
+echo "  Reason: $CONTEXT_INDICATOR"
 
 echo "-> Initializing Nimbus Code in $WORKDIR (integration: $INTEGRATION)..."
 specify init --here --integration "$INTEGRATION" --force
@@ -245,6 +311,7 @@ BUNDLE_VERSION="$(grep -A4 '^bundle:' "$LOCAL_PATH/bundles/nimbus-code-project-b
 echo
 echo "OK: bundle nimbus-code-project-bundle v${BUNDLE_VERSION} applied."
 echo "OK: preset installed: $SELECTED_PRESET (repository type: $REPO_TYPE)"
+echo "OK: repository classified as $DETECTED_CONTEXT"
 
 auto_assign_hint() {
   echo "  INFO: to enable auto-assign, configure NIMBUS_APP_ID/NIMBUS_APP_PRIVATE_KEY; COPILOT_AGENT_ASSIGN_TOKEN remains a temporary fallback during rollout."
