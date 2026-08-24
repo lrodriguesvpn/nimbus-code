@@ -31,6 +31,19 @@ ERRORS=0
 WARNINGS=0
 FIX_MODE="${1:-}"
 
+# Wrapper em torno de `yq` que normaliza a saída entre implementações
+# diferentes (ex.: mikefarah/yq retorna string escalar sem aspas por padrão;
+# a versão empacotada via `apt-get install yq` em runners Ubuntu — baseada em
+# jq — retorna a string JSON-encoded, com aspas). Sem esta normalização, toda
+# comparação de versão abaixo falha silenciosamente com "NOTFOUND" em CI.
+yq_raw() {
+  local value
+  value="$(yq "$@")"
+  value="${value%\"}"
+  value="${value#\"}"
+  printf '%s' "$value"
+}
+
 log_error() {
   echo -e "${RED}[ERROR]${NC} $*" >&2
   ERRORS=$((ERRORS + 1))
@@ -61,18 +74,18 @@ validate_bundle_preset_consistency() {
     [ -f "$bundle_file" ] || continue
     
     local bundle_dir=$(dirname "$bundle_file")
-    local bundle_id=$(yq '.bundle.id' "$bundle_file")
-    local bundle_version=$(yq '.bundle.version' "$bundle_file")
+    local bundle_id=$(yq_raw '.bundle.id' "$bundle_file")
+    local bundle_version=$(yq_raw '.bundle.version' "$bundle_file")
     
     log_info "  Verificando bundle: $bundle_id (v$bundle_version)"
     
     # Extrair presets fornecidos pelo bundle
-    local preset_count=$(yq '.provides.presets | length' "$bundle_file" 2>/dev/null || echo 0)
+    local preset_count=$(yq_raw '.provides.presets | length' "$bundle_file" 2>/dev/null || echo 0)
     
     if [ "$preset_count" -gt 0 ]; then
       for ((i=0; i<preset_count; i++)); do
-        local preset_id=$(yq ".provides.presets[$i].id" "$bundle_file")
-        local preset_version=$(yq ".provides.presets[$i].version" "$bundle_file")
+        local preset_id=$(yq_raw ".provides.presets[$i].id" "$bundle_file")
+        local preset_version=$(yq_raw ".provides.presets[$i].version" "$bundle_file")
         local preset_file="presets/$preset_id/preset.yml"
         
         if [ ! -f "$preset_file" ]; then
@@ -80,7 +93,7 @@ validate_bundle_preset_consistency() {
           continue
         fi
         
-        local actual_preset_version=$(yq '.preset.version' "$preset_file")
+        local actual_preset_version=$(yq_raw '.preset.version' "$preset_file")
         
         if [ "$preset_version" != "$actual_preset_version" ]; then
           log_error "  Bundle $bundle_id (v$bundle_version) declara preset $preset_id v$preset_version, mas preset.yml tem v$actual_preset_version"
@@ -104,8 +117,8 @@ validate_catalog_consistency() {
   for bundle_file in "${bundles[@]}"; do
     [ -f "$bundle_file" ] || continue
     
-    local bundle_id=$(yq '.bundle.id' "$bundle_file")
-    local bundle_version=$(yq '.bundle.version' "$bundle_file")
+    local bundle_id=$(yq_raw '.bundle.id' "$bundle_file")
+    local bundle_version=$(yq_raw '.bundle.version' "$bundle_file")
     local catalog_version=$(jq -r ".bundles[\"$bundle_id\"].version" bundles/catalog.json 2>/dev/null || echo "NOTFOUND")
     
     if [ "$catalog_version" != "$bundle_version" ]; then
@@ -120,8 +133,8 @@ validate_catalog_consistency() {
   for preset_file in "${presets[@]}"; do
     [ -f "$preset_file" ] || continue
     
-    local preset_id=$(yq '.preset.id' "$preset_file")
-    local preset_version=$(yq '.preset.version' "$preset_file")
+    local preset_id=$(yq_raw '.preset.id' "$preset_file")
+    local preset_version=$(yq_raw '.preset.version' "$preset_file")
     local catalog_version=$(jq -r ".presets[\"$preset_id\"].version" presets/catalog.json 2>/dev/null || echo "NOTFOUND")
     
     if [ "$catalog_version" != "$preset_version" ]; then
@@ -143,8 +156,8 @@ validate_download_urls() {
   for bundle_file in "${bundles[@]}"; do
     [ -f "$bundle_file" ] || continue
     
-    local bundle_id=$(yq '.bundle.id' "$bundle_file")
-    local bundle_version=$(yq '.bundle.version' "$bundle_file")
+    local bundle_id=$(yq_raw '.bundle.id' "$bundle_file")
+    local bundle_version=$(yq_raw '.bundle.version' "$bundle_file")
     local download_url=$(jq -r ".bundles[\"$bundle_id\"].download_url" bundles/catalog.json 2>/dev/null || echo "NOTFOUND")
     
     if [[ "$download_url" != *"$bundle_version"* ]]; then
@@ -160,8 +173,8 @@ validate_download_urls() {
   for preset_file in "${presets[@]}"; do
     [ -f "$preset_file" ] || continue
     
-    local preset_id=$(yq '.preset.id' "$preset_file")
-    local preset_version=$(yq '.preset.version' "$preset_file")
+    local preset_id=$(yq_raw '.preset.id' "$preset_file")
+    local preset_version=$(yq_raw '.preset.version' "$preset_file")
     local download_url=$(jq -r ".presets[\"$preset_id\"].download_url" presets/catalog.json 2>/dev/null || echo "NOTFOUND")
     
     if [[ "$download_url" != *"$preset_version"* ]]; then
@@ -182,7 +195,7 @@ validate_git_tag() {
   # A versão "principal" é a do bundle nimbus-code-project-bundle (convenção)
   local main_bundle="bundles/nimbus-code-project-bundle/bundle.yml"
   if [ -f "$main_bundle" ]; then
-    local bundle_version=$(yq '.bundle.version' "$main_bundle")
+    local bundle_version=$(yq_raw '.bundle.version' "$main_bundle")
     local current_git_tag=$(git describe --tags 2>/dev/null || echo "NOTAG")
     local expected_git_tag="v$bundle_version"
     

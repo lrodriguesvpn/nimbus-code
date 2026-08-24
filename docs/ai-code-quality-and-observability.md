@@ -544,7 +544,7 @@ justificadas no ADL.
 
 ## 11. Não-Negociáveis vs. Decisões Justificáveis — Como o Agente Trata Divergências de Arquitetura
 
-**Princípio central**: o agente (durante `/nimbus-code.plan`) nunca impõe
+**Princípio central**: o agente (durante `/speckit.plan`) nunca impõe
 silenciosamente sua própria preferência de arquitetura, nem aceita
 silenciosamente uma preferência do usuário que divirja do padrão
 institucional. Quando uma divergência é identificada, o agente:

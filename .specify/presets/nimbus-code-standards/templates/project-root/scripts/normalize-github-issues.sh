@@ -3,7 +3,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: scripts/normalize-github-issues.sh [--repo owner/repo] [--issue NUMBER] [--all] [--dry-run]
+Usage: scripts/normalize-github-issues.sh [--repo owner/repo] [--issue NUMBER] [--all] [--dry-run] [--force-reclassify]
 
 Normalizes GitHub issue bodies to the Nimbus-Code hybrid task contract and
 reconciles mandatory Task labels (`priority:*`, `complexity:*`, `type:task`,
@@ -16,6 +16,7 @@ repo=""
 issue_number=""
 all=false
 dry_run=false
+force_reclassify=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -33,6 +34,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --dry-run)
       dry_run=true
+      shift
+      ;;
+    --force-reclassify)
+      force_reclassify=true
       shift
       ;;
     -h|--help)
@@ -341,12 +346,14 @@ PY
 
 reconcile_task_labels() {
   local issue_json="$1"
-  python3 - "$issue_json" <<'PY'
+  local force_mode="$2"
+  python3 - "$issue_json" "$force_mode" <<'PY'
 import json
 import re
 import sys
 
 issue = json.loads(sys.argv[1])
+force_reclassify = sys.argv[2].lower() == "true"
 title = issue.get("title") or ""
 body = (issue.get("body") or "").replace("\\r\\n", "\n").replace("\\n", "\n")
 labels = []
@@ -420,14 +427,21 @@ to_add = []
 to_remove = []
 for family, wanted in desired.items():
     current = find_family(family)
-    if current == wanted:
-        continue
     if current:
-        to_remove.append(current)
+        if force_reclassify and current != wanted:
+            to_remove.append(current)
+            to_add.append(wanted)
+        continue
     to_add.append(wanted)
 
 print(json.dumps({"add": to_add, "remove": to_remove}))
 PY
+}
+
+list_issues_paginated() {
+  local state="$1"
+  gh api --paginate "repos/${repo}/issues?state=${state}&per_page=100" \
+    --jq '.[] | select(.pull_request | not) | {number, title, body, labels}' | jq -c .
 }
 
 issue_jsons=()
@@ -436,11 +450,11 @@ if [[ -n "$issue_number" ]]; then
 elif [[ "$all" == true ]]; then
   while IFS= read -r issue; do
     issue_jsons+=("$issue")
-  done < <(gh issue list --repo "$repo" --state all --limit 100 --json number,title,body,labels | jq -c '.[]')
+  done < <(list_issues_paginated all)
 else
   while IFS= read -r issue; do
     issue_jsons+=("$issue")
-  done < <(gh issue list --repo "$repo" --state open --limit 100 --json number,title,body,labels | jq -c '.[]')
+  done < <(list_issues_paginated open)
 fi
 
 if [[ ${#issue_jsons[@]} -eq 0 ]]; then
@@ -452,7 +466,7 @@ for issue_json in "${issue_jsons[@]}"; do
   issue_number_current="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["number"])' "$issue_json")"
   title_current="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["title"])' "$issue_json")"
   normalized_body="$(normalize_one "$issue_json")"
-  label_plan="$(reconcile_task_labels "$issue_json")"
+  label_plan="$(reconcile_task_labels "$issue_json" "$force_reclassify")"
   labels_to_add="$(python3 -c 'import json,sys; print(",".join(json.loads(sys.argv[1])["add"]))' "$label_plan")"
   labels_to_remove="$(python3 -c 'import json,sys; print(",".join(json.loads(sys.argv[1])["remove"]))' "$label_plan")"
 
