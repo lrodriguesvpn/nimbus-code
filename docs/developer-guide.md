@@ -189,6 +189,26 @@ entender bem padrões, armadilhas, troubleshooting e a importância da constitui
 em brownfield, consulte a referência completa em
 [`docs/brownfield-best-practices.md`](brownfield-best-practices.md).
 
+**Passo opcional pós-constituição — Harvest de padrões reutilizáveis**: depois
+de rodar `/speckit.constitution`, considere também rodar `scripts/harvest-patterns.sh`
+para varrer o código já existente por padrões técnicos estruturais (interfaces,
+factories, decorators recorrentes) e propor entradas para `docs/reuse-catalog.yaml`.
+Diferente do `/speckit.constitution` (que deriva princípios de qualidade/arquitetura),
+o Harvest alimenta especificamente o catálogo de reuso. É **sempre on-demand,
+nunca automático nem em CI** — se este projeto ainda não rodou:
+
+```bash
+export HARVEST_API_URL="<endpoint LLM configurado pelo seu time>"
+export HARVEST_API_TOKEN="<token>"
+
+scripts/harvest-patterns.sh . --dry-run   # revisa antes de escrever
+scripts/harvest-patterns.sh .              # escreve em docs/reuse-catalog.yaml
+```
+
+Se `scripts/harvest-patterns.sh` ainda não existir neste projeto (bundle
+instalado antes desta versão), siga primeiro o prompt de auto-atualização da
+seção 6.7 para trazer os artefatos novos do preset.
+
 ### 2.4. Entender o contexto pelos Boards (cards já existentes)
 
 O Nimbus Code não tem um comando de "importar todos os cards", mas antes de
@@ -318,6 +338,7 @@ Antes de rodar a primeira feature em um brownfield, valide:
 - [ ] Bundle `nimbus-code-project-bundle` instalado (veja `.specify/presets/` e `.specify/extensions/`)
 - [ ] `/speckit.constitution` executado com o prompt de **análise profunda** (seção 2.3)
 - [ ] `constitution.md` revisado/editado manualmente se necessário
+- [ ] `scripts/harvest-patterns.sh` executado ao menos uma vez (opcional, mas recomendado — seção 2.3) para semear `docs/reuse-catalog.yaml` com padrões já existentes no código
 - [ ] `.specify/` adicionado ao git e versionado
 - [ ] README do projeto atualizado com a seção de Nimbus Code (ver [`templates/README-bundle-section.md`](../templates/README-bundle-section.md))
 - [ ] Se usa backlog externo (Azure DevOps/JIRA): MCP correspondente configurado no agente
