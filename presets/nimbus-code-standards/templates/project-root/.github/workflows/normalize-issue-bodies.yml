@@ -32,6 +32,8 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           INPUT_ISSUE_NUMBER: ${{ inputs.issue_number }}
         run: |
+          export GH_HOST="${GITHUB_SERVER_URL#https://}"
+          export GH_HOST="${GH_HOST#http://}"
           ISSUE_NUMBER="${ISSUE_NUMBER:-${INPUT_ISSUE_NUMBER:-}}"
           if [ -n "${ISSUE_NUMBER:-}" ]; then
             scripts/normalize-github-issues.sh --repo "$REPO" --issue "$ISSUE_NUMBER"
