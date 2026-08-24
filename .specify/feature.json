@@ -1,1 +1,9 @@
-{"feature_directory":"specs/017-nimbus-digital-engineer-platform"}
+{
+  "feature_directory": "specs/018-nimbus-agent-intake",
+  "bounded_contexts": [
+    "spec-kit-workflow"
+  ],
+  "repos": [
+    "venha-pra-nuvem/nimbus-code-spec-kit-template"
+  ]
+}
