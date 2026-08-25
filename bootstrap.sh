@@ -527,7 +527,69 @@ else
   echo "  WARN: missing Copilot instructions template"
 fi
 
-BUNDLE_VERSION="$(grep -A4 '^bundle:' "$LOCAL_PATH/bundles/nimbus-code-project-bundle/bundle.yml" | grep -E '^\s*version:' | head -1 | sed -E 's/.*"([0-9.]+)".*//')"
+echo
+echo "-> Installing agent session manual..."
+AGENT_SESSION_MANUAL_SRC="$(select_template_file 'agent-session-manual.md' || true)"
+if [[ -n "$AGENT_SESSION_MANUAL_SRC" && -f "$AGENT_SESSION_MANUAL_SRC" ]]; then
+  mkdir -p "$WORKDIR/docs"
+  if [[ -f "$WORKDIR/docs/agent-session-manual.md" ]]; then
+    echo "  INFO: docs/agent-session-manual.md already exists - skipped."
+  else
+    cp "$AGENT_SESSION_MANUAL_SRC" "$WORKDIR/docs/agent-session-manual.md"
+    echo "  OK: docs/agent-session-manual.md installed."
+  fi
+else
+  echo "  WARN: missing agent session manual template"
+fi
+
+# Generic delivery for every remaining file the preset declares under
+# templates/project-root/ (workflows, ISSUE_TEMPLATE, Harness Engineering,
+# Playbook de Sucesso, automation scripts, cost-config, bounded-contexts.yaml).
+# Without this loop, adding a new "provides.templates" entry to preset.yml
+# never actually reaches a consumer project - only the handful of files
+# explicitly cp'd above (and the 4 hardcoded workflows earlier in this script)
+# were ever delivered. Existing files are never overwritten (idempotent reruns
+# won't clobber org data accumulated in harness-catalog.yaml, for example).
+echo
+echo "-> Installing remaining preset project-root files..."
+PRESET_ROOT_DIR="$LOCAL_PATH/presets/$SELECTED_PRESET/templates/project-root"
+if [[ ! -d "$PRESET_ROOT_DIR" ]]; then
+  PRESET_ROOT_DIR="$LOCAL_PATH/presets/nimbus-code-standards/templates/project-root"
+fi
+
+if [[ -d "$PRESET_ROOT_DIR" ]]; then
+  while IFS= read -r -d '' src_file; do
+    rel_path="${src_file#"$PRESET_ROOT_DIR"/}"
+    case "$rel_path" in
+      "copilot-instructions.md")
+        # Already installed explicitly above (different target: .github/copilot-instructions.md).
+        continue
+        ;;
+      "bounded-contexts.yaml")
+        dest_rel="docs/bounded-contexts.yaml"
+        ;;
+      ".specify/cost/cost-config-template.yml")
+        dest_rel=".specify/cost/cost-config.yml"
+        ;;
+      *)
+        dest_rel="$rel_path"
+        ;;
+    esac
+
+    dest_file="$WORKDIR/$dest_rel"
+    if [[ -f "$dest_file" ]]; then
+      echo "  INFO: $dest_rel already exists - skipped."
+      continue
+    fi
+    mkdir -p "$(dirname "$dest_file")"
+    cp -p "$src_file" "$dest_file"
+    echo "  OK: $dest_rel installed."
+  done < <(find "$PRESET_ROOT_DIR" -type f -print0)
+else
+  echo "  WARN: preset project-root templates directory not found - skipped."
+fi
+
+BUNDLE_VERSION="$(grep -A4 '^bundle:' "$LOCAL_PATH/bundles/nimbus-code-project-bundle/bundle.yml" | grep -E '^\s*version:' | head -1 | sed -E 's/.*"([0-9.]+)".*/\1/')"
 echo
 echo "OK: bundle nimbus-code-project-bundle v${BUNDLE_VERSION} applied."
 echo "OK: preset installed: $SELECTED_PRESET (repository type: $REPO_TYPE)"
