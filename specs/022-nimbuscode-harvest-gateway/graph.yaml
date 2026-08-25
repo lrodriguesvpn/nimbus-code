@@ -1,19 +1,106 @@
-# graph.yaml — Bounded Context: nimbuscode-harvest-gateway
-# Gerado automaticamente por scripts/generate-context-graph.sh — specs/014-brownfield-multirepo-context-awareness/
+# graph.yaml — Grafo de Módulos: Nimbus Harvest Gateway
+#
+# Lido pelo GitHub Action Graph Guard. Combina o grafo de módulos internos
+# (obrigatório pela constituição) com o grafo de contexto multi-repo já
+# gerado por scripts/generate-context-graph.sh na fase /speckit-specify
+# (specs/014-brownfield-multirepo-context-awareness/).
 
-bounded_context: "nimbuscode-harvest-gateway"
+feature: "022-nimbuscode-harvest-gateway"
+complexity: "S4"
 version: 1
-generated_at: "2026-08-24T23:15:49Z"
+updated_at: "2026-08-24"
+spec_ref: "specs/022-nimbuscode-harvest-gateway/spec.md"
+bounded_context: "nimbuscode-harvest-gateway"
 
 nodes:
-  - id: "venha-pra-nuvem-nimbus-harvest-gateway"
-    type: "repo"
-    repository: "venha-pra-nuvem/nimbus-harvest-gateway"
-    cross_repo: true
-    manifest_source: "unavailable"
+  - id: "function-app"
+    type: "service"
+    path: "src/function_app.py"
+    description: "Endpoint HTTP único (Azure Functions) — implementa o contrato externo de harvest-patterns.sh, sem alterá-lo"
+
+  - id: "connector-router"
+    type: "module"
+    path: "src/router.py"
+    description: "Seleciona o conector ativo por HARVEST_LLM_PROVIDER; traduz HarvestConnectorError em resposta HTTP não-200 explícita"
+
+  - id: "azure-ai-connector"
+    type: "module"
+    path: "src/connectors/azure_ai.py"
+    description: "Implementa LLMConnector para Azure AI Foundry — modelo selecionável via HARVEST_AZURE_MODEL"
+
+  - id: "google-connector"
+    type: "module"
+    path: "src/connectors/google.py"
+    description: "Implementa LLMConnector para Google Vertex AI/Gemini — modelo selecionável via HARVEST_GOOGLE_MODEL"
+
+  - id: "aws-bedrock-connector"
+    type: "module"
+    path: "src/connectors/aws_bedrock.py"
+    description: "Implementa LLMConnector para AWS Bedrock Runtime — modelo selecionável via HARVEST_AWS_MODEL"
+
+  - id: "observability"
+    type: "module"
+    path: "src/observability.py"
+    description: "Grava ObservabilityRecord (repo, provider, model, tokens, custo, status) a cada requisição, sucesso ou falha"
 
 edges:
-  []
+  - src: "function-app"
+    dst: "connector-router"
+    type: "sync"
+    protocol: "chamada de função (in-process)"
+    description: "Repassa HarvestRequest já validado ao Router"
 
-unanalyzed_repos:
-  - "venha-pra-nuvem/nimbus-harvest-gateway"
+  - src: "connector-router"
+    dst: "azure-ai-connector"
+    type: "sync"
+    protocol: "chamada de função (in-process)"
+    description: "Roteado quando HARVEST_LLM_PROVIDER=azure"
+
+  - src: "connector-router"
+    dst: "google-connector"
+    type: "sync"
+    protocol: "chamada de função (in-process)"
+    description: "Roteado quando HARVEST_LLM_PROVIDER=google"
+
+  - src: "connector-router"
+    dst: "aws-bedrock-connector"
+    type: "sync"
+    protocol: "chamada de função (in-process)"
+    description: "Roteado quando HARVEST_LLM_PROVIDER=aws"
+
+  - src: "function-app"
+    dst: "observability"
+    type: "sync"
+    protocol: "chamada de função (in-process)"
+    description: "Grava o registro de observabilidade após cada requisição, sucesso ou falha"
+
+externals:
+  - id: "azure-ai-foundry"
+    provider: "Microsoft Azure"
+    called_by: ["azure-ai-connector"]
+    criticality: "medium"
+    fallback: "erro explícito (HarvestConnectorError) — nenhum fallback automático entre provedores"
+
+  - id: "google-vertex-ai"
+    provider: "Google Cloud"
+    called_by: ["google-connector"]
+    criticality: "medium"
+    fallback: "erro explícito (HarvestConnectorError) — nenhum fallback automático entre provedores"
+
+  - id: "aws-bedrock"
+    provider: "Amazon Web Services"
+    called_by: ["aws-bedrock-connector"]
+    criticality: "medium"
+    fallback: "erro explícito (HarvestConnectorError) — nenhum fallback automático entre provedores"
+
+  - id: "application-insights"
+    provider: "Microsoft Azure"
+    called_by: ["observability"]
+    criticality: "low"
+    fallback: "log local/stdout se indisponível — não bloqueia a resposta ao chamador"
+
+# Grafo de contexto multi-repo (gerado por scripts/generate-context-graph.sh
+# na fase /speckit-specify — specs/014-brownfield-multirepo-context-awareness/)
+context_graph:
+  unanalyzed_repos:
+    - "venha-pra-nuvem/nimbus-harvest-gateway"  # repositório ainda não criado; reprocessar após a criação
