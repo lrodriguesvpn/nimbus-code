@@ -24,7 +24,7 @@
 
 **Purpose**: Criar o repositório novo e a estrutura de projeto antes de qualquer lógica de conector.
 
-- [ ] T001 [Humano] Criar o repositório `venha-pra-nuvem/nimbus-harvest-gateway` no GitHub Enterprise e rodar `bootstrap.sh` (Nimbus Code) nele, instalando o preset `nimbus-code-standards`
+- [x] T001 [Humano] Criar o repositório `venha-pra-nuvem/nimbus-harvest-gateway` no GitHub Enterprise e rodar `bootstrap.sh` (Nimbus Code) nele, instalando o preset `nimbus-code-standards`
 
   ```markdown
   ## Contexto
