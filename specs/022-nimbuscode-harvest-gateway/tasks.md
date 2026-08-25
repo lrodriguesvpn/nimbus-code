@@ -11,6 +11,12 @@
 - **[P]**: Pode rodar em paralelo (arquivos diferentes, sem dependência)
 - **[Story]**: US1, US2, US3 ou US4 (mapeado ao `spec.md`)
 - Caminhos de arquivo exatos em cada descrição, relativos ao repositório novo `nimbus-harvest-gateway`
+- Os cabeçalhos das Fases 3–6 trazem a anotação `[USN — nimbuscode-harvest-gateway]`, consumida pelo
+  `/speckit-taskstoissues` para rotear as Tasks dessas fases ao repositório de serviço declarado em
+  `docs/bounded-contexts.yaml` (`venha-pra-nuvem/nimbus-harvest-gateway`) em vez do Repo Central — ver
+  `docs/developer-guide.md`, seção 5.7. As Fases 1, 2 e 7 permanecem sem anotação de propósito: ainda
+  não há repositório de serviço quando o Setup roda (T001 o cria), e Foundational/Polish são
+  transversais ao Repo Central.
 
 ---
 
@@ -91,7 +97,7 @@
 
 ---
 
-## Phase 3: User Story 1 — Conector Azure AI Foundry (Priority: P1) 🎯 MVP
+## Phase 3: User Story 1 — Conector Azure AI Foundry (Priority: P1) 🎯 MVP [US1 — nimbuscode-harvest-gateway]
 
 **Goal**: Rodar `scripts/harvest-patterns.sh` com sucesso contra o Azure AI Foundry, com modelo selecionável.
 
@@ -150,7 +156,7 @@
 
 ---
 
-## Phase 4: User Story 2 — Conector Google (Vertex AI/Gemini) (Priority: P1)
+## Phase 4: User Story 2 — Conector Google (Vertex AI/Gemini) (Priority: P1) [US2 — nimbuscode-harvest-gateway]
 
 **Goal**: Trocar o provedor ativo de Azure para Google sem nenhuma mudança em repositório satélite.
 
@@ -166,7 +172,7 @@
 
 ---
 
-## Phase 5: User Story 3 — Conector AWS Bedrock (Priority: P2)
+## Phase 5: User Story 3 — Conector AWS Bedrock (Priority: P2) [US3 — nimbuscode-harvest-gateway]
 
 **Goal**: Completar o multicloud com o terceiro provedor (AWS Bedrock) e comprovar troca de modelo dentro do mesmo provedor.
 
@@ -182,7 +188,7 @@
 
 ---
 
-## Phase 6: User Story 4 — Observabilidade de Custo e Uso Consolidado (Priority: P2)
+## Phase 6: User Story 4 — Observabilidade de Custo e Uso Consolidado (Priority: P2) [US4 — nimbuscode-harvest-gateway]
 
 **Goal**: Visibilidade centralizada de custo/uso por repositório, provedor e modelo; falhas sempre explícitas.
 
