@@ -78,6 +78,14 @@ Given that feature description, do this:
 
 3. **Create the spec feature directory**:
 
+   **Reuse a pending interview, if present (Nimbus-Code preset)**: before generating anything new, check `.specify/feature.json` for an existing `feature_directory`. If that path exists on disk **and** contains an `interview.md` (created by `/speckit-interview`), this feature was already started there — do not generate a new short name/number and do not run the directory-creation logic below. Instead:
+   - Set `SPECIFY_FEATURE_DIRECTORY` to that exact existing path.
+   - Set `SPEC_FILE` to `SPECIFY_FEATURE_DIRECTORY/spec.md` (already scaffolded, empty, by `/speckit-interview`'s call to `create-new-feature.sh` — do not recreate it).
+   - Read `interview.md` and treat it as the **primary source** for the spec content in the steps below (objective, acceptance criteria, bounded context signal, etc.) — any additional `$ARGUMENTS` given to this `/speckit-specify` invocation only fill gaps `interview.md` still marks `Ambíguo`/`Ausente`/`[NEEDS CLARIFICATION]`, they do not override what the interview already captured.
+   - Skip the rest of this step (directory resolution/creation) entirely and continue at step 4.
+
+   If no such pending interview exists (the common case — most features are created directly by `/speckit-specify` without a prior `/speckit-interview`), proceed with the normal resolution below.
+
    Specs live under the default `specs/` directory unless the user explicitly provides `SPECIFY_FEATURE_DIRECTORY`.
 
    **Resolution order for `SPECIFY_FEATURE_DIRECTORY`**:
@@ -170,8 +178,9 @@ Given that feature description, do this:
          - If the script exits non-zero for a real error (e.g., `docs/bounded-contexts.yaml` has invalid YAML): surface the error clearly, but still do not abort the whole `/speckit-specify` flow — the Dev can fix the file and re-run `scripts/generate-context-graph.sh` manually afterward.
          - **Never invoke `scripts/harvest-patterns.sh`** from this flow — that script is exclusively on-demand and human-initiated (FR-011); `/speckit-specify` only triggers `generate-context-graph.sh`.
       - **Discovery interview coverage check (Nimbus-Code preset)**: this check is about *what* the requester needs, never *how* it will be built — do not let it pull implementation detail into the spec.
-        - Resolve the active `interview-template` (`presets/nimbus-code-standards/templates/feature-artifacts/interview-template.md`, or its `.specify/presets/` mirror) and read its "Checklist de Cobertura Mínima" section — the 4 mandatory blocks are: **Negócio** (objective/why, done-criteria, user profiles, out-of-scope), **Infraestrutura** (hosting/reference pattern, who accesses), **Segurança** (sensitivity, authorization profiles), **LGPD** (personal data presence, legal basis).
-        - Compare the raw feature description (arguments) — and, if the Dev attached one, an interview transcript or `specs/<feature>/interview.md` — against these 4 blocks.
+        - **If `SPECIFY_FEATURE_DIRECTORY/interview.md` already exists** (reused from a prior `/speckit-interview` run per step 3 above), it is already the authoritative record of the 4-block coverage — including its own "Checklist de Cobertura Mínima" 3-state table (Coberto/Ambíguo/Ausente). Use it directly: treat any row still `Ambíguo` or `Ausente` there as the gap list, instead of re-deriving coverage from scratch against the raw feature description.
+        - **Otherwise** (the common case — no prior `/speckit-interview` was run): resolve the active `interview-template` (`presets/nimbus-code-standards/templates/feature-artifacts/interview-template.md`, or its `.specify/presets/` mirror) and read its "Checklist de Cobertura Mínima" section — the 4 mandatory blocks are: **Negócio** (objective/why, done-criteria, user profiles, out-of-scope), **Infraestrutura** (hosting/reference pattern, who accesses), **Segurança** (sensitivity, authorization profiles), **LGPD** (personal data presence, legal basis).
+        - Compare the raw feature description (arguments) — and, if the Dev attached one, an interview transcript — against these 4 blocks.
         - If a block is **explicitly answered** (even briefly, e.g., "sem dado pessoal envolvido"), treat it as covered — do not demand verbose detail. If a block is **completely absent** from the input, it is a gap.
         - If the input already reads as a filled interview (clearly organized by these 4 blocks, e.g., produced by a discovery meeting), copy it into `SPECIFY_FEATURE_DIRECTORY/interview.md` using the `interview-template` structure, preserving the answers given, before continuing.
         - For every gap found, add it as a `[NEEDS CLARIFICATION: <specific missing block>]` candidate — respecting the existing "Maximum 3 [NEEDS CLARIFICATION] markers total" limit from step 6.3, and prioritizing by impact: **Negócio > Segurança/LGPD > Infraestrutura** > other technical details. Never invent an infra, security, or LGPD answer to fill a gap silently — an unanswered mandatory block must surface as a clarification, not a guess.

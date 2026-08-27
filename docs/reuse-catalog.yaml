@@ -116,7 +116,7 @@ entries:
       padrão).
     source: "specs/005-epic-feature-us-ghe-hierarchy/plan.md"
     adr: ""
-    reuse_count: 0
+    reuse_count: 1
   - tag: "process-recovery-flow-decision-model"
     bounded_context: "spec-kit-workflow"
     description: >

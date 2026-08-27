@@ -6,7 +6,8 @@
 > no próprio repo (ou `specify init --here` + bootstrap, se quiser separar) e
 > só depois ler o código/Boards antes de especificar (seção 2, brownfield);
 > ponto de partida a partir de um card do ADO/JIRA → prompt de importação pronto
-> (seção 3).
+> (seção 3); ponto de partida a partir de uma entrevista de descoberta com o
+> cliente (ainda sem card/issue) → `/speckit.interview` (seção 3.5).
 > Pré-requisitos (`specify` CLI, `uv`, Copilot) na tabela logo abaixo.
 
 Este é o manual **central** de como todo dev da Nimbus-Code deve usar o
@@ -20,6 +21,8 @@ cenários, na ordem em que você provavelmente vai precisar deles:
    (brownfield)** e pelos **Boards** (cards já existentes).
 3. [Importar um card do Azure DevOps/JIRA para começar uma feature](#3-importar-um-card-do-azure-devops-ou-jira-para-começar-uma-feature) —
    o prompt exato para puxar um work item/issue como ponto de partida.
+   - [3.5. Conduzindo uma entrevista de descoberta antes do `/speckit.specify`](#35-conduzindo-uma-entrevista-de-descoberta-antes-do-speckitspecify-speckitinterview) —
+     ponto de partida a partir de uma conversa com o cliente, ao vivo ou por transcript, quando ainda não existe card/issue.
 
 Se algo aqui divergir do que você vê na prática, este arquivo é a fonte da
 verdade — abra um PR corrigindo, não crie um manual paralelo em outro lugar.
@@ -385,6 +388,73 @@ não tem um comando dedicado de importação nesse sentido.
 
 Depois de gerar a spec a partir do card, continue o ciclo normal
 (`/speckit.clarify` → `/speckit.plan` → ... ) como na seção 2.5.
+
+### 3.5. Conduzindo uma entrevista de descoberta antes do `/speckit.specify` (`/speckit.interview`)
+
+Use isso quando **ainda não existe** um card/issue pronto (seção 3) nem uma
+descrição já madura da feature — você vai conversar com o cliente/solicitante
+primeiro (ao vivo ou a partir de um transcript de reunião) e quer que essa
+conversa já saia estruturada, cobrindo negócio, infraestrutura, segurança e
+LGPD, antes de gerar a spec.
+
+Isso é **hoje um passo manual** — você (ou o Nimbus, conduzindo a conversa por
+você) preenche o modelo de entrevista
+(`presets/nimbus-code-standards/templates/feature-artifacts/interview-template.md`)
+e salva como `specs/<feature-slug>/interview.md`. Não existe ainda nenhuma
+integração automática com Microsoft Teams — o roadmap dessa automação está
+registrado em `specs/018-nimbus-agent-intake/spec.md` (User Story 5), mas por
+enquanto **quem conduz a entrevista é você**, com o Nimbus como assistente.
+
+**Pré-condição de transcript**: se a reunião já aconteceu e você tem as
+anotações/gravação transcrita, hoje isso normalmente está numa pasta pessoal do
+OneDrive (ex.: `OneDrive - Nimbus-Code/Notas/reuniao-cliente-x.txt`) ou em
+qualquer outro lugar que você tenha acesso local — não existe ainda um
+conector automático que busque isso pra você. Baixe/exporte o transcript para
+um caminho que o agente consiga ler (local ou dentro do próprio repo, ex.:
+`specs/_transcripts/reuniao-cliente-x.txt`) e referencie esse caminho no prompt.
+
+#### Prompt — sem transcript (entrevista ao vivo, do zero)
+
+```
+/speckit.interview Cliente do time Financeiro pediu um jeito de consolidar
+relatórios mensais que hoje são feitos manualmente em planilha. Conduza a
+entrevista de descoberta comigo agora, bloco por bloco (negócio, infra,
+segurança, LGPD) — eu vou respondendo.
+```
+
+#### Prompt — com transcript em arquivo (ex.: exportado do OneDrive)
+
+```
+/speckit.interview Consolidação de relatórios financeiros mensais. Já tenho o
+transcript da reunião com o cliente em
+specs/_transcripts/reuniao-financeiro-2026-08-26.txt (copiei da minha pasta
+pessoal do OneDrive). Avalie o que já está coberto nesse transcript e só me
+pergunte o que estiver faltando ou ambíguo.
+```
+
+#### Prompt — colando o transcript direto na mensagem
+
+```
+/speckit.interview Consolidação de relatórios financeiros mensais.
+Segue o transcript da reunião:
+---
+[Maria - Financeiro]: hoje a gente fecha o relatório mensal manualmente...
+[João - TI]: entendi, e quem mais usa esse relatório hoje?
+[Maria]: só o time financeiro mesmo, uso interno...
+---
+Avalie a cobertura contra os 4 blocos e pergunte só o que faltar.
+```
+
+**O que acontece depois**: o Nimbus cria `specs/<feature-slug>/interview.md`
+(a mesma pasta que a próxima spec vai usar — não duplica), pergunta só o que
+não veio no transcript (nunca inventa resposta de segurança/infra/LGPD), e ao
+final avisa: *"rode `/speckit.specify` agora"*. O `/speckit.specify` detecta
+essa pasta automaticamente e usa a entrevista como base do `spec.md` — você
+não precisa referenciar `interview.md` manualmente.
+
+Se a demanda for claramente pequena (documentação, ajuste isolado), o Nimbus
+vai propor o modo **Fast-Track** (~9 perguntas essenciais, ~10 min) em vez do
+modo Completo (~20-30 min) — ele sempre confirma com você antes de aplicar.
 
 ## 4. Hierarquia Agile (Epic → Feature → US → Task) no GHE
 
