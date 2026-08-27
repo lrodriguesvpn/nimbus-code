@@ -44,6 +44,7 @@ alimenta diretamente o `spec.md` gerado a partir desta entrevista.
 | **Facilitador** | [nome humano, ou "Nimbus Agent (Teams)"] |
 | **Canal** | [presencial / Teams / assíncrono (formulário)] |
 | **Feature slug (se já souber)** | [kebab-case, ou "a definir"] |
+| **Prioridade inferida (uso interno — não ler ao cliente)** | [P0-blocker / P1-high / P2-medium / P3-low — inferida a partir do Bloco 1, pergunta 7] |
 
 ---
 
@@ -52,12 +53,13 @@ alimenta diretamente o `spec.md` gerado a partir desta entrevista.
 *O coração da entrevista. Sem isso, não há spec possível.*
 
 1. Qual problema ou necessidade você está tentando resolver? Para quem?
-2. Como isso é feito hoje (se já existe um jeito manual ou alternativo)? *(descreva o processo atual, não como o novo sistema deve ser construído)*
+2. Como isso é feito hoje — manualmente, ou já existe um sistema/ferramenta que faz isso (mesmo que mal ou parcialmente)? *(descreva o processo/sistema atual, não como o novo deve ser construído)*
 3. O que "pronto" significa para você — como saberemos que funcionou?
 4. Quem usa isso no dia a dia (perfis/papéis, não nomes de sistema)?
 5. O que **definitivamente não** faz parte deste pedido agora (fora de escopo)?
 6. Existe prazo ou evento que torna isso urgente?
-7. Quem dá o aceite final (aprovação de que está correto)?
+7. Se só pudesse resolver **1 coisa** nesta entrega, qual seria? *(usar a resposta para inferir a prioridade no campo interno do cabeçalho — não citar P0–P3 na conversa)*
+8. Quem dá o aceite final (aprovação de que está correto)?
 
 ---
 
@@ -70,12 +72,13 @@ alimenta diretamente o `spec.md` gerado a partir desta entrevista.
 3. Quem ou o quê vai acessar isso? *(usuários internos, parceiros externos, público, outro sistema/integração)*
 4. Existe expectativa de volume (poucos usuários internos vs. escala alta/pública)?
 5. Depende de integração com algum sistema já existente? Qual?
+6. *(opcional, não bloqueia a entrevista)* Isso pode ficar fora do ar de vez em quando (manutenção agendada), ou precisa estar sempre disponível? Se parar por algumas horas, o que acontece de ruim? *(alimenta a tabela de SLO Alvo do `plan.md`, que já aceita "—" com justificativa quando não souberem responder)*
 
 ---
 
 ## Bloco 3 — Segurança — **obrigatório, mas curto**
 
-1. Este sistema expõe alguma informação sensível ou crítica para o negócio?
+1. Este sistema expõe alguma informação sensível ou crítica para o negócio? *(ex.: dado de pagamento/cartão, segredo industrial, propriedade intelectual, contrato confidencial — dado **pessoal** é tratado no Bloco 4/LGPD, não aqui)*
 2. Quem pode e quem não pode acessar (perfis de autorização, mesmo que a granularidade fina venha depois)?
 3. Existe exigência de autenticação corporativa (SSO/AD) ou pode usar um padrão mais simples?
 4. Há necessidade de auditoria/trilha de "quem fez o quê"?
