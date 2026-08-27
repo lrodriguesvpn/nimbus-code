@@ -169,6 +169,13 @@ Given that feature description, do this:
          - If the script exits `0` but warns that the bounded context has no repos mapped (`docs/bounded-contexts.yaml` exists but the context is empty, or the file itself doesn't exist): surface the warning to the Dev once, then **continue the spec flow without blocking** — the graph can be generated later once the context is mapped (AC-5, edge case: never block spec creation on a missing/empty bounded context).
          - If the script exits non-zero for a real error (e.g., `docs/bounded-contexts.yaml` has invalid YAML): surface the error clearly, but still do not abort the whole `/speckit-specify` flow — the Dev can fix the file and re-run `scripts/generate-context-graph.sh` manually afterward.
          - **Never invoke `scripts/harvest-patterns.sh`** from this flow — that script is exclusively on-demand and human-initiated (FR-011); `/speckit-specify` only triggers `generate-context-graph.sh`.
+      - **Discovery interview coverage check (Nimbus-Code preset)**: this check is about *what* the requester needs, never *how* it will be built — do not let it pull implementation detail into the spec.
+        - Resolve the active `interview-template` (`presets/nimbus-code-standards/templates/feature-artifacts/interview-template.md`, or its `.specify/presets/` mirror) and read its "Checklist de Cobertura Mínima" section — the 4 mandatory blocks are: **Negócio** (objective/why, done-criteria, user profiles, out-of-scope), **Infraestrutura** (hosting/reference pattern, who accesses), **Segurança** (sensitivity, authorization profiles), **LGPD** (personal data presence, legal basis).
+        - Compare the raw feature description (arguments) — and, if the Dev attached one, an interview transcript or `specs/<feature>/interview.md` — against these 4 blocks.
+        - If a block is **explicitly answered** (even briefly, e.g., "sem dado pessoal envolvido"), treat it as covered — do not demand verbose detail. If a block is **completely absent** from the input, it is a gap.
+        - If the input already reads as a filled interview (clearly organized by these 4 blocks, e.g., produced by a discovery meeting), copy it into `SPECIFY_FEATURE_DIRECTORY/interview.md` using the `interview-template` structure, preserving the answers given, before continuing.
+        - For every gap found, add it as a `[NEEDS CLARIFICATION: <specific missing block>]` candidate — respecting the existing "Maximum 3 [NEEDS CLARIFICATION] markers total" limit from step 6.3, and prioritizing by impact: **Negócio > Segurança/LGPD > Infraestrutura** > other technical details. Never invent an infra, security, or LGPD answer to fill a gap silently — an unanswered mandatory block must surface as a clarification, not a guess.
+        - This check never blocks spec creation by itself — it only feeds candidates into the existing clarification-marker flow (step 8.c below), which already has its own resolution path.
 
 7. Write the specification to SPEC_FILE using the template structure, replacing placeholders with concrete details derived from the feature description (arguments) while preserving section order and headings.
 
@@ -212,6 +219,7 @@ Given that feature description, do this:
       - [ ] WEB context explicitly references Impeccable
       - [ ] Rollout/toggle context references OpenFeature abstraction
       - [ ] Bounded Context field matches a slug registered in docs/bounded-contexts.yaml (or the file is absent/empty)
+      - [ ] Discovery interview coverage (Negócio, Infraestrutura, Segurança, LGPD) is present or each gap is tracked as [NEEDS CLARIFICATION]
 
       ## Notes
 

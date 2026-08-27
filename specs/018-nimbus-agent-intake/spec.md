@@ -80,6 +80,12 @@
 > **Then** a spec declara OpenFeature como abstração para toggles, independente do provider.
 > **Test ref:** `test_AC6_openfeature_intake_toggle`
 
+> **AC-7** *(Roadmap — US5)*
+> **Given** um transcript de entrevista de descoberta (Teams ou anexado manualmente),
+> **When** o Nimbus avaliar sua cobertura contra os 4 blocos obrigatórios do `interview-template.md`,
+> **Then** todo bloco ausente é sinalizado explicitamente como pendência, e nenhum bloco de Segurança, Infraestrutura ou LGPD é preenchido por suposição.
+> **Test ref:** `test_AC7_interview_coverage_gate`
+
 ## Nimbus-Code — Backlog Hierarchy (EPIC/FEATURE/US)
 
 | Nível | Valor | Observação |
@@ -90,6 +96,7 @@
 | **US2** | Ingestão direta de demanda do `nimbus-agent` | Reduz passos manuais de abertura e sincronização |
 | **US3** | Classificação de modo conforme spec 017 | Aplica governança de autonomia com justificativa |
 | **US4** | Gate de aprovação humana para casos mandatórios | Mantém controle de risco e compliance |
+| **US5** | Conduzir entrevista de descoberta via Teams com modelo padrão | Roadmap — automatiza a coleta de negócio/infra/segurança/LGPD hoje feita manualmente |
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -136,11 +143,28 @@ Como Digital Engineer, quero que o intake herdado da spec 017 seja classificado 
 1. **Given** uma demanda de baixa criticidade, **When** for classificada, **Then** segue fluxo autônomo com justificativa registrada.
 2. **Given** uma demanda de alta criticidade, **When** atingir checkpoint, **Then** não prossegue sem decisão humana registrada.
 
+---
+
+### User Story 5 - Conduzir entrevista de descoberta via Teams com modelo padrão (Priority: P2 — Roadmap)
+
+Como Business Analyst, quero que o Nimbus conduza a entrevista de descoberta de uma nova demanda diretamente numa reunião do Microsoft Teams, usando o modelo padrão de entrevista (negócio, infraestrutura, segurança, LGPD), para reduzir o trabalho manual de captura e já entregar o intake com cobertura mínima validada.
+
+**Why this priority**: hoje a entrevista de descoberta é conduzida manualmente por um humano usando o modelo padrão (`presets/nimbus-code-standards/templates/feature-artifacts/interview-template.md`); esta US moveria essa condução para o Nimbus, mas depende de acesso a transcript/gravação do Teams e de maturidade do fluxo conversacional — não é MVP desta feature, é o próximo incremento natural sobre US1 (Q&A de processo) e US2 (intake direto).
+
+**Independent Test**: simular uma reunião do Teams com transcript contendo respostas completas e incompletas aos 4 blocos obrigatórios do modelo de entrevista, e confirmar que o Nimbus extrai o preenchido, identifica exatamente os blocos ausentes e não avança a demanda para intake sem essas lacunas resolvidas ou explicitamente sinalizadas.
+
+**Acceptance Scenarios**:
+
+1. **Given** um transcript de reunião no Teams cobrindo os 4 blocos obrigatórios (Negócio, Infraestrutura, Segurança, LGPD), **When** o Nimbus processar o transcript, **Then** ele gera `interview.md` preenchido e a demanda segue para intake sem bloqueio.
+2. **Given** um transcript com um ou mais blocos obrigatórios ausentes, **When** o Nimbus processar o transcript, **Then** ele identifica exatamente qual bloco falta e solicita complemento antes de encaminhar a demanda como pronta para intake — nunca preenche o bloco ausente com suposição.
+3. **Given** uma entrevista já conduzida manualmente por um humano (fora do Teams), **When** o resultado for anexado ao intake, **Then** o Nimbus reconhece o formato do modelo padrão e não solicita nova entrevista.
+
 ### Edge Cases
 
 - Duplicidade de intake para a mesma demanda no satélite deve resultar em deduplicação idempotente no projeto.
 - Ausência de token/permissão de projeto deve gerar falha explícita e rastreável, sem “sucesso silencioso”.
 - Perguntas sobre processo com referências desatualizadas devem ser respondidas com aviso de confiança reduzida e pedido de atualização de contexto.
+- Transcript de reunião sem áudio/texto suficiente para avaliar um bloco obrigatório deve ser tratado como bloco ausente (não como "N/A" silencioso) — só um humano ou uma resposta explícita "N/A — motivo" no transcript justifica marcar o bloco como não aplicável.
 
 ## Requirements *(mandatory)*
 
@@ -156,6 +180,8 @@ Como Digital Engineer, quero que o intake herdado da spec 017 seja classificado 
 - **FR-008**: Falhas de integração no intake MUST ser explícitas e observáveis, sem mascaramento de erro.
 - **FR-009**: A feature MUST declarar OpenFeature como padrão de abstração para toggles de rollout de intake direto.
 - **FR-010**: A solução MUST permitir auditoria de quem iniciou o intake, qual modo foi definido e qual decisão de aprovação foi tomada.
+- **FR-011** *(Roadmap — US5)*: Quando a condução de entrevista via Teams estiver implementada, o Nimbus MUST validar a cobertura dos 4 blocos obrigatórios do modelo de entrevista (`interview-template.md`: Negócio, Infraestrutura, Segurança, LGPD) antes de encaminhar a demanda para intake.
+- **FR-012** *(Roadmap — US5)*: Bloco obrigatório ausente no transcript MUST ser sinalizado explicitamente como pendência — o Nimbus MUST NOT inferir ou inventar resposta de Segurança, Infraestrutura ou LGPD para preencher uma lacuna.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -164,6 +190,7 @@ Como Digital Engineer, quero que o intake herdado da spec 017 seja classificado 
 - **Project Item**: representação da demanda no projeto central para gestão de backlog.
 - **Mode Decision**: decisão de modo (autônomo, semi-autônomo, manual) com justificativa.
 - **Approval Decision**: decisão humana Go/No-Go quando o gate de aprovação é obrigatório.
+- **Discovery Interview**: registro estruturado (`interview.md`) da entrevista de descoberta conduzida — manualmente hoje, via Teams no roadmap — cobrindo os 4 blocos do modelo padrão de entrevista (`interview-template.md`).
 
 ## Success Criteria *(mandatory)*
 
@@ -174,9 +201,11 @@ Como Digital Engineer, quero que o intake herdado da spec 017 seja classificado 
 - **SC-003**: 100% das demandas classificadas como semi-autônomas ou manuais devem conter decisão humana registrada antes de execução.
 - **SC-004**: Taxa de duplicidade de itens de projeto para o mesmo intake deve permanecer abaixo de 1%.
 - **SC-005**: Em auditoria de amostra, 100% dos casos devem permitir rastrear origem da demanda, modo definido e decisão de aprovação.
+- **SC-006** *(Roadmap — US5)*: Em uma amostra de transcripts de entrevista simulados, 100% dos blocos obrigatórios ausentes devem ser corretamente identificados como pendência, sem nenhum caso de resposta inventada para Segurança, Infraestrutura ou LGPD.
 
 ## Assumptions
 
 - O repositório satélite `venha-pra-nuvem/nimbus-agent` permanece a fonte de criação inicial das demandas operacionais.
 - O projeto central já está configurado para receber itens automatizados via integração existente.
 - A spec 017 segue como contrato de governança de modo, e esta feature foca em conectar intake e suporte conversacional ao contrato.
+- **US5 é roadmap, não MVP**: depende de acesso a transcript/gravação de reuniões do Teams (fora do controle desta spec) e de maturidade do fluxo conversacional das US1–US4. Não bloqueia `/speckit-plan` ou `/speckit-tasks` das demais User Stories desta feature.
