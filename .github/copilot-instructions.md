@@ -15,6 +15,33 @@
 
 ---
 
+## Modelo de Entrevista de Descoberta (antes do Specify)
+
+> Antes de redigir qualquer `spec.md`, consulte
+> `presets/nimbus-code-standards/templates/feature-artifacts/interview-template.md`
+> (ou sua cópia em `.specify/presets/`) — o modelo padrão de entrevista de
+> descoberta, com 4 blocos obrigatórios: **Negócio** (o quê e por quê, nunca o
+> como técnico), **Infraestrutura**, **Segurança** e **LGPD**.
+
+- Use `/speckit-interview` para conduzir essa entrevista de forma assistida —
+  ele cria `specs/<feature-slug>/interview.md` já com o nome/numeração corretos
+  (reaproveitando `.specify/scripts/bash/create-new-feature.sh`), aceita um
+  transcript já pronto (colado ou por caminho de arquivo) e só pergunta o que
+  ainda estiver `Ambíguo`/`Ausente`. Ver `docs/developer-guide.md`, seção 3.5.
+- O `/speckit-specify` verifica se o input recebido (descrição da feature ou
+  transcript de entrevista já preenchido) cobre os 4 blocos. Bloco ausente vira
+  candidato a `[NEEDS CLARIFICATION]` — nunca é preenchido com suposição
+  silenciosa, especialmente Segurança e LGPD.
+- Se já existir `specs/<feature-slug>/interview.md` (criado por
+  `/speckit-interview`), o `/speckit-specify` detecta e reaproveita essa pasta
+  automaticamente em vez de criar uma nova.
+- Este modelo é usado hoje por humanos (BA/ADE) conduzindo a conversa
+  manualmente, com o `/speckit-interview` como assistente. O roadmap de
+  condução automatizada via Microsoft Teams pelo NIMBUS AGENT está registrado
+  em `specs/018-nimbus-agent-intake/spec.md`.
+
+---
+
 ## Isolamento de Sessão e Regras de Branch
 
 Você está executando como agente numa **sessão de escopo fechado**. As seguintes

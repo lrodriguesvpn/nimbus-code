@@ -1,15 +1,15 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-08-24T22:00:36Z",
+  "updated_at": "2026-08-27T01:25:53Z",
   "catalog_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/presets/catalog.json",
   "presets": {
     "nimbus-code-standards": {
       "name": "Nimbus-Code — Padrões de Governança",
       "id": "nimbus-code-standards",
-      "version": "1.14.0",
-      "description": "Constituição base, gate de segurança/DevSecOps, escala S0–S4 com estimativa de tokens, catálogo de reuso de conteúdo para reduzir custo de tokens, grafo de contexto multi-repo para brownfield, taxonomia de labels de priorização/desenvolvimento autônomo/DORA/incidente/harness, modelo híbrido humano+agente com perfis de custo padrão, GitHub Project por repositório garantido continuamente (campos Horas Humanas/Oportunidade D365), Portfólio PMO consolidado entre repositórios, Harness Engineering (catálogo de aprendizado organizacional com erros) e framework de decisões de arquitetura padrão da Nimbus-Code.",
+      "version": "1.15.0",
+      "description": "Constituição base, gate de segurança/DevSecOps, escala S0–S4 com estimativa de tokens, catálogo de reuso de conteúdo para reduzir custo de tokens, grafo de contexto multi-repo para brownfield, taxonomia de labels de priorização/desenvolvimento autônomo/DORA/incidente/harness, modelo híbrido humano+agente com perfis de custo padrão, GitHub Project por repositório garantido continuamente (campos Horas Humanas/Oportunidade D365), Portfólio PMO consolidado entre repositórios, modelo de entrevista de descoberta (negócio/infraestrutura/segurança/LGPD), Harness Engineering (catálogo de aprendizado organizacional com erros) e framework de decisões de arquitetura padrão da Nimbus-Code.",
       "author": "Nimbus-Code",
-      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.14.0/nimbus-code-standards-1.14.0.zip",
+      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.15.0/nimbus-code-standards-1.15.0.zip",
       "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template",
       "license": "Proprietary",
       "requires": {

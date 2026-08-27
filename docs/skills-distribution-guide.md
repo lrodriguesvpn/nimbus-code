@@ -16,6 +16,7 @@ Hoje, neste template, **todas as skills versionadas pelo Nimbus Code continuam l
 | `speckit-constitution` | local | disponivel | `.github/skills/speckit-constitution/SKILL.md` |
 | `speckit-converge` | local | disponivel | `.github/skills/speckit-converge/SKILL.md` |
 | `speckit-implement` | local | disponivel | `.github/skills/speckit-implement/SKILL.md` |
+| `speckit-interview` | local | disponivel | `.github/skills/speckit-interview/SKILL.md` (passo manual opcional antes do `speckit-specify` — ver `docs/developer-guide.md`) |
 | `speckit-nimbus-code-backlog-sync-sync` | local | disponivel | `.github/skills/speckit-nimbus-code-backlog-sync-sync/SKILL.md` |
 | `speckit-plan` | local | disponivel | `.github/skills/speckit-plan/SKILL.md` |
 | `speckit-specify` | local | disponivel | `.github/skills/speckit-specify/SKILL.md` |
