@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-08-31T14:43:49Z",
+  "updated_at": "2026-08-31T16:45:38Z",
   "catalog_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bundles/catalog.json",
   "bundles": {
     "nimbus-code-project-bundle": {
@@ -47,7 +47,7 @@
       "description": "Bundle de bootstrap para repositórios de PLATAFORMA/CLIENTE/TENANT da Nimbus-Code: aplica o preset nimbus-code-platform-standards (inventário multi-nuvem Azure/AWS/GCP/GWS/M365/D365, grafo de superfícies de plataforma, registro de schemas de sistemas legados e regra de zero-diff como critério de verdade — nunca aplica mudança direta em ambiente). Distinto do nimbus-code-project-bundle, que é para repositórios de projeto/workload.",
       "author": "Nimbus-Code",
       "license": "Proprietary",
-      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.14.0/nimbus-code-platform-bundle-0.4.0.zip",
+      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.16.0/nimbus-code-platform-bundle-0.4.0.zip",
       "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template",
       "requires": {
         "speckit_version": ">=0.16.0"
