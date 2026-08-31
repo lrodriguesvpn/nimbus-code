@@ -3,8 +3,8 @@ schema_version: "1.0"
 preset:
   id: "nimbus-code-standards"
   name: "Nimbus-Code — Padrões de Governança"
-  version: "1.15.0"
-  description: "Constituição base, grafos de módulos obrigatórios (incluindo grafo de contexto multi-repo para brownfield), escala S0–S4 com estimativa de tokens e ajuste por projeto, catálogo de reuso de conteúdo para reduzir custo de tokens, SLO Gate, estratégia de release, ADRs, taxonomia de labels de priorização/desenvolvimento autônomo/DORA, modelo híbrido humano+agente, framework DevSecOps, regras de isolamento de sessões de agente (1 agente por arquivo, fases, limpeza de branches perdidas), rastreamento de custo financeiro real (tokens × preço) por fase SDD, modelo de entrevista de descoberta (negócio/infraestrutura/segurança/LGPD), e manual operacional de uso de agentes remotos da Nimbus-Code, aplicados sobre os templates nativos do Nimbus Code."
+  version: "1.16.0"
+  description: "Constituição base, grafos de módulos obrigatórios (incluindo grafo de contexto multi-repo para brownfield), escala S0–S4 com estimativa de tokens e ajuste por projeto, catálogo de reuso de conteúdo para reduzir custo de tokens, SLO Gate, estratégia de release, ADRs, taxonomia de labels de priorização/desenvolvimento autônomo/DORA, modelo híbrido humano+agente, framework DevSecOps, regras de isolamento de sessões de agente (1 agente por arquivo, fases, limpeza de branches perdidas), rastreamento de custo financeiro real (tokens × preço) por fase SDD, modelo de entrevista de descoberta (negócio/infraestrutura/segurança/LGPD), detecção determinística de retrabalho via histórico git (retro-signal), e manual operacional de uso de agentes remotos da Nimbus-Code, aplicados sobre os templates nativos do Nimbus Code."
   author: "Nimbus-Code"
   repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
   license: "Proprietary"
@@ -217,6 +217,43 @@ provides:
       file: "templates/project-root/scripts/process-metrics-report.sh"
       strategy: "copy"
       description: "Calcula os 4 indicadores DORA a partir das labels dora:* e verifica a cadência de retrospectiva proativa — copiado para scripts/process-metrics-report.sh."
+
+    # Scripts determinísticos companheiros de skills (.github/skills/*/SKILL.md),
+    # instalados em .specify/scripts/bash/ (mesmo local dos scripts nativos do
+    # Spec Kit) — não sobrescrevem nada que `specify init` já cria, são adições
+    # puras. Nota: distribuir o script sozinho tem efeito prático limitado
+    # enquanto a skill que o invoca (também customizada pela Nimbus-Code) não
+    # for distribuída — isso é escopo próprio de specs/003-vpn-skills-repo-
+    # governance (catálogo remoto VPN-SKILLS), não deste preset.
+    - type: "template"
+      name: "check-epic-issue-consistency-script"
+      file: "templates/project-root/.specify/scripts/bash/check-epic-issue-consistency.sh"
+      strategy: "copy"
+      description: "Confere/autocorrige o campo epic_issue de .specify/feature.json contra o token EPIC_ISSUE=<N> na descrição original — companheiro determinístico de .github/skills/speckit-specify/SKILL.md."
+
+    - type: "template"
+      name: "create-github-issue-hierarchy-script"
+      file: "templates/project-root/.specify/scripts/bash/create-github-issue-hierarchy.sh"
+      strategy: "copy"
+      description: "Cria/vincula a hierarquia Epic → Feature → User Story → Task no GHE via sub-issues nativos — companheiro determinístico de .github/skills/speckit-taskstoissues/SKILL.md."
+
+    - type: "template"
+      name: "validate-interview-completeness-script"
+      file: "templates/project-root/.specify/scripts/bash/validate-interview-completeness.sh"
+      strategy: "copy"
+      description: "Confere se specs/<feature>/interview.md não tem placeholders do template sem preencher — companheiro determinístico de .github/skills/speckit-interview/SKILL.md."
+
+    - type: "template"
+      name: "detect-retro-signal-script"
+      file: "templates/project-root/.specify/scripts/bash/detect-retro-signal.sh"
+      strategy: "copy"
+      description: "Detecta via histórico git se spec.md/plan.md foram revisados depois de tasks.md já existir, ou se tasks novas foram adicionadas — sinal determinístico de retrabalho, usado por .github/skills/speckit-implement/SKILL.md para garantir o preenchimento de retro.md."
+
+    - type: "template"
+      name: "validate-retro-completeness-script"
+      file: "templates/project-root/.specify/scripts/bash/validate-retro-completeness.sh"
+      strategy: "copy"
+      description: "Confere se specs/<feature>/retro.md não tem os textos de exemplo do retro-template.md sem substituir — companheiro determinístico de .github/skills/speckit-implement/SKILL.md."
 
 tags:
   - "governance"
