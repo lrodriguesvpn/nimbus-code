@@ -1221,3 +1221,112 @@ Ver também: [FAQ — Como atualizo um projeto criado com uma versão antiga do 
   observabilidade, correlation-id/microsserviços e abertura automática de bugs.
 - [`docs/extension-candidates.md`](extension-candidates.md) — quais extensões
   (oficiais e da Nimbus-Code) considerar instalar além do bundle padrão.
+
+## Phase 2: Automated Preset Synchronization (SPEC 020)
+
+After Phase 1 establishes the governance model, Phase 2 automates ongoing validation
+and synchronization of preset versions across satellite repositories.
+
+### Weekly Satellite Preset Audit
+
+**Schedule**: Every Monday at 09:00 UTC
+
+The central repository runs `.github/workflows/satellite-preset-audit.yml`, which:
+
+1. Queries all satellite repos in the organization
+2. Checks their `.specify/presets/.registry` version
+3. Compares against the central `preset.yml` version (currently 1.16.0)
+4. Reports status for each repo: `in_sync`, `drift`, or `not_bootstrapped`
+5. If drifted repos found:
+   - Creates a GitHub issue with title: "Satellite repos out of sync with vX.Y.Z: N repos need upgrade"
+   - Attaches CSV report as artifact
+   - Labels: `type:automation`, `area:preset-sync`, `priority:P2`
+
+**View audit results**:
+```bash
+# Download latest audit report
+gh run list --workflow=satellite-preset-audit.yml --limit 1 \
+  --json databaseId,createdAt --jq '.[0].databaseId' | xargs -I {} \
+  gh run download {} -n preset-audit-report
+```
+
+### Auto-PR Generation for Drifted Repos
+
+When the audit detects drifted repos, the workflow `.github/workflows/auto-sync-preset.yml`
+can automatically create PRs to sync them. This workflow:
+
+1. Reads the audit issue with detected drifts
+2. For each drifted repo:
+   - Checks if there are open PRs (skips if active development)
+   - Creates branch: `fix/preset-sync-to-vX.Y.Z`
+   - Runs `bootstrap.sh --refresh-preset` to update the preset
+   - Creates PR with:
+     - Title: `fix(preset): sync to vX.Y.Z`
+     - Body: Links to audit issue, explains sync
+     - Labels: `sync:preset-version`, `type:automation`
+
+**Manual Trigger**:
+```bash
+# Sync a specific drifted repo
+gh workflow run auto-sync-preset.yml \
+  -f repo="org/satellite-repo" \
+  -f target_version="1.16.0"
+```
+
+**Manual Override**: If you need to prevent auto-sync for a specific repo:
+- Add label `no:auto-sync` to the PR before it's auto-created, OR
+- Close the audit issue before the workflow runs
+
+### Preset Version Validation in CI/CD
+
+When you open a PR to a satellite repo touching `.specify/` files, the workflow
+`.github/workflows/validate-bootstrap.yml` runs automatically:
+
+1. Executes `.specify/scripts/bash/detect-preset-version-mismatch.sh`
+2. Checks if `.specify/presets/.registry` version matches `preset.yml`
+3. If drift detected:
+   - Comments on PR with version mismatch details
+   - Fails the check to block merge
+   - Provides guidance: "Please run bootstrap.sh --refresh-preset"
+
+**To fix version drift in your PR**:
+```bash
+# In your satellite repo
+./bootstrap.sh --refresh-preset
+
+# Commit and push
+git add .specify/
+git commit -m "chore(preset): refresh to v1.16.0"
+git push
+```
+
+### Manual Preset Refresh
+
+If you need to manually update a satellite repo's preset outside the auto-sync workflow:
+
+```bash
+# In the satellite repository
+./bootstrap.sh --refresh-preset
+
+# Review changes
+git diff --stat
+
+# Create PR for team review
+git checkout -b fix/preset-sync-to-v1.16.0
+git add .specify/
+git commit -m "chore(preset): refresh to v1.16.0
+
+Manually synced to central preset v1.16.0."
+git push origin fix/preset-sync-to-v1.16.0
+
+# Open PR in GitHub UI
+```
+
+### Phase 2 Compliance Checklist
+
+- [ ] Your satellite repo receives weekly audit checks
+- [ ] You understand the audit issue and auto-PR flow
+- [ ] You know how to manually refresh preset if needed
+- [ ] You've reviewed `.specify/presets/.registry` version matches expectations
+- [ ] Your CI/CD validates preset versions on `.specify/` PRs
+
