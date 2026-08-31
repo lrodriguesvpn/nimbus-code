@@ -1,9 +1,3 @@
 {
-  "feature_directory": "specs/022-nimbuscode-harvest-gateway",
-  "bounded_contexts": [
-    "nimbuscode-harvest-gateway"
-  ],
-  "repos": [
-    "venha-pra-nuvem/nimbus-harvest-gateway"
-  ]
+  "feature_directory": "specs/021-dora-metrics-governance"
 }
