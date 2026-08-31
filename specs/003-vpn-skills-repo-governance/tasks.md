@@ -12,8 +12,12 @@
 > (repositório próprio, registrado em `docs/bounded-contexts.yaml` com o slug
 > `vpn-skills`). T001–T113 foram marcadas `[x]` porque a implementação
 > correspondente já existe naquele repositório (commit único, squashed, sem
-> histórico task-a-task granular). T114 permanece `[ ]` — gap real ainda não
-> resolvido (auth GitHub App, ver Phase 8 abaixo). Daqui em diante, novas
+> histórico task-a-task granular). T114 foi resolvida em
+> [venha-pra-nuvem/vpn-skills#2](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/vpn-skills/pull/2)
+> (código de verificação real de token GitHub App implementado e testado —
+> a criação do App em si permanece consolidada em
+> [issue #72](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/72)
+> deste repositório, junto com specs 007/008). Daqui em diante, novas
 > tasks/PRs do VPN-SKILLS devem ser abertas **no repositório externo**, não
 > aqui — este `tasks.md` é mantido como registro histórico do planejamento
 > original, não como backlog ativo.
@@ -262,7 +266,8 @@ This tasks.md outlines the implementation plan for the VPN-SKILLS feature, organ
 
 **Purpose**: Fechar lacunas encontradas na revisão de convergência de 2026-08-20 entre spec.md/plan.md/tasks.md e as decisões de `specs/006-bootstrap-governance-hardening/` (nota: renumeração pendente — ver achado de colisão de números reportado separadamente).
 
-- [ ] T114 Replace the placeholder authentication layer with a real GitHub App-based middleware (installation token for server-to-server calls, user-to-server OAuth for the discovery dashboard) in `vpn-skills/src/api/middleware/auth.ts`, superseding the "optional for v1, placeholder" framing in T095 per plan.md ADL-004 (contradicts)
+- [x] T114 Replace the placeholder authentication layer with a real GitHub App-based middleware (installation token for server-to-server calls, user-to-server OAuth for the discovery dashboard) in `vpn-skills/src/api/middleware/auth.ts`, superseding the "optional for v1, placeholder" framing in T095 per plan.md ADL-004 (contradicts)
+  - **Nota**: implementado em [venha-pra-nuvem/vpn-skills#2](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/vpn-skills/pull/2) — verificação de installation token via `GET /installation/repositories` e de user OAuth token via `GET /user` + checagem de membership em `GET /orgs/{org}/members/{login}`, ambos contra a API GHE (`fetch` nativo, sem dependência nova). 9 testes unitários novos. A criação do GitHub App real (App ID/chave/installation) permanece pendente — consolidada em [issue #72](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/72), junto com a mesma necessidade das specs 007/008.
 - [x] T115 Retrofit `spec.md` to the mandatory Nimbus-Code hybrid contract (Cabeçalho Obrigatório table, BDD `AC-N` acceptance criteria block, SLO table, Cost Reference block) introduced by `specs/016-hybrid-agent-human-dev/` per Constitution — Qualidade e Processo (missing) — **done 2026-08-20**; Cost Reference intentionally omits the external "SPEC KIT COST" URL (identified as pointing to a repository outside the organization — removed from the Nimbus-Code standard)
 - [x] T116 Document and decide the multi-repo board consolidation model for the `vpn-skills-infrastructure` companion repository referenced in `graph.yaml` (issues consolidated into the VPN-SKILLS Project V2) per plan.md Known Gaps #3 (missing) — **done 2026-08-20**: model formalized in `specs/006-multirepo-support/` (published in parallel, discovered during this replanning); apply that spec's pattern to `vpn-skills-infrastructure` if/when it becomes a real separate repository
 
