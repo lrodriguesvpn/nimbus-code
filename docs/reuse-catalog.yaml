@@ -110,13 +110,21 @@ entries:
       execute isto no final". Implementado para o campo `epic_issue` em
       .specify/scripts/bash/create-new-feature.sh +
       .specify/scripts/bash/check-epic-issue-consistency.sh +
-      .github/skills/speckit-specify/SKILL.md. Reaproveitar para qualquer
+      .github/skills/speckit-specify/SKILL.md. Reaproveitado também para
+      completude do interview.md (.specify/scripts/bash/validate-interview-
+      completeness.sh + .github/skills/speckit-interview/SKILL.md) e para
+      detecção determinística de retrabalho via histórico git — spec/plan
+      revisados depois de tasks.md já existir, tasks novas adicionadas —
+      bloqueando /speckit-implement até specs/<feature>/retro.md ser
+      completado (.specify/scripts/bash/detect-retro-signal.sh +
+      .specify/scripts/bash/validate-retro-completeness.sh +
+      .github/skills/speckit-implement/SKILL.md). Reaproveitar para qualquer
       outro campo de feature.json extraído de texto livre por um SKILL.md
       (ex.: bounded_contexts na feature 006, ainda não migrado para este
       padrão).
     source: "specs/005-epic-feature-us-ghe-hierarchy/plan.md"
     adr: ""
-    reuse_count: 1
+    reuse_count: 2
   - tag: "process-recovery-flow-decision-model"
     bounded_context: "spec-kit-workflow"
     description: >

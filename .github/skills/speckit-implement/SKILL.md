@@ -176,6 +176,40 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 Note: This command assumes a complete task breakdown exists in tasks.md. If tasks are incomplete or missing, suggest running `/speckit-tasks` first to regenerate the task list.
 
+## Mandatory Post-Execution Validation (Retro Signal Detection)
+
+**You MUST run this before reporting completion to the user. This step is unconditional — it does not depend on `.specify/extensions.yml` existing or any hook being registered. Never skip it.**
+
+This closes the same reliability gap already documented in `docs/reuse-catalog.yaml` (tag `skill-mid-flow-instruction-reliability-gate`): relying on a prose instruction ("preencha o retro.md se a implementação divergiu do plano") in the middle of a long flow means it can be silently skipped. This is a deterministic, git-history-based check that does not depend on you having tracked or remembered every divergence yourself.
+
+Determine `FEATURE_DIR` (the same feature directory this `/speckit-implement` run just worked on — resolve it from `.specify/feature.json`'s `feature_directory` if not already known in this session).
+
+**Step 1 — detect the signal:**
+```bash
+.specify/scripts/bash/detect-retro-signal.sh --feature-dir "<FEATURE_DIR>" --json
+```
+
+- If it reports `{"status":"not_applicable",...}`: nothing to do — proceed to the Mandatory Post-Execution Hooks below.
+- If it reports `{"status":"clean",...}`: no rework signal found (no spec.md/plan.md revision after tasks.md existed, no new task IDs added) — proceed to the Mandatory Post-Execution Hooks below. Do not create a `retro.md` for a clean implementation; this would be pure ceremony over a feature that went as planned.
+- If it reports `{"status":"signal_detected",...}`: real evidence exists that the spec/plan needed revision during implementation, or tasks were added after the initial breakdown. Continue to Step 2 — **do not skip creating/completing `retro.md` when this status is reported.**
+
+**Step 2 — scaffold `retro.md` if it does not exist yet:**
+
+If `<FEATURE_DIR>/retro.md` does not already exist, resolve the active `retro-template` (`presets/nimbus-code-standards/templates/feature-artifacts/retro-template.md`, or its `.specify/presets/` mirror) and copy it to `<FEATURE_DIR>/retro.md`. Then pre-fill the "O que divergiu do plano?" table using the raw evidence from Step 1's JSON output (`evidence` array — file, commit SHA, date, commit subject; `new_task_ids` — which task IDs were added after the first `tasks.md` generation): one row per distinct file/signal, quoting the evidence directly (commit SHAs, dates, subjects). **Do not invent or infer *why* the divergence happened** — that is exactly what the "Causa raiz" section is for, and only a human or an agent with real context on *this* feature (not just git metadata) can fill it honestly. Leave "Causa raiz" and "Ação para o próximo ciclo" for the current step (or a human) to complete based on actual knowledge of what happened — never guess at causation from commit history alone.
+
+If `<FEATURE_DIR>/retro.md` already exists, do not overwrite it — a human or a previous run may have already started filling it in.
+
+**Step 3 — attempt to fill in "Causa raiz" and "Ação para o próximo ciclo" from context you actually have** (this implementation session's own memory of *why* tasks were redone or the plan changed — not invented). If you genuinely do not know the root cause (e.g., the signal predates this session, or the divergence was reviewed/decided by a human outside your context), leave the placeholder text as-is rather than fabricating a plausible-sounding cause — Step 4 will then correctly report it as still incomplete, and you should tell the user explicitly that human input is needed to close it out.
+
+**Step 4 — validate completeness:**
+```bash
+.specify/scripts/bash/validate-retro-completeness.sh --file "<FEATURE_DIR>/retro.md" --json
+```
+
+- If it reports `{"status":"ok",...}`: proceed to the Mandatory Post-Execution Hooks below.
+- If it reports `{"status":"incomplete",...}`: it lists which example placeholders from the template are still unresolved. **Do not report the implementation as complete.** Report to the user exactly what remains (quoting the `unresolved_examples` list) and that `retro.md` needs human input to close out the root-cause/next-cycle sections before this feature's implementation can be considered done — this is a hard stop, not a warning to note and move past.
+- If it exits with `{"status":"error","reason":"file_not_found",...}`: something went wrong in Step 2 — report the failure to the user, do not silently retry with a guessed path.
+
 ## Mandatory Post-Execution Hooks
 
 **You MUST complete this section before reporting completion to the user.**
@@ -219,5 +253,6 @@ Report final status with summary of completed work.
 
 - [ ] All tasks in tasks.md completed and marked `[X]`
 - [ ] Implementation validated against specification, plan, and test coverage
+- [ ] Retro signal detection run (`detect-retro-signal.sh`); if a signal was detected, `retro.md` created/completed and validated (`validate-retro-completeness.sh` reports `"ok"`) before declaring completion
 - [ ] Extension hooks dispatched or skipped according to the rules in Mandatory Post-Execution Hooks above
 - [ ] Completion reported to user with summary of completed work

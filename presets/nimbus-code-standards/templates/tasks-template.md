@@ -99,7 +99,12 @@ relevante ao artefato entregue pela tarefa.*
       inesperado encontrado) — ver template em
       `presets/nimbus-code-standards/templates/feature-artifacts/retro-template.md`
       (via proativa: `scripts/process-metrics-report.sh --check-retro-cadence`
-      sinaliza quando a cadência de retrospectivas periódicas está devida)
+      sinaliza quando a cadência de retrospectivas periódicas está devida;
+      via reativa/determinística: `/speckit-implement` roda
+      `.specify/scripts/bash/detect-retro-signal.sh` incondicionalmente e
+      **bloqueia a conclusão** se detectar sinal de retrabalho — spec.md/
+      plan.md revisados depois de tasks.md já existir, ou tasks novas
+      adicionadas — sem que o retro.md correspondente esteja completo)
 
 ## Nimbus-Code — Métricas de Branches e Saúde do Repositório (PMO)
 
