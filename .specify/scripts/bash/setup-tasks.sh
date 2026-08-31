@@ -49,9 +49,12 @@ if [[ -d "$CONTRACTS_DIR" ]] && [[ -n "$(ls -A "$CONTRACTS_DIR" 2>/dev/null)" ]]
 fi
 [[ -f "$QUICKSTART" ]] && docs+=("quickstart.md")
 
-# Resolve tasks template through override stack
-TASKS_TEMPLATE=$(resolve_template "tasks-template" "$REPO_ROOT") || true
-if [[ -z "$TASKS_TEMPLATE" ]] || [[ ! -f "$TASKS_TEMPLATE" ]]; then
+# Resolve tasks template through override stack and materialize it to a temp file
+TASKS_TEMPLATE_FILE="$(mktemp "${TMPDIR:-/tmp}/speckit-tasks-template.XXXXXX")"
+if materialize_template_content "tasks-template" "$REPO_ROOT" "$TASKS_TEMPLATE_FILE"; then
+    TASKS_TEMPLATE="$TASKS_TEMPLATE_FILE"
+else
+    rm -f "$TASKS_TEMPLATE_FILE"
     echo "ERROR: Could not resolve required tasks-template from the template override stack for $REPO_ROOT" >&2
     echo "Template 'tasks-template' was not found in any supported location (overrides, presets, extensions, or shared core). Add an override at .specify/templates/overrides/tasks-template.md, or run 'specify init' / reinstall shared infra to restore the core .specify/templates/tasks-template.md template." >&2
     exit 1
