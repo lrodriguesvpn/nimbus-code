@@ -1,0 +1,70 @@
+name: Validate Bootstrap & Preset Version
+
+on:
+  pull_request:
+    paths:
+      - '.specify/**'
+      - 'bootstrap.sh'
+      - '.github/workflows/validate-bootstrap.yml'
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  validate-bootstrap:
+    name: Detect Preset Version Mismatches
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run preset version detection
+        id: detect
+        run: |
+          if [ -f ".specify/scripts/bash/detect-preset-version-mismatch.sh" ]; then
+            chmod +x .specify/scripts/bash/detect-preset-version-mismatch.sh
+            output=$(.specify/scripts/bash/detect-preset-version-mismatch.sh --json 2>&1 || true)
+            echo "result=$output" >> $GITHUB_OUTPUT
+            echo "$output" | jq '.'
+          else
+            echo "Detection script not found, skipping check"
+          fi
+
+      - name: Comment on PR if version drift detected
+        if: steps.detect.outcome == 'failure' || contains(steps.detect.outputs.result, 'mismatch')
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const result = '${{ steps.detect.outputs.result }}';
+            
+            try {
+              const data = JSON.parse(result);
+              if (data.status === 'mismatch' && data.mismatches) {
+                const comment = `⚠️ **Preset Version Mismatch Detected**\n\n` +
+                  `This PR modifies \`.specify/\` files but the installed preset version ` +
+                  `does not match the source version.\n\n` +
+                  `**Mismatches:**\n` +
+                  data.mismatches.map(m => 
+                    `- **File**: ${m.file}\n  **Expected**: ${m.expected}\n  **Actual**: ${m.actual}`
+                  ).join('\n\n');
+                
+                github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: comment
+                });
+              }
+            } catch (e) {
+              console.log('Could not parse detection output:', e);
+            }
+
+      - name: Fail if drift detected in satellite repo
+        if: steps.detect.outcome == 'failure'
+        run: |
+          echo "Preset version mismatch detected. Please run bootstrap.sh --refresh-preset"
+          exit 1
