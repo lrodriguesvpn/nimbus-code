@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   tag:
@@ -18,6 +19,7 @@ jobs:
           fetch-depth: 0
 
       - name: Create and push tag from bundle version (if needed)
+        id: tag_step
         run: |
           set -euo pipefail
 
@@ -29,10 +31,13 @@ jobs:
             exit 1
           fi
 
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
           git fetch --tags origin
 
           if git rev-parse "$TAG" >/dev/null 2>&1; then
             echo "Tag $TAG already exists. Skipping."
+            echo "created=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -46,4 +51,24 @@ jobs:
 
           git tag -a "$TAG" -m "Release $TAG"
           git push origin "$TAG"
+          echo "created=true" >> "$GITHUB_OUTPUT"
           echo "Created and pushed tag $TAG"
+
+      - name: Disparar workflow de release (empacotamento + GitHub Release)
+        if: steps.tag_step.outputs.created == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Necessário porque tags/commits empurrados pelo GITHUB_TOKEN a partir
+          # de dentro de um workflow NÃO disparam outros workflows escutando
+          # `push` (proteção anti-loop do próprio GitHub Actions) — o passo
+          # anterior empurra a tag, mas isso sozinho nunca aciona o workflow
+          # "Release componentes Nimbus-Code" (on: push: tags: v*). Chamadas
+          # explícitas de workflow_dispatch via API, como esta, não sofrem essa
+          # restrição — por isso release.yml também precisa do trigger
+          # workflow_dispatch (adicionado junto com esta correção). Bug real
+          # encontrado em 2026-08-31: nenhuma release formal foi publicada
+          # entre v1.11.0 e v1.16.0 por causa disso — corrigido manualmente
+          # para v1.16.0, esta mudança previne a recorrência.
+          gh workflow run release.yml --ref "${{ steps.tag_step.outputs.tag }}"
+          echo "Disparado release.yml para a tag ${{ steps.tag_step.outputs.tag }}"
