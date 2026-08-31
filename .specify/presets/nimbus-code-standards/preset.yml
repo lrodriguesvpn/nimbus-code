@@ -145,7 +145,7 @@ provides:
     - type: "template"
       name: "cost-config"
       file: "templates/project-root/.specify/cost/cost-config-template.yml"
-      strategy: "copy"
+      strategy: "replace"
       description: "Configuração de rastreamento de custo financeiro real por fase SDD — tabelas de preço por integração e limites de orçamento por feature/fase."
 
     # Harness Engineering — catálogo de aprendizado organizacional com erros,
@@ -175,7 +175,7 @@ provides:
     - type: "template"
       name: "harness-search-script"
       file: "templates/project-root/scripts/harness-search.sh"
-      strategy: "copy"
+      strategy: "replace"
       description: "Script de busca rápida no harness-catalog.yaml por tag/bounded_context — copiado para scripts/harness-search.sh."
 
     # Playbook de Sucesso — catálogo de padrões que funcionaram bem (contraparte
@@ -203,19 +203,19 @@ provides:
     - type: "template"
       name: "generate-context-graph-script"
       file: "templates/project-root/scripts/generate-context-graph.sh"
-      strategy: "copy"
+      strategy: "replace"
       description: "Gera specs/<feature>/graph.yaml a partir dos manifestos de dependência do bounded context ativo — copiado para scripts/generate-context-graph.sh."
 
     - type: "template"
       name: "harvest-patterns-script"
       file: "templates/project-root/scripts/harvest-patterns.sh"
-      strategy: "copy"
+      strategy: "replace"
       description: "Varredura on-demand de padrões técnicos existentes (via LLM) para alimentar docs/reuse-catalog.yaml — copiado para scripts/harvest-patterns.sh."
 
     - type: "template"
       name: "process-metrics-report-script"
       file: "templates/project-root/scripts/process-metrics-report.sh"
-      strategy: "copy"
+      strategy: "replace"
       description: "Calcula os 4 indicadores DORA a partir das labels dora:* e verifica a cadência de retrospectiva proativa — copiado para scripts/process-metrics-report.sh."
 
     # Scripts determinísticos companheiros de skills (.github/skills/*/SKILL.md),
@@ -228,31 +228,31 @@ provides:
     - type: "template"
       name: "check-epic-issue-consistency-script"
       file: "templates/project-root/.specify/scripts/bash/check-epic-issue-consistency.sh"
-      strategy: "copy"
+      strategy: "replace"
       description: "Confere/autocorrige o campo epic_issue de .specify/feature.json contra o token EPIC_ISSUE=<N> na descrição original — companheiro determinístico de .github/skills/speckit-specify/SKILL.md."
 
     - type: "template"
       name: "create-github-issue-hierarchy-script"
       file: "templates/project-root/.specify/scripts/bash/create-github-issue-hierarchy.sh"
-      strategy: "copy"
+      strategy: "replace"
       description: "Cria/vincula a hierarquia Epic → Feature → User Story → Task no GHE via sub-issues nativos — companheiro determinístico de .github/skills/speckit-taskstoissues/SKILL.md."
 
     - type: "template"
       name: "validate-interview-completeness-script"
       file: "templates/project-root/.specify/scripts/bash/validate-interview-completeness.sh"
-      strategy: "copy"
+      strategy: "replace"
       description: "Confere se specs/<feature>/interview.md não tem placeholders do template sem preencher — companheiro determinístico de .github/skills/speckit-interview/SKILL.md."
 
     - type: "template"
       name: "detect-retro-signal-script"
       file: "templates/project-root/.specify/scripts/bash/detect-retro-signal.sh"
-      strategy: "copy"
+      strategy: "replace"
       description: "Detecta via histórico git se spec.md/plan.md foram revisados depois de tasks.md já existir, ou se tasks novas foram adicionadas — sinal determinístico de retrabalho, usado por .github/skills/speckit-implement/SKILL.md para garantir o preenchimento de retro.md."
 
     - type: "template"
       name: "validate-retro-completeness-script"
       file: "templates/project-root/.specify/scripts/bash/validate-retro-completeness.sh"
-      strategy: "copy"
+      strategy: "replace"
       description: "Confere se specs/<feature>/retro.md não tem os textos de exemplo do retro-template.md sem substituir — companheiro determinístico de .github/skills/speckit-implement/SKILL.md."
 
 tags:
