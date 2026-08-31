@@ -37,7 +37,7 @@ jobs:
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          uv tool install specify-cli --from git+https://github.com/github/nimbus-code.git
+          uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
 
       - name: Ler versões instaladas
         id: current
@@ -101,13 +101,26 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # GH_HOST precisa ser derivado explicitamente em runners que operam
+          # contra um GitHub Enterprise Server — sem isso, `gh` não reconhece
+          # o host e falha com "none of the git remotes configured for this
+          # repository point to a known GitHub host" (mesmo padrão já usado
+          # em .github/workflows/normalize-issue-bodies.yml).
+          export GH_HOST="${GITHUB_SERVER_URL#https://}"
+          export GH_HOST="${GH_HOST#http://}"
           EXISTING=$(gh issue list --search "Verificação semanal — Nimbus Code / Bundle Nimbus-Code in:title" --state open --json number -q '.[0].number' || true)
           if [ -n "$EXISTING" ]; then
             gh issue comment "$EXISTING" --body-file /tmp/issue-body.md
           else
-            # Tenta com a taxonomia completa (requer scripts/setup-github-labels.sh já
-            # aplicado); se os labels type:chore/status:needs-triage ainda não existirem
-            # neste repositório, cai para o label padrão "dependencies" apenas.
+            # 3 níveis de fallback, do mais completo ao mais garantido — a
+            # ordem anterior assumia que o label "dependencies" (só existe se
+            # o Dependabot já rodou neste repo) sempre estava disponível como
+            # último recurso, o que falhava em repos sem Dependabot habilitado
+            # mesmo tendo a taxonomia Nimbus-Code completa instalada.
+            # 1) taxonomia completa (Nimbus-Code + dependencies, se ambos existirem)
+            # 2) só a taxonomia Nimbus-Code (scripts/setup-github-labels.sh já aplicado)
+            # 3) sem label nenhum — sempre funciona, garante que a Issue nunca deixa de existir
             gh issue create --title "Verificação semanal — Nimbus Code / Bundle Nimbus-Code" --body-file /tmp/issue-body.md --label "dependencies,type:chore,status:needs-triage" \
-              || gh issue create --title "Verificação semanal — Nimbus Code / Bundle Nimbus-Code" --body-file /tmp/issue-body.md --label "dependencies"
+              || gh issue create --title "Verificação semanal — Nimbus Code / Bundle Nimbus-Code" --body-file /tmp/issue-body.md --label "type:chore,status:needs-triage" \
+              || gh issue create --title "Verificação semanal — Nimbus Code / Bundle Nimbus-Code" --body-file /tmp/issue-body.md
           fi
