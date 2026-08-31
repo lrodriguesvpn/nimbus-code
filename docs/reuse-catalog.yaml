@@ -118,13 +118,22 @@ entries:
       bloqueando /speckit-implement até specs/<feature>/retro.md ser
       completado (.specify/scripts/bash/detect-retro-signal.sh +
       .specify/scripts/bash/validate-retro-completeness.sh +
-      .github/skills/speckit-implement/SKILL.md). Reaproveitar para qualquer
-      outro campo de feature.json extraído de texto livre por um SKILL.md
-      (ex.: bounded_contexts na feature 006, ainda não migrado para este
-      padrão).
+      .github/skills/speckit-implement/SKILL.md). Também generalizado (T018)
+      para o caso em que o "estado" a validar não é um campo extraído de texto
+      livre, mas o resultado real de uma ação em API externa (GraphQL) que a
+      prosa do Outline instrui o agente a fazer no meio do fluxo — vínculo de
+      sub-issue Task/User Story -> parent no GHE
+      (.specify/scripts/bash/check-task-hierarchy-consistency.sh +
+      .github/skills/speckit-taskstoissues/SKILL.md), reconsultando a API em
+      vez de confiar que o passo de vínculo foi executado corretamente.
+      Reaproveitar para qualquer outro campo de feature.json extraído de
+      texto livre por um SKILL.md (ex.: bounded_contexts na feature 006,
+      ainda não migrado para este padrão) ou qualquer outra ação de API
+      externa que a prosa do Outline instrui o agente a fazer sem checagem
+      determinística de resultado.
     source: "specs/005-epic-feature-us-ghe-hierarchy/plan.md"
     adr: ""
-    reuse_count: 2
+    reuse_count: 3
   - tag: "process-recovery-flow-decision-model"
     bounded_context: "spec-kit-workflow"
     description: >
