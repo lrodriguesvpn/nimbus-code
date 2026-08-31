@@ -112,6 +112,16 @@ ação de backlog para os 4 indicadores DORA.
 
 ## Validação executada nesta sessão
 
-Esta seção deve ser preenchida ao final da implementação (fase de Polish),
-registrando os comandos efetivamente executados e seus resultados — mesmo
-padrão já usado em `specs/012-loop-melhoria-continua/quickstart.md`.
+- **Cenário V1 (AC-1)**: validado por inspeção estrutural — `docs/playbooks/README.md` seção "Definições Oficiais dos Indicadores" contém fórmula, evento de origem, janela de medição e regra de inclusão/exclusão para os 4 indicadores.
+- **Cenário V2 (AC-2)**: validado com suíte de integração estendida:
+  - `bash tests/scripts/process-metrics-report.detect.test.sh` ✅ (7/7, incluindo os 3 novos casos de qualidade de dados — FR-011)
+- **Cenário V3/V4 (AC-3, FR-006)**: validado com suíte de auditoria nova:
+  - `bash tests/scripts/process-metrics-report.audit-trail.test.sh` ✅ (5/5 — ajuste completo aceito, incompleto rejeitado, IDs sequenciais, gate de fechamento bloqueado/aprovado)
+- **Cenário V5 (AC-4)**: validado por inspeção estrutural — `docs/playbooks/README.md` seção "Leitura Combinada" exige `combined_conclusion` antes de fechar qualquer revisão.
+- **Cenário V6 (AC-5)**: validado com suíte de degradação nova:
+  - `bash tests/scripts/process-metrics-report.degradation-action.test.sh` ✅ (4/4 — sinal de degradação para deployment_frequency/lead_time, ausência de sinal quando saudável, orientação de ação de backlog)
+- **Cenário V7 (AC-6)**: validado por inspeção estrutural — `docs/playbooks/README.md` seção "Comparabilidade entre Squads" orienta evolução relativa, não ranking absoluto.
+- **Regressão**: `bash tests/scripts/process-metrics-report.retro-cadence.test.sh` ✅ (4/4, sem regressão da feature 012).
+- **Grafo**: `graph.yaml`/`graph.md` conferidos — 5 módulos desta feature mapeados, nenhum módulo novo fora do grafo.
+
+Total: **20/20 testes de integração passando** (7 detect + 4 retro-cadence + 5 audit-trail + 4 degradation-action).

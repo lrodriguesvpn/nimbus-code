@@ -323,3 +323,25 @@ entries:
     source: "specs/020-satellite-repo-governance/plan.md"
     adr: ""
     reuse_count: 0
+
+  - tag: "dora-governance-hybrid-collection"
+    bounded_context: "spec-kit-workflow"
+    description: >
+      Padrão de governança de métricas DORA com coleta híbrida: (1) definições
+      fechadas de fórmula/evento de origem/janela de medição para os 4
+      indicadores, evitando leitura divergente entre squads; (2) coleta
+      automática via labels `dora:*` como caminho padrão, com qualidade de
+      dados explícita (completude via `INSUFFICIENT_DATA`, ausência de
+      duplicidade, consistência temporal); (3) ajuste manual como exceção
+      controlada, com trilha de auditoria obrigatória (justification, author,
+      evidence_link, exception_category) persistida em YAML versionado no
+      Git, no mesmo padrão de `retro-cadence-state.yaml`; (4) gate
+      determinístico que bloqueia fechamento de revisão periódica com ajuste
+      incompleto; (5) sinalização objetiva de degradação contra metas
+      documentadas, convertida em ação de backlog com owner/priority/prazo —
+      sem auto-criar Issues, mesmo racional da sinalização proativa de
+      retrospectiva. Reaproveitar em qualquer domínio de métricas de processo
+      que precise combinar coleta automática com exceção manual auditável.
+    source: "specs/021-dora-metrics-governance/plan.md"
+    adr: ""
+    reuse_count: 0
