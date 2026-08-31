@@ -101,6 +101,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # GH_HOST precisa ser derivado explicitamente em runners que operam
+          # contra um GitHub Enterprise Server — sem isso, `gh` não reconhece
+          # o host e falha com "none of the git remotes configured for this
+          # repository point to a known GitHub host" (mesmo padrão já usado
+          # em .github/workflows/normalize-issue-bodies.yml).
+          export GH_HOST="${GITHUB_SERVER_URL#https://}"
+          export GH_HOST="${GH_HOST#http://}"
           EXISTING=$(gh issue list --search "Verificação semanal — Nimbus Code / Bundle Nimbus-Code in:title" --state open --json number -q '.[0].number' || true)
           if [ -n "$EXISTING" ]; then
             gh issue comment "$EXISTING" --body-file /tmp/issue-body.md
