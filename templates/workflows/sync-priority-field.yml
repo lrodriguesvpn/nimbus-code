@@ -20,7 +20,12 @@ jobs:
     steps:
       - name: Generate GitHub App installation token
         id: app-token
-        if: ${{ secrets.NIMBUS_APP_ID != '' && secrets.NIMBUS_APP_PRIVATE_KEY != '' }}
+        if: ${{ env.NIMBUS_APP_CONFIGURED == 'true' }}
+        env:
+          # 'secrets' não é permitido em jobs.<job_id>.steps.if (ver
+          # https://docs.github.com/actions/reference/workflows-and-actions/contexts#context-availability) —
+          # avaliar aqui em env (permitido) e ler via env.* no if acima.
+          NIMBUS_APP_CONFIGURED: ${{ secrets.NIMBUS_APP_ID != '' && secrets.NIMBUS_APP_PRIVATE_KEY != '' }}
         uses: actions/create-github-app-token@v1
         with:
           app-id: ${{ secrets.NIMBUS_APP_ID }}
