@@ -292,3 +292,35 @@ Antes de habilitar `agent-auto-assign.yml` num repositório:
   a regra organizacional da qual a guardrail de S4 deste workflow deriva.
 - [`developer-guide.md`](developer-guide.md) — manual do dev, cenários de uso
   ponta a ponta.
+
+### Preset Synchronization Labels (SPEC 020 Phase 2)
+
+#### `sync:preset-version`
+
+**Applied by**: Auto-sync workflow when creating preset sync PRs
+
+**Meaning**: PR contains preset version updates from automated satellite audit
+
+**Usage**:
+- Automatically added to PRs created by `.github/workflows/auto-sync-preset.yml`
+- Used to filter and track preset sync PRs across all satellite repos
+- Helps distinguish preset maintenance PRs from feature work
+
+**Coordination with Feature Work**:
+- If you have a feature PR open in a satellite repo, the auto-sync workflow will skip that repo (no active development override)
+- If auto-sync PR conflicts with your feature work, one of these options:
+  - Label your feature PR with `no:auto-sync` before audit runs
+  - Merge feature first, then auto-sync PR will process on next audit
+  - Manually merge both PRs with `git merge --theirs` if conflicts are only in `.specify/` files
+
+#### `no:auto-sync`
+
+**Applied by**: Developer (manual override)
+
+**Meaning**: Prevent automatic preset sync for this repository during current cycle
+
+**Usage**:
+- Add to your PR if you want to prevent auto-sync from running
+- Useful when you're actively refactoring `.specify/` or have parallel feature work
+- Remove label after your work completes to re-enable auto-sync
+
