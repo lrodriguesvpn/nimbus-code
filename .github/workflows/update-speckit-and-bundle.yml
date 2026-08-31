@@ -108,9 +108,15 @@ jobs:
           if [ -n "$EXISTING" ]; then
             gh issue comment "$EXISTING" --body-file /tmp/issue-body.md
           else
-            # Tenta com a taxonomia completa (requer scripts/setup-github-labels.sh já
-            # aplicado); se os labels type:chore/status:needs-triage ainda não existirem
-            # neste repositório, cai para o label padrão "dependencies" apenas.
+            # 3 níveis de fallback, do mais completo ao mais garantido — a
+            # ordem anterior assumia que o label "dependencies" (só existe se
+            # o Dependabot já rodou neste repo) sempre estava disponível como
+            # último recurso, o que falhava em repos sem Dependabot habilitado
+            # mesmo tendo a taxonomia Nimbus-Code completa instalada.
+            # 1) taxonomia completa (Nimbus-Code + dependencies, se ambos existirem)
+            # 2) só a taxonomia Nimbus-Code (scripts/setup-github-labels.sh já aplicado)
+            # 3) sem label nenhum — sempre funciona, garante que a Issue nunca deixa de existir
             gh issue create --title "Verificação semanal — Nimbus Code / Bundle Nimbus-Code" --body-file /tmp/issue-body.md --label "dependencies,type:chore,status:needs-triage" \
-              || gh issue create --title "Verificação semanal — Nimbus Code / Bundle Nimbus-Code" --body-file /tmp/issue-body.md --label "dependencies"
+              || gh issue create --title "Verificação semanal — Nimbus Code / Bundle Nimbus-Code" --body-file /tmp/issue-body.md --label "type:chore,status:needs-triage" \
+              || gh issue create --title "Verificação semanal — Nimbus Code / Bundle Nimbus-Code" --body-file /tmp/issue-body.md
           fi
