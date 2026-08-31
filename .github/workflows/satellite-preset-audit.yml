@@ -1,0 +1,96 @@
+name: Satellite Preset Version Audit
+
+on:
+  schedule:
+    # Weekly audit: Monday at 09:00 UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  actions: write
+  contents: read
+
+jobs:
+  audit-satellite-presets:
+    name: Audit Preset Versions Across Org
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up GitHub CLI
+        run: |
+          which gh || brew install gh
+
+      - name: Run preset audit
+        id: audit
+        run: |
+          # Run the extended audit script
+          chmod +x scripts/scan-org-rename-references.sh
+          ./scripts/scan-org-rename-references.sh \
+            --mode satellite-preset-audit \
+            --org venha-pra-nuvem \
+            --output preset-audit-report.csv
+
+      - name: Parse audit results
+        id: parse
+        run: |
+          drifted_count=$(grep ",drift," preset-audit-report.csv | wc -l)
+          not_bootstrapped_count=$(grep ",not_bootstrapped," preset-audit-report.csv | wc -l)
+          in_sync_count=$(grep ",in_sync," preset-audit-report.csv | wc -l)
+          
+          echo "drifted=$drifted_count" >> $GITHUB_OUTPUT
+          echo "not_bootstrapped=$not_bootstrapped_count" >> $GITHUB_OUTPUT
+          echo "in_sync=$in_sync_count" >> $GITHUB_OUTPUT
+          
+          echo "## Satellite Preset Audit Results" > audit-summary.md
+          echo "" >> audit-summary.md
+          echo "- **In Sync**: $in_sync_count repos" >> audit-summary.md
+          echo "- **Drifted**: $drifted_count repos" >> audit-summary.md
+          echo "- **Not Bootstrapped**: $not_bootstrapped_count repos" >> audit-summary.md
+          echo "" >> audit-summary.md
+          
+          if [ $drifted_count -gt 0 ]; then
+            echo "### Drifted Repos" >> audit-summary.md
+            grep ",drift," preset-audit-report.csv | cut -d',' -f1-3 | while read line; do
+              echo "- $line" >> audit-summary.md
+            done
+          fi
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: preset-audit-report
+          path: preset-audit-report.csv
+          retention-days: 30
+
+      - name: Create issue if repos are drifted
+        if: steps.parse.outputs.drifted > 0
+        uses: actions/create-issue@v2
+        with:
+          title: "🔄 Satellite repos out of sync with v1.16.0: ${{ steps.parse.outputs.drifted }} repos need upgrade"
+          body: |
+            Automated preset audit found **${{ steps.parse.outputs.drifted }}** satellite repositories with preset version drift.
+            
+            See artifact `preset-audit-report` for full details.
+            
+            **Next Steps:**
+            1. Review the drifted repos in the audit report
+            2. For each drifted repo, either:
+               - Manually run `bootstrap.sh --refresh-preset` and create a PR, OR
+               - Wait for auto-PR generation (if enabled)
+            3. Link PRs to this issue once created
+            
+            **Audit Details:**
+            - In Sync: ${{ steps.parse.outputs.in_sync }}
+            - Drifted: ${{ steps.parse.outputs.drifted }}
+            - Not Bootstrapped: ${{ steps.parse.outputs.not_bootstrapped }}
+            
+            Labels: `type:automation`, `area:preset-sync`, `priority:P2`
+
+      - name: Comment summary on dashboard
+        run: |
+          echo "## Audit completed at $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+          cat audit-summary.md
