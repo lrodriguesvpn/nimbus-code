@@ -9,6 +9,7 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch: {}
 
 permissions:
   contents: write
@@ -24,7 +25,15 @@ jobs:
 
       - name: Validar que a tag aponta para commit promovido em main
         run: |
-          git fetch origin main --depth=1
+          # Fetch completo (sem --depth) é necessário aqui: um fetch raso
+          # (--depth=1) só traz o commit mais recente de main, sem histórico
+          # suficiente para o merge-base resolver a ancestralidade sempre que
+          # main já avançou além do commit da tag (cenário comum — a tag é
+          # criada no momento do merge, mas outro PR pode mergear em main
+          # antes deste workflow rodar). Bug real encontrado em 2026-08-31 ao
+          # publicar v1.16.0: com --depth=1 este passo falhava incorretamente
+          # mesmo com o commit da tag sendo um ancestral real de main.
+          git fetch origin main
           if ! git merge-base --is-ancestor "$GITHUB_SHA" "origin/main"; then
             echo "ERRO: a tag ${GITHUB_REF_NAME} não está em um commit da main."
             echo "Publique versão apenas após PR develop -> main aprovado e mergeado."

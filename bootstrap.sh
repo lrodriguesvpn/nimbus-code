@@ -415,6 +415,32 @@ echo "  Evidence: $CONTEXT_INDICATOR"
   persist_topology_decision
 
 echo "-> Installing preset $SELECTED_PRESET..."
+# Detect a stale already-installed preset and upgrade it automatically.
+# `specify preset add` has no "update" verb: re-running it on a repo that
+# already has the same preset ID installed just fails/no-ops, so simply
+# re-running bootstrap.sh after a preset version bump silently kept every
+# repo on its old (possibly broken) preset forever. Compare the version
+# recorded in .specify/presets/.registry against the version declared in
+# the source preset.yml, and remove+reinstall when they differ.
+SOURCE_PRESET_MANIFEST="$LOCAL_PATH/presets/$SELECTED_PRESET/preset.yml"
+SOURCE_PRESET_VERSION="$(grep -E '^version:' "$SOURCE_PRESET_MANIFEST" 2>/dev/null | head -1 | sed -E 's/^version:[[:space:]]*"?([^"[:space:]]+)"?.*/\1/')"
+INSTALLED_REGISTRY="$WORKDIR/.specify/presets/.registry"
+INSTALLED_PRESET_VERSION=""
+if [[ -f "$INSTALLED_REGISTRY" ]] && command -v python3 >/dev/null 2>&1; then
+  INSTALLED_PRESET_VERSION="$(SPECKIT_REGISTRY="$INSTALLED_REGISTRY" SPECKIT_PRESET="$SELECTED_PRESET" python3 -c "
+import json, os
+try:
+    with open(os.environ['SPECKIT_REGISTRY']) as f:
+        data = json.load(f)
+    print(data.get('presets', {}).get(os.environ['SPECKIT_PRESET'], {}).get('version', ''))
+except Exception:
+    print('')
+" 2>/dev/null)"
+fi
+if [[ -n "$INSTALLED_PRESET_VERSION" && -n "$SOURCE_PRESET_VERSION" && "$INSTALLED_PRESET_VERSION" != "$SOURCE_PRESET_VERSION" ]]; then
+  echo "  Installed preset version ($INSTALLED_PRESET_VERSION) differs from source ($SOURCE_PRESET_VERSION) - upgrading..."
+  specify preset remove "$SELECTED_PRESET" || echo "  WARN: could not remove existing preset $SELECTED_PRESET before upgrade"
+fi
 specify preset add --dev "$LOCAL_PATH/presets/$SELECTED_PRESET" --priority 5   || echo "  (preset already installed - skipped; use 'specify preset remove $SELECTED_PRESET' before reinstalling)"
 
 echo "-> Installing extension nimbus-code-backlog-sync..."

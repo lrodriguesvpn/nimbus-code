@@ -702,3 +702,19 @@ except Exception:
     printf '%s' "$content"
     return 0
 }
+
+# Materialize composed template content into a file on disk.
+# Usage: materialize_template_content "template-name" "$REPO_ROOT" "$OUTPUT_FILE"
+materialize_template_content() {
+    local template_name="$1"
+    local repo_root="$2"
+    local output_file="$3"
+    local content
+
+    if content=$(resolve_template_content "$template_name" "$repo_root"); then
+        printf '%s' "$content" > "$output_file"
+        return 0
+    fi
+
+    return 1
+}

@@ -92,7 +92,7 @@ git config --get remote.origin.url
         [--complexity <...> to match the feature's own level; default is S2] \
         --json
       ```
-      Parse `user_story_issue` from the result and keep an in-memory map `US<M> -> issue number` for the task-linking step below. This is also idempotent (reused by marker on re-run), skips re-linking if already a sub-issue of the Feature, and backfills missing governance labels the same way `ensure-feature` does.
+      Parse `user_story_issue` from the result and keep an in-memory map `US<M> -> issue number` for the task-linking step below. This is also idempotent (reused by marker on re-run), skips re-linking if already a sub-issue of the Feature, and backfills missing governance labels the same way `ensure-feature` does. **Also record `user_story_issue:FEATURE_ISSUE` in the central repo's hierarchy-links accumulator** (User Stories always live in the central repo per the MultiRepo routing rule below) — this feeds the Mandatory Post-Execution Validation gate at the end of this Outline.
    4. If the script prints a line starting with `✗ Parent #... já tem N sub-issues` (hard limit reached, exit code 2) for either the Epic or the Feature, **stop and report this clearly to the user** — the corresponding link was NOT created (the issue itself may still exist), and the Epic/Feature must be split into smaller pieces before continuing. Do not silently ignore this.
    5. If the script reports `[MODO DEGRADADO]` (org without native Issue Types), continue normally — it already applied the `type:*` label fallback; just surface the message once to the user instead of repeating it per issue.
 
@@ -109,7 +109,7 @@ git config --get remote.origin.url
        --child-issue <this task's issue number> \
        --json
      ```
-     This both links the Task as a sub-issue (skipping if already linked, warning instead of silently reparenting if the Task is already a sub-issue of something else, and enforcing the 90/100 sub-issue limit on the parent) and applies the native `Task` Issue Type (or the `type:task` label fallback — on top of, not instead of, the priority/complexity/agent labels computed in the next step).
+     This both links the Task as a sub-issue (skipping if already linked, warning instead of silently reparenting if the Task is already a sub-issue of something else, and enforcing the 90/100 sub-issue limit on the parent) and applies the native `Task` Issue Type (or the `type:task` label fallback — on top of, not instead of, the priority/complexity/agent labels computed in the next step). **Also record `<this task's issue number>:<the parent issue number just used above>` in the hierarchy-links accumulator for the task's resolved target repository** (the same repository this `link-task` call used for `--repo-owner`/`--repo-name`) — this feeds the Mandatory Post-Execution Validation gate at the end of this Outline.
 
 1. **Resolve MultiRepo bounded context routing** (fully backward compatible — single-repo features behave exactly as before):
    - Read `.specify/feature.json` for the current feature. If it is missing, has no `bounded_contexts` field, or `bounded_contexts` is an empty array, this is a **single-repo feature**: skip the rest of this step, treat every task as routed to the repository representative of the Git remote (the "central repo"), and proceed to the next steps unchanged (AC-10).
@@ -190,6 +190,27 @@ git config --get remote.origin.url
 
 > [!CAUTION]
 > UNDER NO CIRCUMSTANCES EVER CREATE ISSUES IN A REPOSITORY THAT IS NEITHER THE GIT REMOTE'S REPO NOR ONE OF THE SERVICE REPOSITORIES RESOLVED IN THE MULTIREPO ROUTING TABLE.
+
+## Mandatory Post-Execution Validation (Task Hierarchy Consistency)
+
+**You MUST run this before reporting completion to the user. Unlike the "Post-Execution Checks" section below, this step is unconditional — it does not depend on `.specify/extensions.yml` existing or any hook being registered. Never skip it.**
+
+This closes a reliability gap (specs/005-epic-feature-us-ghe-hierarchy, FR-009/T018): the sub-issue linking described in steps 3–7 of the Outline above is prose in the middle of a long multi-step flow — an agent (you, in a future run, or a different session) could follow it incorrectly, skip a link, or miscount a parent without anyone noticing until someone opens the GHE board and finds a Task floating without its User Story. This step is a deterministic check implemented in bash against the GraphQL `parent`/`subIssuesSummary` fields — not something you re-interpret from the Outline's prose — and self-heals the ones it can.
+
+For **each target repository** that had at least one User Story or Task processed this run (the Git remote's repo alone for single-repo features; every repository from the MultiRepo routing table that received at least one issue otherwise), run:
+
+```bash
+.specify/scripts/bash/check-task-hierarchy-consistency.sh \
+  --repo-owner <owner> --repo-name <that repository's name> \
+  --links "<child>:<parent>[,<child>:<parent>...]" \
+  --json
+```
+
+- `--links` is the comma-separated list of `child_issue:parent_issue` pairs you accumulated **for that specific repository** while executing steps 3 (User Story → Feature) and 7 (Task → User Story or Feature) above. Do not mix pairs from different repositories into the same invocation.
+- The script is a no-op (exits 0, prints `{"status":"no-op",...}`) when `--links` is empty — safe and cheap to always run, even for a repository where nothing was actually linked this run (for example, only pre-existing issues were skipped).
+- If it prints `{"status":"ok",...}`: every pair was already consistent — nothing to mention.
+- If it prints `{"status":"fixed",...}`: one or more Task/User Story issues were missing their sub-issue link (or pointed at the wrong parent) and the script corrected them for you. Mention this self-correction in the Completion Report so the user is aware — this is exactly the class of mistake this gate exists to catch.
+- If it prints `{"status":"failed",...}` or exits non-zero: **do not silently ignore it or declare completion** — report the failed pairs (child/parent issue numbers and repository) to the user clearly, since these require manual investigation (for example, the child already has a conflicting parent, or the parent hit the 100 sub-issue limit).
 
 ## Post-Execution Checks
 

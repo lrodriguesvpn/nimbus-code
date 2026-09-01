@@ -6,7 +6,8 @@
 > no próprio repo (ou `specify init --here` + bootstrap, se quiser separar) e
 > só depois ler o código/Boards antes de especificar (seção 2, brownfield);
 > ponto de partida a partir de um card do ADO/JIRA → prompt de importação pronto
-> (seção 3).
+> (seção 3); ponto de partida a partir de uma entrevista de descoberta com o
+> cliente (ainda sem card/issue) → `/speckit.interview` (seção 3.5).
 > Pré-requisitos (`specify` CLI, `uv`, Copilot) na tabela logo abaixo.
 
 Este é o manual **central** de como todo dev da Nimbus-Code deve usar o
@@ -20,6 +21,8 @@ cenários, na ordem em que você provavelmente vai precisar deles:
    (brownfield)** e pelos **Boards** (cards já existentes).
 3. [Importar um card do Azure DevOps/JIRA para começar uma feature](#3-importar-um-card-do-azure-devops-ou-jira-para-começar-uma-feature) —
    o prompt exato para puxar um work item/issue como ponto de partida.
+   - [3.5. Conduzindo uma entrevista de descoberta antes do `/speckit.specify`](#35-conduzindo-uma-entrevista-de-descoberta-antes-do-speckitspecify-speckitinterview) —
+     ponto de partida a partir de uma conversa com o cliente, ao vivo ou por transcript, quando ainda não existe card/issue.
 
 Se algo aqui divergir do que você vê na prática, este arquivo é a fonte da
 verdade — abra um PR corrigindo, não crie um manual paralelo em outro lugar.
@@ -385,6 +388,73 @@ não tem um comando dedicado de importação nesse sentido.
 
 Depois de gerar a spec a partir do card, continue o ciclo normal
 (`/speckit.clarify` → `/speckit.plan` → ... ) como na seção 2.5.
+
+### 3.5. Conduzindo uma entrevista de descoberta antes do `/speckit.specify` (`/speckit.interview`)
+
+Use isso quando **ainda não existe** um card/issue pronto (seção 3) nem uma
+descrição já madura da feature — você vai conversar com o cliente/solicitante
+primeiro (ao vivo ou a partir de um transcript de reunião) e quer que essa
+conversa já saia estruturada, cobrindo negócio, infraestrutura, segurança e
+LGPD, antes de gerar a spec.
+
+Isso é **hoje um passo manual** — você (ou o Nimbus, conduzindo a conversa por
+você) preenche o modelo de entrevista
+(`presets/nimbus-code-standards/templates/feature-artifacts/interview-template.md`)
+e salva como `specs/<feature-slug>/interview.md`. Não existe ainda nenhuma
+integração automática com Microsoft Teams — o roadmap dessa automação está
+registrado em `specs/018-nimbus-agent-intake/spec.md` (User Story 5), mas por
+enquanto **quem conduz a entrevista é você**, com o Nimbus como assistente.
+
+**Pré-condição de transcript**: se a reunião já aconteceu e você tem as
+anotações/gravação transcrita, hoje isso normalmente está numa pasta pessoal do
+OneDrive (ex.: `OneDrive - Nimbus-Code/Notas/reuniao-cliente-x.txt`) ou em
+qualquer outro lugar que você tenha acesso local — não existe ainda um
+conector automático que busque isso pra você. Baixe/exporte o transcript para
+um caminho que o agente consiga ler (local ou dentro do próprio repo, ex.:
+`specs/_transcripts/reuniao-cliente-x.txt`) e referencie esse caminho no prompt.
+
+#### Prompt — sem transcript (entrevista ao vivo, do zero)
+
+```
+/speckit.interview Cliente do time Financeiro pediu um jeito de consolidar
+relatórios mensais que hoje são feitos manualmente em planilha. Conduza a
+entrevista de descoberta comigo agora, bloco por bloco (negócio, infra,
+segurança, LGPD) — eu vou respondendo.
+```
+
+#### Prompt — com transcript em arquivo (ex.: exportado do OneDrive)
+
+```
+/speckit.interview Consolidação de relatórios financeiros mensais. Já tenho o
+transcript da reunião com o cliente em
+specs/_transcripts/reuniao-financeiro-2026-08-26.txt (copiei da minha pasta
+pessoal do OneDrive). Avalie o que já está coberto nesse transcript e só me
+pergunte o que estiver faltando ou ambíguo.
+```
+
+#### Prompt — colando o transcript direto na mensagem
+
+```
+/speckit.interview Consolidação de relatórios financeiros mensais.
+Segue o transcript da reunião:
+---
+[Maria - Financeiro]: hoje a gente fecha o relatório mensal manualmente...
+[João - TI]: entendi, e quem mais usa esse relatório hoje?
+[Maria]: só o time financeiro mesmo, uso interno...
+---
+Avalie a cobertura contra os 4 blocos e pergunte só o que faltar.
+```
+
+**O que acontece depois**: o Nimbus cria `specs/<feature-slug>/interview.md`
+(a mesma pasta que a próxima spec vai usar — não duplica), pergunta só o que
+não veio no transcript (nunca inventa resposta de segurança/infra/LGPD), e ao
+final avisa: *"rode `/speckit.specify` agora"*. O `/speckit.specify` detecta
+essa pasta automaticamente e usa a entrevista como base do `spec.md` — você
+não precisa referenciar `interview.md` manualmente.
+
+Se a demanda for claramente pequena (documentação, ajuste isolado), o Nimbus
+vai propor o modo **Fast-Track** (~9 perguntas essenciais, ~10 min) em vez do
+modo Completo (~20-30 min) — ele sempre confirma com você antes de aplicar.
 
 ## 4. Hierarquia Agile (Epic → Feature → US → Task) no GHE
 
@@ -1151,3 +1221,112 @@ Ver também: [FAQ — Como atualizo um projeto criado com uma versão antiga do 
   observabilidade, correlation-id/microsserviços e abertura automática de bugs.
 - [`docs/extension-candidates.md`](extension-candidates.md) — quais extensões
   (oficiais e da Nimbus-Code) considerar instalar além do bundle padrão.
+
+## Phase 2: Automated Preset Synchronization (SPEC 020)
+
+After Phase 1 establishes the governance model, Phase 2 automates ongoing validation
+and synchronization of preset versions across satellite repositories.
+
+### Weekly Satellite Preset Audit
+
+**Schedule**: Every Monday at 09:00 UTC
+
+The central repository runs `.github/workflows/satellite-preset-audit.yml`, which:
+
+1. Queries all satellite repos in the organization
+2. Checks their `.specify/presets/.registry` version
+3. Compares against the central `preset.yml` version (currently 1.16.0)
+4. Reports status for each repo: `in_sync`, `drift`, or `not_bootstrapped`
+5. If drifted repos found:
+   - Creates a GitHub issue with title: "Satellite repos out of sync with vX.Y.Z: N repos need upgrade"
+   - Attaches CSV report as artifact
+   - Labels: `type:automation`, `area:preset-sync`, `priority:P2`
+
+**View audit results**:
+```bash
+# Download latest audit report
+gh run list --workflow=satellite-preset-audit.yml --limit 1 \
+  --json databaseId,createdAt --jq '.[0].databaseId' | xargs -I {} \
+  gh run download {} -n preset-audit-report
+```
+
+### Auto-PR Generation for Drifted Repos
+
+When the audit detects drifted repos, the workflow `.github/workflows/auto-sync-preset.yml`
+can automatically create PRs to sync them. This workflow:
+
+1. Reads the audit issue with detected drifts
+2. For each drifted repo:
+   - Checks if there are open PRs (skips if active development)
+   - Creates branch: `fix/preset-sync-to-vX.Y.Z`
+   - Runs `bootstrap.sh --refresh-preset` to update the preset
+   - Creates PR with:
+     - Title: `fix(preset): sync to vX.Y.Z`
+     - Body: Links to audit issue, explains sync
+     - Labels: `sync:preset-version`, `type:automation`
+
+**Manual Trigger**:
+```bash
+# Sync a specific drifted repo
+gh workflow run auto-sync-preset.yml \
+  -f repo="org/satellite-repo" \
+  -f target_version="1.16.0"
+```
+
+**Manual Override**: If you need to prevent auto-sync for a specific repo:
+- Add label `no:auto-sync` to the PR before it's auto-created, OR
+- Close the audit issue before the workflow runs
+
+### Preset Version Validation in CI/CD
+
+When you open a PR to a satellite repo touching `.specify/` files, the workflow
+`.github/workflows/validate-bootstrap.yml` runs automatically:
+
+1. Executes `.specify/scripts/bash/detect-preset-version-mismatch.sh`
+2. Checks if `.specify/presets/.registry` version matches `preset.yml`
+3. If drift detected:
+   - Comments on PR with version mismatch details
+   - Fails the check to block merge
+   - Provides guidance: "Please run bootstrap.sh --refresh-preset"
+
+**To fix version drift in your PR**:
+```bash
+# In your satellite repo
+./bootstrap.sh --refresh-preset
+
+# Commit and push
+git add .specify/
+git commit -m "chore(preset): refresh to v1.16.0"
+git push
+```
+
+### Manual Preset Refresh
+
+If you need to manually update a satellite repo's preset outside the auto-sync workflow:
+
+```bash
+# In the satellite repository
+./bootstrap.sh --refresh-preset
+
+# Review changes
+git diff --stat
+
+# Create PR for team review
+git checkout -b fix/preset-sync-to-v1.16.0
+git add .specify/
+git commit -m "chore(preset): refresh to v1.16.0
+
+Manually synced to central preset v1.16.0."
+git push origin fix/preset-sync-to-v1.16.0
+
+# Open PR in GitHub UI
+```
+
+### Phase 2 Compliance Checklist
+
+- [ ] Your satellite repo receives weekly audit checks
+- [ ] You understand the audit issue and auto-PR flow
+- [ ] You know how to manually refresh preset if needed
+- [ ] You've reviewed `.specify/presets/.registry` version matches expectations
+- [ ] Your CI/CD validates preset versions on `.specify/` PRs
+

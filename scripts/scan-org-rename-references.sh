@@ -133,3 +133,54 @@ echo "2) aplicar as trocas de URL/slug"
 echo "3) abrir PR"
 echo "4) validar CI"
 echo "5) mergear e só então seguir para o próximo lote"
+
+# ============================================================================
+# Mode: satellite-preset-audit (added by T-046)
+# ============================================================================
+# Usage: ./scan-org-rename-references.sh --mode satellite-preset-audit [--org ORG] [--output OUTPUT]
+#
+# Scans all satellite repos and checks preset version alignment with central repo.
+# Outputs CSV report: repo,current_version,drift_status,last_updated
+# ============================================================================
+
+if [[ "$MODE" == "satellite-preset-audit" ]]; then
+  ORG="${ORG:-venha-pra-nuvem}"
+  OUTPUT_FILE="${OUTPUT:-preset-audit-$(date +%Y%m%d-%H%M%S).csv}"
+  CENTRAL_VERSION="1.16.0"  # From specs/020-satellite-repo-governance/tasks.md
+  
+  echo "repo,current_version,drift_status,last_updated" > "$OUTPUT_FILE"
+  
+  # Query GitHub API for all repos in org
+  repos=$(gh repo list "$ORG" --limit 1000 --json nameWithOwner --jq '.[].nameWithOwner')
+  
+  for repo in $repos; do
+    # Skip central repo (we're looking at satellites only)
+    if [[ "$repo" == *"nimbus-code-spec-kit-template" ]]; then
+      continue
+    fi
+    
+    # Query preset version from satellite repo
+    preset_version=$(gh api "repos/$repo/contents/.specify/presets/.registry" \
+      --jq '.content' 2>/dev/null | base64 -d | \
+      jq -r '.version // "unknown"' 2>/dev/null || echo "missing")
+    
+    # Determine drift status
+    if [[ "$preset_version" == "$CENTRAL_VERSION" ]]; then
+      drift_status="in_sync"
+    elif [[ "$preset_version" == "missing" ]] || [[ "$preset_version" == "unknown" ]]; then
+      drift_status="not_bootstrapped"
+    else
+      drift_status="drift"
+    fi
+    
+    # Get last update time for .specify directory
+    last_updated=$(gh api "repos/$repo/commits" \
+      --jq 'map(select(.files[].path | startswith(".specify"))) | .[0].commit.committer.date // "N/A"' 2>/dev/null || echo "N/A")
+    
+    echo "$repo,$preset_version,$drift_status,$last_updated" >> "$OUTPUT_FILE"
+  done
+  
+  echo "✓ Preset audit complete. Report saved to: $OUTPUT_FILE"
+  echo "  Drifted repos:"
+  grep ",drift," "$OUTPUT_FILE" | cut -d',' -f1
+fi

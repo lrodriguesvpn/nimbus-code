@@ -7,6 +7,10 @@ set -euo pipefail
 # Teste de integração (T012, Feature 012, AC-2): valida o cálculo dos 4
 # indicadores DORA implementados em scripts/process-metrics-report.sh
 #
+# Estendido (T007, Feature 021, FR-011): cobre também as regras de qualidade
+# de dados (duplicidade e consistência temporal) adicionadas à coleta
+# automática existente.
+#
 # Estratégia: sobrepõe `gh` com uma função bash que retorna fixtures JSON
 # em memória (sem chamar a API real), depois executa o script real e valida
 # a saída via grep/assert.
@@ -57,6 +61,19 @@ MTTR_FIXTURE='[
 
 # Fixture vazia para caso sem dados
 EMPTY_FIXTURE='[]'
+
+# Fixture com item duplicado (mesmo number aparecendo duas vezes) — T007,
+# feature 021, FR-011: checagem de ausência de duplicidade
+DUPLICATE_FIXTURE='[
+  {"number":1,"createdAt":"2026-01-05T10:00:00Z","mergedAt":"2026-01-06T10:00:00Z"},
+  {"number":1,"createdAt":"2026-01-05T10:00:00Z","mergedAt":"2026-01-06T10:00:00Z"}
+]'
+
+# Fixture com inconsistência temporal (mergedAt antes de createdAt) — T007,
+# feature 021, FR-011: checagem de consistência temporal
+TEMPORAL_INCONSISTENCY_FIXTURE='[
+  {"number":99,"createdAt":"2026-01-20T10:00:00Z","mergedAt":"2026-01-15T10:00:00Z"}
+]'
 
 # --- Mock do gh CLI ----------------------------------------------------------
 # Intercepta `gh pr list` / `gh issue list` e retorna fixtures por label.
@@ -168,6 +185,30 @@ if echo "$OUTPUT" | grep -qi "2.00 horas\|2,00 horas\|2.0 horas"; then
   pass "MTTR: 2.00 horas calculado corretamente"
 else
   fail "MTTR: esperava ~2.00 horas, obteve: $(echo "$OUTPUT" | grep -i "mttr\|hora" || echo '(nada)')"
+fi
+
+# Teste 5: qualidade de dados detecta item duplicado (T007, FR-011)
+OUTPUT=$(run_with_mock "$DUPLICATE_FIXTURE" "$EMPTY_FIXTURE" "$EMPTY_FIXTURE" "$EMPTY_FIXTURE" "$EMPTY_FIXTURE" 2>/dev/null || true)
+if echo "$OUTPUT" | grep -qi "duplicidade detectada.*#1"; then
+  pass "qualidade de dados: duplicidade detectada corretamente (item #1 repetido)"
+else
+  fail "qualidade de dados: esperava alerta de duplicidade para #1, obteve: $(echo "$OUTPUT" | grep -i "duplicidade\|qualidade" || echo '(nada)')"
+fi
+
+# Teste 6: qualidade de dados detecta inconsistência temporal (T007, FR-011)
+OUTPUT=$(run_with_mock "$TEMPORAL_INCONSISTENCY_FIXTURE" "$EMPTY_FIXTURE" "$EMPTY_FIXTURE" "$EMPTY_FIXTURE" "$EMPTY_FIXTURE" 2>/dev/null || true)
+if echo "$OUTPUT" | grep -qi "inconsistência temporal.*#99"; then
+  pass "qualidade de dados: inconsistência temporal detectada corretamente (item #99 fechado antes de criado)"
+else
+  fail "qualidade de dados: esperava alerta de inconsistência temporal para #99, obteve: $(echo "$OUTPUT" | grep -i "inconsistência\|qualidade" || echo '(nada)')"
+fi
+
+# Teste 7: sem duplicidade/inconsistência, nenhum alerta de qualidade é emitido
+OUTPUT=$(run_with_mock "$DEPLOY_FIXTURE" "$LEAD_FIXTURE" "$FAILURE_FIXTURE" "$EMPTY_FIXTURE" "$MTTR_FIXTURE" 2>/dev/null || true)
+if echo "$OUTPUT" | grep -q "nenhuma duplicidade ou inconsistência"; then
+  pass "qualidade de dados: nenhum alerta falso-positivo com dados limpos"
+else
+  fail "qualidade de dados: esperava confirmação de dados limpos, obteve: $(echo "$OUTPUT" | grep -i "qualidade" || echo '(nada)')"
 fi
 
 # Resumo

@@ -15,6 +15,28 @@
 
 ---
 
+## Modelo de Entrevista de Descoberta (antes do Specify)
+
+> Antes de redigir qualquer `spec.md`, consulte
+> `presets/nimbus-code-standards/templates/feature-artifacts/interview-template.md`
+> (ou sua cópia em `.specify/presets/`) — o modelo padrão de entrevista de
+> descoberta, com 4 blocos obrigatórios: **Negócio** (o quê e por quê, nunca o
+> como técnico), **Infraestrutura**, **Segurança** e **LGPD**.
+
+- O `/speckit-specify` verifica se o input recebido (descrição da feature ou
+  transcript de entrevista já preenchido) cobre os 4 blocos. Bloco ausente vira
+  candidato a `[NEEDS CLARIFICATION]` — nunca é preenchido com suposição
+  silenciosa, especialmente Segurança e LGPD.
+- Se o input já vier como uma entrevista preenchida (ex.: resumo de reunião),
+  ele é salvo como `specs/<feature-slug>/interview.md` usando a estrutura do
+  template, preservando as respostas dadas.
+- Este modelo é usado hoje por humanos (BA/ADE) conduzindo a conversa
+  manualmente. Condução automatizada via Microsoft Teams (ex.: por um agente
+  de intake corporativo) é um roadmap possível — trate como capacidade futura,
+  não como comportamento já implementado neste template.
+
+---
+
 ## Isolamento de Sessão e Regras de Branch
 
 Você está executando como agente numa **sessão de escopo fechado**. As seguintes
