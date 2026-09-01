@@ -20,6 +20,10 @@ System**.
 | — extensão `nimbus-code-backlog-sync` | `1.0.0` |
 | — workflow `nimbus-code-full-cycle` | `1.0.0` |
 
+O bundle também instala o fluxo de descoberta **`/speckit-interview`**, que
+gera `specs/<feature>/interview.md` antes do `/speckit-specify` e valida a
+completude da entrevista com um script determinístico.
+
 **Atualizar a versão acima requer aprovação formal** (mesma regra do próprio
 Nimbus Code) — não altere por conta própria fora do fluxo do PR automático semanal
 (`.github/workflows/update-speckit-and-bundle.yml`).
