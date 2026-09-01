@@ -14,6 +14,12 @@ SATELLITE_DOMAINS=""
 CUSTOM_DOMAIN_JUSTIFICATION=""
 CUSTOM_DOMAIN_OWNERSHIP=""
 
+IGNORED_TOP_LEVEL_ARTIFACTS=(
+  .github .specify docs templates presets extensions workflows tests specs bundles reports scripts
+  README.md LICENSE .gitignore .editorconfig .npmrc .prettierrc .prettierrc.json .prettierrc.yml
+  .eslintrc .eslintrc.json .markdownlint.json .tool-versions
+)
+
 print_usage() {
   cat <<'EOF'
 Usage:
@@ -408,11 +414,11 @@ else
   echo "  Interpretation: no relevant application code was found, so the repo follows the greenfield path."
 fi
 echo "  Evidence: $CONTEXT_INDICATOR"
-  resolve_greenfield_topology_decision
+resolve_greenfield_topology_decision
 
-  echo "-> Initializing Nimbus Code in $WORKDIR (integration: $INTEGRATION)..."
-  specify init --here --integration "$INTEGRATION" --force
-  persist_topology_decision
+echo "-> Initializing Nimbus Code in $WORKDIR (integration: $INTEGRATION)..."
+specify init --here --integration "$INTEGRATION" --force
+persist_topology_decision
 
 echo "-> Installing preset $SELECTED_PRESET..."
 # Detect a stale already-installed preset and upgrade it automatically.
@@ -423,7 +429,7 @@ echo "-> Installing preset $SELECTED_PRESET..."
 # recorded in .specify/presets/.registry against the version declared in
 # the source preset.yml, and remove+reinstall when they differ.
 SOURCE_PRESET_MANIFEST="$LOCAL_PATH/presets/$SELECTED_PRESET/preset.yml"
-SOURCE_PRESET_VERSION="$(grep -E '^version:' "$SOURCE_PRESET_MANIFEST" 2>/dev/null | head -1 | sed -E 's/^version:[[:space:]]*"?([^"[:space:]]+)"?.*/\1/')"
+SOURCE_PRESET_VERSION="$({ grep -E '^version:' "$SOURCE_PRESET_MANIFEST" 2>/dev/null || true; } | head -1 | sed -E 's/^version:[[:space:]]*"?([^"[:space:]]+)"?.*/\1/')"
 INSTALLED_REGISTRY="$WORKDIR/.specify/presets/.registry"
 INSTALLED_PRESET_VERSION=""
 if [[ -f "$INSTALLED_REGISTRY" ]] && command -v python3 >/dev/null 2>&1; then

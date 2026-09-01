@@ -146,7 +146,7 @@ echo "5) mergear e só então seguir para o próximo lote"
 if [[ "$MODE" == "satellite-preset-audit" ]]; then
   ORG="${ORG:-venha-pra-nuvem}"
   OUTPUT_FILE="${OUTPUT:-preset-audit-$(date +%Y%m%d-%H%M%S).csv}"
-  CENTRAL_VERSION="1.16.0"  # From specs/020-satellite-repo-governance/tasks.md
+  CENTRAL_VERSION="1.17.0"  # From specs/020-satellite-repo-governance/tasks.md
   
   echo "repo,current_version,drift_status,last_updated" > "$OUTPUT_FILE"
   
