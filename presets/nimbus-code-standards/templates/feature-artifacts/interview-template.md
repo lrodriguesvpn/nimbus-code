@@ -53,6 +53,7 @@ sistema pedido*, não da reunião).
 S1 — função isolada sem dependência externa), use apenas as perguntas
 marcadas com ⚡ abaixo — geralmente 9 perguntas no total, ~10 minutos. As
 demais podem ser puladas nesta rodada; se a complexidade real revelar-se maior
+during a conversa, mude para o modo Completo sem constrangimento.*
 durante a conversa, mude para o modo Completo sem constrangimento.*
 
 Se não tiver certeza da complexidade antes de começar, comece pelo modo
