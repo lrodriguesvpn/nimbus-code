@@ -15,6 +15,28 @@
 
 ---
 
+## Modelo de Entrevista de Descoberta (antes do Specify)
+
+> Antes de redigir qualquer `spec.md`, consulte
+> `presets/nimbus-code-standards/templates/feature-artifacts/interview-template.md`
+> (ou sua cópia em `.specify/presets/`) — o modelo padrão de entrevista de
+> descoberta, com 4 blocos obrigatórios: **Negócio** (o quê e por quê, nunca o
+> como técnico), **Infraestrutura**, **Segurança** e **LGPD**.
+
+- O `/speckit-specify` verifica se o input recebido (descrição da feature ou
+  transcript de entrevista já preenchido) cobre os 4 blocos. Bloco ausente vira
+  candidato a `[NEEDS CLARIFICATION]` — nunca é preenchido com suposição
+  silenciosa, especialmente Segurança e LGPD.
+- Se o input já vier como uma entrevista preenchida (ex.: resumo de reunião),
+  ele é salvo como `specs/<feature-slug>/interview.md` usando a estrutura do
+  template, preservando as respostas dadas.
+- Este modelo é usado hoje por humanos (BA/ADE) conduzindo a conversa
+  manualmente. Condução automatizada via Microsoft Teams (ex.: por um agente
+  de intake corporativo) é um roadmap possível — trate como capacidade futura,
+  não como comportamento já implementado neste template.
+
+---
+
 ## Isolamento de Sessão e Regras de Branch
 
 Você está executando como agente numa **sessão de escopo fechado**. As seguintes
@@ -25,6 +47,9 @@ regras são não-negociáveis:
    e informe o Dev — nunca edite silenciosamente fora do escopo.
 2. **Não faça merge.** Ao finalizar, abra um PR para `develop` com o checklist
    da fase preenchido. O merge é decisão exclusiva do Dev após revisão.
+   **Obrigatório no corpo do PR:** para cada issue implementada, inclua
+   `Closes #<n>` (ou `Fixes #<n>`). Só mencionar `#<n>` em texto/tabela não
+   fecha a issue automaticamente.
 3. **1 branch por sessão.** Não crie branches adicionais além do declarado no
    início da sessão. Se a tarefa exigir mais do que o escopo permite, **pare e
    informe** — não subdivida por conta própria em novos branches.
@@ -204,6 +229,49 @@ humana constante. Instalada via `scripts/setup-github-labels.sh`.
   explicitamente. Se o catálogo de reuso já tiver entradas originadas de
   harvest para o bounded context ativo, declare quais se aplicam na seção
   "Padrão reutilizado encontrado?" do `plan.md`, junto às entradas manuais.
+
+## Harness Engineering (Aprendizado com Erros)
+
+> **Passo obrigatório antes de qualquer `/nimbus-code-plan`**: consulte também
+> `docs/harness/harness-catalog.yaml` buscando por `tags` e `bounded_context`
+> relacionados ao domínio da feature — ANTES de redigir o `plan.md`.
+>
+> Use `./scripts/harness-search.sh <tag>` ou `grep` direto no arquivo.
+
+- Se encontrar match: declare na seção **"Harness Gate"** do `plan.md`:
+  - ID(s) do harness consultado(s)
+  - Padrão de erro evitado
+  - Como foi mitigado preventivamente nesta feature
+- Se não encontrar match: declare explicitamente `"Nenhum padrão de erro relevante
+  encontrado"` na seção "Harness Gate" — **nunca deixar em branco**.
+- Se o catálogo estiver vazio: declare `"Catálogo vazio — nenhum padrão disponível"`.
+- Se durante a implementação você (agente) perceber que está prestes a cometer um
+  padrão catalogado no harness: **pare imediatamente** e informe o Dev antes de continuar.
+- Ao fechar uma feature com retrabalho > 20% ou incidente: abrir Issue com label
+  `harness:pending` e preencher entrada no `harness-catalog.yaml`.
+- Detalhamento completo: `docs/harness/harness-guide.md`.
+
+---
+
+## Playbook de Sucesso (Aprendizado com Acertos)
+
+> **Passo obrigatório antes de qualquer `/nimbus-code-plan`**: consulte também
+> `docs/playbooks/success-catalog.yaml` buscando por `tags` e `bounded_context`
+> relacionados ao domínio da feature — ANTES de redigir o `plan.md`.
+>
+> Use `grep -i "<tag>" docs/playbooks/success-catalog.yaml` para busca rápida.
+
+- Se encontrar match: declare na seção **"Playbook de Sucesso Gate"** do `plan.md`:
+  - ID(s) do playbook consultado(s)
+  - O que funcionou
+  - Como foi reaplicado nesta feature
+- Se não encontrar match: declare explicitamente `"Nenhum padrão relevante encontrado"`
+  na seção "Playbook de Sucesso Gate" — **nunca deixar em branco**.
+- Se o catálogo estiver vazio: declare `"Catálogo vazio — nenhum padrão disponível"`.
+- Ao fechar uma feature com padrão digno de repetição: o checklist de fechamento do
+  `tasks.md` pergunta "o que deu certo?". Registrar em `docs/playbooks/success-catalog.yaml`
+  (requer validação humana antes de catalogar).
+- Detalhamento completo: `docs/playbooks/README.md`.
 
 ---
 

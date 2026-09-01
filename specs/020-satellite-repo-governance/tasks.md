@@ -15,9 +15,9 @@
 
 **Objetivo**: preparar os artefatos e pontos de entrada compartilhados antes de alterar o comportamento do bootstrap e a documentação operacional.
 
-- [ ] T001 Consolidar o escopo final e a separação formal entre governança permanente e bugfix operacional em `specs/020-satellite-repo-governance/plan.md`
-- [ ] T002 [P] Alinhar `specs/020-satellite-repo-governance/research.md`, `specs/020-satellite-repo-governance/data-model.md` e `specs/020-satellite-repo-governance/contracts/topology-intake.contract.md` para usar a mesma terminologia de `greenfield`, `brownfield`, `monorepo`, `multirepo`, `repo central` e `repo satélite`
-- [ ] T003 [P] Preparar a baseline de validação em `specs/020-satellite-repo-governance/quickstart.md` com os cenários AC-1 a AC-7 e referências aos arquivos candidatos de implementação
+- [x] T001 Consolidar o escopo final e a separação formal entre governança permanente e bugfix operacional em `specs/020-satellite-repo-governance/plan.md`
+- [x] T002 [P] Alinhar `specs/020-satellite-repo-governance/research.md`, `specs/020-satellite-repo-governance/data-model.md` e `specs/020-satellite-repo-governance/contracts/topology-intake.contract.md` para usar a mesma terminologia de `greenfield`, `brownfield`, `monorepo`, `multirepo`, `repo central` e `repo satélite`
+- [x] T003 [P] Preparar a baseline de validação em `specs/020-satellite-repo-governance/quickstart.md` com os cenários AC-1 a AC-7 e referências aos arquivos candidatos de implementação
 
 **Checkpoint**: artefatos da feature usam a mesma linguagem e deixam claro que esta entrega não absorve bugfixes técnicos paralelos.
 
@@ -27,9 +27,9 @@
 
 **Objetivo**: estabelecer a infraestrutura mínima de implementação e rastreabilidade antes das user stories.
 
-- [ ] T004 Atualizar `bootstrap.sh` para introduzir uma etapa explícita de classificação `greenfield` vs `brownfield` baseada em presença de código de aplicação relevante
-- [ ] T005 [P] Adicionar fixtures e asserções iniciais de teste para classificação de contexto em `tests/bootstrap/bootstrap-entrypoints.bats`
-- [ ] T006 [P] Atualizar `specs/020-satellite-repo-governance/graph.yaml`, `specs/020-satellite-repo-governance/graph.md` e `specs/020-satellite-repo-governance/impact-map.md` se a implementação final exigir refinamento nos módulos planejados
+- [x] T004 Atualizar `bootstrap.sh` para introduzir uma etapa explícita de classificação `greenfield` vs `brownfield` baseada em presença de código de aplicação relevante
+- [x] T005 [P] Adicionar fixtures e asserções iniciais de teste para classificação de contexto em `tests/bootstrap/bootstrap-entrypoints.bats`
+- [x] T006 [P] Atualizar `specs/020-satellite-repo-governance/graph.yaml`, `specs/020-satellite-repo-governance/graph.md` e `specs/020-satellite-repo-governance/impact-map.md` se a implementação final exigir refinamento nos módulos planejados
 
 **Checkpoint**: o bootstrap já tem o gancho estrutural da classificação inicial, e a feature tem lastro de teste/traçabilidade antes de avançar por user story.
 
@@ -41,11 +41,11 @@
 
 **Independent Test**: executar os cenários com um repositório quase vazio e com um repositório contendo código de aplicação relevante e confirmar que o fluxo diverge corretamente.
 
-- [ ] T007 [P] [US1] Implementar a heurística de “código de aplicação relevante” em `bootstrap.sh`
-- [ ] T008 [US1] Adicionar mensagens operacionais explícitas para explicar a classificação `greenfield` ou `brownfield` em `bootstrap.sh`
-- [ ] T009 [P] [US1] Cobrir os cenários AC-1 e AC-2 com fixtures/asserções shell em `tests/bootstrap/bootstrap-entrypoints.bats`
-- [ ] T010 [US1] Atualizar a documentação do onboarding inicial em `README.md` para refletir a distinção entre greenfield e brownfield
-- [ ] T011 [US1] Validar US1 contra AC-1, AC-2, FR-001 e SC-001 em `specs/020-satellite-repo-governance/quickstart.md`
+- [x] T007 [P] [US1] Implementar a heurística de “código de aplicação relevante” em `bootstrap.sh`
+- [x] T008 [US1] Adicionar mensagens operacionais explícitas para explicar a classificação `greenfield` ou `brownfield` em `bootstrap.sh`
+- [x] T009 [P] [US1] Cobrir os cenários AC-1 e AC-2 com fixtures/asserções shell em `tests/bootstrap/bootstrap-entrypoints.bats`
+- [x] T010 [US1] Atualizar a documentação do onboarding inicial em `README.md` para refletir a distinção entre greenfield e brownfield
+- [x] T011 [US1] Validar US1 contra AC-1, AC-2, FR-001 e SC-001 em `specs/020-satellite-repo-governance/quickstart.md`
 
 ---
 
@@ -55,11 +55,11 @@
 
 **Independent Test**: percorrer o fluxo greenfield e confirmar que não é possível concluir a escolha estrutural sem registrar o motivo.
 
-- [ ] T012 [P] [US2] Implementar o prompt e a captura da decisão `monorepo` vs `multirepo` em `bootstrap.sh`
-- [ ] T013 [US2] Exigir e persistir a justificativa da decisão estrutural no fluxo operacional descrito em `bootstrap.sh` e `.specify/feature.json`
-- [ ] T014 [P] [US2] Atualizar `specs/020-satellite-repo-governance/contracts/topology-intake.contract.md` e `specs/020-satellite-repo-governance/data-model.md` para refletir o formato final do registro da decisão
-- [ ] T015 [US2] Cobrir AC-3 com testes shell/asserções em `tests/bootstrap/bootstrap-entrypoints.bats`
-- [ ] T016 [US2] Validar US2 contra AC-3, FR-002, FR-003 e SC-002 em `specs/020-satellite-repo-governance/quickstart.md`
+- [x] T012 [P] [US2] Implementar o prompt e a captura da decisão `monorepo` vs `multirepo` em `bootstrap.sh`
+- [x] T013 [US2] Exigir e persistir a justificativa da decisão estrutural no fluxo operacional descrito em `bootstrap.sh` e `.specify/feature.json`
+- [x] T014 [P] [US2] Atualizar `specs/020-satellite-repo-governance/contracts/topology-intake.contract.md` e `specs/020-satellite-repo-governance/data-model.md` para refletir o formato final do registro da decisão
+- [x] T015 [US2] Cobrir AC-3 com testes shell/asserções em `tests/bootstrap/bootstrap-entrypoints.bats`
+- [x] T016 [US2] Validar US2 contra AC-3, FR-002, FR-003 e SC-002 em `specs/020-satellite-repo-governance/quickstart.md`
 
 ---
 
@@ -69,11 +69,11 @@
 
 **Independent Test**: seguir o fluxo greenfield multirepo e confirmar que FRONT, BACK, DESIGN, DATA e JOBS aparecem como baseline recomendada, com espaço explícito para adaptação.
 
-- [ ] T017 [P] [US3] Atualizar `bootstrap.sh` para fazer o handoff explícito do fluxo multirepo para a definição de domínios após a primeira spec estrutural
-- [ ] T018 [US3] Implementar em `docs/developer-guide.md` a sugestão da baseline FRONT/BACK/DESIGN/DATA/JOBS na orientação pós-primeira-spec, exigindo justificativa e ownership explícitos em domínios adaptados
-- [ ] T020 [P] [US3] Atualizar `README.md` com a recomendação de baseline de domínios satélite e o momento correto de aplicação em projetos greenfield multirepo
-- [ ] T021 [US3] Sincronizar `specs/020-satellite-repo-governance/research.md`, `specs/020-satellite-repo-governance/data-model.md` e `specs/020-satellite-repo-governance/contracts/topology-intake.contract.md` com a regra final de baseline adaptável, formato mínimo de justificativa e definição de ownership
-- [ ] T022 [US3] Validar US3 contra AC-4, AC-5, FR-004, FR-005, FR-006 e SC-003 em `specs/020-satellite-repo-governance/quickstart.md`
+- [x] T017 [P] [US3] Atualizar `bootstrap.sh` para fazer o handoff explícito do fluxo multirepo para a definição de domínios após a primeira spec estrutural
+- [x] T018 [US3] Implementar em `docs/developer-guide.md` a sugestão da baseline FRONT/BACK/DESIGN/DATA/JOBS na orientação pós-primeira-spec, exigindo justificativa e ownership explícitos em domínios adaptados
+- [x] T020 [P] [US3] Atualizar `README.md` com a recomendação de baseline de domínios satélite e o momento correto de aplicação em projetos greenfield multirepo
+- [x] T021 [US3] Sincronizar `specs/020-satellite-repo-governance/research.md`, `specs/020-satellite-repo-governance/data-model.md` e `specs/020-satellite-repo-governance/contracts/topology-intake.contract.md` com a regra final de baseline adaptável, formato mínimo de justificativa e definição de ownership
+- [x] T022 [US3] Validar US3 contra AC-4, AC-5, FR-004, FR-005, FR-006 e SC-003 em `specs/020-satellite-repo-governance/quickstart.md`
 
 ---
 
@@ -83,11 +83,11 @@
 
 **Independent Test**: revisar a documentação e confirmar que ela separa claramente o papel do repo central do papel do satélite, inclusive quando uma demanda nasce no satélite.
 
-- [ ] T023 [P] [US4] Expandir a seção MultiRepo em `docs/developer-guide.md` para declarar explicitamente que `spec.md`, `plan.md`, `tasks.md`, grafos, contratos e checklists vivem apenas no repo central
-- [ ] T024 [US4] Atualizar `docs/bounded-contexts.yaml` com a formulação final da política “specs só no repo central”
-- [ ] T025 [P] [US4] Atualizar `README.md` para refletir o papel do repo central versus satélites no onboarding greenfield
-- [ ] T026 [US4] Atualizar `templates/BROWNFIELD-SETUP-CHECKLIST.md` para evitar que o fluxo brownfield sugira `specs/` locais em satélites
-- [ ] T027 [US4] Validar US4 contra AC-6, FR-007 e FR-008 em `specs/020-satellite-repo-governance/quickstart.md`
+- [x] T023 [P] [US4] Expandir a seção MultiRepo em `docs/developer-guide.md` para declarar explicitamente que `spec.md`, `plan.md`, `tasks.md`, grafos, contratos e checklists vivem apenas no repo central
+- [x] T024 [US4] Atualizar `docs/bounded-contexts.yaml` com a formulação final da política “specs só no repo central”
+- [x] T025 [P] [US4] Atualizar `README.md` para refletir o papel do repo central versus satélites no onboarding greenfield
+- [x] T026 [US4] Atualizar `templates/BROWNFIELD-SETUP-CHECKLIST.md` para evitar que o fluxo brownfield sugira `specs/` locais em satélites
+- [x] T027 [US4] Validar US4 contra AC-6, FR-007 e FR-008 em `specs/020-satellite-repo-governance/quickstart.md`
 
 ---
 
@@ -97,10 +97,10 @@
 
 **Independent Test**: verificar que a documentação e os templates deixam inequívoco que o satélite se atualiza pelo mecanismo oficial e sempre por PR revisado.
 
-- [ ] T028 [P] [US5] Atualizar `docs/developer-guide.md` com o processo operacional central → satélite baseado no workflow oficial de update
-- [ ] T029 [US5] Atualizar `templates/workflows/update-speckit-and-bundle.yml` para reforçar, via comentários/documentação inline, o papel do workflow no alinhamento entre repo central e satélites
-- [ ] T030 [P] [US5] Atualizar `README.md` para explicar quando e como o workflow oficial deve ser usado em satélites bootstrapados
-- [ ] T031 [US5] Validar US5 contra AC-7, FR-009, FR-010 e SC-004 em `specs/020-satellite-repo-governance/quickstart.md`
+- [x] T028 [P] [US5] Atualizar `docs/developer-guide.md` com o processo operacional central → satélite baseado no workflow oficial de update
+- [x] T029 [US5] Atualizar `templates/workflows/update-speckit-and-bundle.yml` para reforçar, via comentários/documentação inline, o papel do workflow no alinhamento entre repo central e satélites
+- [x] T030 [P] [US5] Atualizar `README.md` para explicar quando e como o workflow oficial deve ser usado em satélites bootstrapados
+- [x] T031 [US5] Validar US5 contra AC-7, FR-009, FR-010 e SC-004 em `specs/020-satellite-repo-governance/quickstart.md`
 
 ---
 
@@ -108,10 +108,10 @@
 
 **Objetivo**: concluir a consistência final, cobertura de testes e artefatos de governança da feature.
 
-- [ ] T032 [P] Consolidar a consistência terminológica e a separação FR-011 entre governança permanente e bugfix operacional em `bootstrap.sh`, `README.md`, `docs/developer-guide.md`, `docs/bounded-contexts.yaml` e `templates/BROWNFIELD-SETUP-CHECKLIST.md`
-- [ ] T033 [P] Atualizar `specs/020-satellite-repo-governance/plan.md`, `specs/020-satellite-repo-governance/graph.yaml`, `specs/020-satellite-repo-governance/graph.md` e `specs/020-satellite-repo-governance/impact-map.md` para refletir a implementação final
-- [ ] T034 Adicionar entrada reutilizável de governança greenfield multi-repo em `docs/reuse-catalog.yaml`
-- [ ] T035 Executar a validação final dos cenários AC-1 a AC-7 e da separação FR-011 em `specs/020-satellite-repo-governance/quickstart.md`
+- [x] T032 [P] Consolidar a consistência terminológica e a separação FR-011 entre governança permanente e bugfix operacional em `bootstrap.sh`, `README.md`, `docs/developer-guide.md`, `docs/bounded-contexts.yaml` e `templates/BROWNFIELD-SETUP-CHECKLIST.md`
+- [x] T033 [P] Atualizar `specs/020-satellite-repo-governance/plan.md`, `specs/020-satellite-repo-governance/graph.yaml`, `specs/020-satellite-repo-governance/graph.md` e `specs/020-satellite-repo-governance/impact-map.md` para refletir a implementação final
+- [x] T034 Adicionar entrada reutilizável de governança greenfield multi-repo em `docs/reuse-catalog.yaml`
+- [x] T035 Executar a validação final dos cenários AC-1 a AC-7 e da separação FR-011 em `specs/020-satellite-repo-governance/quickstart.md`
 
 ---
 
@@ -248,3 +248,87 @@ Humano: sim
 ## Referência
 - AC-ID: AC-1, AC-3, AC-4, AC-6, AC-7
 - Feature: `specs/020-satellite-repo-governance`
+
+---
+
+## PHASE 2: Bootstrap Detection & Satellite Monitoring Automation
+
+*Status*: Complete ✅  
+**Estimated Duration**: 1–2 weeks  
+**Parallelizable with**: SPEC 022 implementation  
+**Complexity**: S2 (build-time scripts, no new service)  
+
+### Phase 2 Overview
+
+Phase 1 established the governance model and applied it manually to 31 repos.
+Phase 2 automates the ongoing validation and monitoring so satellite repos 
+stay synchronized with the central preset version without manual intervention.
+
+### User Stories & Tasks
+
+#### LS-008: Bootstrap Detection & Validation Framework
+
+**Description**: Implement automated detection of mismatched preset versions 
+and provide tooling to validate bootstraps.
+
+- [x] **T-043**: Implement `detect_preset_version_mismatch()` in bootstrap.sh
+  - Compare `.specify/presets/.registry` version with `preset.yml` source version
+  - Return exit code 0 if matched, 1 if diverged
+  - Output JSON report of mismatches (file, expected, actual)
+
+- [x] **T-044**: Add GitHub Actions workflow `validate-bootstrap.yml`
+  - Trigger on: PR to any satellite repo touching `.specify/`
+  - Run detection logic, fail if version drift detected
+  - Comment on PR with version mismatch details
+
+- [x] **T-045**: Add test coverage for detection logic
+  - Test: exact version match → pass
+  - Test: missing .specify/ directory → error
+  - Test: stale registry version → detection
+  - Test: newer registry than source → warn
+
+#### LS-009: Continuous Satellite Monitoring
+
+**Description**: Extend org-wide audit to run on schedule and report preset 
+version drift across all satellite repos.
+
+- [x] **T-046**: Extend `scripts/scan-org-rename-references.sh`
+  - Add mode: `--mode satellite-preset-audit`
+  - Check each repo's `.specify/presets/.registry` vs central v1.16.0
+  - Output: CSV report (repo, current version, drift status, last updated)
+
+- [x] **T-047**: Create CI job `.github/workflows/satellite-preset-audit.yml`
+  - Trigger: Weekly (Monday 09:00 UTC)
+  - Run extended audit script
+  - Create issue if >0 repos are drifted: 
+    "Satellite repos out of sync with v1.16.0: N repos need upgrade"
+  - Attach report as artifact
+
+- [x] **T-048**: Implement auto-PR creation for drifted repos
+  - On audit detection of drift, automatically:
+    - Fork branch: `fix/preset-sync-to-vX.Y.Z`
+    - Run `bootstrap.sh --refresh-preset`
+    - Create PR with title: "fix(preset): sync to v1.16.0"
+    - Link to audit issue
+  - Only if repo is not already in active development (check for open PRs)
+
+#### LS-010: Phase 2 Quickstart & Documentation
+
+**Description**: Update quickstart and docs to reflect Phase 2 automation.
+
+- [x] **T-049**: Update `specs/020-satellite-repo-governance/quickstart.md`
+  - Document: "After Phase 1, satellite repos receive automated preset sync"
+  - Include: Weekly audit schedule, auto-PR flow, manual override steps
+
+- [x] **T-050**: Add section to `docs/developer-guide.md`
+  - Title: "Automated Preset Synchronization (Phase 2)"
+  - Explain: How weekly audit works, how auto-PRs are created, how to disable
+
+- [x] **T-051**: Document in `docs/label-taxonomy-and-autonomous-dev.md`
+  - Add label: `sync:preset-version` (auto-applied by audit-generated PRs)
+  - Add: How to override auto-sync, coordination with feature work
+
+---
+
+**End of Phase 2 scope. Estimated completion: 1–2 weeks.**
+

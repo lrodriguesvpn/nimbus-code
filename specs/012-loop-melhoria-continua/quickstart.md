@@ -56,10 +56,16 @@ nem com valor inventado (ver Edge Case do `spec.md`).
    preenchida com um dos três estados obrigatórios: match encontrado, nenhum
    match relevante, ou catálogo vazio — nunca em branco.
 
-## Validação retroativa desta sessão
+## Validação executada nesta sessão
 
-Esta spec foi escrita e planejada (spec.md + plan.md + research.md +
-data-model.md + quickstart.md + graph.yaml + graph.md + impact-map.md) sem
-ainda ter `tasks.md`/implementação — os cenários acima descrevem o
-comportamento esperado após `/speckit-tasks` + `/speckit-implement`, não o
-estado atual do repositório.
+- **Cenário 2 (AC-2)**: validado com suíte de integração do script:
+  - `bash tests/scripts/process-metrics-report.detect.test.sh` ✅
+- **Cenário 4 (AC-4)**: validado com suíte de cadência retro:
+  - `bash tests/scripts/process-metrics-report.retro-cadence.test.sh` ✅
+- **Cenários 1, 3 e 5 (AC-1, AC-3, AC-5)**: validados por inspeção estrutural
+  dos artefatos implementados:
+  - `docs/playbooks/success-catalog.yaml` e `docs/playbooks/README.md`
+  - `plan-template.md` (preset raiz e cópia em `.specify/...`) com seção
+    **Playbook de Sucesso Gate**
+  - `tasks-template.md` (preset raiz e cópia em `.specify/...`) com pergunta
+    explícita de "o que deu certo aqui?"

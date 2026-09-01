@@ -86,7 +86,15 @@ flowchart TD
     I --> A
 ```
 
-O bootstrap agora exige a selecao explicita do tipo de repositorio (`platform` ou `dev_standards`) antes de instalar qualquer preset. Em CI/automacao, use `--repo-type` para evitar falha explicita em modo nao interativo.
+O bootstrap agora exige a seleção explícita do tipo de repositório (`platform`
+ou `dev_standards`) antes de instalar qualquer preset. Em CI/automação, use
+`--repo-type` para evitar falha explícita em modo não interativo.
+
+No fluxo greenfield, o bootstrap também registra a decisão estrutural
+`monorepo` vs `multirepo` com justificativa e owner (`--delivery-model`,
+`--decision-reason`, `--decision-owner`). Quando a escolha for `multirepo`,
+a baseline recomendada FRONT/BACK/DESIGN/DATA/JOBS é usada como ponto de
+partida adaptável (com justificativa + ownership explícitos).
 
 ## O que este repositório contém
 
@@ -126,9 +134,9 @@ leia **obrigatoriamente** [`docs/brownfield-best-practices.md`](docs/brownfield-
 - Estratégia para múltiplas homologações com Feature Toggle.
 - Troubleshooting comum e estratégias de migração incremental.
 
-**TL;DR do brownfield**: sempre rode `/nimbus-code.constitution` **antes** de qualquer
+**TL;DR do brownfield**: sempre rode `/speckit.constitution` **antes** de qualquer
 feature (análise profunda do código existente é essencial); use
-`/nimbus-code.converge` **sempre** após `implement`; aceite múltiplos passes e
+`/speckit.converge` **sempre** após `implement`; aceite múltiplos passes e
 documentar exceções no Architecture Decision Log.
 
 Para o cenário de branches concorrentes (3+ homologações ativas), veja também
@@ -170,6 +178,21 @@ curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-
 ```
 
 Isso executa `specify init` (se ainda nao inicializado), exige a selecao explicita do tipo de repositorio (`platform` ou `dev_standards`) e instala preset + extensao + workflow na versao publicada mais recente da branch `main`.
+
+### Bootstrap intake: greenfield vs brownfield
+
+Antes de seguir para qualquer outra etapa, o `bootstrap.sh` classifica o
+repositório como **greenfield** ou **brownfield** com base em `relevant
+application code`.
+
+- **Greenfield**: repositórios com apenas `README`, `LICENSE`, workflows,
+  templates, scripts de setup ou esqueleto mínimo sem implementação real.
+- **Brownfield**: repositórios que já contêm código de aplicação relevante em
+  diretórios como `src/`, `app/`, `packages/`, `services/`, `frontend/` e
+  `backend`, ou manifests/testes já conectados a esse código.
+
+O resultado aparece no console com a interpretação operacional da escolha para
+facilitar validação humana e alinhamento com a [quickstart](specs/020-satellite-repo-governance/quickstart.md).
 
 **Alternativa mais robusta para troubleshooting, VPN/proxy ou shell com pipe restrito:**
 
@@ -360,6 +383,14 @@ Este repositório fornece arquivos prontos para copiar em projetos que usam o Ni
 | [`templates/workflows/update-speckit-and-bundle.yml`](templates/workflows/update-speckit-and-bundle.yml) | GitHub Action automática para notificar atualizações do bundle | `.github/workflows/update-speckit-and-bundle.yml` (todos os projetos) |
 | [`templates/workflows/devstats-corporate-integration.yml`](templates/workflows/devstats-corporate-integration.yml) | GitHub Action padrão de integração híbrida com DEVSTATS corporativo (evento + snapshot + reprocessamento manual) | `.github/workflows/devstats-corporate-integration.yml` (todos os projetos Nimbus-Code) |
 
+Além destes, o preset `nimbus-code-standards` já instala automaticamente (sem
+cópia manual) os seguintes workflows de governança em `.github/workflows/` de
+todo projeto consumidor: `graph-guard.yml` (bloqueia PR que altera código sem
+atualizar `graph.yaml`/`graph.md`), `agent-auto-assign.yml` (atribui o Copilot
+coding agent quando `agent:autonomous-ok` é aplicado), `promote-develop-to-main.yml`
+(abre o PR de promoção `develop` -> `main`), `normalize-issue-bodies.yml` e
+`close-referenced-issues-fallback.yml`.
+
 **Para brownfield especificamente**: depois de rodar `specify init` e o
 `bootstrap.sh`, copie o checklist para o seu `.specify/`:
 
@@ -392,6 +423,28 @@ Releases são publicadas via tag `vX.Y.Z` — o workflow
 componente em `.zip` e anexa como assets da GitHub Release correspondente. Os
 arquivos `catalog.json` em `presets/`, `extensions/`, `workflows/` e `bundles/`
 apontam para esses assets e são atualizados no mesmo PR que muda a versão.
+
+### Fluxo semi-automático de versão (develop -> main -> tag)
+
+1. **Durante PRs para `develop`**
+   - Classifique a PR com um label `release:*`:
+     - `release:major`, `release:minor`, `release:patch` ou `release:skip`.
+   - O gate
+     [`.github/workflows/release-readiness-gate.yml`](.github/workflows/release-readiness-gate.yml)
+     falha se a PR tocar superfície de release sem exatamente um label `release:*`.
+2. **Ao merge em `develop`**
+   - O workflow
+     [`.github/workflows/release-impact-advisor.yml`](.github/workflows/release-impact-advisor.yml)
+     registra recomendação de bump na issue operacional `Release Candidate: develop`.
+3. **Promoção para `main`**
+   - O workflow
+     [`.github/workflows/promote-develop-to-main.yml`](.github/workflows/promote-develop-to-main.yml)
+     abre/atualiza PR `develop` -> `main` e solicita aprovadores configurados.
+4. **Publicação da versão**
+   - Depois do PR `develop` -> `main` aprovado e mergeado, o workflow
+     [`.github/workflows/tag-release-on-main.yml`](.github/workflows/tag-release-on-main.yml)
+     cria/pusha a tag `vX.Y.Z` com base em `bundles/nimbus-code-project-bundle/bundle.yml`.
+   - O workflow de release valida que a tag está em commit da `main` e então publica.
 
 Para registrar os catálogos uma vez por projeto (ou uma vez por máquina, em
 `~/.specify/*-catalogs.yml`):

@@ -1,0 +1,119 @@
+name: Promote develop to main
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create or update PR develop -> main
+        uses: actions/github-script@v7
+        env:
+          MAIN_PR_REVIEWERS: ${{ vars.NIMBUS_MAIN_PR_REVIEWERS }}
+          MAIN_PR_REVIEW_TEAMS: ${{ vars.NIMBUS_MAIN_PR_REVIEW_TEAMS }}
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const head = "develop";
+            const base = "main";
+
+            const title = "Promote develop to main";
+            const body = [
+              "PR de promoção automática `develop` -> `main`.",
+              "",
+              "Gate obrigatório antes do merge:",
+              "- [ ] Aprovação de owner/revisores designados",
+              "- [ ] Aprovação formal do Comitê Nimbus registrada no PR",
+              "- [ ] Checklist de release concluído (versão/catalog/validação)",
+            ].join("\n");
+
+            const openPRs = await github.paginate(github.rest.pulls.list, {
+              owner,
+              repo,
+              state: "open",
+              base,
+              head: `${owner}:${head}`,
+              per_page: 100,
+            });
+
+            let pr = openPRs[0];
+            if (!pr) {
+              try {
+                pr = (await github.rest.pulls.create({
+                  owner,
+                  repo,
+                  base,
+                  head,
+                  title,
+                  body,
+                  maintainer_can_modify: true,
+                })).data;
+                core.info(`Created PR #${pr.number}`);
+              } catch (error) {
+                core.warning(`Could not create PR: ${error.message}. Ensure "Allow GitHub Actions to create and approve pull requests" is enabled in repository/org settings.`);
+              }
+            } else {
+              try {
+                await github.rest.pulls.update({
+                  owner,
+                  repo,
+                  pull_number: pr.number,
+                  title,
+                  body,
+                });
+                core.info(`Updated existing PR #${pr.number}`);
+              } catch (error) {
+                core.warning(`Could not update PR #${pr.number}: ${error.message}`);
+              }
+            }
+
+            if (!pr) {
+              core.warning("No PR available — skipping labels and reviewer requests.");
+              return;
+            }
+
+            const labels = ["release:pending", "agent:needs-human"];
+            try {
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: pr.number,
+                labels,
+              });
+            } catch (error) {
+              core.warning(`Could not apply labels on PR #${pr.number}: ${error.message}`);
+            }
+
+            const users = (process.env.MAIN_PR_REVIEWERS || "")
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean);
+            const teams = (process.env.MAIN_PR_REVIEW_TEAMS || "")
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean);
+
+            if (users.length || teams.length) {
+              try {
+                await github.rest.pulls.requestReviewers({
+                  owner,
+                  repo,
+                  pull_number: pr.number,
+                  reviewers: users,
+                  team_reviewers: teams,
+                });
+                core.info(`Requested reviewers for PR #${pr.number}`);
+              } catch (error) {
+                core.warning(`Could not request reviewers for PR #${pr.number}: ${error.message}`);
+              }
+            } else {
+              core.info("No reviewers configured in NIMBUS_MAIN_PR_REVIEWERS / NIMBUS_MAIN_PR_REVIEW_TEAMS.");
+            }

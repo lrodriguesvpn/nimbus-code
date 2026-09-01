@@ -1,0 +1,153 @@
+name: Release impact advisor
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: write
+
+jobs:
+  advise:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build recommendation and register release candidate note
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const bumpOrder = { none: 0, patch: 1, minor: 2, major: 3 };
+            const labelToBump = {
+              "release:major": "major",
+              "release:minor": "minor",
+              "release:patch": "patch",
+              "release:skip": "none",
+            };
+
+            function rankMax(values) {
+              let best = "none";
+              for (const value of values) {
+                if ((bumpOrder[value] ?? 0) > (bumpOrder[best] ?? 0)) best = value;
+              }
+              return best;
+            }
+
+            async function listChangedFiles(prNumber) {
+              const files = await github.paginate(github.rest.pulls.listFiles, {
+                owner,
+                repo,
+                pull_number: prNumber,
+                per_page: 100,
+              });
+              return files.map((f) => f.filename);
+            }
+
+            function touchesReleaseSurface(files) {
+              const roots = [
+                "presets/",
+                "extensions/",
+                "workflows/",
+                "bundles/",
+                "scripts/validate-versions.sh",
+                "README.md",
+              ];
+              return files.some((file) => roots.some((root) => file.startsWith(root) || file === root));
+            }
+
+            let pr;
+            if (context.eventName === "pull_request") {
+              pr = context.payload.pull_request;
+            } else {
+              const prs = await github.paginate(github.rest.pulls.list, {
+                owner,
+                repo,
+                state: "closed",
+                base: "develop",
+                sort: "updated",
+                direction: "desc",
+                per_page: 20,
+              });
+              pr = prs.find((candidate) => candidate.merged_at);
+            }
+
+            if (!pr) {
+              core.info("No merged PR found for develop.");
+              return;
+            }
+
+            const prLabels = (pr.labels || []).map((l) => l.name);
+            const labeledBumps = prLabels.map((l) => labelToBump[l]).filter(Boolean);
+
+            const changedFiles = await listChangedFiles(pr.number);
+            const touched = touchesReleaseSurface(changedFiles);
+
+            let recommended = rankMax(labeledBumps);
+            if (recommended === "none" && touched) recommended = "patch";
+
+            const reasonParts = [];
+            if (labeledBumps.length) {
+              reasonParts.push(`labels de release na PR: ${prLabels.filter((l) => labelToBump[l]).join(", ")}`);
+            }
+            if (!labeledBumps.length && touched) {
+              reasonParts.push("PR tocou superfície versionada (preset/extensão/workflow/bundle/catalog/validação)");
+            }
+            if (!touched) {
+              reasonParts.push("PR não tocou superfície de release");
+            }
+
+            const issueTitle = "Release Candidate: develop";
+            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
+              owner,
+              repo,
+              state: "open",
+              labels: "release:pending",
+              per_page: 100,
+            });
+            let releaseIssue = openIssues.find((i) => i.title === issueTitle && !i.pull_request);
+
+            if (!releaseIssue) {
+              releaseIssue = (await github.rest.issues.create({
+                owner,
+                repo,
+                title: issueTitle,
+                labels: ["type:chore", "release:pending", "agent:needs-human"],
+                body: [
+                  "Issue operacional para consolidar recomendações de versão no branch `develop`.",
+                  "",
+                  "Checklist de fechamento:",
+                  "- [ ] Decidir bump final (major/minor/patch) com base nas recomendações registradas",
+                  "- [ ] Atualizar `bundle.yml`/`preset.yml`/`catalog.json` no mesmo PR de release",
+                  "- [ ] Validar com `scripts/validate-versions.sh`",
+                  "- [ ] Aprovar PR `develop` -> `main` com gate reforçado",
+                  "- [ ] Criar tag `vX.Y.Z` somente após merge em `main`",
+                ].join("\n"),
+              })).data;
+            }
+
+            const recommendation = [
+              `### PR #${pr.number} — ${pr.title}`,
+              `- URL: ${pr.html_url}`,
+              `- Merge em: ${pr.merged_at}`,
+              `- Recomendação de bump: **${recommended}**`,
+              `- Justificativa: ${reasonParts.join(" | ") || "sem impacto de release detectado"}`,
+              "",
+              "Ação esperada:",
+              "- confirme/ajuste labels `release:*` na PR;",
+              "- consolide decisão no PR de release para `develop`.",
+            ].join("\n");
+
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: releaseIssue.number,
+              body: recommendation,
+            });
+
+            core.info(`Release recommendation (${recommended}) added to issue #${releaseIssue.number}`);

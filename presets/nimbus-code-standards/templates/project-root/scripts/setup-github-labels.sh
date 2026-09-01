@@ -120,6 +120,14 @@ declare -a LABELS=(
   "status:needs-triage|ededed|Issue nova, ainda sem priority:*/complexity:* definidos — não deve ser puxada por agente autônomo"
   "status:blocked|5319e7|Bloqueada por dependência externa — pular na fila mesmo com priority:P0-blocker"
 
+  # Release — classificação de impacto de versão para fluxo semi-automático
+  # de publicação de preset/bundle/workflow.
+  "release:major|b60205|Mudança incompatível (breaking change) — sugere bump MAJOR"
+  "release:minor|d93f0b|Nova capacidade compatível — sugere bump MINOR"
+  "release:patch|1d76db|Correção/ajuste compatível — sugere bump PATCH"
+  "release:skip|cfd3d7|Sem impacto de versão publicável"
+  "release:pending|5319e7|Release candidate aberto aguardando decisão final de versão"
+
   # DORA — domínio de métrica DevOps (Four Keys) que esta issue impacta.
   # Usado para correlacionar issues fechadas com os indicadores DORA da equipe
   # (ver docs/label-taxonomy-and-autonomous-dev.md, seção 5).

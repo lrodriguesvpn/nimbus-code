@@ -35,21 +35,19 @@ unset _paths_output
 # Ensure the feature directory exists
 mkdir -p "$FEATURE_DIR"
 
-# Copy plan template if plan doesn't already exist
+# Materialize the composed plan template if plan doesn't already exist
 if [[ -f "$IMPL_PLAN" ]]; then
     if $JSON_MODE; then
-        echo "Plan already exists at $IMPL_PLAN, skipping template copy" >&2
+        echo "Plan already exists at $IMPL_PLAN, skipping template materialization" >&2
     else
-        echo "Plan already exists at $IMPL_PLAN, skipping template copy"
+        echo "Plan already exists at $IMPL_PLAN, skipping template materialization"
     fi
 else
-    TEMPLATE=$(resolve_template "plan-template" "$REPO_ROOT") || true
-    if [[ -n "$TEMPLATE" ]] && [[ -f "$TEMPLATE" ]]; then
-        cp "$TEMPLATE" "$IMPL_PLAN"
+    if materialize_template_content "plan-template" "$REPO_ROOT" "$IMPL_PLAN"; then
         if $JSON_MODE; then
-            echo "Copied plan template to $IMPL_PLAN" >&2
+            echo "Materialized composed plan template to $IMPL_PLAN" >&2
         else
-            echo "Copied plan template to $IMPL_PLAN"
+            echo "Materialized composed plan template to $IMPL_PLAN"
         fi
     else
         if $JSON_MODE; then

@@ -1,0 +1,41 @@
+# dora-manual-adjustments-log.yaml — Trilha de auditoria de ajustes manuais DORA
+#
+# Este arquivo registra toda correção manual excepcional aplicada a um
+# indicador DORA que não pôde ser capturado automaticamente pelas labels
+# `dora:*` (feature 002) via `scripts/process-metrics-report.sh` (feature 012).
+#
+# Coleta automática continua sendo o caminho padrão (FR-002) — um ajuste
+# manual é sempre uma exceção controlada, nunca uma rota primária.
+#
+# SCHEMA (cada entrada em `adjustments`)
+#   id:                 identificador estável do ajuste (ex.: ADJ-0001, nunca reutilizar)
+#   indicator:           deployment_frequency | lead_time_for_changes | change_failure_rate | mttr
+#   justification:       motivo objetivo do ajuste, em texto curto legível por humano
+#   author:               responsável identificado (handle/GitHub username) que registrou o ajuste
+#   timestamp:            data/hora do ajuste (ISO 8601)
+#   evidence_link:        link da evidência (issue, PR, comentário, log) que sustenta o ajuste
+#   exception_category:   categoria da exceção (ex.: fonte_indisponivel, evento_duplicado,
+#                          correcao_retroativa) — reutilizar a mesma categoria para o mesmo
+#                          motivo recorrente, em vez de criar uma nova a cada entrada
+#   approved_by:          quem aprovou o ajuste (pode coincidir com `author` se
+#                          auto-aprovado por regra explícita — registrar mesmo assim)
+#   review_cycle_period:  período (YYYY-MM a YYYY-MM, ou YYYY-MM-DD a YYYY-MM-DD) da
+#                          Review Cycle à qual este ajuste está vinculado
+#
+# REGRAS DE VALIDAÇÃO (ver contracts/dora-quality-and-audit.contract.md)
+# - Todos os campos acima são obrigatórios — nenhuma entrada parcial é aceita
+#   (FR-004). `scripts/process-metrics-report.sh --record-manual-adjustment`
+#   valida isso antes de gravar.
+# - Uma Review Cycle não pode ser fechada (`closed`) enquanto existir uma
+#   entrada aqui referente ao seu período sem todos os campos preenchidos
+#   (FR-006).
+#
+# COMO ATUALIZAR
+# - Registrar um novo ajuste: `scripts/process-metrics-report.sh --record-manual-adjustment
+#   --indicator <indicador> --justification "<texto>" --author <handle>
+#   --evidence-link <url> --exception-category <categoria> --approved-by <handle>
+#   --review-cycle-period <periodo>`
+# - Nunca editar `timestamp` de uma entrada já registrada — é o registro imutável
+#   de quando o ajuste ocorreu.
+
+adjustments:

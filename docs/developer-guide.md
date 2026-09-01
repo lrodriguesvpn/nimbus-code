@@ -6,7 +6,8 @@
 > no próprio repo (ou `specify init --here` + bootstrap, se quiser separar) e
 > só depois ler o código/Boards antes de especificar (seção 2, brownfield);
 > ponto de partida a partir de um card do ADO/JIRA → prompt de importação pronto
-> (seção 3).
+> (seção 3); ponto de partida a partir de uma entrevista de descoberta com o
+> cliente (ainda sem card/issue) → `/speckit.interview` (seção 3.5).
 > Pré-requisitos (`specify` CLI, `uv`, Copilot) na tabela logo abaixo.
 
 Este é o manual **central** de como todo dev da Nimbus-Code deve usar o
@@ -20,6 +21,8 @@ cenários, na ordem em que você provavelmente vai precisar deles:
    (brownfield)** e pelos **Boards** (cards já existentes).
 3. [Importar um card do Azure DevOps/JIRA para começar uma feature](#3-importar-um-card-do-azure-devops-ou-jira-para-começar-uma-feature) —
    o prompt exato para puxar um work item/issue como ponto de partida.
+   - [3.5. Conduzindo uma entrevista de descoberta antes do `/speckit.specify`](#35-conduzindo-uma-entrevista-de-descoberta-antes-do-speckitspecify-speckitinterview) —
+     ponto de partida a partir de uma conversa com o cliente, ao vivo ou por transcript, quando ainda não existe card/issue.
 
 Se algo aqui divergir do que você vê na prática, este arquivo é a fonte da
 verdade — abra um PR corrigindo, não crie um manual paralelo em outro lugar.
@@ -166,13 +169,13 @@ Use esta variação só se você **quiser separar conscientemente** a criação 
 
 Este é o passo que resolve "como o Nimbus Code entende o código". **Não existe um
 comando dedicado de "scan"** — a varredura acontece dentro do próprio
-`/nimbus-code.constitution`, sendo explícito no prompt para o agente analisar a
+`/speckit.constitution`, sendo explícito no prompt para o agente analisar a
 fundo antes de escrever qualquer princípio. Use este prompt (adaptado do
 walkthrough oficial de brownfield do time do Spec Kit (demo ASP.NET brownfield)
 do próprio time do Nimbus Code):
 
 ```
-/nimbus-code.constitution Este é um projeto brownfield já existente, sem
+/speckit.constitution Este é um projeto brownfield já existente, sem
 constituição prévia. Analise o código-fonte de forma exaustiva e em
 profundidade — não superficialmente, use quantas iterações forem necessárias
 para explorar a estrutura de pastas, stack, padrões de arquitetura, convenções
@@ -194,6 +197,26 @@ entender bem padrões, armadilhas, troubleshooting e a importância da constitui
 em brownfield, consulte a referência completa em
 [`docs/brownfield-best-practices.md`](brownfield-best-practices.md).
 
+**Passo opcional pós-constituição — Harvest de padrões reutilizáveis**: depois
+de rodar `/speckit.constitution`, considere também rodar `scripts/harvest-patterns.sh`
+para varrer o código já existente por padrões técnicos estruturais (interfaces,
+factories, decorators recorrentes) e propor entradas para `docs/reuse-catalog.yaml`.
+Diferente do `/speckit.constitution` (que deriva princípios de qualidade/arquitetura),
+o Harvest alimenta especificamente o catálogo de reuso. É **sempre on-demand,
+nunca automático nem em CI** — se este projeto ainda não rodou:
+
+```bash
+export HARVEST_API_URL="<endpoint LLM configurado pelo seu time>"
+export HARVEST_API_TOKEN="<token>"
+
+scripts/harvest-patterns.sh . --dry-run   # revisa antes de escrever
+scripts/harvest-patterns.sh .              # escreve em docs/reuse-catalog.yaml
+```
+
+Se `scripts/harvest-patterns.sh` ainda não existir neste projeto (bundle
+instalado antes desta versão), siga primeiro o prompt de auto-atualização da
+seção 6.7 para trazer os artefatos novos do preset.
+
 ### 2.4. Entender o contexto pelos Boards (cards já existentes)
 
 O Nimbus Code não tem um comando de "importar todos os cards", mas antes de
@@ -211,7 +234,7 @@ usarmos como contexto na spec.
 
 (Troque "Azure DevOps" por "JIRA" e "work items" por "issues" conforme a
 ferramenta do time — ver seção 3 para o MCP necessário.) Esse resumo entra
-como contexto adicional no prompt do `/nimbus-code.specify` seguinte — ele não
+como contexto adicional no prompt do `/speckit.specify` seguinte — ele não
 substitui a leitura do código feita no passo 2.3, complementa com o "porquê"
 por trás de decisões que só existem no board, não no código.
 
@@ -222,14 +245,14 @@ do Nimbus Code (ver [`workflows/nimbus-code-full-cycle/README.md`](../workflows/
 para a variante com gate de DevSecOps da Nimbus-Code):
 
 ```
-/nimbus-code.specify   → descreve a feature nova (não retro-especifique o app inteiro)
-/nimbus-code.clarify    → (opcional) reduz ambiguidade antes de planejar
-/nimbus-code.plan       → plano técnico (já usa o que o agente aprendeu do código real)
-/nimbus-code.checklist  → (opcional) "testes unitários" da própria spec
-/nimbus-code.tasks      → lista de tarefas ordenada por dependência
-/nimbus-code.analyze    → (opcional, somente leitura) checa consistência spec/plan/tasks
-/nimbus-code.implement  → executa as tarefas (pode levar múltiplos passes em repo grande)
-/nimbus-code.converge   → depois do implement: compara código real vs spec/plan/tasks
+/speckit.specify   → descreve a feature nova (não retro-especifique o app inteiro)
+/speckit.clarify    → (opcional) reduz ambiguidade antes de planejar
+/speckit.plan       → plano técnico (já usa o que o agente aprendeu do código real)
+/speckit.checklist  → (opcional) "testes unitários" da própria spec
+/speckit.tasks      → lista de tarefas ordenada por dependência
+/speckit.analyze    → (opcional, somente leitura) checa consistência spec/plan/tasks
+/speckit.implement  → executa as tarefas (pode levar múltiplos passes em repo grande)
+/speckit.converge   → depois do implement: compara código real vs spec/plan/tasks
                       e anexa o que faltar como novas tarefas — repita
                       implement → converge até sair "✅ Converged"
 ```
@@ -246,7 +269,7 @@ comandos do Spec Kit. O comando original continua válido.
 - `analyze` → `nimbus.validate`
 - `converge` → `nimbus.release`
 
-`/nimbus-code.converge` é especialmente útil em brownfield porque é comum já
+`/speckit.converge` é especialmente útil em brownfield porque é comum já
 existir implementação parcial/legada na mesma área da feature nova — ele é
 **append-only** (nunca edita/apaga código, só pode adicionar tarefas).
 
@@ -257,14 +280,14 @@ existir implementação parcial/legada na mesma área da feature nova — ele é
 - **DO** começar pelo `bootstrap.sh` quando o repo brownfield ainda não tem
   Spec Kit/Nimbus Code — ele já faz o `specify init --here` e instala o bundle
   padrão da Nimbus-Code no mesmo fluxo.
-- **DO** rodar `/nimbus-code.constitution` como o passo **1 da primeira feature**,
+- **DO** rodar `/speckit.constitution` como o passo **1 da primeira feature**,
   depois da inicialização do ambiente, com o prompt de análise profunda —
   deixar o agente entender o código existente custa iterações iniciais mas
   economiza em toda feature subsequente.
 - **DO** manter `constitution.md`, `spec.md` e `plan.md` como **artefatos vivos**
   — eles são sempre reescritos/atualizados conforme a realidade muda, não são
   cópia estática do que foi feito uma vez.
-- **DO** usar `/nimbus-code.converge` **sempre** depois do `implement` — é
+- **DO** usar `/speckit.converge` **sempre** depois do `implement` — é
   append-only, busca gaps, e é essencial em brownfield onde código legado já
   toca a mesma área da feature nova.
 - **DO** fazer **múltiplos passes** de `implement` → converge em features
@@ -274,10 +297,10 @@ existir implementação parcial/legada na mesma área da feature nova — ele é
   rastreável (ex.: framework IaC diferente do padrão Terraform, por compliance
   nativo do Azure Policy).
 - **DO** revisar a análise profunda gerada pelo agente (iterações 1-N do
-  `/nimbus-code.constitution`) **como insumo, não como verdade absoluta** — o agente
+  `/speckit.constitution`) **como insumo, não como verdade absoluta** — o agente
   pode interpretar padrões errado ou superestimar certa convenção. Edite
   `constitution.md` se necessário antes de prosseguir para features.
-- **DO** rodar `/nimbus-code.analyze` **antes** de implementar — a carga cognitiva
+- **DO** rodar `/speckit.analyze` **antes** de implementar — a carga cognitiva
   de ambiguidades em spec/plan/tasks é exponencial; pague o custo cedo.
 - **DO** manter `.specify/` versionado no git — é parte da história do projeto,
   não é lixo de build. `.specify/memory/` (com artefatos) sim, mas pelo menos
@@ -285,22 +308,22 @@ existir implementação parcial/legada na mesma área da feature nova — ele é
 
 ### ❌ DONTs — armadilhas comuns em brownfield
 
-- **DON'T** pular o `/nimbus-code.constitution` achando que "vamos especificar
+- **DON'T** pular o `/speckit.constitution` achando que "vamos especificar
   features normalmente" — sem princípios derivados do código existente, cada
   feature é um caos; o agente toma decisões contraditórias.
 - **DON'T** tentar retro-especificar **todo** o código existente num único
-  `/nimbus-code.specify` — isso sobrecarrega o agente e gera uma "spec" gigante e
+  `/speckit.specify` — isso sobrecarrega o agente e gera uma "spec" gigante e
   inútil. Especifique **só a mudança incremental** (o que é novo/alterado, não
   o que já existe).
 - **DON'T** editar `spec.md`/`plan.md`/`tasks.md` manualmente depois que foram
   gerados — se precisa ajustar, reegere os artefatos com os comandos correspondentes
-  (ex.: `/nimbus-code.specify` de novo com um prompt ajustado, não edite `spec.md`
+  (ex.: `/speckit.specify` de novo com um prompt ajustado, não edite `spec.md`
   diretamente). Exceção: adicionar observações/notas contextuais, OK; mudar
   requisito/design, não.
-- **DON'T** ignorar o `/nimbus-code.converge` achando que "implementamos tudo o que
+- **DON'T** ignorar o `/speckit.converge` achando que "implementamos tudo o que
   foi pedido" — converter sempre encontra lacunas que não eram óbvias na spec
   original. É parte do ciclo, não é falha.
-- **DON'T** usar `/nimbus-code.implement` uma única vez em repo grande esperando que
+- **DON'T** usar `/speckit.implement` uma única vez em repo grande esperando que
   saia perfeito — quebre em stages (Setup, Foundational, depois user story por
   story), valide cada uma, continue. Vários passes pequenos > um pass gigante.
 - **DON'T** deixar `constitution.md` desatualizado quando princípios mudam — se
@@ -312,7 +335,7 @@ existir implementação parcial/legada na mesma área da feature nova — ele é
 - **DON'T** confundir "Nimbus Code" com "gerador de código" — o Nimbus Code é um
   **framework de documentação estruturada** que *alimenta* um gerador (o agente).
   Se o agente gera código ruim, a spec estava ambígua; volte e clarifique (via
-  `/nimbus-code.clarify` ou `/nimbus-code.specify`), não culpe o Nimbus Code.
+  `/speckit.clarify` ou `/speckit.specify`), não culpe o Nimbus Code.
 
 ### 2.7. Checklist pré-primeiro-ciclo para brownfield
 
@@ -321,8 +344,9 @@ Antes de rodar a primeira feature em um brownfield, valide:
 - [ ] `bootstrap.sh` rodou com sucesso no repo brownfield
 - [ ] `.specify/` foi criado (via `bootstrap.sh` ou via `specify init --here`, se você optou por separar)
 - [ ] Bundle `nimbus-code-project-bundle` instalado (veja `.specify/presets/` e `.specify/extensions/`)
-- [ ] `/nimbus-code.constitution` executado com o prompt de **análise profunda** (seção 2.3)
+- [ ] `/speckit.constitution` executado com o prompt de **análise profunda** (seção 2.3)
 - [ ] `constitution.md` revisado/editado manualmente se necessário
+- [ ] `scripts/harvest-patterns.sh` executado ao menos uma vez (opcional, mas recomendado — seção 2.3) para semear `docs/reuse-catalog.yaml` com padrões já existentes no código
 - [ ] `.specify/` adicionado ao git e versionado
 - [ ] README do projeto atualizado com a seção de Nimbus Code (ver [`templates/README-bundle-section.md`](../templates/README-bundle-section.md))
 - [ ] Se usa backlog externo (Azure DevOps/JIRA): MCP correspondente configurado no agente
@@ -344,7 +368,7 @@ do agente, o Nimbus Code não instala nem verifica isso).
 ### Prompt para Azure DevOps
 
 ```
-/nimbus-code.specify Busque o work item #1234 no Azure DevOps (organização
+/speckit.specify Busque o work item #1234 no Azure DevOps (organização
 <org>, projeto <projeto>) via MCP e construa a especificação desta feature a
 partir do título, descrição e critérios de aceitação dele. Se algo estiver
 ambíguo, incompleto ou contraditório, liste como observação a esclarecer —
@@ -354,7 +378,7 @@ não invente detalhes que não estão no work item.
 ### Prompt para JIRA
 
 ```
-/nimbus-code.specify Busque a issue <PROJ-123> no JIRA via MCP Atlassian Rovo e
+/speckit.specify Busque a issue <PROJ-123> no JIRA via MCP Atlassian Rovo e
 construa a especificação desta feature a partir do resumo, descrição e
 critérios de aceitação dela. Se algo estiver ambíguo, incompleto ou
 contraditório, liste como observação a esclarecer — não invente detalhes que
@@ -368,7 +392,74 @@ para dentro da spec é sempre feita via prompt manual como acima — o Nimbus Co
 não tem um comando dedicado de importação nesse sentido.
 
 Depois de gerar a spec a partir do card, continue o ciclo normal
-(`/nimbus-code.clarify` → `/nimbus-code.plan` → ... ) como na seção 2.5.
+(`/speckit.clarify` → `/speckit.plan` → ... ) como na seção 2.5.
+
+### 3.5. Conduzindo uma entrevista de descoberta antes do `/speckit.specify` (`/speckit.interview`)
+
+Use isso quando **ainda não existe** um card/issue pronto (seção 3) nem uma
+descrição já madura da feature — você vai conversar com o cliente/solicitante
+primeiro (ao vivo ou a partir de um transcript de reunião) e quer que essa
+conversa já saia estruturada, cobrindo negócio, infraestrutura, segurança e
+LGPD, antes de gerar a spec.
+
+Isso é **hoje um passo manual** — você (ou o Nimbus, conduzindo a conversa por
+você) preenche o modelo de entrevista
+(`presets/nimbus-code-standards/templates/feature-artifacts/interview-template.md`)
+e salva como `specs/<feature-slug>/interview.md`. Não existe ainda nenhuma
+integração automática com Microsoft Teams — o roadmap dessa automação está
+registrado em `specs/018-nimbus-agent-intake/spec.md` (User Story 5), mas por
+enquanto **quem conduz a entrevista é você**, com o Nimbus como assistente.
+
+**Pré-condição de transcript**: se a reunião já aconteceu e você tem as
+anotações/gravação transcrita, hoje isso normalmente está numa pasta pessoal do
+OneDrive (ex.: `OneDrive - Nimbus-Code/Notas/reuniao-cliente-x.txt`) ou em
+qualquer outro lugar que você tenha acesso local — não existe ainda um
+conector automático que busque isso pra você. Baixe/exporte o transcript para
+um caminho que o agente consiga ler (local ou dentro do próprio repo, ex.:
+`specs/_transcripts/reuniao-cliente-x.txt`) e referencie esse caminho no prompt.
+
+#### Prompt — sem transcript (entrevista ao vivo, do zero)
+
+```
+/speckit.interview Cliente do time Financeiro pediu um jeito de consolidar
+relatórios mensais que hoje são feitos manualmente em planilha. Conduza a
+entrevista de descoberta comigo agora, bloco por bloco (negócio, infra,
+segurança, LGPD) — eu vou respondendo.
+```
+
+#### Prompt — com transcript em arquivo (ex.: exportado do OneDrive)
+
+```
+/speckit.interview Consolidação de relatórios financeiros mensais. Já tenho o
+transcript da reunião com o cliente em
+specs/_transcripts/reuniao-financeiro-2026-08-26.txt (copiei da minha pasta
+pessoal do OneDrive). Avalie o que já está coberto nesse transcript e só me
+pergunte o que estiver faltando ou ambíguo.
+```
+
+#### Prompt — colando o transcript direto na mensagem
+
+```
+/speckit.interview Consolidação de relatórios financeiros mensais.
+Segue o transcript da reunião:
+---
+[Maria - Financeiro]: hoje a gente fecha o relatório mensal manualmente...
+[João - TI]: entendi, e quem mais usa esse relatório hoje?
+[Maria]: só o time financeiro mesmo, uso interno...
+---
+Avalie a cobertura contra os 4 blocos e pergunte só o que faltar.
+```
+
+**O que acontece depois**: o Nimbus cria `specs/<feature-slug>/interview.md`
+(a mesma pasta que a próxima spec vai usar — não duplica), pergunta só o que
+não veio no transcript (nunca inventa resposta de segurança/infra/LGPD), e ao
+final avisa: *"rode `/speckit.specify` agora"*. O `/speckit.specify` detecta
+essa pasta automaticamente e usa a entrevista como base do `spec.md` — você
+não precisa referenciar `interview.md` manualmente.
+
+Se a demanda for claramente pequena (documentação, ajuste isolado), o Nimbus
+vai propor o modo **Fast-Track** (~9 perguntas essenciais, ~10 min) em vez do
+modo Completo (~20-30 min) — ele sempre confirma com você antes de aplicar.
 
 ## 4. Hierarquia Agile (Epic → Feature → US → Task) no GHE
 
@@ -534,15 +625,15 @@ visual por tipo fica menos rica.
 
 | Comando | Quando usar | Obrigatório? |
 |---|---|---|
-| `/nimbus-code.constitution` | Uma vez por projeto (ou ao mudar princípios); em brownfield, com o prompt de análise profunda da seção 2.3 | Sim, uma vez |
-| `/nimbus-code.specify` | Toda feature nova — descreve o quê/porquê, não a stack | Sim |
-| `/nimbus-code.clarify` | Quando a spec tem áreas ambíguas | Recomendado |
-| `/nimbus-code.plan` | Depois da spec aprovada — stack e arquitetura | Sim |
-| `/nimbus-code.checklist` | Validar completude da própria spec antes de detalhar tarefas | Opcional |
-| `/nimbus-code.tasks` | Gera `tasks.md` a partir do plano | Sim |
-| `/nimbus-code.analyze` | Checagem cruzada spec/plan/tasks antes de implementar | Recomendado |
-| `/nimbus-code.implement` | Executa as tarefas | Sim |
-| `/nimbus-code.converge` | Depois do implement — garante que nada ficou faltando vs. spec/plan/tasks | Recomendado, essencial em brownfield |
+| `/speckit.constitution` | Uma vez por projeto (ou ao mudar princípios); em brownfield, com o prompt de análise profunda da seção 2.3 | Sim, uma vez |
+| `/speckit.specify` | Toda feature nova — descreve o quê/porquê, não a stack | Sim |
+| `/speckit.clarify` | Quando a spec tem áreas ambíguas | Recomendado |
+| `/speckit.plan` | Depois da spec aprovada — stack e arquitetura | Sim |
+| `/speckit.checklist` | Validar completude da própria spec antes de detalhar tarefas | Opcional |
+| `/speckit.tasks` | Gera `tasks.md` a partir do plano | Sim |
+| `/speckit.analyze` | Checagem cruzada spec/plan/tasks antes de implementar | Recomendado |
+| `/speckit.implement` | Executa as tarefas | Sim |
+| `/speckit.converge` | Depois do implement — garante que nada ficou faltando vs. spec/plan/tasks | Recomendado, essencial em brownfield |
 
 ---
 
@@ -580,10 +671,10 @@ flowchart TD
     A[Spec, Plan e Tasks continuam válidos] --> B[Implementação apresentou erro]
     B --> C{O erro altera objetivo, regra ou aceite?}
     C -- Não --> D[Corrigir código]
-    D --> E[/nimbus-code.converge]
+    D --> E[/speckit.converge]
     E --> F{Converge encontrou gaps?}
     F -- Sim --> G[Append de novas tasks na mesma feature]
-    G --> H[/nimbus-code.implement]
+    G --> H[/speckit.implement]
     H --> I[Rodar converge de novo]
     F -- Não --> J[Feature pronta para PR/revisão]
 ```
@@ -593,12 +684,12 @@ flowchart TD
 ```mermaid
 flowchart TD
     A[Problema descoberto] --> B{A ambiguidade está na intenção da feature?}
-    B -- Sim --> C[/nimbus-code.clarify ou edição da mesma spec]
+    B -- Sim --> C[/speckit.clarify ou edição da mesma spec]
     C --> D[Atualizar a mesma spec.md]
     D --> E[Revisar plan.md]
     E --> F[Regenerar ou atualizar tasks.md]
-    F --> G[/nimbus-code.implement]
-    G --> H[/nimbus-code.converge]
+    F --> G[/speckit.implement]
+    G --> H[/speckit.converge]
     H --> I[PR/revisão]
 ```
 
@@ -613,8 +704,8 @@ flowchart TD
     D -- Não --> F[Manter spec e seguir]
     E --> G[Atualizar tasks.md]
     F --> G
-    G --> H[/nimbus-code.implement]
-    H --> I[/nimbus-code.converge]
+    G --> H[/speckit.implement]
+    H --> I[/speckit.converge]
 ```
 
 #### Ordem operacional recomendada
@@ -702,6 +793,42 @@ gere ou regenere o `plan.md`.
 O fluxo de correção de rota continua válido para artefatos (`spec.md`, `plan.md`,
 `tasks.md`), mas a decisão de hotfix, rollback ou janela de release segue o
 processo operacional de release do projeto.
+
+### 4.9. Recuperação de "issues perdidas" (implementadas, mas ainda abertas)
+
+Quando PRs são mergeadas sem `Closes #<n>` / `Fixes #<n>`, as issues podem ficar
+abertas mesmo com implementação concluída.
+
+#### Causa raiz recorrente
+
+- O corpo da PR lista issue apenas como texto/tabela (ex.: `#288`, `#289`), sem
+  keyword de fechamento.
+- Resultado: o GitHub não registra vínculo de auto-close.
+
+#### Correção permanente aplicada
+
+- Workflow de fallback: [close-referenced-issues-fallback.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/close-referenced-issues-fallback.yml)
+  fecha issues abertas referenciadas na PR mergeada (incluindo seção
+  "Issues Resolvidas"), quando o auto-close padrão não ocorreu.
+- Instrução obrigatória no Copilot: sempre usar `Closes #<n>` no corpo da PR.
+
+#### Prompt padrão (time) — triagem e correção de issues perdidas
+
+```text
+Faça triagem de issues abertas e identifique "issues perdidas" (implementadas, mas ainda abertas).
+
+Objetivo:
+1) Listar issues `type:task` abertas cujo T-ID esteja marcado como [x] no `tasks.md` da mesma feature.
+2) Para cada issue perdida, validar evidência em PR mergeada (arquivos alterados + descrição da PR).
+3) Fechar somente casos de alta confiança com comentário padrão:
+   "Fechada por triagem: implementação já mergeada em PR #<n>, porém sem auto-close keyword."
+4) Para os casos não conclusivos, comentar com pendência e manter aberta.
+5) No final, gerar relatório: fechadas, pendentes, risco/ambiguidade e ações recomendadas.
+
+Regras obrigatórias:
+- Em toda PR futura, incluir `Closes #<n>` ou `Fixes #<n>` para cada issue resolvida.
+- Não usar apenas menções soltas `#<n>` em tabela/texto.
+```
 
 ---
 
@@ -842,6 +969,13 @@ microsserviço, frontend, mobile, lib ou infra), siga sempre este fluxo:
 4. Aplique a atualização do bundle no satélite via PR normal, com diff revisado;
    a atualização **nunca** deve ser aplicada diretamente na branch principal do
    satélite.
+5. No intake greenfield do `bootstrap.sh`, registre explicitamente:
+   - `delivery_model`: `monorepo` ou `multirepo`
+   - `decision_reason`: motivo principal + trade-off esperado
+   - `decision_owner`: quem aprovou a decisão estrutural
+6. Se o `delivery_model` for `multirepo`, use FRONT/BACK/DESIGN/DATA/JOBS como
+   baseline recomendada e adapte apenas com justificativa e ownership explícitos.
+   Esse ajuste ocorre **após a primeira spec estrutural** no Repo Central.
 
 **Resumo operacional:** o Repo Central dita o padrão; o repo satélite consome o
 mesmo bundle e atualiza por PR a partir do diagnóstico do workflow semanal.
@@ -860,6 +994,10 @@ Central do produto**:
 
 Isso evita drift de processo, duplicação de artefatos e conflito entre múltiplas
 fontes de verdade.
+
+**Regra prática para o time:** se uma demanda nascer no satélite, a decisão de
+escopo e artefatos de spec continua no Repo Central; o satélite recebe apenas o
+roteamento de implementação.
 
 ### 5.8. Edge cases
 
@@ -916,6 +1054,166 @@ repo git com esse arquivo.
   onde possível; manual onde depende de uma API GHE real ou do comportamento
   do agente).
 
+## 6. Release semi-automático (Preset/Bundle/Workflow)
+
+### 6.1. Objetivo
+
+Padronizar quando criar nova versão e impedir publicação fora do fluxo
+`develop` -> `main`.
+
+### 6.2. Labels de impacto de release
+
+Classifique cada PR que toca superfície de bundle/preset com um label:
+
+- `release:major` — breaking change
+- `release:minor` — nova capacidade compatível
+- `release:patch` — correção compatível
+- `release:skip` — sem impacto de versão
+
+> O script [setup-github-labels.sh](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/scripts/setup-github-labels.sh)
+> cria/atualiza esses labels.
+
+### 6.2.1. Gate automático para não depender de memória humana
+
+O workflow
+[release-readiness-gate.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/release-readiness-gate.yml)
+roda em toda PR para `develop` e bloqueia merge quando:
+
+- a PR toca superfície de release (`presets/`, `extensions/`, `workflows/`,
+  `bundles/`, docs de release e scripts de versionamento) sem label `release:*`;
+- há mais de um label `release:*`;
+- a PR foi classificada como `release:major|minor|patch` mas não atualizou
+  arquivo de versão e `catalog.json`.
+
+### 6.3. Recomendação automática de bump em `develop`
+
+Ao merge de PR em `develop`, o workflow
+[release-impact-advisor.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/release-impact-advisor.yml)
+registra recomendação na issue `Release Candidate: develop` (`release:pending`).
+
+### 6.4. PR automático de promoção `develop` -> `main`
+
+O workflow
+[promote-develop-to-main.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/promote-develop-to-main.yml)
+abre/atualiza o PR de promoção e solicita revisão para aprovadores configurados
+nas variáveis do repositório:
+
+- `NIMBUS_MAIN_PR_REVIEWERS` (lista CSV de usuários)
+- `NIMBUS_MAIN_PR_REVIEW_TEAMS` (lista CSV de times)
+
+### 6.5. Gate humano obrigatório antes da tag
+
+Mesmo com automação, o merge para `main` exige:
+
+- aprovação dos revisores/owner designados;
+- aprovação do Comitê Nimbus registrada no PR.
+
+### 6.6. Publicação da versão
+
+Após merge em `main`, o workflow
+[tag-release-on-main.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/tag-release-on-main.yml)
+cria/pusha a tag `vX.Y.Z` automaticamente com base na versão do bundle. Em
+seguida, o workflow
+[release.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/release.yml)
+publica os assets, validando que a tag aponta para commit da `main`.
+
+### 6.7. Atualizando um projeto consumidor para a versão mais recente do bundle
+
+Isto **não** é sobre publicar uma nova versão aqui — é sobre um projeto que já
+foi bootstrapado com uma versão antiga do `nimbus-code-project-bundle` e
+precisa se atualizar para a versão atual publicada neste repositório, sem
+perder customização local (Contexto do Projeto, Bounded Contexts próprios,
+entradas de catálogo já registradas, seções preenchidas de "Padrões de Código
+deste Projeto") e sem quebrar o fluxo de PR normal.
+
+O workflow `update-speckit-and-bundle.yml` (instalado pelo `bootstrap.sh` em
+todo projeto consumidor) **detecta** que há uma versão nova e abre/atualiza
+uma issue de aviso — ele nunca aplica a atualização sozinho. Quando essa issue
+aparecer (ou quando você quiser verificar manualmente), use o prompt abaixo
+com o agente de Copilot **dentro do repositório do projeto consumidor**:
+
+```text
+Você está atualizando este projeto para a versão mais recente do bundle
+`nimbus-code-project-bundle` da Nimbus-Code (fonte: nimbus-code-spec-kit-template).
+Siga este roteiro sem pular etapas:
+
+1. Diagnóstico
+   - Leia .specify/integration.json e a tabela de versão no README (seção
+     "Nimbus Code — Padrões Nimbus-Code") para descobrir as versões
+     instaladas hoje (Nimbus Code CLI, bundle, preset, extensão, workflow).
+   - Compare com a versão mais recente publicada nos catalog.json de
+     nimbus-code-spec-kit-template (registre os catálogos primeiro se ainda
+     não estiverem registrados, com os comandos da seção "Publicação e
+     Catálogo" do README de nimbus-code-spec-kit-template).
+   - Se a versão instalada já for a mais recente, pare aqui e informe — não
+     há nada para atualizar.
+
+2. Branch e escopo
+   - Crie uma branch dedicada (ex.: `chore/update-nimbus-code-bundle-vX.Y.Z`).
+   - Nunca faça commit direto em `main`/`develop` — esta atualização segue a
+     mesma regra de qualquer outra mudança de dependência.
+
+3. Aplicar a atualização sem destruir customização local
+   - Rode `specify bundle install nimbus-code-project-bundle` (ou
+     `specify preset add`/`extension add`/`workflow add` individualmente, se
+     o projeto não usa o bundle consolidado).
+   - **Nunca sobrescreva cegamente** `copilot-instructions.md`,
+     `.specify/memory/constitution.md`, `docs/bounded-contexts.yaml`,
+     `docs/reuse-catalog.yaml`, `docs/cost-profiles-and-rates.md`, nem
+     qualquer arquivo em `docs/harness/` ou `docs/playbooks/` que já exista
+     neste projeto com conteúdo próprio — faça diff seção por seção contra o
+     template novo e mescle apenas o que é aditivo (novas seções, novas
+     regras), preservando 100% do conteúdo específico deste projeto.
+   - Se um arquivo novo do template (ex.: `docs/harness/`, `docs/playbooks/`,
+     `scripts/generate-context-graph.sh`, `scripts/harvest-patterns.sh`,
+     `scripts/process-metrics-report.sh`, `.github/workflows/graph-guard.yml`,
+     `.github/workflows/agent-auto-assign.yml`) ainda não existir neste
+     projeto, copie-o integralmente — são artefatos aditivos, seguros de criar.
+   - Se este projeto tiver `.github/workflows/tag-release-on-main.yml`,
+     `release-impact-advisor.yml` ou `release-readiness-gate.yml` copiados de
+     uma versão antiga do template, **remova-os** — eram bugs de empacotamento
+     (referenciavam `bundles/*/bundle.yml`/`catalog.json` que só existem no
+     repositório-fonte) e nunca deveriam ter sido shipados a projetos
+     consumidores; foram retirados do preset a partir desta versão.
+   - Se este projeto ainda não tiver a seção "Idioma dos Artefatos" na
+     constituição, ou não tiver "Harness Engineering"/"Playbook de Sucesso"
+     no `copilot-instructions.md`, adicione-as (são regras aditivas desta
+     versão) sem remover nada que já existia.
+
+4. Atualizar a documentação de versão
+   - Atualize a tabela de versões no README (modelo em
+     `templates/README-bundle-section.md` do repositório-fonte).
+   - `.specify/integration.json` normalmente é reescrito por
+     `specify init --here --force`, não editado à mão — confirme antes de
+     alterá-lo manualmente.
+
+5. Validar antes de abrir o PR
+   - Rode qualquer suíte de testes/lint já existente neste projeto (ex.:
+     `./scripts/run-tests.sh`, se existir).
+   - Valide sintaticamente todo arquivo novo/alterado (YAML: parseia sem
+     erro; shell: `bash -n`).
+   - Confirme que nenhuma seção pré-existente de `copilot-instructions.md`/
+     `constitution.md` foi removida — apenas adicionada.
+
+6. Abrir o PR
+   - Título: "chore: atualizar bundle nimbus-code-project-bundle para vX.Y.Z".
+   - Corpo do PR deve listar: versão anterior → nova, o que é novo nesta
+     versão (seções/artefatos adicionados) e confirmação de que nenhuma
+     customização local foi perdida.
+   - Classifique a complexidade como S1 ou S2 (atualização de dependência
+     aditiva); se alterar comportamento de autenticação, segurança ou
+     branch/merge, reclassifique para S3/S4 e peça revisão humana antes de
+     prosseguir.
+   - Peça revisão humana normal antes do merge — nunca faça merge sozinho.
+
+Se em qualquer etapa encontrar conflito real entre o conteúdo específico
+deste projeto e o novo conteúdo do template (não um caso puramente aditivo),
+pare, documente o conflito no PR e peça decisão explícita do Dev — nunca
+resolva um conflito de conteúdo escolhendo um lado silenciosamente.
+```
+
+Ver também: [FAQ — Como atualizo um projeto criado com uma versão antiga do bundle/preset com segurança?](FAQ.md#como-atualizo-um-projeto-criado-com-uma-versão-antiga-do-bundlepreset-com-segurança).
+
 ## Documentos relacionados neste repositório
 
 - [`docs/bundle-architecture.md`](bundle-architecture.md) — diagramas Mermaid
@@ -928,3 +1226,112 @@ repo git com esse arquivo.
   observabilidade, correlation-id/microsserviços e abertura automática de bugs.
 - [`docs/extension-candidates.md`](extension-candidates.md) — quais extensões
   (oficiais e da Nimbus-Code) considerar instalar além do bundle padrão.
+
+## Phase 2: Automated Preset Synchronization (SPEC 020)
+
+After Phase 1 establishes the governance model, Phase 2 automates ongoing validation
+and synchronization of preset versions across satellite repositories.
+
+### Weekly Satellite Preset Audit
+
+**Schedule**: Every Monday at 09:00 UTC
+
+The central repository runs `.github/workflows/satellite-preset-audit.yml`, which:
+
+1. Queries all satellite repos in the organization
+2. Checks their `.specify/presets/.registry` version
+3. Compares against the central `preset.yml` version (currently 1.16.0)
+4. Reports status for each repo: `in_sync`, `drift`, or `not_bootstrapped`
+5. If drifted repos found:
+   - Creates a GitHub issue with title: "Satellite repos out of sync with vX.Y.Z: N repos need upgrade"
+   - Attaches CSV report as artifact
+   - Labels: `type:automation`, `area:preset-sync`, `priority:P2`
+
+**View audit results**:
+```bash
+# Download latest audit report
+gh run list --workflow=satellite-preset-audit.yml --limit 1 \
+  --json databaseId,createdAt --jq '.[0].databaseId' | xargs -I {} \
+  gh run download {} -n preset-audit-report
+```
+
+### Auto-PR Generation for Drifted Repos
+
+When the audit detects drifted repos, the workflow `.github/workflows/auto-sync-preset.yml`
+can automatically create PRs to sync them. This workflow:
+
+1. Reads the audit issue with detected drifts
+2. For each drifted repo:
+   - Checks if there are open PRs (skips if active development)
+   - Creates branch: `fix/preset-sync-to-vX.Y.Z`
+   - Runs `bootstrap.sh --refresh-preset` to update the preset
+   - Creates PR with:
+     - Title: `fix(preset): sync to vX.Y.Z`
+     - Body: Links to audit issue, explains sync
+     - Labels: `sync:preset-version`, `type:automation`
+
+**Manual Trigger**:
+```bash
+# Sync a specific drifted repo
+gh workflow run auto-sync-preset.yml \
+  -f repo="org/satellite-repo" \
+  -f target_version="1.16.0"
+```
+
+**Manual Override**: If you need to prevent auto-sync for a specific repo:
+- Add label `no:auto-sync` to the PR before it's auto-created, OR
+- Close the audit issue before the workflow runs
+
+### Preset Version Validation in CI/CD
+
+When you open a PR to a satellite repo touching `.specify/` files, the workflow
+`.github/workflows/validate-bootstrap.yml` runs automatically:
+
+1. Executes `.specify/scripts/bash/detect-preset-version-mismatch.sh`
+2. Checks if `.specify/presets/.registry` version matches `preset.yml`
+3. If drift detected:
+   - Comments on PR with version mismatch details
+   - Fails the check to block merge
+   - Provides guidance: "Please run bootstrap.sh --refresh-preset"
+
+**To fix version drift in your PR**:
+```bash
+# In your satellite repo
+./bootstrap.sh --refresh-preset
+
+# Commit and push
+git add .specify/
+git commit -m "chore(preset): refresh to v1.16.0"
+git push
+```
+
+### Manual Preset Refresh
+
+If you need to manually update a satellite repo's preset outside the auto-sync workflow:
+
+```bash
+# In the satellite repository
+./bootstrap.sh --refresh-preset
+
+# Review changes
+git diff --stat
+
+# Create PR for team review
+git checkout -b fix/preset-sync-to-v1.16.0
+git add .specify/
+git commit -m "chore(preset): refresh to v1.16.0
+
+Manually synced to central preset v1.16.0."
+git push origin fix/preset-sync-to-v1.16.0
+
+# Open PR in GitHub UI
+```
+
+### Phase 2 Compliance Checklist
+
+- [ ] Your satellite repo receives weekly audit checks
+- [ ] You understand the audit issue and auto-PR flow
+- [ ] You know how to manually refresh preset if needed
+- [ ] You've reviewed `.specify/presets/.registry` version matches expectations
+- [ ] Your CI/CD validates preset versions on `.specify/` PRs
+

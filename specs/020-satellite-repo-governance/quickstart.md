@@ -27,10 +27,12 @@ satélites.
 2. Confirme em [research.md](./research.md) linhas 11–24 que a decisão greenfield baseia-se apenas em presença de `relevant application code` (definido em [plan.md](./plan.md) linhas 47–48)
 3. Verifique em [contracts/topology-intake.contract.md](./contracts/topology-intake.contract.md) linhas 52–53 que esses artefatos isolados NÃO contam como brownfield
 4. Confirme que o campo `has_relevant_application_code = false` leva o intake para greenfield (Decision Rules, linha 26)
-5. **Assertion**: O fluxo bootstrap apresenta a questão mono vs multirepo *antes* de qualquer sugestão de topologia
+5. **Assertion**: O fluxo bootstrap apresenta explicitamente a classificação greenfield e a interpretação de ausência de código relevante antes de qualquer sugestão de topologia
+6. **Assertion**: A validação cobre FR-001 e SC-001 porque o bootstrap registra a classificação antes de avançar
 
 **Files involved**: 
 - `bootstrap.sh` (detector de `relevant application code` no intake)
+- `README.md` (orientação de onboarding greenfield/brownfield)
 - `docs/developer-guide.md` (seção "Greenfield Intake")
 - `spec.md` (AC-1)
 - `research.md` (Decision 1)
@@ -47,10 +49,12 @@ satélites.
 2. Confirme em [data-model.md](./data-model.md) linhas 67–68 que `has_relevant_application_code = true` implica brownfield
 3. Verifique em [contracts/topology-intake.contract.md](./contracts/topology-intake.contract.md) linha 26 que esse fluxo segue para "Mandar diretamente para o fluxo brownfield"
 4. Confirme que a sugestão padrão de satélites NÃO é feita neste fluxo
-5. **Assertion**: O processo respeita o histórico existente do produto e não força decomposição prematura
+5. **Assertion**: O fluxo bootstrap apresenta explicitamente a classificação brownfield e a interpretação de presença de código relevante
+6. **Assertion**: A validação continua cobrindo FR-001 e SC-001, agora no caminho brownfield, antes de qualquer orientação estrutural adicional
 
 **Files involved**:
 - `bootstrap.sh` (detector de código em `src/`, `app/`, `services/`)
+- `README.md` (orientação de onboarding greenfield/brownfield)
 - `docs/developer-guide.md` (seção "Brownfield Intake")
 - `spec.md` (AC-2)
 - `research.md` (Decision 1, lines 13–24)
@@ -224,3 +228,152 @@ After completing all 8 validation scenarios above, the implementation **must sat
 - ✓ Domain baseline accelerates decomposition without rigidity
 - ✓ Central repo consolidation is now documented and enforced
 - ✓ Satellite alignment mechanism is clear and auditable
+
+## Validation Execution Log (2026-08-24)
+
+- ✅ V1 + V2 (AC-1/AC-2): heurística greenfield/brownfield confirmada em `bootstrap.sh` e testes `tests/bootstrap/bootstrap-entrypoints.bats`.
+- ✅ V3 (AC-3): captura de `delivery_model`, `decision_reason` e `decision_owner` implementada no bootstrap com persistência em `.specify/feature.json`.
+- ✅ V4 + V5 (AC-4/AC-5): handoff explícito para baseline FRONT/BACK/DESIGN/DATA/JOBS adaptável com justificativa + ownership registrado.
+- ✅ V6 (AC-6): regra de fonte única no Repo Central reforçada em `docs/developer-guide.md`, `docs/bounded-contexts.yaml` e template brownfield.
+- ✅ V7 (AC-7): processo central → satélite via workflow oficial de update reforçado em `docs/developer-guide.md`, `README.md` e `templates/workflows/update-speckit-and-bundle.yml`.
+- ✅ V8 (FR-011): separação governança permanente vs bugfix operacional preservada e consolidada nos arquivos de processo.
+
+**Comando executado (evidência):**
+
+```bash
+bats tests/bootstrap/bootstrap-entrypoints.bats
+```
+
+---
+
+## Phase 2: Automated Preset Synchronization
+
+**Phase 2 Overview**: After Phase 1 establishes the governance model, Phase 2 automates 
+ongoing validation and synchronization so satellite repos stay aligned with the central 
+preset version without manual intervention.
+
+### V8: Weekly Audit Detects Preset Drift (Phase 2)
+
+**Scenario**: A satellite repository's `.specify/presets/.registry` version lags behind 
+the central `preset.yml` version due to delayed PR merges or administrative oversight.
+
+**Validation steps**:
+
+1. Confirm in `.github/workflows/satellite-preset-audit.yml` that:
+   - Trigger: Weekly on Monday 09:00 UTC
+   - Runs `scripts/scan-org-rename-references.sh --mode satellite-preset-audit`
+   - Generates CSV report: `repo,current_version,drift_status,last_updated`
+
+2. Verify in `scripts/scan-org-rename-references.sh` (satellite-preset-audit mode) that:
+   - It queries `.specify/presets/.registry` version from each satellite
+   - Compares against central `preset.yml` version (1.16.0)
+   - Reports: `in_sync`, `drift`, or `not_bootstrapped`
+
+3. Confirm in `.github/workflows/satellite-preset-audit.yml` that:
+   - If drifted repos found: Creates issue with title "Satellite repos out of sync with v1.16.0: N repos need upgrade"
+   - Attaches CSV report as artifact
+   - Labels issue: `type:automation`, `area:preset-sync`, `priority:P2`
+
+**Assertion**: Weekly audit runs automatically and creates actionable issue if drift detected.
+
+**Files involved**:
+- `.github/workflows/satellite-preset-audit.yml` (T-047)
+- `scripts/scan-org-rename-references.sh` (T-046, satellite-preset-audit mode)
+- `.specify/scripts/bash/detect-preset-version-mismatch.sh` (T-043)
+
+### V9: Auto-PR Flow for Drifted Repos (Phase 2)
+
+**Scenario**: The audit detects a drifted satellite repo and attempts to create a PR 
+automatically if the repo is not in active development.
+
+**Validation steps**:
+
+1. Confirm in `.github/workflows/auto-sync-preset.yml` that:
+   - Trigger: On audit issue creation (`issue opened` event)
+   - Also supports: `workflow_dispatch` for manual override
+
+2. Verify workflow logic:
+   - Parse drifted repos from audit issue
+   - For each repo:
+     - Check if there are open PRs (if yes, skip to avoid conflicts)
+     - Create branch: `fix/preset-sync-to-vX.Y.Z`
+     - Run `bootstrap.sh --refresh-preset`
+     - Create PR with title: `fix(preset): sync to vX.Y.Z`
+     - Label: `sync:preset-version`, `type:automation`
+     - Link to audit issue in PR body
+
+3. Confirm in `bootstrap.sh` that:
+   - Supports flag `--refresh-preset` to update preset without full re-initialization
+   - Detects version mismatch via `.specify/scripts/bash/detect-preset-version-mismatch.sh`
+
+**Assertion**: Auto-PR creation respects active development (skips repos with open PRs) 
+and creates linked PRs for drifted repos.
+
+**Files involved**:
+- `.github/workflows/auto-sync-preset.yml` (T-048)
+- `bootstrap.sh` (extended with `--refresh-preset` support)
+- `.specify/scripts/bash/detect-preset-version-mismatch.sh` (T-043)
+
+### V10: Preset Detection in Validation Workflow (Phase 2)
+
+**Scenario**: A developer opens a PR to a satellite repo touching `.specify/` files. 
+The validation workflow should detect if preset version drift exists.
+
+**Validation steps**:
+
+1. Confirm in `.github/workflows/validate-bootstrap.yml` that:
+   - Trigger: On PR touching `.specify/`, `bootstrap.sh`, or the workflow itself
+   - Runs `.specify/scripts/bash/detect-preset-version-mismatch.sh --json`
+
+2. Verify workflow behavior:
+   - Parses JSON output from detection script
+   - If `status: "mismatch"` found: Comments on PR with mismatch details
+   - Exits with failure code to block merge if drift detected
+
+3. Confirm comment format includes:
+   - `⚠️ Preset Version Mismatch Detected`
+   - Expected version vs. Actual version
+   - Recovery instruction: "Please run bootstrap.sh --refresh-preset"
+
+**Assertion**: PR validation catches preset drift early and provides guidance to fix it.
+
+**Files involved**:
+- `.github/workflows/validate-bootstrap.yml` (T-044)
+- `.specify/scripts/bash/detect-preset-version-mismatch.sh` (T-043)
+
+### V11: Test Coverage for Detection Logic (Phase 2)
+
+**Scenario**: Verify that the detection function handles all edge cases correctly.
+
+**Validation steps**:
+
+1. Confirm in `tests/bootstrap/bootstrap-preset-detection.bats` that:
+   - Test AC-1: Exact version match → exit code 0, status "ok"
+   - Test AC-2: Stale registry (e.g., 1.15.0 vs 1.16.0) → exit code 1, status "mismatch"
+   - Test AC-3: Missing .registry file → exit code 1, status "error"
+   - Test AC-4: JSON output is valid and parseable
+
+2. Run tests:
+   ```bash
+   bats tests/bootstrap/bootstrap-preset-detection.bats
+   ```
+
+3. Verify all tests pass and cover the detection scenarios.
+
+**Assertion**: Detection function is thoroughly tested for matching, drift, and error cases.
+
+**Files involved**:
+- `tests/bootstrap/bootstrap-preset-detection.bats` (T-045)
+- `.specify/scripts/bash/detect-preset-version-mismatch.sh` (T-043)
+
+---
+
+## Phase 1 + Phase 2 Integration
+
+After Phase 2 implementation, the full governance model is:
+
+1. **Phase 1 (Manual)**: Bootstrap classifies greenfield/brownfield, records topology decision, suggests baseline domains, enforces central repo as source of specs, documents central → satélite update flow.
+
+2. **Phase 2 (Automated)**: Weekly audit detects preset drift, auto-PRs refresh drifted repos, validation workflow catches drift on PR, test coverage ensures detection reliability.
+
+**Expected Outcome**: Satellite repos stay synchronized with central preset version without manual intervention, while governance rules remain explicit and traceable.

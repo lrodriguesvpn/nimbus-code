@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-08-21T09:30:00Z",
+  "updated_at": "2026-08-24T22:00:36Z",
   "catalog_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/workflows/catalog.json",
   "workflows": {
     "nimbus-code-full-cycle": {
@@ -9,7 +9,7 @@
       "version": "1.4.0",
       "description": "Ciclo SDD completo (discovery → specify → plan → tasks → implement → converge) com branch criado apenas na fase implement, gates de DevSecOps, grafo de módulos, release strategy e convergência pós-implementação.",
       "author": "Nimbus-Code",
-      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.10.0/nimbus-code-full-cycle-1.4.0.zip",
+      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.16.0/nimbus-code-full-cycle-1.4.0.zip",
       "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template",
       "license": "Proprietary",
       "requires": {

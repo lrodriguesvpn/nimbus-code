@@ -1,0 +1,19 @@
+# retro-cadence-state.yaml — Estado do contador de retrospectivas proativas
+#
+# Este arquivo rastreia quantas features foram concluídas desde a última
+# retrospectiva, para sinalizar quando uma nova retro está devida.
+#
+# SCHEMA
+#   features_since_last_retro: número de features concluídas desde a última retro
+#   retro_cadence_n:           a cada N features, sinalizar retro proativa (default: 5)
+#   last_retro_date:           data da última retrospectiva registrada (YYYY-MM-DD ou null)
+#
+# COMO ATUALIZAR
+# - Ao concluir uma feature: incrementar `features_since_last_retro` manualmente
+#   ou via `scripts/process-metrics-report.sh --check-retro-cadence`.
+# - Ao realizar uma retrospectiva: resetar `features_since_last_retro` para 0
+#   e atualizar `last_retro_date` com a data da sessão.
+
+features_since_last_retro: 0
+retro_cadence_n: 5
+last_retro_date: null

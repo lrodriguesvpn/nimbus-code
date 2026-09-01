@@ -54,6 +54,7 @@ S1 — função isolada sem dependência externa), use apenas as perguntas
 marcadas com ⚡ abaixo — geralmente 9 perguntas no total, ~10 minutos. As
 demais podem ser puladas nesta rodada; se a complexidade real revelar-se maior
 during a conversa, mude para o modo Completo sem constrangimento.*
+durante a conversa, mude para o modo Completo sem constrangimento.*
 
 Se não tiver certeza da complexidade antes de começar, comece pelo modo
 Completo — é mais barato perguntar a mais do que reabrir a entrevista depois.
@@ -130,7 +131,10 @@ Completo — é mais barato perguntar a mais do que reabrir a entrevista depois.
 4. Esses dados têm prazo de retenção definido, ou existe pedido de exclusão a considerar?
 5. Esse dado sai da organização (parceiro, fornecedor terceiro, nuvem fora do país)?
 
-> Se a resposta ao item 1 for claramente "não" (nenhum dado pessoal), marque os itens 2–5 como `N/A — sem dado pessoal identificado` e siga em frente. Não force perguntas de LGPD quando não há dado pessoal em jogo — isso é burocracia sem valor.
+> Se a resposta ao item 1 for claramente "não" (nenhum dado pessoal envolvido),
+> marque os itens 2–5 como `N/A — sem dado pessoal identificado` e siga em
+> frente. Não force perguntas de LGPD quando não há dado pessoal em jogo — isso
+> é burocracia sem valor.
 
 ---
 

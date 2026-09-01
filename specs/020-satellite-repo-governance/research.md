@@ -33,7 +33,8 @@ o produto já tem legado suficiente para exigir o fluxo brownfield.
 **Decision**: o fluxo greenfield deve registrar o motivo da escolha entre
 monorepo e multirepo como parte explícita do intake, em formato mínimo legível:
 motivo principal, trade-off esperado e papel/responsável que confirmou a
-decisão.
+decisão. O registro deve ser persistido em `.specify/feature.json` no objeto
+`topology_decision` para manter rastreabilidade operacional.
 
 **Rationale**: a decisão estrutural impacta ownership, board, bootstrap,
 roteamento de tasks e futura decomposição do produto. Sem justificativa, a
@@ -50,7 +51,8 @@ topologia vira opinião oral e não decisão rastreável.
 entra após a primeira spec estrutural do produto, não antes de existir um mínimo
 de entendimento do problema. O bootstrap registra a decisão multirepo e faz o
 handoff explícito para esse passo posterior, mas não tenta materializar a
-topologia completa cedo demais.
+topologia completa cedo demais; a baseline FRONT/BACK/DESIGN/DATA/JOBS é
+apenas recomendação inicial, adaptável com justificativa + ownership.
 
 **Rationale**: sugerir satélites cedo demais força particionamento artificial. A
 primeira spec dá contexto suficiente para decidir se a baseline recomendada faz

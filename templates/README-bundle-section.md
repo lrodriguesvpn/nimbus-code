@@ -8,7 +8,7 @@
 
 ## Nimbus Code — NIMBUS CODE / Padrões Nimbus-Code
 
-Este projeto usa o [GitHub Nimbus Code](https://github.com/github/nimbus-code) com os
+Este projeto usa o [GitHub Spec Kit](https://github.com/github/spec-kit) com os
 padrões corporativos da Nimbus-Code aplicados via **NIMBUS CODE™ AI Delivery
 System**.
 

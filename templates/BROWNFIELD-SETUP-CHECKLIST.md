@@ -40,7 +40,7 @@ Status: ⏳ Em andamento
   - [ ] Padrões de testes observados: [PLACEHOLDER: ex.: pytest, Jest, GoTest]
   - [ ] Estrutura de módulos/pacotes: [PLACEHOLDER: ex.: monorepo, mono package, microserviços]
 
-- [ ] Executado `/nimbus-code.constitution` com o prompt de análise profunda (seção 2.3 do [developer-guide.md](../docs/developer-guide.md))
+- [ ] Executado `/speckit.constitution` com o prompt de análise profunda (seção 2.3 do [developer-guide.md](../docs/developer-guide.md))
 - [ ] Agente completou múltiplas iterações de análise (quantas: [PLACEHOLDER: 1-5])
 - [ ] `constitution.md` gerado e revisado
 - [ ] Ajustes manuais aplicados em `constitution.md`, se necessário (escreva resumo abaixo se sim)
@@ -64,19 +64,19 @@ Status: ⏳ Em andamento
 ## Fase 4: Primeira Feature com Nimbus Code
 
 - [ ] Feature/card escolhido: [PLACEHOLDER: ex.: "PROJ-123 — Add user role management"]
-- [ ] Executado `/nimbus-code.specify` (com contexto de cards/constituição)
+- [ ] Executado `/speckit.specify` (com contexto de cards/constituição)
 - [ ] `spec.md` gerado e revisado
-- [ ] Executado `/nimbus-code.plan` e revisado `plan.md`
+- [ ] Executado `/speckit.plan` e revisado `plan.md`
   - [ ] Architecture Decision Log incluído com decisões-chave?
-- [ ] Executado `/nimbus-code.tasks` e revisado `tasks.md`
+- [ ] Executado `/speckit.tasks` e revisado `tasks.md`
   - [ ] Tarefas estão em ordem de dependência?
   - [ ] Checklist de qualidade do preset incluído?
   - [ ] Itens de IaC obrigatório incluídos?
 
-- [ ] Executado `/nimbus-code.implement` — primeiras tarefas completadas
+- [ ] Executado `/speckit.implement` — primeiras tarefas completadas
   - [ ] Quantos passes foram necessários? [PLACEHOLDER: 1-5]
   - [ ] Houve erros de compilação/teste? [PLACEHOLDER: Sim/Não — descreva se sim]
-- [ ] Executado `/nimbus-code.converge` — gaps identificados
+- [ ] Executado `/speckit.converge` — gaps identificados
   - [ ] Quantos gaps novos foram anexados? [PLACEHOLDER: número]
   - [ ] Natureza dos gaps (ex.: testes faltando, docs, edge cases): [PLACEHOLDER: resumo]
 
@@ -84,6 +84,12 @@ Status: ⏳ Em andamento
 - [ ] Código final validado (testes, compilação, cobertura)
 - [ ] PR aberta e revisão de código completa (incluindo Copilot review obrigatória)
 - [ ] Merge realizado
+
+### Regra adicional para projetos multirepo
+
+- [ ] Confirmado que o repositório atual é o **Repo Central** antes de criar/editar `specs/`
+- [ ] Se este repo for satélite, nenhuma pasta `specs/` local foi criada
+- [ ] Demandas originadas no satélite foram registradas no Repo Central antes do roteamento
 
 ## Fase 5: Documentação Pós-Setup
 
@@ -115,9 +121,9 @@ Exemplo:
 Após este setup, o próximo ciclo de Nimbus Code será:
 
 1. Nova branch: `git checkout -b feature/[ID]-[descrição]`
-2. `/nimbus-code.specify` (usando contexto já aprendido em `constitution.md`)
-3. `/nimbus-code.plan` → `/nimbus-code.tasks`
-4. `/nimbus-code.implement` → `/nimbus-code.converge` (ciclos até ✅)
+2. `/speckit.specify` (usando contexto já aprendido em `constitution.md`)
+3. `/speckit.plan` → `/speckit.tasks`
+4. `/speckit.implement` → `/speckit.converge` (ciclos até ✅)
 5. PR → Merge
 
 Ver [`docs/developer-guide.md`](../docs/developer-guide.md) seção 3 para o passo a passo de importação de card, se aplicável.

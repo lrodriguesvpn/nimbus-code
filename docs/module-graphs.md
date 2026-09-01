@@ -262,6 +262,36 @@ evitando falsos positivos em contextos multirepo.
    mais de um repositório do contexto — ver `.github/copilot-instructions.md`,
    seção "Grafo de Contexto Multi-Repo (Brownfield)".
 
+### Merge não-destrutivo ao re-executar o script
+
+`scripts/generate-context-graph.sh` detecta automaticamente se um
+`graph.yaml`/`graph.md` já existente foi composto manualmente com um grafo
+de módulos internos (`nodes`/`edges`/`externals`/`complexity`/`feature`/
+`spec_ref` no nível raiz) e, nesse caso, **preserva todo esse conteúdo**,
+atualizando apenas o bloco de contexto multi-repo.
+
+Comportamento por cenário:
+
+| Cenário | `graph.yaml` | `graph.md` |
+|---|---|---|
+| Arquivo **não existe** | criado do zero (comportamento original) | criado do zero (comportamento original) |
+| Arquivo existe, **só grafo de contexto** (gerado pelo script) | substituído integralmente (idempotente) | substituído integralmente (idempotente) |
+| Arquivo existe, **grafo de módulos + contexto** (composição manual) | apenas o bloco `context_graph:` é atualizado; `nodes`, `edges`, `externals`, `complexity`, `feature`, `spec_ref` são preservados byte-a-byte | apenas a seção delimitada por `<!-- generate-context-graph:start -->` / `<!-- generate-context-graph:end -->` é substituída; o resto do arquivo é preservado |
+
+No `graph.md`, a seção gerada pelo script é delimitada por marcadores HTML:
+
+```html
+<!-- generate-context-graph:start -->
+## Grafo de Contexto Multi-Repo: <context-slug>
+...
+<!-- generate-context-graph:end -->
+```
+
+Se o `graph.md` já existia antes e **não tinha** esses marcadores, o script
+acrescenta a seção de contexto ao final do arquivo na primeira execução
+(adicionando os marcadores); nas execuções seguintes, apenas o conteúdo entre
+os marcadores é substituído.
+
 ### Harvest de padrões (`harvest-patterns.sh`) — complementar, não parte do grafo
 
 `scripts/harvest-patterns.sh` (mesma feature 014) é um mecanismo

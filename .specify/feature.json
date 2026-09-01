@@ -1,9 +1,3 @@
 {
-  "feature_directory": "specs/020-satellite-repo-governance",
-  "bounded_contexts": [
-    "spec-kit-workflow"
-  ],
-  "repos": [
-    "venha-pra-nuvem/nimbus-code-spec-kit-template"
-  ]
+  "feature_directory": "specs/023-template-resolution-merge-fix"
 }

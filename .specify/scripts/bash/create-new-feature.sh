@@ -597,12 +597,20 @@ if [ "$DRY_RUN" != true ]; then
 
     mkdir -p "$FEATURE_DIR"
 
+    # Materialize the composed spec template once for this feature.
     if [ ! -f "$SPEC_FILE" ]; then
-        TEMPLATE=$(resolve_template "spec-template" "$REPO_ROOT") || true
-        if [ -n "$TEMPLATE" ] && [ -f "$TEMPLATE" ]; then
-            cp "$TEMPLATE" "$SPEC_FILE"
+        if materialize_template_content "spec-template" "$REPO_ROOT" "$SPEC_FILE"; then
+            if $JSON_MODE; then
+                echo "Materialized composed spec template to $SPEC_FILE" >&2
+            else
+                echo "Materialized composed spec template to $SPEC_FILE"
+            fi
         else
-            echo "Warning: Spec template not found; created empty spec file" >&2
+            if $JSON_MODE; then
+                echo "Warning: Spec template not found; created empty spec file" >&2
+            else
+                echo "Warning: Spec template not found; created empty spec file"
+            fi
             touch "$SPEC_FILE"
         fi
     fi

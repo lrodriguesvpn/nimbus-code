@@ -9,6 +9,8 @@
 #   Cada contexto tem seu próprio repo de código onde o Copilot Agent abre PRs.
 #   Repos satélite não devem manter specs/ locais: toda spec continua no Repo
 #   Central do produto, e o satélite recebe apenas código/tasks/PRs roteados.
+#   Para greenfield multirepo, use FRONT/BACK/DESIGN/DATA/JOBS como baseline
+#   recomendada de domínios satélite e adapte apenas com justificativa + owner.
 #
 # Como registrar um novo microsserviço:
 #   1. Adicione uma entrada abaixo com slug, description, repository, stack,
@@ -44,6 +46,20 @@ contexts:
     stack: "Go + TypeScript + React"
     team: "a definir"
     autonomous_ok: false  # ainda sem primeira revisão humana pós-migração
+
+  - slug: "nimbuscode-harvest-gateway"
+    description: >
+      Gateway multicloud compartilhado que traduz o contrato genérico de
+      scripts/harvest-patterns.sh (repo/stack/prompt/metadata → padrões
+      arquiteturais) em chamadas de inferência reais a Azure AI Foundry,
+      Google (Vertex AI/Gemini) ou AWS Bedrock, com modelo selecionável dentro
+      de cada provedor. Endpoint único usado por todos os repositórios
+      satélite via HARVEST_API_URL/HARVEST_API_TOKEN de nível de organização —
+      ver specs/022-nimbuscode-harvest-gateway/.
+    repository: "venha-pra-nuvem/nimbus-harvest-gateway"
+    stack: "Azure Functions (Python)"
+    team: "platform"
+    autonomous_ok: false  # infraestrutura nova, sem primeira revisão humana ainda
 
 # Exemplos para projetos reais (descomente e ajuste):
 #

@@ -7,11 +7,17 @@ LOCAL_PATH=""
 INTEGRATION="${SPECKIT_INTEGRATION_DEFAULT:-copilot}"
 REPO_TYPE=""
 SELECTED_PRESET=""
+DELIVERY_MODEL=""
+DECISION_REASON=""
+DECISION_OWNER=""
+SATELLITE_DOMAINS=""
+CUSTOM_DOMAIN_JUSTIFICATION=""
+CUSTOM_DOMAIN_OWNERSHIP=""
 
 print_usage() {
   cat <<'EOF'
 Usage:
-  ./bootstrap.sh [--local <path>] [--integration <copilot|claude|gemini>] [--repo-type <platform|dev_standards>]
+  ./bootstrap.sh [--local <path>] [--integration <copilot|claude|gemini>] [--repo-type <platform|dev_standards>] [--delivery-model <monorepo|multirepo>] [--decision-reason <text>] [--decision-owner <team|role>] [--satellite-domains <CSV>] [--custom-domain-justification <text>] [--custom-domain-ownership <text>]
 EOF
 }
 
@@ -63,6 +69,170 @@ resolve_repo_type() {
   done
 }
 
+read_interactive_value() {
+  local prompt="$1"
+  local result_var="$2"
+  local value=""
+
+  if [[ -t 0 ]]; then
+    printf '%s' "$prompt"
+    IFS= read -r value
+  elif [[ -r /dev/tty ]]; then
+    printf '%s' "$prompt" > /dev/tty
+    IFS= read -r value < /dev/tty
+  fi
+
+  printf -v "$result_var" '%s' "$value"
+}
+
+require_non_empty_value() {
+  local var_name="$1"
+  local prompt="$2"
+  local non_interactive_error="$3"
+  local current=""
+
+  eval "current=\"\${$var_name:-}\""
+
+  while [[ -z "$current" ]]; do
+    if [[ -t 0 || -r /dev/tty ]]; then
+      read_interactive_value "$prompt" current
+    else
+      echo "ERROR: $non_interactive_error" >&2
+      exit 1
+    fi
+  done
+
+  printf -v "$var_name" '%s' "$current"
+}
+
+resolve_delivery_model() {
+  local prompt='? For greenfield, choose delivery model [monorepo/multirepo] '
+
+  while true; do
+    if [[ -n "$DELIVERY_MODEL" ]]; then
+      case "$DELIVERY_MODEL" in
+        monorepo|multirepo)
+          return
+          ;;
+        *)
+          echo "ERROR: invalid --delivery-model '$DELIVERY_MODEL'. Use 'monorepo' or 'multirepo'." >&2
+          exit 1
+          ;;
+      esac
+    fi
+
+    if [[ -t 0 || -r /dev/tty ]]; then
+      read_interactive_value "$prompt" DELIVERY_MODEL
+    else
+      echo "ERROR: --delivery-model is required in fully non-interactive greenfield mode. Use --delivery-model monorepo or --delivery-model multirepo." >&2
+      exit 1
+    fi
+  done
+}
+
+normalize_satellite_domains() {
+  local domains="$1"
+  echo "$domains" | tr '[:lower:]' '[:upper:]' | tr -d ' ' | sed -E 's/,+/,/g; s/^,+//; s/,+$//'
+}
+
+resolve_greenfield_topology_decision() {
+  local baseline_domains="FRONT,BACK,DESIGN,DATA,JOBS"
+  local domains_prompt='? Suggested satellite baseline is FRONT/BACK/DESIGN/DATA/JOBS. Press ENTER to accept or provide CSV to adapt it: '
+  local domains_input=""
+
+  [[ "${DETECTED_CONTEXT:-}" == "greenfield" ]] || return 0
+
+  echo "-> Capturing topology decision for greenfield intake..."
+  resolve_delivery_model
+
+  require_non_empty_value \
+    "DECISION_REASON" \
+    "? Why did you choose ${DELIVERY_MODEL}? (main reason + expected trade-off) " \
+    "--decision-reason is required in fully non-interactive greenfield mode."
+
+  require_non_empty_value \
+    "DECISION_OWNER" \
+    "? Who is confirming this structural decision? (team/role) " \
+    "--decision-owner is required in fully non-interactive greenfield mode."
+
+  if [[ "$DELIVERY_MODEL" == "multirepo" ]]; then
+    if [[ -n "$SATELLITE_DOMAINS" ]]; then
+      domains_input="$SATELLITE_DOMAINS"
+    elif [[ -t 0 || -r /dev/tty ]]; then
+      read_interactive_value "$domains_prompt" domains_input
+    else
+      domains_input="$baseline_domains"
+    fi
+
+    if [[ -z "$domains_input" ]]; then
+      SATELLITE_DOMAINS="$baseline_domains"
+    else
+      SATELLITE_DOMAINS="$(normalize_satellite_domains "$domains_input")"
+    fi
+
+    if [[ "$SATELLITE_DOMAINS" != "$baseline_domains" ]]; then
+      require_non_empty_value \
+        "CUSTOM_DOMAIN_JUSTIFICATION" \
+        "? Why are you adapting the baseline domains? " \
+        "--custom-domain-justification is required when --satellite-domains differs from FRONT,BACK,DESIGN,DATA,JOBS."
+
+      require_non_empty_value \
+        "CUSTOM_DOMAIN_OWNERSHIP" \
+        "? Who owns the custom domain topology? (team/role/repo) " \
+        "--custom-domain-ownership is required when --satellite-domains differs from FRONT,BACK,DESIGN,DATA,JOBS."
+    fi
+
+    echo "  Handoff: define/confirm satellite domains after the first structural spec in the Repo Central."
+    echo "  Baseline recommendation: FRONT/BACK/DESIGN/DATA/JOBS (adaptable with explicit ownership)."
+  else
+    SATELLITE_DOMAINS=""
+  fi
+}
+
+persist_topology_decision() {
+  local feature_file="$WORKDIR/.specify/feature.json"
+  local timestamp
+  local domains_json="[]"
+
+  [[ "${DETECTED_CONTEXT:-}" == "greenfield" ]] || return 0
+
+  if [[ ! -f "$feature_file" ]]; then
+    echo "  WARN: .specify/feature.json not found; skipping topology decision persistence."
+    return 0
+  fi
+
+  if [[ -n "$SATELLITE_DOMAINS" ]]; then
+    domains_json="$(printf '%s' "$SATELLITE_DOMAINS" | tr ',' '\n' | sed '/^$/d' | jq -R . | jq -s .)"
+  fi
+
+  timestamp="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+
+  jq \
+    --arg dm "$DELIVERY_MODEL" \
+    --arg dr "$DECISION_REASON" \
+    --arg do "$DECISION_OWNER" \
+    --arg cj "$CUSTOM_DOMAIN_JUSTIFICATION" \
+    --arg co "$CUSTOM_DOMAIN_OWNERSHIP" \
+    --arg ci "$CONTEXT_INDICATOR" \
+    --arg ts "$timestamp" \
+    --argjson domains "$domains_json" \
+    '
+    .topology_decision = {
+      delivery_model: $dm,
+      decision_reason: $dr,
+      decision_owner: $do,
+      satellite_domains: $domains,
+      custom_domain_justification: (if $cj == "" then null else $cj end),
+      custom_domain_ownership: (if $co == "" then null else $co end),
+      context_indicator: $ci,
+      recorded_at: $ts
+    }
+    ' "$feature_file" > "$feature_file.tmp"
+
+  mv "$feature_file.tmp" "$feature_file"
+  echo "  OK: topology decision persisted to .specify/feature.json."
+}
+
 select_template_file() {
   local relative_path="$1"
   local preferred="$LOCAL_PATH/presets/$SELECTED_PRESET/templates/$relative_path"
@@ -81,6 +251,86 @@ select_template_file() {
   return 1
 }
 
+detect_has_relevant_application_source() {
+  local application_dirs=(
+    "src" "app" "packages" "services" "frontend" "backend"
+    "lib" "config" "routes" "controllers" "models" "components"
+  )
+  local dir
+
+  for dir in "${application_dirs[@]}"; do
+    [[ -d "$WORKDIR/$dir" ]] || continue
+    if find "$WORKDIR/$dir" -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.jsx' -o -name '*.py' -o -name '*.go' -o -name '*.java' -o -name '*.cs' -o -name '*.rb' \) 2>/dev/null | grep -q .; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+detect_has_relevant_application_manifest() {
+  local manifest_files=(
+    "package.json" "pom.xml" "build.gradle" "Makefile" "Dockerfile"
+    "pyproject.toml" "setup.py" "go.mod" "Cargo.toml"
+  )
+  local manifest
+
+  for manifest in "${manifest_files[@]}"; do
+    if [[ -f "$WORKDIR/$manifest" ]] && grep -Eq 'src|app|packages|services|frontend|backend' "$WORKDIR/$manifest" 2>/dev/null; then
+      return 0
+    fi
+  done
+
+  if find "$WORKDIR" -type f \( -name '*.csproj' -o -name '*.fsproj' \) 2>/dev/null | grep -q .; then
+    return 0
+  fi
+
+  return 1
+}
+
+detect_has_relevant_application_tests() {
+  local test_dirs=("__tests__" "test" "tests" "spec" "specs")
+  local test_dir test_file
+
+  for test_dir in "${test_dirs[@]}"; do
+    [[ -d "$WORKDIR/$test_dir" ]] || continue
+    while IFS= read -r test_file; do
+      [[ -n "$test_file" ]] || continue
+      case "$test_file" in
+        *bootstrap*|*infra*|*setup*)
+          continue
+          ;;
+        *)
+          return 0
+          ;;
+      esac
+    done < <(find "$WORKDIR/$test_dir" -type f \( -name '*.test.*' -o -name '*.spec.*' -o -name '*_test.*' -o -name '*_spec.*' \) 2>/dev/null)
+  done
+
+  return 1
+}
+
+detect_has_relevant_application_code() {
+  detect_has_relevant_application_source || \
+    detect_has_relevant_application_manifest || \
+    detect_has_relevant_application_tests
+}
+
+classify_repository_context() {
+  local classification="greenfield"
+  local indicator_list=""
+
+  if detect_has_relevant_application_code; then
+    classification="brownfield"
+    indicator_list="Relevant application code detected in source directories, build manifests, or application tests"
+  else
+    indicator_list="No relevant application code found; only README, LICENSE, workflows, setup scripts, or minimal templates"
+  fi
+
+  echo "$classification"
+  echo "$indicator_list"
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --local)
@@ -93,6 +343,30 @@ while [[ $# -gt 0 ]]; do
       ;;
     --repo-type)
       REPO_TYPE="$2"
+      shift 2
+      ;;
+    --delivery-model)
+      DELIVERY_MODEL="$2"
+      shift 2
+      ;;
+    --decision-reason)
+      DECISION_REASON="$2"
+      shift 2
+      ;;
+    --decision-owner)
+      DECISION_OWNER="$2"
+      shift 2
+      ;;
+    --satellite-domains)
+      SATELLITE_DOMAINS="$2"
+      shift 2
+      ;;
+    --custom-domain-justification)
+      CUSTOM_DOMAIN_JUSTIFICATION="$2"
+      shift 2
+      ;;
+    --custom-domain-ownership)
+      CUSTOM_DOMAIN_OWNERSHIP="$2"
       shift 2
       ;;
     -h|--help)
@@ -125,10 +399,48 @@ fi
 resolve_repo_type
 SELECTED_PRESET="$(preset_for_repo_type "$REPO_TYPE")"
 
-echo "-> Initializing Nimbus Code in $WORKDIR (integration: $INTEGRATION)..."
-specify init --here --integration "$INTEGRATION" --force
+echo "-> Classifying repository context (greenfield vs brownfield)..."
+read -r DETECTED_CONTEXT CONTEXT_INDICATOR <<< "$(classify_repository_context)"
+echo "  Detected context: $DETECTED_CONTEXT"
+if [[ "$DETECTED_CONTEXT" == "brownfield" ]]; then
+  echo "  Interpretation: relevant application code is present, so the repo follows the brownfield path."
+else
+  echo "  Interpretation: no relevant application code was found, so the repo follows the greenfield path."
+fi
+echo "  Evidence: $CONTEXT_INDICATOR"
+  resolve_greenfield_topology_decision
+
+  echo "-> Initializing Nimbus Code in $WORKDIR (integration: $INTEGRATION)..."
+  specify init --here --integration "$INTEGRATION" --force
+  persist_topology_decision
 
 echo "-> Installing preset $SELECTED_PRESET..."
+# Detect a stale already-installed preset and upgrade it automatically.
+# `specify preset add` has no "update" verb: re-running it on a repo that
+# already has the same preset ID installed just fails/no-ops, so simply
+# re-running bootstrap.sh after a preset version bump silently kept every
+# repo on its old (possibly broken) preset forever. Compare the version
+# recorded in .specify/presets/.registry against the version declared in
+# the source preset.yml, and remove+reinstall when they differ.
+SOURCE_PRESET_MANIFEST="$LOCAL_PATH/presets/$SELECTED_PRESET/preset.yml"
+SOURCE_PRESET_VERSION="$(grep -E '^version:' "$SOURCE_PRESET_MANIFEST" 2>/dev/null | head -1 | sed -E 's/^version:[[:space:]]*"?([^"[:space:]]+)"?.*/\1/')"
+INSTALLED_REGISTRY="$WORKDIR/.specify/presets/.registry"
+INSTALLED_PRESET_VERSION=""
+if [[ -f "$INSTALLED_REGISTRY" ]] && command -v python3 >/dev/null 2>&1; then
+  INSTALLED_PRESET_VERSION="$(SPECKIT_REGISTRY="$INSTALLED_REGISTRY" SPECKIT_PRESET="$SELECTED_PRESET" python3 -c "
+import json, os
+try:
+    with open(os.environ['SPECKIT_REGISTRY']) as f:
+        data = json.load(f)
+    print(data.get('presets', {}).get(os.environ['SPECKIT_PRESET'], {}).get('version', ''))
+except Exception:
+    print('')
+" 2>/dev/null)"
+fi
+if [[ -n "$INSTALLED_PRESET_VERSION" && -n "$SOURCE_PRESET_VERSION" && "$INSTALLED_PRESET_VERSION" != "$SOURCE_PRESET_VERSION" ]]; then
+  echo "  Installed preset version ($INSTALLED_PRESET_VERSION) differs from source ($SOURCE_PRESET_VERSION) - upgrading..."
+  specify preset remove "$SELECTED_PRESET" || echo "  WARN: could not remove existing preset $SELECTED_PRESET before upgrade"
+fi
 specify preset add --dev "$LOCAL_PATH/presets/$SELECTED_PRESET" --priority 5   || echo "  (preset already installed - skipped; use 'specify preset remove $SELECTED_PRESET' before reinstalling)"
 
 echo "-> Installing extension nimbus-code-backlog-sync..."
@@ -241,10 +553,79 @@ else
   echo "  WARN: missing Copilot instructions template"
 fi
 
-BUNDLE_VERSION="$(grep -A4 '^bundle:' "$LOCAL_PATH/bundles/nimbus-code-project-bundle/bundle.yml" | grep -E '^\s*version:' | head -1 | sed -E 's/.*"([0-9.]+)".*//')"
+echo
+echo "-> Installing agent session manual..."
+AGENT_SESSION_MANUAL_SRC="$(select_template_file 'agent-session-manual.md' || true)"
+if [[ -n "$AGENT_SESSION_MANUAL_SRC" && -f "$AGENT_SESSION_MANUAL_SRC" ]]; then
+  mkdir -p "$WORKDIR/docs"
+  if [[ -f "$WORKDIR/docs/agent-session-manual.md" ]]; then
+    echo "  INFO: docs/agent-session-manual.md already exists - skipped."
+  else
+    cp "$AGENT_SESSION_MANUAL_SRC" "$WORKDIR/docs/agent-session-manual.md"
+    echo "  OK: docs/agent-session-manual.md installed."
+  fi
+else
+  echo "  WARN: missing agent session manual template"
+fi
+
+# Generic delivery for every remaining file the preset declares under
+# templates/project-root/ (workflows, ISSUE_TEMPLATE, Harness Engineering,
+# Playbook de Sucesso, automation scripts, cost-config, bounded-contexts.yaml).
+# Without this loop, adding a new "provides.templates" entry to preset.yml
+# never actually reaches a consumer project - only the handful of files
+# explicitly cp'd above (and the 4 hardcoded workflows earlier in this script)
+# were ever delivered. Existing files are never overwritten (idempotent reruns
+# won't clobber org data accumulated in harness-catalog.yaml, for example).
+echo
+echo "-> Installing remaining preset project-root files..."
+PRESET_ROOT_DIR="$LOCAL_PATH/presets/$SELECTED_PRESET/templates/project-root"
+if [[ ! -d "$PRESET_ROOT_DIR" ]]; then
+  PRESET_ROOT_DIR="$LOCAL_PATH/presets/nimbus-code-standards/templates/project-root"
+fi
+
+if [[ -d "$PRESET_ROOT_DIR" ]]; then
+  while IFS= read -r -d '' src_file; do
+    rel_path="${src_file#"$PRESET_ROOT_DIR"/}"
+    case "$rel_path" in
+      "copilot-instructions.md")
+        # Already installed explicitly above (different target: .github/copilot-instructions.md).
+        continue
+        ;;
+      "bounded-contexts.yaml")
+        dest_rel="docs/bounded-contexts.yaml"
+        ;;
+      ".specify/cost/cost-config-template.yml")
+        dest_rel=".specify/cost/cost-config.yml"
+        ;;
+      *)
+        dest_rel="$rel_path"
+        ;;
+    esac
+
+    dest_file="$WORKDIR/$dest_rel"
+    if [[ -f "$dest_file" ]]; then
+      echo "  INFO: $dest_rel already exists - skipped."
+      continue
+    fi
+    mkdir -p "$(dirname "$dest_file")"
+    cp -p "$src_file" "$dest_file"
+    echo "  OK: $dest_rel installed."
+  done < <(find "$PRESET_ROOT_DIR" -type f -print0)
+else
+  echo "  WARN: preset project-root templates directory not found - skipped."
+fi
+
+BUNDLE_VERSION="$(grep -A4 '^bundle:' "$LOCAL_PATH/bundles/nimbus-code-project-bundle/bundle.yml" | grep -E '^\s*version:' | head -1 | sed -E 's/.*"([0-9.]+)".*/\1/')"
 echo
 echo "OK: bundle nimbus-code-project-bundle v${BUNDLE_VERSION} applied."
 echo "OK: preset installed: $SELECTED_PRESET (repository type: $REPO_TYPE)"
+echo "OK: repository classified as $DETECTED_CONTEXT (reason: $CONTEXT_INDICATOR)"
+if [[ "${DETECTED_CONTEXT:-}" == "greenfield" ]]; then
+  echo "OK: topology decision recorded: $DELIVERY_MODEL (owner: $DECISION_OWNER)"
+  if [[ "$DELIVERY_MODEL" == "multirepo" ]]; then
+    echo "OK: suggested satellite domains: ${SATELLITE_DOMAINS:-FRONT,BACK,DESIGN,DATA,JOBS}"
+  fi
+fi
 
 auto_assign_hint() {
   echo "  INFO: to enable auto-assign, configure NIMBUS_APP_ID/NIMBUS_APP_PRIVATE_KEY; COPILOT_AGENT_ASSIGN_TOKEN remains a temporary fallback during rollout."

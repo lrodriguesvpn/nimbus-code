@@ -59,7 +59,7 @@ Cada issue de Task recebeu labels de `priority:*`, `complexity:*`, `type:*` e `a
 
 **Status desta sessão (MVP)**: T004 é manual (criação do GitHub App na organização) e permanece pendente — nenhum agente pode executá-la. Como consequência, T005 (configurar os secrets reais com as credenciais do App) também permanece pendente, pois depende diretamente de T004. T006–T010 foram implementados em código (a lógica de autenticação, descoberta, dedup de issue e resolução de flag funciona assim que os secrets existirem — ela falha explicitamente com `::error::` enquanto não existirem, sem simular autenticação).
 
-- [ ] T004 [Humano] Criar o GitHub App "Nimbus Code Security Auditor" na organização com permissões somente-leitura (`metadata:read`, `administration:read`, `secrets:read`, `contents:read`) e instalá-lo — ver ADR [0008](/docs/adr/0008-github-app-para-varredura-de-seguranca-org-wide.md)
+- [ ] T004 [Humano] Criar o GitHub App "Nimbus Code Security Auditor" na organização com permissões somente-leitura (`metadata:read`, `administration:read`, `secrets:read`, `contents:read`) e instalá-lo — ver ADR [0008](/docs/adr/0008-github-app-para-varredura-de-seguranca-org-wide.md) _(decisão consolidada em [issue #72](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/72) junto com specs 003/008 — aguardar decisão de App único antes de criar um App isolado)_
 
   ```markdown
   ## Contexto

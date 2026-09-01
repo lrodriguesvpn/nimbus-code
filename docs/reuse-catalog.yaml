@@ -110,13 +110,30 @@ entries:
       execute isto no final". Implementado para o campo `epic_issue` em
       .specify/scripts/bash/create-new-feature.sh +
       .specify/scripts/bash/check-epic-issue-consistency.sh +
-      .github/skills/speckit-specify/SKILL.md. Reaproveitar para qualquer
-      outro campo de feature.json extraído de texto livre por um SKILL.md
-      (ex.: bounded_contexts na feature 006, ainda não migrado para este
-      padrão).
+      .github/skills/speckit-specify/SKILL.md. Reaproveitado também para
+      completude do interview.md (.specify/scripts/bash/validate-interview-
+      completeness.sh + .github/skills/speckit-interview/SKILL.md) e para
+      detecção determinística de retrabalho via histórico git — spec/plan
+      revisados depois de tasks.md já existir, tasks novas adicionadas —
+      bloqueando /speckit-implement até specs/<feature>/retro.md ser
+      completado (.specify/scripts/bash/detect-retro-signal.sh +
+      .specify/scripts/bash/validate-retro-completeness.sh +
+      .github/skills/speckit-implement/SKILL.md). Também generalizado (T018)
+      para o caso em que o "estado" a validar não é um campo extraído de texto
+      livre, mas o resultado real de uma ação em API externa (GraphQL) que a
+      prosa do Outline instrui o agente a fazer no meio do fluxo — vínculo de
+      sub-issue Task/User Story -> parent no GHE
+      (.specify/scripts/bash/check-task-hierarchy-consistency.sh +
+      .github/skills/speckit-taskstoissues/SKILL.md), reconsultando a API em
+      vez de confiar que o passo de vínculo foi executado corretamente.
+      Reaproveitar para qualquer outro campo de feature.json extraído de
+      texto livre por um SKILL.md (ex.: bounded_contexts na feature 006,
+      ainda não migrado para este padrão) ou qualquer outra ação de API
+      externa que a prosa do Outline instrui o agente a fazer sem checagem
+      determinística de resultado.
     source: "specs/005-epic-feature-us-ghe-hierarchy/plan.md"
     adr: ""
-    reuse_count: 0
+    reuse_count: 3
   - tag: "process-recovery-flow-decision-model"
     bounded_context: "spec-kit-workflow"
     description: >
@@ -270,5 +287,61 @@ entries:
       manter o agente ciente de padrões/dependências já existentes em repos
       brownfield sem depender de o Dev colar exemplos manualmente no prompt.
     source: "specs/014-brownfield-multirepo-context-awareness/plan.md"
+    adr: ""
+    reuse_count: 0
+
+  - tag: "success-playbook-pattern"
+    bounded_context: "spec-kit-workflow"
+    description: >
+      Padrão de catálogo de sucessos (Playbook de Sucesso) como simétrico ao
+      harness-catalog.yaml: (1) docs/playbooks/success-catalog.yaml registra
+      padrões/decisões que funcionaram bem (schema análogo ao harness, IDs SUC-NNNN);
+      (2) plan-template.md recebe seção "Playbook de Sucesso Gate" obrigatória antes
+      de qualquer gate — buscar por tag/bounded_context, declarar match ou ausência,
+      nunca deixar em branco; (3) tasks-template.md recebe item de fechamento
+      "o que deu certo?" com resposta "Nada relevante a registrar" como válida;
+      (4) copilot-instructions.md instrui o agente a consultar o catálogo antes de
+      /nimbus-code-plan. Reaproveitar sempre que um projeto precisar de memória
+      organizacional de acertos além da memória de erros já coberta pelo harness.
+    source: "specs/012-loop-melhoria-continua/plan.md"
+    adr: ""
+    reuse_count: 0
+
+  - tag: "greenfield-multirepo-governance-baseline"
+    bounded_context: "spec-kit-workflow"
+    description: >
+      Padrão de intake greenfield no bootstrap com: (1) classificação explícita
+      greenfield/brownfield por código de aplicação relevante; (2) decisão
+      obrigatória monorepo vs multirepo com `decision_reason` e `decision_owner`;
+      (3) persistência da decisão em `.specify/feature.json` (`topology_decision`);
+      (4) baseline recomendada de domínios FRONT/BACK/DESIGN/DATA/JOBS para
+      multirepo, adaptável com justificativa e ownership; (5) reforço operacional
+      de que `specs/` vive apenas no Repo Central e satélites recebem código/tasks
+      com alinhamento contínuo via workflow oficial de update por PR revisado.
+      Reaproveitar em produtos greenfield multirepo que precisem governança
+      centralizada sem engessar a decomposição por domínio.
+    source: "specs/020-satellite-repo-governance/plan.md"
+    adr: ""
+    reuse_count: 0
+
+  - tag: "dora-governance-hybrid-collection"
+    bounded_context: "spec-kit-workflow"
+    description: >
+      Padrão de governança de métricas DORA com coleta híbrida: (1) definições
+      fechadas de fórmula/evento de origem/janela de medição para os 4
+      indicadores, evitando leitura divergente entre squads; (2) coleta
+      automática via labels `dora:*` como caminho padrão, com qualidade de
+      dados explícita (completude via `INSUFFICIENT_DATA`, ausência de
+      duplicidade, consistência temporal); (3) ajuste manual como exceção
+      controlada, com trilha de auditoria obrigatória (justification, author,
+      evidence_link, exception_category) persistida em YAML versionado no
+      Git, no mesmo padrão de `retro-cadence-state.yaml`; (4) gate
+      determinístico que bloqueia fechamento de revisão periódica com ajuste
+      incompleto; (5) sinalização objetiva de degradação contra metas
+      documentadas, convertida em ação de backlog com owner/priority/prazo —
+      sem auto-criar Issues, mesmo racional da sinalização proativa de
+      retrospectiva. Reaproveitar em qualquer domínio de métricas de processo
+      que precise combinar coleta automática com exceção manual auditável.
+    source: "specs/021-dora-metrics-governance/plan.md"
     adr: ""
     reuse_count: 0

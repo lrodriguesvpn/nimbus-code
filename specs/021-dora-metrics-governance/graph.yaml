@@ -1,0 +1,72 @@
+feature: "021-dora-metrics-governance"
+bounded_context: "spec-kit-workflow"
+version: 1
+
+modules:
+  - id: dora-metric-definitions
+    type: documentation
+    owner: platform
+    responsibilities:
+      - Definir fórmula, evento de origem e janela de medição dos 4 indicadores DORA
+      - Servir de referência única para squads e PMO (evita leitura divergente)
+  - id: dora-auto-collector
+    type: script
+    owner: platform
+    responsibilities:
+      - Calcular os 4 indicadores a partir das labels dora:* (extensão de scripts/process-metrics-report.sh)
+      - Registrar a origem (automática) de cada métrica coletada
+  - id: dora-manual-adjustment-audit
+    type: script
+    owner: platform
+    responsibilities:
+      - Capturar ajustes manuais com justificativa, autor, timestamp e evidência
+      - Persistir a trilha de auditoria em docs/playbooks/dora-manual-adjustments-log.yaml
+      - Bloquear fechamento de revisão periódica com ajuste manual incompleto
+  - id: dora-review-cadence
+    type: governance
+    owner: architecture-board
+    responsibilities:
+      - Orquestrar cadência semanal (squads) e mensal (portfólio/PMO)
+      - Exigir leitura combinada dos 4 indicadores em cada rodada de revisão
+  - id: dora-degradation-to-action
+    type: governance
+    owner: architecture-board
+    responsibilities:
+      - Definir gatilhos objetivos de degradação
+      - Converter degradação relevante em ação de backlog com owner e prazo
+
+dependencies:
+  - from: dora-auto-collector
+    to: dora-metric-definitions
+    kind: sync
+    protocol: documentation-reference
+  - from: dora-manual-adjustment-audit
+    to: dora-auto-collector
+    kind: sync
+    protocol: script-flow
+  - from: dora-review-cadence
+    to: dora-auto-collector
+    kind: sync
+    protocol: script-flow
+  - from: dora-review-cadence
+    to: dora-manual-adjustment-audit
+    kind: sync
+    protocol: governance-reference
+  - from: dora-degradation-to-action
+    to: dora-review-cadence
+    kind: sync
+    protocol: governance-reference
+
+externals:
+  - id: dora-label-taxonomy
+    type: file
+    reference: "docs/label-taxonomy-and-autonomous-dev.md"
+  - id: process-metrics-report-script
+    type: script
+    reference: "scripts/process-metrics-report.sh"
+  - id: playbooks-readme
+    type: file
+    reference: "docs/playbooks/README.md"
+  - id: github-project-board
+    type: github-project
+    reference: "GitHub Project V2 do repositório/portfólio"
