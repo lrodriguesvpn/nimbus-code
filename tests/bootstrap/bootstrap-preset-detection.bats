@@ -21,26 +21,29 @@ setup() {
   mkdir -p .specify/presets
   cat > .specify/presets/.registry <<'JSON'
 {
-  "version": "1.16.0",
-  "presets": {}
+  "version": "1.17.0",
+  "presets": {
+    "nimbus-code-standards": {}
+  }
 }
 JSON
   
   mkdir -p presets/nimbus-code-standards
   cat > presets/nimbus-code-standards/preset.yml <<'YAML'
-version: "1.16.0"
+version: "1.17.0"
 YAML
 
   # Act
   cd "$REPO_ROOT"
-  result=$(.specify/scripts/bash/detect-preset-version-mismatch.sh \
-    --repo-root "$BATS_TEST_TEMP_DIR" --json 2>&1)
-  exit_code=$?
+  run .specify/scripts/bash/detect-preset-version-mismatch.sh \
+    --repo-root "$BATS_TEST_TEMP_DIR" --json
+  result="$output"
+  exit_code="$status"
 
   # Assert
   [ $exit_code -eq 0 ]
   echo "$result" | jq -e '.status == "ok"'
-  echo "$result" | jq -e '.version == "1.16.0"'
+  echo "$result" | jq -e '.version == "1.17.0"'
 }
 
 @test "T-045-AC-2: detect_preset_version_mismatch detects stale registry version" {
@@ -49,25 +52,28 @@ YAML
   cat > .specify/presets/.registry <<'JSON'
 {
   "version": "1.15.0",
-  "presets": {}
+  "presets": {
+    "nimbus-code-standards": {}
+  }
 }
 JSON
   
   mkdir -p presets/nimbus-code-standards
   cat > presets/nimbus-code-standards/preset.yml <<'YAML'
-version: "1.16.0"
+version: "1.17.0"
 YAML
 
   # Act
   cd "$REPO_ROOT"
-  result=$(.specify/scripts/bash/detect-preset-version-mismatch.sh \
-    --repo-root "$BATS_TEST_TEMP_DIR" --json 2>&1)
-  exit_code=$?
+  run .specify/scripts/bash/detect-preset-version-mismatch.sh \
+    --repo-root "$BATS_TEST_TEMP_DIR" --json
+  result="$output"
+  exit_code="$status"
 
   # Assert
   [ $exit_code -eq 1 ]
   echo "$result" | jq -e '.status == "mismatch"'
-  echo "$result" | jq -e '.mismatches[0].expected == "1.16.0"'
+  echo "$result" | jq -e '.mismatches[0].expected == "1.17.0"'
   echo "$result" | jq -e '.mismatches[0].actual == "1.15.0"'
 }
 
@@ -75,14 +81,15 @@ YAML
   # Arrange: Create preset.yml but no .registry
   mkdir -p presets/nimbus-code-standards
   cat > presets/nimbus-code-standards/preset.yml <<'YAML'
-version: "1.16.0"
+version: "1.17.0"
 YAML
 
   # Act
   cd "$REPO_ROOT"
-  result=$(.specify/scripts/bash/detect-preset-version-mismatch.sh \
-    --repo-root "$BATS_TEST_TEMP_DIR" --json 2>&1)
-  exit_code=$?
+  run .specify/scripts/bash/detect-preset-version-mismatch.sh \
+    --repo-root "$BATS_TEST_TEMP_DIR" --json
+  result="$output"
+  exit_code="$status"
 
   # Assert
   [ $exit_code -eq 1 ]
@@ -92,13 +99,14 @@ YAML
 @test "T-045-AC-4: detect_preset_version_mismatch handles JSON mode correctly" {
   # Arrange
   mkdir -p .specify/presets presets/nimbus-code-standards
-  echo '{"version":"1.16.0"}' > .specify/presets/.registry
-  echo 'version: "1.16.0"' > presets/nimbus-code-standards/preset.yml
+  echo '{"version":"1.17.0"}' > .specify/presets/.registry
+  echo 'version: "1.17.0"' > presets/nimbus-code-standards/preset.yml
 
   # Act
   cd "$REPO_ROOT"
-  result=$(.specify/scripts/bash/detect-preset-version-mismatch.sh \
-    --repo-root "$BATS_TEST_TEMP_DIR" --json 2>&1)
+  run .specify/scripts/bash/detect-preset-version-mismatch.sh \
+    --repo-root "$BATS_TEST_TEMP_DIR" --json
+  result="$output"
 
   # Assert
   echo "$result" | jq empty  # Validates JSON syntax

@@ -5,6 +5,43 @@ setup() {
   BOOTSTRAP_SCRIPT="$REPO_ROOT/bootstrap.sh"
 }
 
+make_fake_toolchain() {
+  local bindir="$1"
+  mkdir -p "$bindir"
+
+  cat > "$bindir/specify" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+case "${1:-}" in
+  init)
+    mkdir -p .specify
+    printf '{"feature_directory":"."}\n' > .specify/feature.json
+    ;;
+  preset|extension|workflow)
+    :
+    ;;
+esac
+
+exit 0
+EOF
+  chmod +x "$bindir/specify"
+
+  cat > "$bindir/gh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+exit 1
+EOF
+  chmod +x "$bindir/gh"
+}
+
+prepare_consumer_repo() {
+  local repo_dir="$1"
+  mkdir -p "$repo_dir"
+  git -C "$repo_dir" init >/dev/null
+  git -C "$repo_dir" remote add origin https://example.com/acme/consumer.git
+}
+
 @test "nimbus-code entrypoints do not use the broken raw GHE subdomain" {
   run bash -lc 'set -euo pipefail; cd "$1"; matches=$(grep -RIn "raw\\.venha-pra-nuvem\\.ghe\\.com/venha-pra-nuvem/nimbus-code-spec-kit-template/main/" README.md bootstrap.sh docs templates .github bundles presets extensions workflows tests || true); [ -z "$matches" ]' _ "$REPO_ROOT"
   [ "$status" -eq 0 ]
@@ -15,280 +52,75 @@ setup() {
   [ "$status" -eq 0 ]
 }
 
-@test "AC-1: detect_has_relevant_application_code function exists and handles greenfield case" {
-  # Extract and test the detect_has_relevant_application_code function
-  TEMP_DIR=$(mktemp -d)
-  trap 'rm -rf "$TEMP_DIR"' EXIT
-  
-  cd "$TEMP_DIR"
-  touch README.md LICENSE
-  mkdir -p .github/workflows
-  touch .github/workflows/test.yml
-  
-  # Create a test script that only sources the function
-  cat > test_detection.sh << 'EOF'
-    set -euo pipefail
-    WORKDIR="$(pwd)"
-    
-    detect_has_relevant_application_code() {
-      local application_dirs=(
-        "src" "app" "packages" "services" "frontend" "backend"
-        "lib" "config" "routes" "controllers" "models" "components"
-      )
-      
-      for dir in "${application_dirs[@]}"; do
-        if [[ -d "$WORKDIR/$dir" && -n "$(find "$WORKDIR/$dir" -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.jsx' -o -name '*.py' -o -name '*.go' -o -name '*.java' -o -name '*.cs' -o -name '*.rb' \) 2>/dev/null | head -1)" ]]; then
-          return 0
-        fi
-      done
-      
-      local manifest_files=(
-        "package.json" "pom.xml" "build.gradle" "Makefile" "Dockerfile"
-        "pyproject.toml" "setup.py" "go.mod" "Cargo.toml" ".csproj"
-      )
-      
-      for manifest in "${manifest_files[@]}"; do
-        if [[ -f "$WORKDIR/$manifest" ]]; then
-          if grep -q "src\|app\|packages\|services\|frontend\|backend" "$WORKDIR/$manifest" 2>/dev/null; then
-            return 0
-          fi
-        fi
-      done
-      
-      local test_dirs=("__tests__" "test" "tests" "spec" "specs")
-      for test_dir in "${test_dirs[@]}"; do
-        if [[ -d "$WORKDIR/$test_dir" ]]; then
-          local test_files=$(find "$WORKDIR/$test_dir" -type f \( -name '*.test.*' -o -name '*.spec.*' -o -name '*_test.*' -o -name '*_spec.*' \) 2>/dev/null | head -1)
-          if [[ -n "$test_files" ]]; then
-            if ! echo "$test_files" | grep -q "bootstrap\|infra\|setup"; then
-              return 0
-            fi
-          fi
-        fi
-      done
-      
-      return 1
-    }
-    
-    detect_has_relevant_application_code
-    exit $?
-EOF
-  
-  run bash test_detection.sh
-  [ "$status" -eq 1 ]  # Greenfield should return 1 (no code found)
-}
+@test "bootstrap classifies a greenfield repo without application code" {
+  local workspace repo fake_bin
+  workspace="$(mktemp -d)"
+  repo="$workspace/consumer-greenfield"
+  fake_bin="$workspace/bin"
 
-@test "AC-2: detect_has_relevant_application_code function identifies brownfield (src/ with JS)" {
-  TEMP_DIR=$(mktemp -d)
-  trap 'rm -rf "$TEMP_DIR"' EXIT
-  
-  cd "$TEMP_DIR"
-  mkdir -p src
-  echo "console.log('app code');" > src/index.js
-  
-  # Create a test script that only sources the function
-  cat > test_detection.sh << 'EOF'
-    set -euo pipefail
-    WORKDIR="$(pwd)"
-    
-    detect_has_relevant_application_code() {
-      local application_dirs=(
-        "src" "app" "packages" "services" "frontend" "backend"
-        "lib" "config" "routes" "controllers" "models" "components"
-      )
-      
-      for dir in "${application_dirs[@]}"; do
-        if [[ -d "$WORKDIR/$dir" && -n "$(find "$WORKDIR/$dir" -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.jsx' -o -name '*.py' -o -name '*.go' -o -name '*.java' -o -name '*.cs' -o -name '*.rb' \) 2>/dev/null | head -1)" ]]; then
-          return 0
-        fi
-      done
-      
-      local manifest_files=(
-        "package.json" "pom.xml" "build.gradle" "Makefile" "Dockerfile"
-        "pyproject.toml" "setup.py" "go.mod" "Cargo.toml" ".csproj"
-      )
-      
-      for manifest in "${manifest_files[@]}"; do
-        if [[ -f "$WORKDIR/$manifest" ]]; then
-          if grep -q "src\|app\|packages\|services\|frontend\|backend" "$WORKDIR/$manifest" 2>/dev/null; then
-            return 0
-          fi
-        fi
-      done
-      
-      local test_dirs=("__tests__" "test" "tests" "spec" "specs")
-      for test_dir in "${test_dirs[@]}"; do
-        if [[ -d "$WORKDIR/$test_dir" ]]; then
-          local test_files=$(find "$WORKDIR/$test_dir" -type f \( -name '*.test.*' -o -name '*.spec.*' -o -name '*_test.*' -o -name '*_spec.*' \) 2>/dev/null | head -1)
-          if [[ -n "$test_files" ]]; then
-            if ! echo "$test_files" | grep -q "bootstrap\|infra\|setup"; then
-              return 0
-            fi
-          fi
-        fi
-      done
-      
-      return 1
-    }
-    
-    detect_has_relevant_application_code
-    exit $?
-EOF
-  
-  run bash test_detection.sh
-  [ "$status" -eq 0 ]  # Brownfield should return 0 (code found)
-}
+  prepare_consumer_repo "$repo"
+  make_fake_toolchain "$fake_bin"
 
-@test "AC-2: detect_has_relevant_application_code function identifies brownfield (with package.json referencing src)" {
-  TEMP_DIR=$(mktemp -d)
-  trap 'rm -rf "$TEMP_DIR"' EXIT
-  
-  cd "$TEMP_DIR"
-  cat > package.json << 'EOF'
-{
-  "name": "my-app",
-  "main": "src/index.js",
-  "scripts": {
-    "build": "tsc src/**/*.ts"
-  }
-}
-EOF
-  
-  # Create a test script that only sources the function
-  cat > test_detection.sh << 'EOF'
-    set -euo pipefail
-    WORKDIR="$(pwd)"
-    
-    detect_has_relevant_application_code() {
-      local application_dirs=(
-        "src" "app" "packages" "services" "frontend" "backend"
-        "lib" "config" "routes" "controllers" "models" "components"
-      )
-      
-      for dir in "${application_dirs[@]}"; do
-        if [[ -d "$WORKDIR/$dir" && -n "$(find "$WORKDIR/$dir" -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.jsx' -o -name '*.py' -o -name '*.go' -o -name '*.java' -o -name '*.cs' -o -name '*.rb' \) 2>/dev/null | head -1)" ]]; then
-          return 0
-        fi
-      done
-      
-      local manifest_files=(
-        "package.json" "pom.xml" "build.gradle" "Makefile" "Dockerfile"
-        "pyproject.toml" "setup.py" "go.mod" "Cargo.toml" ".csproj"
-      )
-      
-      for manifest in "${manifest_files[@]}"; do
-        if [[ -f "$WORKDIR/$manifest" ]]; then
-          if grep -q "src\|app\|packages\|services\|frontend\|backend" "$WORKDIR/$manifest" 2>/dev/null; then
-            return 0
-          fi
-        fi
-      done
-      
-      local test_dirs=("__tests__" "test" "tests" "spec" "specs")
-      for test_dir in "${test_dirs[@]}"; do
-        if [[ -d "$WORKDIR/$test_dir" ]]; then
-          local test_files=$(find "$WORKDIR/$test_dir" -type f \( -name '*.test.*' -o -name '*.spec.*' -o -name '*_test.*' -o -name '*_spec.*' \) 2>/dev/null | head -1)
-          if [[ -n "$test_files" ]]; then
-            if ! echo "$test_files" | grep -q "bootstrap\|infra\|setup"; then
-              return 0
-            fi
-          fi
-        fi
-      done
-      
-      return 1
-    }
-    
-    detect_has_relevant_application_code
-    exit $?
-EOF
-  
-  run bash test_detection.sh
-  [ "$status" -eq 0 ]  # Brownfield should return 0 (manifest references src)
-}
+  mkdir -p "$repo/docs"
+  mkdir -p "$repo/src"
+  printf '# Demo\n' > "$repo/README.md"
+  printf 'console.log("hello");\n' > "$repo/src/index.ts"
+  printf 'MIT\n' > "$repo/LICENSE"
+  printf '*.log\n' > "$repo/.gitignore"
+  printf 'notes\n' > "$repo/docs/notes.md"
 
-@test "AC-2: detect_has_relevant_application_code function identifies brownfield (dotnet csproj)" {
-  TEMP_DIR=$(mktemp -d)
-  trap 'rm -rf "$TEMP_DIR"' EXIT
-
-  cd "$TEMP_DIR"
-  touch MyApp.csproj
-
-  cat > test_detection.sh << 'EOF'
-    set -euo pipefail
-    WORKDIR="$(pwd)"
-
-    detect_has_relevant_application_code() {
-      local application_dirs=(
-        "src" "app" "packages" "services" "frontend" "backend"
-        "lib" "config" "routes" "controllers" "models" "components"
-      )
-
-      for dir in "${application_dirs[@]}"; do
-        [[ -d "$WORKDIR/$dir" ]] || continue
-        if find "$WORKDIR/$dir" -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.jsx' -o -name '*.py' -o -name '*.go' -o -name '*.java' -o -name '*.cs' -o -name '*.rb' \) 2>/dev/null | grep -q .; then
-          return 0
-        fi
-      done
-
-      local manifest_files=(
-        "package.json" "pom.xml" "build.gradle" "Makefile" "Dockerfile"
-        "pyproject.toml" "setup.py" "go.mod" "Cargo.toml"
-      )
-
-      for manifest in "${manifest_files[@]}"; do
-        if [[ -f "$WORKDIR/$manifest" ]] && grep -Eq 'src|app|packages|services|frontend|backend' "$WORKDIR/$manifest" 2>/dev/null; then
-          return 0
-        fi
-      done
-
-      if find "$WORKDIR" -type f \( -name '*.csproj' -o -name '*.fsproj' \) 2>/dev/null | grep -q .; then
-        return 0
-      fi
-
-      local test_dirs=("__tests__" "test" "tests" "spec" "specs")
-      for test_dir in "${test_dirs[@]}"; do
-        [[ -d "$WORKDIR/$test_dir" ]] || continue
-        while IFS= read -r test_file; do
-          [[ -n "$test_file" ]] || continue
-          case "$test_file" in
-            *bootstrap*|*infra*|*setup*)
-              continue
-              ;;
-            *)
-              return 0
-              ;;
-          esac
-        done < <(find "$WORKDIR/$test_dir" -type f \( -name '*.test.*' -o -name '*.spec.*' -o -name '*_test.*' -o -name '*_spec.*' \) 2>/dev/null)
-      done
-
-      return 1
-    }
-
-    detect_has_relevant_application_code
-    exit $?
-EOF
-
-  run bash test_detection.sh
-  [ "$status" -eq 0 ]  # Brownfield should return 0 (csproj present)
-}
-
-@test "bootstrap.sh includes classification step in main flow" {
-  run bash -lc 'set -euo pipefail; cd "$1"; grep -q "Classifying repository context" bootstrap.sh' _ "$REPO_ROOT"
+  run bash -lc 'set -euo pipefail; cd "$1"; PATH="$2:$PATH" bash "$3/bootstrap.sh" --local "$3" --repo-type dev_standards --delivery-model monorepo --decision-reason "baseline repo" --decision-owner "platform"' _ "$repo" "$fake_bin" "$REPO_ROOT"
   [ "$status" -eq 0 ]
+  [[ "$output" == *"Detected context: greenfield"* ]]
+  [[ "$output" == *"Interpretation: no relevant application code was found"* ]]
+  rm -rf "$workspace"
 }
 
-@test "bootstrap.sh outputs explicit context classification guidance" {
-  run bash -lc 'set -euo pipefail; cd "$1"; grep -q "Interpretation: no relevant application code was found" bootstrap.sh && grep -q "Interpretation: relevant application code is present" bootstrap.sh && grep -q "repository classified as" bootstrap.sh' _ "$REPO_ROOT"
+@test "bootstrap classifies a brownfield repo with application code" {
+  local workspace repo fake_bin
+  workspace="$(mktemp -d)"
+  repo="$workspace/consumer-brownfield"
+  fake_bin="$workspace/bin"
+
+  prepare_consumer_repo "$repo"
+  make_fake_toolchain "$fake_bin"
+
+  mkdir -p "$repo/src"
+  printf '# Demo\n' > "$repo/README.md"
+  printf 'console.log("hello");\n' > "$repo/src/index.ts"
+
+  run bash -lc 'set -euo pipefail; cd "$1"; PATH="$2:$PATH" bash "$3/bootstrap.sh" --local "$3" --repo-type dev_standards' _ "$repo" "$fake_bin" "$REPO_ROOT"
   [ "$status" -eq 0 ]
+  [[ "$output" == *"Detected context: brownfield"* ]]
+  [[ "$output" == *"Interpretation: relevant application code is present"* ]]
+  rm -rf "$workspace"
 }
 
-@test "AC-3: bootstrap defines topology decision flags for greenfield intake" {
-  run bash -lc 'set -euo pipefail; cd "$1"; grep -q -- "--delivery-model" bootstrap.sh && grep -q -- "--decision-reason" bootstrap.sh && grep -q -- "--decision-owner" bootstrap.sh && grep -q "resolve_greenfield_topology_decision" bootstrap.sh' _ "$REPO_ROOT"
-  [ "$status" -eq 0 ]
-}
+@test "bootstrap reruns rehydrate missing copied artifacts" {
+  local workspace repo fake_bin source_file restored_file
+  workspace="$(mktemp -d)"
+  repo="$workspace/consumer-rehydrate"
+  fake_bin="$workspace/bin"
 
-@test "AC-3: bootstrap persists topology decision in .specify/feature.json" {
-  run bash -lc 'set -euo pipefail; cd "$1"; grep -q "topology_decision" bootstrap.sh && grep -q "decision_reason" bootstrap.sh && grep -q "decision_owner" bootstrap.sh && grep -q "satellite_domains" bootstrap.sh' _ "$REPO_ROOT"
+  prepare_consumer_repo "$repo"
+  make_fake_toolchain "$fake_bin"
+
+  mkdir -p "$repo/docs" "$repo/src"
+  printf '# Demo\n' > "$repo/README.md"
+  printf 'console.log("hello");\n' > "$repo/src/index.ts"
+
+  run bash -lc 'set -euo pipefail; cd "$1"; PATH="$2:$PATH" bash "$3/bootstrap.sh" --local "$3" --repo-type dev_standards' _ "$repo" "$fake_bin" "$REPO_ROOT"
   [ "$status" -eq 0 ]
+
+  source_file="$REPO_ROOT/presets/nimbus-code-standards/templates/project-root/bounded-contexts.yaml"
+  restored_file="$repo/docs/bounded-contexts.yaml"
+  [ -f "$restored_file" ]
+  rm -f "$restored_file"
+
+  run bash -lc 'set -euo pipefail; cd "$1"; PATH="$2:$PATH" bash "$3/bootstrap.sh" --local "$3" --repo-type dev_standards' _ "$repo" "$fake_bin" "$REPO_ROOT"
+  [ "$status" -eq 0 ]
+  [ -f "$restored_file" ]
+  cmp -s "$restored_file" "$source_file"
+
+  rm -rf "$workspace"
 }
