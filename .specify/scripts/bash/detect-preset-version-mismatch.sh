@@ -55,7 +55,7 @@ if [ ! -f "$PRESET_SOURCE" ]; then
 fi
 
 # Get source version from preset.yml (inside the preset: block)
-SOURCE_VERSION=$(grep -E '^[[:space:]]+version:[[:space:]]*' "$PRESET_SOURCE" | head -1 | sed -E 's/^[[:space:]]*version:[[:space:]]*"?([^"[:space:]]+)"?.*/\1/')
+SOURCE_VERSION=$(grep -E '^[[:space:]]*version:[[:space:]]*' "$PRESET_SOURCE" | head -1 | sed -E 's/^[[:space:]]*version:[[:space:]]*"?([^"[:space:]]+)"?.*/\1/')
 
 if [ -z "$SOURCE_VERSION" ]; then
   if $JSON_MODE; then
@@ -81,12 +81,12 @@ INSTALLED_VERSION=$(cat "$PRESET_MANIFEST" | python3 -c "
 import json, sys
 try:
   data = json.load(sys.stdin)
-  if 'presets' in data:
+  version = data.get('version', '')
+  if not version and 'presets' in data:
     for key in data['presets']:
-      print(data['presets'][key].get('version', ''))
+      version = data['presets'][key].get('version', '')
       break
-  else:
-    print('')
+  print(version)
 except:
   print('')
 " 2>/dev/null || echo "")

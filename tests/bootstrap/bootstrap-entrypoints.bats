@@ -62,9 +62,7 @@ prepare_consumer_repo() {
   make_fake_toolchain "$fake_bin"
 
   mkdir -p "$repo/docs"
-  mkdir -p "$repo/src"
   printf '# Demo\n' > "$repo/README.md"
-  printf 'console.log("hello");\n' > "$repo/src/index.ts"
   printf 'MIT\n' > "$repo/LICENSE"
   printf '*.log\n' > "$repo/.gitignore"
   printf 'notes\n' > "$repo/docs/notes.md"
