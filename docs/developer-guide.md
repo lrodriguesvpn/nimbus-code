@@ -967,7 +967,9 @@ microsserviço, frontend, mobile, lib ou infra), siga sempre este fluxo:
    deixe a issue semanal do `update-speckit-and-bundle.yml` abrir o diagnóstico
    automaticamente **ou** dispare o workflow manualmente no satélite.
 4. Aplique a atualização do bundle no satélite via PR normal, com diff revisado;
-   a atualização **nunca** deve ser aplicada diretamente na branch principal do
+   se algum artefato local copiado pelo bootstrap tiver sido removido, rerode o
+   mesmo `bootstrap.sh`/sync antes do PR para reidratar os arquivos faltantes.
+   A atualização **nunca** deve ser aplicada diretamente na branch principal do
    satélite.
 5. No intake greenfield do `bootstrap.sh`, registre explicitamente:
    - `delivery_model`: `monorepo` ou `multirepo`
@@ -978,7 +980,8 @@ microsserviço, frontend, mobile, lib ou infra), siga sempre este fluxo:
    Esse ajuste ocorre **após a primeira spec estrutural** no Repo Central.
 
 **Resumo operacional:** o Repo Central dita o padrão; o repo satélite consome o
-mesmo bundle e atualiza por PR a partir do diagnóstico do workflow semanal.
+mesmo bundle, reidrata artefatos locais pelo mesmo bootstrap/sync quando
+necessário e atualiza por PR a partir do diagnóstico do workflow semanal.
 
 ### 5.7. Política: `specs/` só existe no Repo Central
 
@@ -1334,4 +1337,3 @@ git push origin fix/preset-sync-to-v1.16.0
 - [ ] You know how to manually refresh preset if needed
 - [ ] You've reviewed `.specify/presets/.registry` version matches expectations
 - [ ] Your CI/CD validates preset versions on `.specify/` PRs
-

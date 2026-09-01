@@ -364,9 +364,11 @@ Fluxo de atualização:
    instalada com a mais recente publicada aqui — **essa issue nunca aplica a
    atualização sozinha**, apenas avisa e traz os comandos exatos a rodar; a
    atualização em si sempre vira um PR normal, revisado como qualquer outra
-   mudança de dependência. Com o secret `VPNDEV_STANDARDS_READ_TOKEN` (PAT de
-   qualquer membro da organização), também compara a versão publicada do bundle;
-   sem esse secret, a execução continua e valida apenas o Nimbus Code CLI.
+   mudança de dependência. Se algum arquivo local copiado pelo bootstrap tiver
+   sido apagado, rerode o bootstrap/sync antes do PR para reidratar os artefatos
+   faltantes. Com o secret `VPNDEV_STANDARDS_READ_TOKEN` (PAT de qualquer membro
+   da organização), também compara a versão publicada do bundle; sem esse
+   secret, a execução continua e valida apenas o Nimbus Code CLI.
 
 Todo projeto que consome este bundle deve documentar, no seu próprio README, a
 versão instalada — ver o modelo em

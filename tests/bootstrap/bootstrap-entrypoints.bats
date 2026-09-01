@@ -62,7 +62,9 @@ prepare_consumer_repo() {
   make_fake_toolchain "$fake_bin"
 
   mkdir -p "$repo/docs"
+  mkdir -p "$repo/src"
   printf '# Demo\n' > "$repo/README.md"
+  printf 'console.log("hello");\n' > "$repo/src/index.ts"
   printf 'MIT\n' > "$repo/LICENSE"
   printf '*.log\n' > "$repo/.gitignore"
   printf 'notes\n' > "$repo/docs/notes.md"
@@ -91,5 +93,34 @@ prepare_consumer_repo() {
   [ "$status" -eq 0 ]
   [[ "$output" == *"Detected context: brownfield"* ]]
   [[ "$output" == *"Interpretation: relevant application code is present"* ]]
+  rm -rf "$workspace"
+}
+
+@test "bootstrap reruns rehydrate missing copied artifacts" {
+  local workspace repo fake_bin source_file restored_file
+  workspace="$(mktemp -d)"
+  repo="$workspace/consumer-rehydrate"
+  fake_bin="$workspace/bin"
+
+  prepare_consumer_repo "$repo"
+  make_fake_toolchain "$fake_bin"
+
+  mkdir -p "$repo/docs" "$repo/src"
+  printf '# Demo\n' > "$repo/README.md"
+  printf 'console.log("hello");\n' > "$repo/src/index.ts"
+
+  run bash -lc 'set -euo pipefail; cd "$1"; PATH="$2:$PATH" bash "$3/bootstrap.sh" --local "$3" --repo-type dev_standards' _ "$repo" "$fake_bin" "$REPO_ROOT"
+  [ "$status" -eq 0 ]
+
+  source_file="$REPO_ROOT/presets/nimbus-code-standards/templates/project-root/bounded-contexts.yaml"
+  restored_file="$repo/docs/bounded-contexts.yaml"
+  [ -f "$restored_file" ]
+  rm -f "$restored_file"
+
+  run bash -lc 'set -euo pipefail; cd "$1"; PATH="$2:$PATH" bash "$3/bootstrap.sh" --local "$3" --repo-type dev_standards' _ "$repo" "$fake_bin" "$REPO_ROOT"
+  [ "$status" -eq 0 ]
+  [ -f "$restored_file" ]
+  cmp -s "$restored_file" "$source_file"
+
   rm -rf "$workspace"
 }

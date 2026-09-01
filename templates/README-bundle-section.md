@@ -24,6 +24,10 @@ O bundle também instala o fluxo de descoberta **`/speckit-interview`**, que
 gera `specs/<feature>/interview.md` antes do `/speckit-specify` e valida a
 completude da entrevista com um script determinístico.
 
+Quando o bundle muda, o mesmo `bootstrap.sh`/sync usado na inicialização pode
+ser rerodado para reidratar arquivos locais copiados que tenham sido removidos
+ou estejam fora de sincronia.
+
 **Atualizar a versão acima requer aprovação formal** (mesma regra do próprio
 Nimbus Code) — não altere por conta própria fora do fluxo do PR automático semanal
 (`.github/workflows/update-speckit-and-bundle.yml`).

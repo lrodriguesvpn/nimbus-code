@@ -4,7 +4,10 @@ name: Verificar atualizações do Nimbus Code e do bundle Nimbus-Code
 # nimbus-code-project-bundle instaladas neste projeto com a versão mais recente
 # publicada, e abre/atualiza uma issue com o diagnóstico e os comandos exatos
 # para atualizar manualmente. NUNCA aplica a atualização sozinho — a versão só
-# muda quando alguém rodar os comandos e abrir um PR revisado normalmente,
+# muda quando alguém rodar os comandos e abrir um PR revisado normalmente.
+# Se algum arquivo copiado localmente pelo bootstrap tiver sido removido ou
+# estiver em drift, o caminho oficial de atualização é reaplicar o mesmo
+# bootstrap/sync do bundle para reidratar os artefatos faltantes antes do PR,
 # conforme a política em
 # https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template#versão-do-bundle-em-uso--política-de-atualização
 #
@@ -91,7 +94,8 @@ jobs:
             echo "specify bundle update nimbus-code-project-bundle"
             echo '```'
             echo ""
-            echo "Depois de aplicar e testar, abrir um PR normal com o diff e atualizar a tabela"
+            echo "Depois de aplicar e testar, rerodar o bootstrap/sync local se algum artefato"
+            echo "copiado tiver sumido, abrir um PR normal com o diff e atualizar a tabela"
             echo "de versões na seção 'Nimbus Code — Padrões Nimbus-Code' do README (ver"
             echo "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/templates/README-bundle-section.md)."
           } > /tmp/issue-body.md
