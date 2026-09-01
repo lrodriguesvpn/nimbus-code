@@ -150,9 +150,9 @@
 **Objetivo**: Definir e validar rota de escalonamento operacional para evitar bloqueio indefinido.  
 **Resultado Esperado**: Regra de escalonamento com prazo, responsável e ação de contingência publicada.  
 **Critérios de Aceite**:
-- [ ] SLA de aprovação definido por criticidade
-- [ ] Escalonamento possui responsável e prazo de resposta
-- [ ] Regra está alinhada ao AC-3
+- [x] SLA de aprovação definido por criticidade
+- [x] Escalonamento possui responsável e prazo de resposta
+- [x] Regra está alinhada ao AC-3
 **Passos Operacionais**:
 1. Revisar checkpoints críticos em `approval-sla.md`.
 2. Definir tempo máximo por etapa.
@@ -168,9 +168,9 @@
 **Objetivo**: Validar fórmula e campos mínimos do custo híbrido no plano e no contrato de handoff.  
 **Resultado Esperado**: Regra de custo documentada, consistente entre plan e contrato.  
 **Critérios de Aceite**:
-- [ ] Fórmula de custo híbrido explícita
-- [ ] Campo de horas humanas obrigatório
-- [ ] Rastreabilidade com AC-4 e SC-004
+- [x] Fórmula de custo híbrido explícita
+- [x] Campo de horas humanas obrigatório
+- [x] Rastreabilidade com AC-4 e SC-004
 **Passos Operacionais**:
 1. Revisar seção Cost Reference em `plan.md`.
 2. Revisar contrato em `delivery-handoff.contract.yaml`.
@@ -186,9 +186,9 @@
 **Objetivo**: Consolidar resultado final para aprovação Go/No-Go por BA e Digital Engineering.  
 **Resultado Esperado**: Resumo executivo com decisão, riscos residuais e próximos passos.  
 **Critérios de Aceite**:
-- [ ] Decisão final explícita
-- [ ] Riscos residuais listados
-- [ ] Próximo passo com owner definido
+- [x] Decisão final explícita
+- [x] Riscos residuais listados
+- [x] Próximo passo com owner definido
 **Passos Operacionais**:
 1. Consolidar evidências em `implementation-log.md`.
 2. Revisar atendimento dos ACs na `evidence-matrix.md`.
