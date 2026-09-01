@@ -92,10 +92,11 @@ O bootstrap agora exige a selecao explicita do tipo de repositorio (`platform` o
 
 | Componente | Pasta | O que faz |
 |---|---|---|
-| **Preset** `nimbus-code-standards` | [`presets/nimbus-code-standards/`](presets/nimbus-code-standards/) | Injeta os princípios não-negociáveis da empresa na constituição (`wrap`) e acrescenta o Security/DevSecOps Gate + Architecture Decision Log ao `plan.md` e o checklist de qualidade ao `tasks.md` (`append`) — sem remover nada do Nimbus Code nativo. |
+| **Preset** `nimbus-code-standards` | [`presets/nimbus-code-standards/`](presets/nimbus-code-standards/) | Injeta os princípios não-negociáveis da empresa na constituição (`wrap`) e acrescenta o Security/DevSecOps Gate + Architecture Decision Log ao `plan.md`, o checklist de qualidade ao `tasks.md` (`append`) e o fluxo de entrevista `speckit-interview` com validação determinística. |
 | **Extensão** `nimbus-code-backlog-sync` | [`extensions/nimbus-code-backlog-sync/`](extensions/nimbus-code-backlog-sync/) | Sincroniza specs/tasks com JIRA ou Azure DevOps via MCP, como hook opcional após `/nimbus-code-specify` e `/nimbus-code-tasks`. |
 | **Workflow** `nimbus-code-full-cycle` | [`workflows/nimbus-code-full-cycle/`](workflows/nimbus-code-full-cycle/) | Ciclo SDD completo com um gate explícito de DevSecOps entre `plan` e `tasks`. |
 | **Bundle** `nimbus-code-project-bundle` | [`bundles/nimbus-code-project-bundle/`](bundles/nimbus-code-project-bundle/) | Amarra as três peças acima numa "receita" instalável de uma vez, com versões pinadas. |
+| **Skill** `speckit-interview` | [`.github/skills/speckit-interview/`](.github/skills/speckit-interview/) | Conduz a entrevista de descoberta e preenche `specs/<feature>/interview.md` antes do `/speckit-specify`. |
 
 Cada peça é independentemente versionada (SemVer) e pode ser instalada isolada —
 ver o README de cada pasta.

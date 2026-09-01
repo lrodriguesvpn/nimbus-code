@@ -77,6 +77,29 @@ provides:
       file: "templates/feature-artifacts/retro-template.md"
       description: "Retrospectiva leve por feature: divergências do plano, causa raiz e ação para o próximo ciclo."
 
+    # Template de entrevista de descoberta — copiado para o repo consumidor
+    # como .github/skills/speckit-interview/SKILL.md para orientar a coleta
+    # de briefing antes do /speckit-specify.
+    - type: "template"
+      name: "speckit-interview-skill"
+      file: "templates/project-root/.github/skills/speckit-interview/SKILL.md"
+      description: "Skill de entrevista de descoberta (business/infra/security/LGPD) que cria specs/<feature>/interview.md e chama a validação determinística de completude."
+
+    # Template da entrevista de descoberta salvo em specs/<feature>/interview.md
+    # antes do /speckit-specify.
+    - type: "template"
+      name: "interview-template"
+      file: "templates/feature-artifacts/interview-template.md"
+      description: "Modelo de entrevista de descoberta (business/infra/security/LGPD) com checklist de cobertura mínima validado pelo /speckit-specify."
+
+    # Validador determinístico da entrevista de descoberta — copiado para
+    # .specify/scripts/bash/validate-interview-completeness.sh no repo consumidor.
+    - type: "template"
+      name: "validate-interview-completeness-script"
+      file: "templates/project-root/.specify/scripts/bash/validate-interview-completeness.sh"
+      strategy: "replace"
+      description: "Confere se specs/<feature>/interview.md não tem placeholders do template sem preencher — companheiro determinístico de .github/skills/speckit-interview/SKILL.md."
+
     # Template ADR — copiado para docs/adr/NNNN-slug.md no projeto ou neste repo.
     - type: "template"
       name: "adr-template"

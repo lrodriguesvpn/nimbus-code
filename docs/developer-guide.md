@@ -64,6 +64,11 @@ curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-
 Isso já deixa o projeto com `specify init` feito e o bundle
 `nimbus-code-project-bundle` (preset + extensão + workflow) instalado.
 
+Se a ideia ainda estiver nebulosa, execute primeiro `/speckit-interview` para
+produzir `specs/<feature>/interview.md` e só depois siga com `/speckit-specify`.
+O skill de entrevista e o validador determinístico são instalados junto com o
+preset para manter o mesmo fluxo em qualquer repositório inicializado.
+
 **Alternativa recomendada quando o time precisa depurar, rodar atrás de VPN/proxy
 ou evitar qualquer fragilidade de `curl | bash`:**
 
