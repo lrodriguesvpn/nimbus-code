@@ -148,11 +148,11 @@ Para adoção de LaunchDarkly no processo atual, veja
 
 ```mermaid
 flowchart TB
-    subgraph BUNDLE["📦 bundle: nimbus-code-project-bundle (v1.0.0)"]
+    subgraph BUNDLE["📦 bundle: nimbus-code-project-bundle (v1.17.0)"]
         direction TB
-        PRESET["🧩 preset: nimbus-code-standards (v1.0.0)\nrole: governança/DevSecOps"]
-        EXT["🔌 extension: nimbus-code-backlog-sync (v1.0.0)\nrole: integração JIRA/Azure DevOps"]
-        WF["🔁 workflow: nimbus-code-full-cycle (v1.0.0)\nrole: orquestra o ciclo SDD"]
+        PRESET["🧩 preset: nimbus-code-standards (v1.17.0)\nrole: governança/DevSecOps"]
+        EXT["🔌 extension: nimbus-code-backlog-sync (v1.2.0)\nrole: integração JIRA/Azure DevOps"]
+        WF["🔁 workflow: nimbus-code-full-cycle (v1.4.0)\nrole: orquestra o ciclo SDD"]
     end
 
     BUNDLE -->|"specify bundle install\nnimbus-code-project-bundle"| PROJ["📁 Projeto consumidor\n(specs/, .specify/, .github/)"]

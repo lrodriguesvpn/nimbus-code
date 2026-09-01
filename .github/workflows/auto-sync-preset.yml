@@ -9,9 +9,9 @@ on:
         description: 'Satellite repo to sync (owner/repo format)'
         required: true
       target_version:
-        description: 'Target version (default: 1.16.0)'
+        description: 'Target version (default: 1.17.0)'
         required: false
-        default: '1.16.0'
+        default: '1.17.0'
 
 permissions:
   contents: write
@@ -41,7 +41,7 @@ jobs:
           else
             # Extract repo names from artifact URL in issue (if available)
             echo "repos=pending-from-issue" >> $GITHUB_OUTPUT
-            echo "target_version=1.16.0" >> $GITHUB_OUTPUT
+            echo "target_version=1.17.0" >> $GITHUB_OUTPUT
           fi
 
       - name: Check for active development in satellite repo

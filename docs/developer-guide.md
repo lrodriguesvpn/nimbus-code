@@ -1243,7 +1243,7 @@ The central repository runs `.github/workflows/satellite-preset-audit.yml`, whic
 
 1. Queries all satellite repos in the organization
 2. Checks their `.specify/presets/.registry` version
-3. Compares against the central `preset.yml` version (currently 1.16.0)
+3. Compares against the central `preset.yml` version (currently 1.17.0)
 4. Reports status for each repo: `in_sync`, `drift`, or `not_bootstrapped`
 5. If drifted repos found:
    - Creates a GitHub issue with title: "Satellite repos out of sync with vX.Y.Z: N repos need upgrade"
@@ -1278,7 +1278,7 @@ can automatically create PRs to sync them. This workflow:
 # Sync a specific drifted repo
 gh workflow run auto-sync-preset.yml \
   -f repo="org/satellite-repo" \
-  -f target_version="1.16.0"
+  -f target_version="1.17.0"
 ```
 
 **Manual Override**: If you need to prevent auto-sync for a specific repo:
@@ -1304,7 +1304,7 @@ When you open a PR to a satellite repo touching `.specify/` files, the workflow
 
 # Commit and push
 git add .specify/
-git commit -m "chore(preset): refresh to v1.16.0"
+git commit -m "chore(preset): refresh to v1.17.0"
 git push
 ```
 
@@ -1320,12 +1320,11 @@ If you need to manually update a satellite repo's preset outside the auto-sync w
 git diff --stat
 
 # Create PR for team review
-git checkout -b fix/preset-sync-to-v1.16.0
+git checkout -b fix/preset-sync-to-v1.17.0
 git add .specify/
-git commit -m "chore(preset): refresh to v1.16.0
-
-Manually synced to central preset v1.16.0."
-git push origin fix/preset-sync-to-v1.16.0
+git commit -m "chore(preset): refresh to v1.17.0
+Manually synced to central preset v1.17.0."
+git push origin fix/preset-sync-to-v1.17.0
 
 # Open PR in GitHub UI
 ```
