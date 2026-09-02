@@ -40,18 +40,27 @@ jobs:
           drifted_count=$(grep ",drift," preset-audit-report.csv | wc -l)
           not_bootstrapped_count=$(grep ",not_bootstrapped," preset-audit-report.csv | wc -l)
           in_sync_count=$(grep ",in_sync," preset-audit-report.csv | wc -l)
-          
+
           echo "drifted=$drifted_count" >> $GITHUB_OUTPUT
           echo "not_bootstrapped=$not_bootstrapped_count" >> $GITHUB_OUTPUT
           echo "in_sync=$in_sync_count" >> $GITHUB_OUTPUT
-          
+
+          # Fonte única de verdade da versão central: presets/nimbus-code-standards/preset.yml.
+          # Não reaproveitar o CENTRAL_VERSION hardcoded dentro de
+          # scan-org-rename-references.sh para o título da issue — aquele valor
+          # já precisa ser bumpado manualmente a cada release (ver comentário no
+          # próprio script) e esquecer de bumpá-lo ali não deve também deixar o
+          # título desta issue com uma versão antiga.
+          central_version=$(grep -m1 -E '^[[:space:]]*version:' presets/nimbus-code-standards/preset.yml | sed -E 's/.*"([0-9.]+)".*/\1/')
+          echo "central_version=$central_version" >> $GITHUB_OUTPUT
+
           echo "## Satellite Preset Audit Results" > audit-summary.md
           echo "" >> audit-summary.md
           echo "- **In Sync**: $in_sync_count repos" >> audit-summary.md
           echo "- **Drifted**: $drifted_count repos" >> audit-summary.md
           echo "- **Not Bootstrapped**: $not_bootstrapped_count repos" >> audit-summary.md
           echo "" >> audit-summary.md
-          
+
           if [ $drifted_count -gt 0 ]; then
             echo "### Drifted Repos" >> audit-summary.md
             grep ",drift," preset-audit-report.csv | cut -d',' -f1-3 | while read line; do
@@ -68,27 +77,70 @@ jobs:
 
       - name: Create issue if repos are drifted
         if: steps.parse.outputs.drifted > 0
-        uses: actions/create-issue@v2
+        uses: actions/github-script@v7
         with:
-          title: "🔄 Satellite repos out of sync with v1.18.0: ${{ steps.parse.outputs.drifted }} repos need upgrade"
-          body: |
-            Automated preset audit found **${{ steps.parse.outputs.drifted }}** satellite repositories with preset version drift.
-            
-            See artifact `preset-audit-report` for full details.
-            
-            **Next Steps:**
-            1. Review the drifted repos in the audit report
-            2. For each drifted repo, either:
-               - Manually run `bootstrap.sh --refresh-preset` and create a PR, OR
-               - Wait for auto-PR generation (if enabled)
-            3. Link PRs to this issue once created
-            
-            **Audit Details:**
-            - In Sync: ${{ steps.parse.outputs.in_sync }}
-            - Drifted: ${{ steps.parse.outputs.drifted }}
-            - Not Bootstrapped: ${{ steps.parse.outputs.not_bootstrapped }}
-            
-            Labels: `type:automation`, `area:preset-sync`, `priority:P2`
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const centralVersion = "${{ steps.parse.outputs.central_version }}";
+            const drifted = "${{ steps.parse.outputs.drifted }}";
+            const inSync = "${{ steps.parse.outputs.in_sync }}";
+            const notBootstrapped = "${{ steps.parse.outputs.not_bootstrapped }}";
+
+            const issueTitle = `🔄 Satellite repos out of sync with v${centralVersion}: ${drifted} repos need upgrade`;
+
+            // Idempotência: evita abrir uma issue nova a cada execução semanal
+            // enquanto o drift já reportado anteriormente ainda não foi resolvido
+            // — reaproveita uma issue aberta existente com o mesmo label em vez
+            // de duplicar. Usa "type:chore" (não "area:preset-sync", que nunca
+            // existiu na taxonomia real de labels deste repo — ver
+            // docs/label-taxonomy-and-autonomous-dev.md) como critério de busca.
+            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
+              owner,
+              repo,
+              state: "open",
+              labels: "type:chore,priority:P2-medium",
+              per_page: 100,
+            });
+            const existing = openIssues.find((i) => !i.pull_request && i.title.startsWith("🔄 Satellite repos out of sync"));
+
+            const body = [
+              `Automated preset audit found **${drifted}** satellite repositories with preset version drift.`,
+              "",
+              "See artifact `preset-audit-report` for full details.",
+              "",
+              "**Next Steps:**",
+              "1. Review the drifted repos in the audit report",
+              "2. For each drifted repo, either:",
+              "   - Manually run `bootstrap.sh --refresh-preset` and create a PR, OR",
+              "   - Wait for auto-PR generation (if enabled)",
+              "3. Link PRs to this issue once created",
+              "",
+              "**Audit Details:**",
+              `- In Sync: ${inSync}`,
+              `- Drifted: ${drifted}`,
+              `- Not Bootstrapped: ${notBootstrapped}`,
+            ].join("\n");
+
+            if (existing) {
+              await github.rest.issues.update({
+                owner,
+                repo,
+                issue_number: existing.number,
+                title: issueTitle,
+                body,
+              });
+              core.info(`Updated existing issue #${existing.number}`);
+            } else {
+              const created = await github.rest.issues.create({
+                owner,
+                repo,
+                title: issueTitle,
+                body,
+                labels: ["type:chore", "priority:P2-medium"],
+              });
+              core.info(`Created issue #${created.data.number}`);
+            }
 
       - name: Comment summary on dashboard
         run: |
