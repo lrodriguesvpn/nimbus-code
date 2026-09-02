@@ -49,6 +49,7 @@ cross-repo/org do bootstrap. O padrão é:
 | `add-to-repo-project.yml` | GitHub App | `VPNDEV_PROJECT_TOKEN` | `metadata:read`, `issues:read`, `pull-requests:read`, `repository-projects:write`, `organization-projects:write` |
 | `sync-priority-field.yml` | GitHub App | `ADD_TO_PROJECT_PAT` | `metadata:read`, `issues:write`, `pull-requests:write`, `repository-projects:write`, `organization-projects:write` |
 | `agent-auto-assign.yml` | GitHub App | `COPILOT_AGENT_ASSIGN_TOKEN` | `metadata:read`, `issues:write` |
+| `satellite-preset-audit.yml` | GitHub App | `VPNDEV_STANDARDS_READ_TOKEN` | `metadata:read`, `contents:read` (leitura entre 34+ repos privados/internos da org, não apenas o repo atual) |
 
 ## Secrets esperados
 
