@@ -66,15 +66,20 @@ automation from `specs/018-nimbus-agent-intake/spec.md` (User Story 5) exists.
    - For every question marked `Ambíguo` or `Ausente` (within the chosen mode's scope — Fast-Track only asks its ⚡ subset), ask it conversationally — group by block if that reads more naturally, but never re-ask something already `Coberto`.
    - If there was no transcript at all, this is simply the full live interview: ask every question in the chosen mode's scope, in order, conversationally (not as a rigid item-by-item form — see "Como usar este modelo" in the template for tone).
    - Apply the golden rule from the template: if the operator starts describing **how** the system should be built (tech, framework, architecture), note it aside and redirect — this interview is about **what** and **why**, never **how**.
+   - **Critérios de Aceite (Bloco 1)**: don't ask "what are the acceptance criteria?" as an open question — draft 3-4 candidate criteria yourself from the problem/done-criteria/user answers already gathered, present them for the operator to validate/adjust/add to, and only close the block once there are at least 4 concrete, observable criteria (never a vague adjective like "works correctly").
+   - **Bloco 1.5 (opcional)**: after Bloco 1 is closed, silently check the size signals in the template — if 2+ are present, propose a vertical breakdown to the operator before moving to Bloco 2; otherwise skip this without mentioning it.
    - Apply the LGPD shortcut from the template: if Bloco 4, question 1 is a clear "no personal data", mark questions 2–5 as `N/A — sem dado pessoal identificado` and don't force them.
    - If, after asking, an item still has no answer (operator doesn't know), record it explicitly as `[NEEDS CLARIFICATION: <what's missing>]` in the Encerramento's "Pendências" list — never leave it silently blank.
 
 8. **Fill `interview.md` completely**:
    - Cabeçalho: Data (today), Solicitante/Cliente, Facilitador (your agent identity, e.g. "Nimbus Agent (sessão manual)", or a human name if the operator says they're filling it on someone else's behalf), Canal, Feature slug (= `INTERVIEW_FEATURE_DIRECTORY`'s directory name), Prioridade inferida (from Bloco 1 question 7's answer — never spoken aloud as P0–P3 to the operator), Versão deste modelo (copy from the template's own header comment), Modo desta entrevista, Duração real (your best estimate of elapsed conversation, or "não medida" if conducted from a transcript with no timing info).
    - All 4 blocos: replace every bracketed prompt with the actual answer gathered (live or from transcript).
+   - Bloco 1's Critérios de Aceite subsection: fill with the final validated list (minimum 4).
+   - Bloco 1.5: fill only if the breakdown proposal was actually evaluated (2+ signals present) — otherwise leave the section's guidance text untouched, it is not a per-interview fill-in field.
+   - Bloco 2, question 3: if the operator names concrete repos/bounded contexts, cross-check `docs/reuse-catalog.yaml` for an existing catalogued pattern for that domain — if found, note it so the Dev can reference it in `/speckit-plan` instead of re-deriving.
    - Encerramento: 3–5 line summary read back to the operator for confirmation, the Pendências list, who validates the resulting `spec.md`, and duração real.
-   - Checklist de Cobertura Mínima: fill the 3-state table (Coberto/Ambíguo/Ausente) for every row based on what was actually gathered.
-   - Saída Estruturada (YAML): fill the `interview_output` block with real values derived from the answers (not placeholders) — this is optional in the template but you should fill it whenever you have the data, since it's what future automation will consume.
+   - Checklist de Cobertura Mínima: fill the 3-state table (Coberto/Ambíguo/Ausente) for every row based on what was actually gathered — including the new "Critérios de aceite" and "repositórios/bounded contexts afetados" rows.
+   - Saída Estruturada (YAML): fill the `interview_output` block with real values derived from the answers (not placeholders), including `criterios_aceite` and `quebra_proposta` — this is optional in the template but you should fill it whenever you have the data, since it's what future automation will consume.
 
 ## Mandatory Post-Execution Validation (Interview Completeness)
 
