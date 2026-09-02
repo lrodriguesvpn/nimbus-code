@@ -67,6 +67,11 @@ curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-
 Isso já deixa o projeto com `specify init` feito e o bundle
 `nimbus-code-project-bundle` (preset + extensão + workflow) instalado.
 
+Se a ideia ainda estiver nebulosa, execute primeiro `/speckit-interview` para
+produzir `specs/<feature>/interview.md` e só depois siga com `/speckit-specify`.
+O skill de entrevista e o validador determinístico são instalados junto com o
+preset para manter o mesmo fluxo em qualquer repositório inicializado.
+
 **Alternativa recomendada quando o time precisa depurar, rodar atrás de VPN/proxy
 ou evitar qualquer fragilidade de `curl | bash`:**
 
@@ -962,7 +967,9 @@ microsserviço, frontend, mobile, lib ou infra), siga sempre este fluxo:
    deixe a issue semanal do `update-speckit-and-bundle.yml` abrir o diagnóstico
    automaticamente **ou** dispare o workflow manualmente no satélite.
 4. Aplique a atualização do bundle no satélite via PR normal, com diff revisado;
-   a atualização **nunca** deve ser aplicada diretamente na branch principal do
+   se algum artefato local copiado pelo bootstrap tiver sido removido, rerode o
+   mesmo `bootstrap.sh`/sync antes do PR para reidratar os arquivos faltantes.
+   A atualização **nunca** deve ser aplicada diretamente na branch principal do
    satélite.
 5. No intake greenfield do `bootstrap.sh`, registre explicitamente:
    - `delivery_model`: `monorepo` ou `multirepo`
@@ -973,7 +980,8 @@ microsserviço, frontend, mobile, lib ou infra), siga sempre este fluxo:
    Esse ajuste ocorre **após a primeira spec estrutural** no Repo Central.
 
 **Resumo operacional:** o Repo Central dita o padrão; o repo satélite consome o
-mesmo bundle e atualiza por PR a partir do diagnóstico do workflow semanal.
+mesmo bundle, reidrata artefatos locais pelo mesmo bootstrap/sync quando
+necessário e atualiza por PR a partir do diagnóstico do workflow semanal.
 
 ### 5.7. Política: `specs/` só existe no Repo Central
 
@@ -1235,7 +1243,7 @@ The central repository runs `.github/workflows/satellite-preset-audit.yml`, whic
 
 1. Queries all satellite repos in the organization
 2. Checks their `.specify/presets/.registry` version
-3. Compares against the central `preset.yml` version (currently 1.17.0)
+3. Compares against the central `preset.yml` version (currently 1.18.0)
 4. Reports status for each repo: `in_sync`, `drift`, or `not_bootstrapped`
 5. If drifted repos found:
    - Creates a GitHub issue with title: "Satellite repos out of sync with vX.Y.Z: N repos need upgrade"
@@ -1270,7 +1278,7 @@ can automatically create PRs to sync them. This workflow:
 # Sync a specific drifted repo
 gh workflow run auto-sync-preset.yml \
   -f repo="org/satellite-repo" \
-  -f target_version="1.17.0"
+  -f target_version="1.18.0"
 ```
 
 **Manual Override**: If you need to prevent auto-sync for a specific repo:
@@ -1296,7 +1304,7 @@ When you open a PR to a satellite repo touching `.specify/` files, the workflow
 
 # Commit and push
 git add .specify/
-git commit -m "chore(preset): refresh to v1.17.0"
+git commit -m "chore(preset): refresh to v1.18.0"
 git push
 ```
 
@@ -1312,12 +1320,12 @@ If you need to manually update a satellite repo's preset outside the auto-sync w
 git diff --stat
 
 # Create PR for team review
-git checkout -b fix/preset-sync-to-v1.17.0
+git checkout -b fix/preset-sync-to-v1.18.0
 git add .specify/
-git commit -m "chore(preset): refresh to v1.17.0
+git commit -m "chore(preset): refresh to v1.18.0
 
-Manually synced to central preset v1.17.0."
-git push origin fix/preset-sync-to-v1.17.0
+Manually synced to central preset v1.18.0."
+git push origin fix/preset-sync-to-v1.18.0
 
 # Open PR in GitHub UI
 ```
@@ -1329,4 +1337,3 @@ git push origin fix/preset-sync-to-v1.17.0
 - [ ] You know how to manually refresh preset if needed
 - [ ] You've reviewed `.specify/presets/.registry` version matches expectations
 - [ ] Your CI/CD validates preset versions on `.specify/` PRs
-

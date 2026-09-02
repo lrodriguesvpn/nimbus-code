@@ -20,7 +20,7 @@ set -euo pipefail
 #
 ###############################################################################
 
-REPO_ROOT="${1:-.}"
+REPO_ROOT="."
 JSON_MODE=false
 
 while (( $# > 0 )); do
@@ -54,8 +54,8 @@ if [ ! -f "$PRESET_SOURCE" ]; then
   exit 1
 fi
 
-# Get source version from preset.yml
-SOURCE_VERSION=$(sed -E 's/^version:[[:space:]]*"?([^"[:space:]]+)"?.*/\1/' "$PRESET_SOURCE" | head -1)
+# Get source version from preset.yml (inside the preset: block)
+SOURCE_VERSION=$(grep -E '^[[:space:]]*version:[[:space:]]*' "$PRESET_SOURCE" | head -1 | sed -E 's/^[[:space:]]*version:[[:space:]]*"?([^"[:space:]]+)"?.*/\1/')
 
 if [ -z "$SOURCE_VERSION" ]; then
   if $JSON_MODE; then
@@ -81,15 +81,12 @@ INSTALLED_VERSION=$(cat "$PRESET_MANIFEST" | python3 -c "
 import json, sys
 try:
   data = json.load(sys.stdin)
-  # Get latest preset by checking metadata
-  if 'presets' in data:
-    presets = data['presets']
-    # Get first preset's version or metadata version
-    for key in presets:
-      print(data.get('version', ''))
+  version = data.get('version', '')
+  if not version and 'presets' in data:
+    for key in data['presets']:
+      version = data['presets'][key].get('version', '')
       break
-  else:
-    print('')
+  print(version)
 except:
   print('')
 " 2>/dev/null || echo "")

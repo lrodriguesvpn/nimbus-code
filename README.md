@@ -100,10 +100,11 @@ partida adaptável (com justificativa + ownership explícitos).
 
 | Componente | Pasta | O que faz |
 |---|---|---|
-| **Preset** `nimbus-code-standards` | [`presets/nimbus-code-standards/`](presets/nimbus-code-standards/) | Injeta os princípios não-negociáveis da empresa na constituição (`wrap`) e acrescenta o Security/DevSecOps Gate + Architecture Decision Log ao `plan.md` e o checklist de qualidade ao `tasks.md` (`append`) — sem remover nada do Nimbus Code nativo. |
+| **Preset** `nimbus-code-standards` | [`presets/nimbus-code-standards/`](presets/nimbus-code-standards/) | Injeta os princípios não-negociáveis da empresa na constituição (`wrap`) e acrescenta o Security/DevSecOps Gate + Architecture Decision Log ao `plan.md`, o checklist de qualidade ao `tasks.md` (`append`) e o fluxo de entrevista `speckit-interview` com validação determinística. |
 | **Extensão** `nimbus-code-backlog-sync` | [`extensions/nimbus-code-backlog-sync/`](extensions/nimbus-code-backlog-sync/) | Sincroniza specs/tasks com JIRA ou Azure DevOps via MCP, como hook opcional após `/nimbus-code-specify` e `/nimbus-code-tasks`. |
 | **Workflow** `nimbus-code-full-cycle` | [`workflows/nimbus-code-full-cycle/`](workflows/nimbus-code-full-cycle/) | Ciclo SDD completo com um gate explícito de DevSecOps entre `plan` e `tasks`. |
 | **Bundle** `nimbus-code-project-bundle` | [`bundles/nimbus-code-project-bundle/`](bundles/nimbus-code-project-bundle/) | Amarra as três peças acima numa "receita" instalável de uma vez, com versões pinadas. |
+| **Skill** `speckit-interview` | [`.github/skills/speckit-interview/`](.github/skills/speckit-interview/) | Conduz a entrevista de descoberta e preenche `specs/<feature>/interview.md` antes do `/speckit-specify`. |
 
 Cada peça é independentemente versionada (SemVer) e pode ser instalada isolada —
 ver o README de cada pasta.
@@ -147,11 +148,11 @@ Para adoção de LaunchDarkly no processo atual, veja
 
 ```mermaid
 flowchart TB
-    subgraph BUNDLE["📦 bundle: nimbus-code-project-bundle (v1.0.0)"]
+    subgraph BUNDLE["📦 bundle: nimbus-code-project-bundle (v1.18.0)"]
         direction TB
-        PRESET["🧩 preset: nimbus-code-standards (v1.0.0)\nrole: governança/DevSecOps"]
-        EXT["🔌 extension: nimbus-code-backlog-sync (v1.0.0)\nrole: integração JIRA/Azure DevOps"]
-        WF["🔁 workflow: nimbus-code-full-cycle (v1.0.0)\nrole: orquestra o ciclo SDD"]
+        PRESET["🧩 preset: nimbus-code-standards (v1.18.0)\nrole: governança/DevSecOps"]
+        EXT["🔌 extension: nimbus-code-backlog-sync (v1.2.0)\nrole: integração JIRA/Azure DevOps"]
+        WF["🔁 workflow: nimbus-code-full-cycle (v1.4.0)\nrole: orquestra o ciclo SDD"]
     end
 
     BUNDLE -->|"specify bundle install\nnimbus-code-project-bundle"| PROJ["📁 Projeto consumidor\n(specs/, .specify/, .github/)"]
@@ -363,9 +364,11 @@ Fluxo de atualização:
    instalada com a mais recente publicada aqui — **essa issue nunca aplica a
    atualização sozinha**, apenas avisa e traz os comandos exatos a rodar; a
    atualização em si sempre vira um PR normal, revisado como qualquer outra
-   mudança de dependência. Com o secret `VPNDEV_STANDARDS_READ_TOKEN` (PAT de
-   qualquer membro da organização), também compara a versão publicada do bundle;
-   sem esse secret, a execução continua e valida apenas o Nimbus Code CLI.
+   mudança de dependência. Se algum arquivo local copiado pelo bootstrap tiver
+   sido apagado, rerode o bootstrap/sync antes do PR para reidratar os artefatos
+   faltantes. Com o secret `VPNDEV_STANDARDS_READ_TOKEN` (PAT de qualquer membro
+   da organização), também compara a versão publicada do bundle; sem esse
+   secret, a execução continua e valida apenas o Nimbus Code CLI.
 
 Todo projeto que consome este bundle deve documentar, no seu próprio README, a
 versão instalada — ver o modelo em

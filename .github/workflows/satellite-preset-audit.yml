@@ -70,7 +70,7 @@ jobs:
         if: steps.parse.outputs.drifted > 0
         uses: actions/create-issue@v2
         with:
-          title: "🔄 Satellite repos out of sync with v1.17.0: ${{ steps.parse.outputs.drifted }} repos need upgrade"
+          title: "🔄 Satellite repos out of sync with v1.18.0: ${{ steps.parse.outputs.drifted }} repos need upgrade"
           body: |
             Automated preset audit found **${{ steps.parse.outputs.drifted }}** satellite repositories with preset version drift.
             
