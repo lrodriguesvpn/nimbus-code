@@ -177,8 +177,8 @@ Inspeção estática confirma zero ocorrências de `harvest-patterns.sh` nos wor
 de CI — ou, se alguma ocorrência for encontrada, ela é removida antes do merge.
 
 ## Critérios de Aceite
-- [ ] `grep -r "harvest-patterns" .github/workflows/` retorna zero resultados
-- [ ] Resultado documentado como comentário no PR desta feature
+- [x] `grep -r "harvest-patterns" .github/workflows/` retorna zero resultados
+- [x] Resultado documentado como comentário no PR desta feature
 
 ## Passos Operacionais
 1. Executar: `grep -r "harvest-patterns" .github/workflows/`
@@ -201,9 +201,9 @@ Humano: não
 - Feature: specs/014-brownfield-multirepo-context-awareness
 ```
 
-- [ ] Toda task com `Responsável.Humano = sim` inclui `Passos Operacionais` completos
-- [ ] `Dependências` está preenchido com `Nenhuma` quando não existir bloqueador
-- [ ] `Referência` inclui AC-ID e link da feature de origem
+- [x] Toda task com `Responsável.Humano = sim` inclui `Passos Operacionais` completos
+- [x] `Dependências` está preenchido com `Nenhuma` quando não existir bloqueador
+- [x] `Referência` inclui AC-ID e link da feature de origem
 
 ---
 
@@ -216,7 +216,7 @@ Humano: não
       (AC-1, AC-3, AC-5, AC-6 — testes bats; AC-2, AC-4 — manuais com justificativa no `plan.md`; AC-governance — inspeção estática T026)
 - [x] Feature flag: N/A — deploy `direct` justificado no `plan.md` (ADL-005)
 - [x] SLO: scripts CLI/CI sem SLO de latência; critérios binários de erro definidos no `plan.md`
-- [ ] Revisão de código por IA (GitHub Copilot code review) solicitada no PR
+- [x] Revisão de código por IA (GitHub Copilot code review) solicitada no PR
       de implementação e sem findings High/Critical pendentes _(pendente: solicitar ao abrir a PR)_
 - [x] Testes de integração cobrindo AC-1, AC-3, AC-5, AC-6 via bats-core — testes manuais para AC-2 e AC-4 documentados
 - [x] Observabilidade: log de custo de tokens por execução do harvest (FR-004a); output colorido com resumo de repos analisados no `generate-context-graph.sh`
@@ -256,4 +256,4 @@ Humano: não
 - [x] N/A — sem health checks/readiness aplicável (workflow de CI, não serviço long-running)
 - [x] N/A — sem build de container nesta feature
 - [x] Testado localmente (T030) antes de qualquer merge
-- [ ] `docs/module-graphs.md` atualizado se o comportamento do workflow mudar após o merge inicial (T029)
+- [x] `docs/module-graphs.md` atualizado se o comportamento do workflow mudar após o merge inicial (T029)

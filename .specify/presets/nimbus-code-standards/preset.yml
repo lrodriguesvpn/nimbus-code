@@ -3,8 +3,8 @@ schema_version: "1.0"
 preset:
   id: "nimbus-code-standards"
   name: "Nimbus-Code — Padrões de Governança"
-  version: "1.17.0"
-  description: "Constituição base, grafos de módulos obrigatórios (incluindo grafo de contexto multi-repo para brownfield), escala S0–S4 com estimativa de tokens e ajuste por projeto, catálogo de reuso de conteúdo para reduzir custo de tokens, SLO Gate, estratégia de release, ADRs, taxonomia de labels de priorização/desenvolvimento autônomo/DORA, modelo híbrido humano+agente, framework DevSecOps, regras de isolamento de sessões de agente (1 agente por arquivo, fases, limpeza de branches perdidas), rastreamento de custo financeiro real (tokens × preço) por fase SDD, modelo de entrevista de descoberta (negócio/infraestrutura/segurança/LGPD), detecção determinística de retrabalho via histórico git (retro-signal), e manual operacional de uso de agentes remotos da Nimbus-Code, aplicados sobre os templates nativos do Nimbus Code."
+  version: "1.18.0"
+  description: "Constituição base, grafos de módulos obrigatórios (incluindo grafo de contexto multi-repo para brownfield), escala S0–S4 com estimativa de tokens e ajuste por projeto, catálogo de reuso de conteúdo para reduzir custo de tokens, SLO Gate, estratégia de release, ADRs, taxonomia de labels de priorização/desenvolvimento autônomo/DORA, modelo híbrido humano+agente, framework DevSecOps, regras de isolamento de sessões de agente (1 agente por arquivo, fases, limpeza de branches perdidas), rastreamento de custo financeiro real (tokens × preço) por fase SDD, modelo de entrevista de descoberta (negócio/infraestrutura/segurança/LGPD) mesclado com o padrão de entrevista de Product Owner (critérios de aceite validados e análise de quebra de demanda), detecção determinística de retrabalho via histórico git (retro-signal), e manual operacional de uso de agentes remotos da Nimbus-Code, aplicados sobre os templates nativos do Nimbus Code."
   author: "Nimbus-Code"
   repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
   license: "Proprietary"
@@ -83,26 +83,14 @@ provides:
 
     # Template de entrevista de descoberta — copiado para o repo consumidor
     # como .github/skills/speckit-interview/SKILL.md para orientar a coleta
-    # de briefing antes do /speckit-specify.
+    # de briefing antes do /speckit-specify. O companheiro determinístico
+    # "validate-interview-completeness-script" fica catalogado junto aos
+    # demais scripts determinísticos mais abaixo neste arquivo.
     - type: "template"
       name: "speckit-interview-skill"
       file: "templates/project-root/.github/skills/speckit-interview/SKILL.md"
       description: "Skill de entrevista de descoberta (business/infra/security/LGPD) que cria specs/<feature>/interview.md e chama a validação determinística de completude."
 
-    # Template da entrevista de descoberta salvo em specs/<feature>/interview.md
-    # antes do /speckit-specify.
-    - type: "template"
-      name: "interview-template"
-      file: "templates/feature-artifacts/interview-template.md"
-      description: "Modelo de entrevista de descoberta (business/infra/security/LGPD) com checklist de cobertura mínima validado pelo /speckit-specify."
-
-    # Validador determinístico da entrevista de descoberta — copiado para
-    # .specify/scripts/bash/validate-interview-completeness.sh no repo consumidor.
-    - type: "template"
-      name: "validate-interview-completeness-script"
-      file: "templates/project-root/.specify/scripts/bash/validate-interview-completeness.sh"
-      strategy: "replace"
-      description: "Confere se specs/<feature>/interview.md não tem placeholders do template sem preencher — companheiro determinístico de .github/skills/speckit-interview/SKILL.md."
     # Modelo de entrevista de descoberta — gerado em specs/<feature>/interview.md
     # quando uma entrevista é conduzida antes do spec.md. Cobre negócio (o quê/
     # por quê), infraestrutura, segurança e LGPD sem prescrever o "como" técnico.
@@ -112,7 +100,7 @@ provides:
     - type: "template"
       name: "interview-template"
       file: "templates/feature-artifacts/interview-template.md"
-      description: "Modelo de entrevista de descoberta (negócio, infraestrutura, segurança, LGPD) com checklist de cobertura mínima validada pelo /speckit-specify."
+      description: "Modelo de entrevista de descoberta (negócio, infraestrutura, segurança, LGPD) mesclado com o padrão de entrevista de Product Owner (sugestão validada de critérios de aceite, análise de tamanho/quebra), com checklist de cobertura mínima validada pelo /speckit-specify."
 
     # Template ADR — copiado para docs/adr/NNNN-slug.md no projeto ou neste repo.
     - type: "template"

@@ -1,15 +1,15 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-08-31T16:45:38Z",
+  "updated_at": "2026-09-01T21:00:00Z",
   "catalog_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/presets/catalog.json",
   "presets": {
     "nimbus-code-standards": {
       "name": "Nimbus-Code — Padrões de Governança",
       "id": "nimbus-code-standards",
-      "version": "1.17.0",
-      "description": "Constituição base, gate de segurança/DevSecOps, escala S0–S4 com estimativa de tokens, catálogo de reuso de conteúdo para reduzir custo de tokens, grafo de contexto multi-repo para brownfield, taxonomia de labels de priorização/desenvolvimento autônomo/DORA/incidente/harness, modelo híbrido humano+agente com perfis de custo padrão, GitHub Project por repositório garantido continuamente (campos Horas Humanas/Oportunidade D365), Portfólio PMO consolidado entre repositórios, modelo de entrevista de descoberta (negócio/infraestrutura/segurança/LGPD), Harness Engineering (catálogo de aprendizado organizacional com erros) e framework de decisões de arquitetura padrão da Nimbus-Code.",
+      "version": "1.18.0",
+      "description": "Constituição base, gate de segurança/DevSecOps, escala S0–S4 com estimativa de tokens, catálogo de reuso de conteúdo para reduzir custo de tokens, grafo de contexto multi-repo para brownfield, taxonomia de labels de priorização/desenvolvimento autônomo/DORA/incidente/harness, modelo híbrido humano+agente com perfis de custo padrão, GitHub Project por repositório garantido continuamente (campos Horas Humanas/Oportunidade D365), Portfólio PMO consolidado entre repositórios, modelo de entrevista de descoberta (negócio/infraestrutura/segurança/LGPD) mesclado com o padrão de entrevista de Product Owner (critérios de aceite validados e análise de quebra de demanda), Harness Engineering (catálogo de aprendizado organizacional com erros) e framework de decisões de arquitetura padrão da Nimbus-Code.",
       "author": "Nimbus-Code",
-      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.17.0/nimbus-code-standards-1.17.0.zip",
+      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.18.0/nimbus-code-standards-1.18.0.zip",
       "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template",
       "license": "Proprietary",
       "requires": {
@@ -39,7 +39,7 @@
       "version": "0.4.0",
       "description": "Constituição para repositórios de PLATAFORMA/CLIENTE/TENANT (ambientes, contas cloud, tenants M365/GWS/D365 e sistemas legados) — inventário multi-nuvem (Azure/AWS/GCP/GWS/M365/D365), hierarquia de plataformas por cliente, pipeline de ciclo de vida (discovery → imported → plan_diff_zero → landing_zone_generated → managed), Nimbus Discovery Report, Landing Zone + CAF automático por plataforma, regra de zero-diff como critério de verdade, proibição de aplicar mudança direta em produção, registro de schemas de bancos legados e grafo de 2 níveis (plataforma ↔ workload). Complementar ao nimbus-code-standards: repositórios de projeto/workload continuam usando nimbus-code-standards; um repositório de plataforma/cliente usa este preset.",
       "author": "Nimbus-Code",
-      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.17.0/nimbus-code-platform-standards-0.4.0.zip",
+      "download_url": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/v1.18.0/nimbus-code-platform-standards-0.4.0.zip",
       "repository": "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template",
       "license": "Proprietary",
       "requires": {
