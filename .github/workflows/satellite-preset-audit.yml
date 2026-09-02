@@ -1,5 +1,15 @@
 name: Satellite Preset Version Audit
 
+# Autenticação:
+#   - Preferencial: GitHub App (`NIMBUS_APP_ID` + `NIMBUS_APP_PRIVATE_KEY`)
+#   - Fallback temporário: `VPNDEV_STANDARDS_READ_TOKEN` (PAT de qualquer
+#     membro da org, já documentado em update-speckit-and-bundle.yml)
+#
+# Todos os 34 repositórios satélites são privados/internos, então o token
+# padrão do Actions (GITHUB_TOKEN, escopo restrito a este próprio repositório)
+# não consegue listar/ler conteúdo de outros repos da org — é obrigatório um
+# token com leitura org-wide aqui. Ver docs/github-app-auth-snippet.md.
+
 on:
   schedule:
     # Weekly audit: Monday at 09:00 UTC
@@ -24,8 +34,41 @@ jobs:
         run: |
           which gh || brew install gh
 
+      - name: Generate GitHub App installation token
+        id: app-token
+        if: ${{ env.NIMBUS_APP_CONFIGURED == 'true' }}
+        env:
+          # 'secrets' não é permitido em jobs.<job_id>.steps.if (ver
+          # https://docs.github.com/actions/reference/workflows-and-actions/contexts#context-availability) —
+          # avaliar aqui em env (permitido) e ler via env.* no if acima.
+          NIMBUS_APP_CONFIGURED: ${{ secrets.NIMBUS_APP_ID != '' && secrets.NIMBUS_APP_PRIVATE_KEY != '' }}
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.NIMBUS_APP_ID }}
+          private-key: ${{ secrets.NIMBUS_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          github-api-url: ${{ github.api_url }}
+          permission-metadata: read
+          permission-contents: read
+
+      - name: Resolve auth token (App or PAT fallback)
+        id: resolve-token
+        run: |
+          if [ -n "${{ steps.app-token.outputs.token }}" ]; then
+            echo "token=${{ steps.app-token.outputs.token }}" >> "$GITHUB_OUTPUT"
+            echo "::notice::Autenticado via GitHub App (instalação de curta duração)."
+          elif [ -n "${{ secrets.VPNDEV_STANDARDS_READ_TOKEN }}" ]; then
+            echo "token=${{ secrets.VPNDEV_STANDARDS_READ_TOKEN }}" >> "$GITHUB_OUTPUT"
+            echo "::warning::GitHub App não configurado — usando VPNDEV_STANDARDS_READ_TOKEN de fallback (ver docs/github-app-auth-snippet.md)."
+          else
+            echo "::error::Nenhuma credencial configurada. Defina NIMBUS_APP_ID/NIMBUS_APP_PRIVATE_KEY ou VPNDEV_STANDARDS_READ_TOKEN. Repos satélites são privados/internos; o GITHUB_TOKEN padrão não tem acesso a eles."
+            exit 1
+          fi
+
       - name: Run preset audit
         id: audit
+        env:
+          GH_TOKEN: ${{ steps.resolve-token.outputs.token }}
         run: |
           # Run the extended audit script
           chmod +x scripts/scan-org-rename-references.sh
