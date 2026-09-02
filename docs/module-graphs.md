@@ -303,6 +303,20 @@ nenhum workflow de CI (diferente de `generate-context-graph.sh`, que roda
 automaticamente). Ver `docs/reuse-catalog.yaml` para o schema das entradas
 resultantes (campo `example` opcional).
 
+---
+
+## Workflow: context-graph-refresh.yml
+
+O workflow `.github/workflows/context-graph-refresh.yml` (feature `specs/014-brownfield-multirepo-context-awareness`) automatiza a atualização dos grafos de contexto quando `docs/bounded-contexts.yaml` é alterado em uma PR:
+
+- **Trigger**: Qualquer PR que altere `docs/bounded-contexts.yaml`
+- **Ação**: Executa `generate-context-graph.sh` para todos os bounded contexts afetados
+- **Output**: Atualiza `specs/<feature>/graph.yaml` e `specs/<feature>/graph.md` automaticamente
+- **Permissões**: `contents: write` (necessário para fazer commit nas mudanças)
+- **Comportamento especial**: **Nunca invoca `harvest-patterns.sh`** (FR-011) — harvest é exclusivamente on-demand
+
+Este workflow garante que grafos de contexto estejam sempre sincronizados com a declaração de bounded contexts sem exigir ação manual em cada PR.
+
 ## Referências
 
 - Templates: `presets/nimbus-code-standards/templates/feature-artifacts/`

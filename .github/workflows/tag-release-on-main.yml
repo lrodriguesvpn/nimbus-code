@@ -59,6 +59,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          GH_HOST=$(echo "${{ github.server_url }}" | sed 's|https://||')
+          export GH_HOST
           # Necessário porque tags/commits empurrados pelo GITHUB_TOKEN a partir
           # de dentro de um workflow NÃO disparam outros workflows escutando
           # `push` (proteção anti-loop do próprio GitHub Actions) — o passo

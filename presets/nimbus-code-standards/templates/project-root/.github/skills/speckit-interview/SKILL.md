@@ -66,50 +66,70 @@ automation from `specs/018-nimbus-agent-intake/spec.md` (User Story 5) exists.
    - For every question marked `Ambíguo` or `Ausente` (within the chosen mode's scope — Fast-Track only asks its ⚡ subset), ask it conversationally — group by block if that reads more naturally, but never re-ask something already `Coberto`.
    - If there was no transcript at all, this is simply the full live interview: ask every question in the chosen mode's scope, in order, conversationally (not as a rigid item-by-item form — see "Como usar este modelo" in the template for tone).
    - Apply the golden rule from the template: if the operator starts describing **how** the system should be built (tech, framework, architecture), note it aside and redirect — this interview is about **what** and **why**, never **how**.
+   - **Critérios de Aceite (Bloco 1)**: don't ask "what are the acceptance criteria?" as an open question — draft 3-4 candidate criteria yourself from the problem/done-criteria/user answers already gathered, present them for the operator to validate/adjust/add to, and only close the block once there are at least 4 concrete, observable criteria (never a vague adjective like "works correctly").
+   - **Bloco 1.5 (opcional)**: after Bloco 1 is closed, silently check the size signals in the template — if 2+ are present, propose a vertical breakdown to the operator before moving to Bloco 2; otherwise skip this without mentioning it.
    - Apply the LGPD shortcut from the template: if Bloco 4, question 1 is a clear "no personal data", mark questions 2–5 as `N/A — sem dado pessoal identificado` and don't force them.
    - If, after asking, an item still has no answer (operator doesn't know), record it explicitly as `[NEEDS CLARIFICATION: <what's missing>]` in the Encerramento's "Pendências" list — never leave it silently blank.
 
 8. **Fill `interview.md` completely**:
    - Cabeçalho: Data (today), Solicitante/Cliente, Facilitador (your agent identity, e.g. "Nimbus Agent (sessão manual)", or a human name if the operator says they're filling it on someone else's behalf), Canal, Feature slug (= `INTERVIEW_FEATURE_DIRECTORY`'s directory name), Prioridade inferida (from Bloco 1 question 7's answer — never spoken aloud as P0–P3 to the operator), Versão deste modelo (copy from the template's own header comment), Modo desta entrevista, Duração real (your best estimate of elapsed conversation, or "não medida" if conducted from a transcript with no timing info).
    - All 4 blocos: replace every bracketed prompt with the actual answer gathered (live or from transcript).
+   - Bloco 1's Critérios de Aceite subsection: fill with the final validated list (minimum 4).
+   - Bloco 1.5: fill only if the breakdown proposal was actually evaluated (2+ signals present) — otherwise leave the section's guidance text untouched, it is not a per-interview fill-in field.
+   - Bloco 2, question 3: if the operator names concrete repos/bounded contexts, cross-check `docs/reuse-catalog.yaml` for an existing catalogued pattern for that domain — if found, note it so the Dev can reference it in `/speckit-plan` instead of re-deriving.
    - Encerramento: 3–5 line summary read back to the operator for confirmation, the Pendências list, who validates the resulting `spec.md`, and duração real.
-   - Checklist de Cobertura Mínima: fill the 3-state table (Coberto/Ambíguo/Ausente) for every row based on what was actually gathered.
-   - Saída Estruturada (YAML): fill the `interview_output` block with real values derived from the conversation/transcript, preserving the same semantics as the template.
+   - Checklist de Cobertura Mínima: fill the 3-state table (Coberto/Ambíguo/Ausente) for every row based on what was actually gathered — including the new "Critérios de aceite" and "repositórios/bounded contexts afetados" rows.
+   - Saída Estruturada (YAML): fill the `interview_output` block with real values derived from the answers (not placeholders), including `criterios_aceite` and `quebra_proposta` — this is optional in the template but you should fill it whenever you have the data, since it's what future automation will consume.
 
 ## Mandatory Post-Execution Validation (Interview Completeness)
 
-After filling `interview.md`, run the deterministic validator **always**:
+**You MUST run this before reporting completion to the user. This step is unconditional — it does not depend on `.specify/extensions.yml` existing or any hook being registered. Never skip it.**
 
+This closes the same reliability gap documented in `docs/reuse-catalog.yaml` (tag
+`skill-mid-flow-instruction-reliability-gate`, originally implemented for
+`EPIC_ISSUE` consistency in `/speckit-specify`): a prose instruction to "fill
+everything in" partway through a long flow can be silently skipped. This script
+is deterministic and does not depend on you having tracked every field correctly.
+
+Run:
 ```bash
-.specify/scripts/bash/validate-interview-completeness.sh --file "$INTERVIEW_FEATURE_DIRECTORY/interview.md"
+.specify/scripts/bash/validate-interview-completeness.sh --file "<INTERVIEW_FEATURE_DIRECTORY>/interview.md" --json
 ```
 
-- If the validator reports unresolved placeholders, reopen `interview.md` and finish the missing fields.
-- If the validator reports the YAML block is absent, that is a warning only; the markdown interview may still be accepted, but the YAML block is recommended whenever possible.
+- If it reports `{"status":"ok",...}`: proceed to the Completion Report. If `yaml_output_present` is `false`, mention this to the user as a minor note (not blocking).
+- If it reports `{"status":"incomplete",...}`: it lists which template placeholders are still unresolved. Go back to step 7/8 above and fill (or explicitly mark `N/A`/`[NEEDS CLARIFICATION]`) every field listed before re-running this check. **Do not report completion with an incomplete interview.md.**
+- If it exits with `{"status":"error","reason":"file_not_found",...}`: something went wrong in step 4 — report the failure to the user, do not silently retry with a guessed path.
 
 ## Mandatory Post-Execution Hooks
 
-- If `.specify/extensions.yml` defines hooks under `hooks.after_interview`, run them after the completeness validator passes.
-- Respect the same optional/mandatory hook behavior as the pre-execution stage.
+**You MUST complete this section before reporting completion to the user.**
+
+Check if `.specify/extensions.yml` exists in the project root.
+- If it does not exist, or no hooks are registered under `hooks.after_interview`, skip to the Completion Report.
+- If it exists, read it and look for entries under the `hooks.after_interview` key, following the exact same filtering/execution convention as `/speckit-specify`'s "Mandatory Post-Execution Hooks" section (skip disabled hooks, skip hooks with a non-empty `condition`, execute unconditional ones, emit optional-hook prompts for `optional: true`).
 
 ## Completion Report
 
-When done, tell the operator:
-- the resolved feature slug / directory;
-- whether the interview was Fast-Track or Completo;
-- what major areas were covered;
-- what is still pending (if anything) before `/speckit-specify`.
+Report completion to the user with:
+- `INTERVIEW_FEATURE_DIRECTORY` — the feature directory path (e.g., `specs/023-relatorio-financeiro`)
+- The path to the saved `interview.md`
+- A short summary of what was captured per block (Negócio/Infraestrutura/Segurança/LGPD), and the mode used (Completo/Fast-Track)
+- Any `[NEEDS CLARIFICATION]` items still pending
+- **The explicit next step**: *"Rode `/speckit-specify` agora — ele detecta e reaproveita esta pasta automaticamente (não cria uma pasta nova), usando este `interview.md` como fonte principal do `spec.md`."*
 
 ## Quick Guidelines
 
-- Keep the interview about **what** and **why**, not **how**.
-- Never invent answers for Security, Infrastructure, or LGPD.
-- Prefer explicit `N/A` / `[NEEDS CLARIFICATION]` over silent omission.
-- When the transcript already answers a question, do not ask it again.
+- This is a **manual** step today — you (the agent) are the facilitator, conducting the interview conversationally with whoever is providing the answers (a human BA/ADE, or the requester directly). There is no Microsoft Teams integration yet; if a transcript is referenced from a personal storage location (e.g., OneDrive), you read it via the `view` tool like any other file the operator points you to — you do not have any special Teams/OneDrive connector.
+- Never invent Segurança, Infraestrutura, or LGPD answers to close a gap quickly — always ask, or mark `[NEEDS CLARIFICATION]`.
+- Do not create `spec.md` content yourself — that remains `/speckit-specify`'s responsibility. This skill only produces `interview.md`.
+- Do not duplicate the feature directory: always use `create-new-feature.sh` (step 3) rather than `mkdir` directly, so `/speckit-specify` can find and reuse it later via `.specify/feature.json`.
 
 ## Done When
 
-- `specs/<feature-slug>/interview.md` exists and is complete.
-- The deterministic validator passes.
-- Any required after-hooks ran successfully.
-- The operator has a concise completion report with next steps.
+- [ ] `INTERVIEW_FEATURE_DIRECTORY` created via `create-new-feature.sh` (not ad-hoc)
+- [ ] `interview.md` copied from the resolved `interview-template` and fully filled (no unresolved template placeholders)
+- [ ] Mode (Completo/Fast-Track) confirmed with the operator, not silently assumed
+- [ ] Every mandatory block question answered, marked `N/A` with reason, or listed as `[NEEDS CLARIFICATION]` — never silently blank
+- [ ] `validate-interview-completeness.sh` run and passing (or its findings addressed)
+- [ ] Extension hooks dispatched or skipped according to the rules above
+- [ ] Completion reported with the explicit next step to run `/speckit-specify`
