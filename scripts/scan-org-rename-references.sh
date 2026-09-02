@@ -6,6 +6,8 @@ ORG="${ORG:-venha-pra-nuvem}"
 OLD_SLUG="${OLD_SLUG:-speckit-nimbus-code-standards}"
 NEW_SLUG="${NEW_SLUG:-nimbus-code-spec-kit-template}"
 GH_HOST="${GH_HOST:-venha-pra-nuvem.ghe.com}"
+MODE="${MODE:-}"
+OUTPUT="${OUTPUT:-}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -25,6 +27,14 @@ while [[ $# -gt 0 ]]; do
       GH_HOST="$2"
       shift 2
       ;;
+    --mode)
+      MODE="$2"
+      shift 2
+      ;;
+    --output)
+      OUTPUT="$2"
+      shift 2
+      ;;
     *)
       echo "Argumento desconhecido: $1" >&2
       exit 1
@@ -41,6 +51,12 @@ if ! command -v jq >/dev/null 2>&1; then
   echo "❌ jq não encontrado." >&2
   exit 1
 fi
+
+# O modo padrão (varredura org-wide de referências ao slug antigo) e o modo
+# --mode satellite-preset-audit são mutuamente exclusivos: o segundo não deve
+# disparar as buscas de Code Search do primeiro (custo de API e ruído
+# desnecessários).
+if [[ "$MODE" != "satellite-preset-audit" ]]; then
 
 RAW_OLD="raw.${GH_HOST}/${ORG}/${OLD_SLUG}"
 WEB_OLD="${GH_HOST}/${ORG}/${OLD_SLUG}"
@@ -134,6 +150,8 @@ echo "3) abrir PR"
 echo "4) validar CI"
 echo "5) mergear e só então seguir para o próximo lote"
 
+fi # MODE != satellite-preset-audit
+
 # ============================================================================
 # Mode: satellite-preset-audit (added by T-046)
 # ============================================================================
@@ -146,7 +164,19 @@ echo "5) mergear e só então seguir para o próximo lote"
 if [[ "$MODE" == "satellite-preset-audit" ]]; then
   ORG="${ORG:-venha-pra-nuvem}"
   OUTPUT_FILE="${OUTPUT:-preset-audit-$(date +%Y%m%d-%H%M%S).csv}"
-  CENTRAL_VERSION="1.18.0"  # From specs/020-satellite-repo-governance/tasks.md
+
+  # Fonte única de verdade: presets/nimbus-code-standards/preset.yml no repo
+  # central. Nunca hardcodear a versão aqui — isso exigiria lembrar de
+  # bumpar em dois lugares a cada release (aqui e no preset.yml), e
+  # esquecer faria todo satélite já atualizado aparecer como "drift" contra
+  # uma versão central desatualizada.
+  PRESET_YML="presets/nimbus-code-standards/preset.yml"
+  if [[ -f "$PRESET_YML" ]]; then
+    CENTRAL_VERSION="$(grep -m1 -E '^[[:space:]]*version:' "$PRESET_YML" | sed -E 's/.*"([0-9.]+)".*/\1/')"
+  else
+    echo "❌ Não encontrei ${PRESET_YML} a partir do diretório atual — rode este script a partir da raiz do repositório central." >&2
+    exit 1
+  fi
   
   echo "repo,current_version,drift_status,last_updated" > "$OUTPUT_FILE"
   
@@ -159,10 +189,17 @@ if [[ "$MODE" == "satellite-preset-audit" ]]; then
       continue
     fi
     
-    # Query preset version from satellite repo
-    preset_version=$(gh api "repos/$repo/contents/.specify/presets/.registry" \
-      --jq '.content' 2>/dev/null | base64 -d | \
-      jq -r '.version // "unknown"' 2>/dev/null || echo "missing")
+    # Query preset version from satellite repo. Não usar "|| echo missing" aqui:
+    # com pipefail, um estágio intermediário do pipe (ex.: base64 -d recebendo
+    # entrada vazia) pode falhar mas o jq final ainda produzir saída válida —
+    # checar se a variável ficou vazia no final é mais confiável do que
+    # confiar no exit code do pipe inteiro.
+    preset_version="$(gh api "repos/$repo/contents/.specify/presets/.registry" \
+      --jq '.content' 2>/dev/null | base64 -d 2>/dev/null | \
+      jq -r '.version // "unknown"' 2>/dev/null)" || preset_version=""
+    if [[ -z "$preset_version" ]]; then
+      preset_version="missing"
+    fi
     
     # Determine drift status
     if [[ "$preset_version" == "$CENTRAL_VERSION" ]]; then
@@ -173,14 +210,26 @@ if [[ "$MODE" == "satellite-preset-audit" ]]; then
       drift_status="drift"
     fi
     
-    # Get last update time for .specify directory
-    last_updated=$(gh api "repos/$repo/commits" \
-      --jq 'map(select(.files[].path | startswith(".specify"))) | .[0].commit.committer.date // "N/A"' 2>/dev/null || echo "N/A")
+    # Get last update time for .specify directory. Usar "if cmd; then ...
+    # else ...; fi" em vez de "cmd || echo N/A": com $(...), a saída parcial
+    # (ex.: corpo de erro JSON de um repo vazio/409) já foi capturada pela
+    # substituição de comando mesmo quando o comando falha, então um "||"
+    # simplesmente concatenaria o JSON de erro com "N/A" em vez de substituí-lo.
+    if last_updated="$(gh api "repos/$repo/commits" \
+      --jq 'map(select(.files[].path | startswith(".specify"))) | .[0].commit.committer.date // "N/A"' 2>/dev/null)" \
+      && [[ -n "$last_updated" ]]; then
+      :
+    else
+      last_updated="N/A"
+    fi
     
     echo "$repo,$preset_version,$drift_status,$last_updated" >> "$OUTPUT_FILE"
   done
   
   echo "✓ Preset audit complete. Report saved to: $OUTPUT_FILE"
   echo "  Drifted repos:"
-  grep ",drift," "$OUTPUT_FILE" | cut -d',' -f1
+  # "|| true": nenhum repo em drift é o resultado esperado/de sucesso, não uma
+  # falha do script — sem isso, o exit code 1 do grep (nenhum match) propagava
+  # via pipefail e derrubava todo o job do workflow mesmo com auditoria OK.
+  grep ",drift," "$OUTPUT_FILE" | cut -d',' -f1 || true
 fi
