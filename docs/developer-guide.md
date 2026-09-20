@@ -584,15 +584,38 @@ labels automaticamente:
 | `scripts/setup-github-labels.sh` | Cria/atualiza as *definições* de label (nome/cor/descrição) no repositório via `gh label create --force` | ❌ Não — só garante que o label existe como opção, nunca toca em issues |
 | `.github/workflows/agent-auto-assign.yml` | Dispara em `issues: labeled` — **reage** a um label (`agent:autonomous-ok`) que já foi aplicado, para atribuir o Copilot coding agent | ❌ Não — consome o label, não o cria |
 | `.github/workflows/sync-priority-field.yml` | Lê o label `priority:*` já existente na issue e espelha no campo nativo do Project | ❌ Não — só leitura/espelhamento |
-| `/speckit-taskstoissues` (via `.specify/scripts/bash/create-github-issue-hierarchy.sh`) | Cria as issues de Feature/User Story/Task **e aplica** `priority:*`, `complexity:*`, `agent:autonomous-ok`/`agent:needs-human`, `type:*` no momento da criação (e reaplica os que faltarem em reexecuções) | ✅ **É o único mecanismo do bundle que aplica esses labels automaticamente** |
+| `/speckit-taskstoissues` (via `.specify/scripts/bash/create-github-issue-hierarchy.sh`) | Cria as issues de Feature/User Story/Task **e aplica** `priority:*`, `complexity:*`, `agent:autonomous-ok`/`agent:needs-human`, `type:*` no momento da criação (e reaplica os que faltarem em reexecuções) | ✅ Sim, mas só nas issues que ele mesmo cria/rastreia (`T00N`) |
+| `scripts/apply-governance-labels.sh` | Varre issues **já existentes** (criadas por qualquer via, inclusive manual) e aplica defaults nos labels de governança ausentes, sem prompt por issue | ✅ **É o mecanismo para corrigir issues manuais que ficaram sem labels** |
 
 Se a equipe cria issues manualmente (pela UI do GHE, `gh issue create` avulso,
 ou qualquer fluxo que não passe por `/speckit-taskstoissues`), é esperado que
 elas fiquem sem `priority:*`/`complexity:*`/`agent:*` — nenhum outro workflow
-deste bundle aplica esses labels de forma automática. Para uma issue nessa
-situação ganhar labels, rode `/speckit-taskstoissues` (ele detecta issues já
-existentes por `T00N` e aplica os labels de governança ausentes sem duplicar
-nada) ou aplique os labels manualmente.
+deste bundle aplica esses labels de forma automática. Para uma issue de
+Task/User Story/Feature já rastreada por `T00N`, rode `/speckit-taskstoissues`
+(ele detecta a issue existente e aplica os labels de governança ausentes sem
+duplicar nada). Para qualquer outra issue manual (bug reportado direto no
+GHE, chore, incidente, etc.) que não passa por esse fluxo, use o script
+`scripts/apply-governance-labels.sh`:
+
+```bash
+# Ver o que seria alterado, sem aplicar nada ainda
+./scripts/apply-governance-labels.sh \
+  --repo-owner venha-pra-nuvem --repo-name <repo> --dry-run
+
+# Aplicar de fato — varre todas as issues abertas, preenche só os labels
+# ausentes com defaults sensatos (priority:P2-medium, complexity:S2,
+# agent:autonomous-ok/needs-human, type:task) e nunca sobrescreve um label
+# já presente
+./scripts/apply-governance-labels.sh \
+  --repo-owner venha-pra-nuvem --repo-name <repo>
+```
+
+Ele é o "modo bulk": varre todas as issues abertas de uma vez e aplica
+defaults automáticos sem perguntar valor por issue — depois de rodar, revise
+as issues que ganharam `type:task` "no chute" (o default mais neutro) e
+corrija manualmente se a issue for na verdade um Epic/Feature/Bug/Chore/Docs/
+Incident. Rode `--help` para ver todas as opções (`--only`, `--include-closed`,
+`--default-*`, `--json`).
 
 #### Passo 5 — Verificar no board
 
@@ -1271,6 +1294,57 @@ Ver também: [FAQ — Como atualizo um projeto criado com uma versão antiga do 
   observabilidade, correlation-id/microsserviços e abertura automática de bugs.
 - [`docs/extension-candidates.md`](extension-candidates.md) — quais extensões
   (oficiais e da Nimbus-Code) considerar instalar além do bundle padrão.
+
+## Integrações Multi-Agente e Agentes Disponíveis (SPEC 024)
+
+O Nimbus Code suporta três plataformas de execução de agentes com paridade completa nos 12 comandos `/speckit-*` e nos 9 agentes institucionais `/nc-*`:
+
+| Plataforma / Agente | Diretório de Instalação | `multi_install_safe` | 12 Comandos `/speckit-*` | 9 Agentes `/nc-*` |
+|---|---|:---:|:---:|:---:|
+| **GitHub Copilot** | `.github/skills/` | `true` | ✅ Nativo | ✅ Fonte única |
+| **Claude Code** | `.claude/skills/` | `true` | ✅ `specify integration install claude` | ✅ Sincronizado (`scripts/sync-nc-agents-to-integrations.sh --target claude`) |
+| **Antigravity** | `.agents/skills/` | `false` | ✅ `specify integration install agy` (Worktree isolado) | ✅ Sincronizado (`scripts/sync-nc-agents-to-integrations.sh --target antigravity`) |
+
+### Tabela de Agentes e Comandos Disponíveis por Integração
+
+| Identificador | Tipo | Copilot | Claude Code | Antigravity |
+|---|---|:---:|:---:|:---:|
+| `/speckit-constitution` | Workflow | ✅ | ✅ | ✅ |
+| `/speckit-specify` | Workflow | ✅ | ✅ | ✅ |
+| `/speckit-clarify` | Workflow | ✅ | ✅ | ✅ |
+| `/speckit-checklist` | Workflow | ✅ | ✅ | ✅ |
+| `/speckit-plan` | Workflow | ✅ | ✅ | ✅ |
+| `/speckit-tasks` | Workflow | ✅ | ✅ | ✅ |
+| `/speckit-analyze` | Workflow | ✅ | ✅ | ✅ |
+| `/speckit-implement` | Workflow | ✅ | ✅ | ✅ |
+| `/speckit-converge` | Workflow | ✅ | ✅ | ✅ |
+| `/speckit-taskstoissues` | Workflow | ✅ | ✅ | ✅ |
+| `/speckit-interview` | Workflow | ✅ | ✅ | ✅ |
+| `/speckit-nimbus-code-backlog-sync-sync` | Workflow | ✅ | ✅ | ✅ |
+| `/nc-intake` | Agente (Alias `/speckit-interview`) | ✅ | ✅ | ✅ |
+| `/nc-spec` | Agente (Alias `/speckit-specify`) | ✅ | ✅ | ✅ |
+| `/nc-critic` | Agente (Auditoria de Spec) | ✅ | ✅ | ✅ |
+| `/nc-governor` | Agente (Gates & Integridade) | ✅ | ✅ | ✅ |
+| `/nc-arch` | Agente (Solution Architecture) | ✅ | ✅ | ✅ |
+| `/nc-qa` | Agente (Test Strategy) | ✅ | ✅ | ✅ |
+| `/nc-builder` | Agente (Autonomous Builder) | ✅ | ✅ | ✅ |
+| `/nc-shield` | Agente (DevSecOps Guardian) | ✅ | ✅ | ✅ |
+| `/nc-telemetry` | Agente (Observability & SRE) | ✅ | ✅ | ✅ |
+
+### Regra de Segurança para Antigravity (`multi_install_safe: false`)
+
+Como o `specify_cli` define `multi_install_safe = false` para Antigravity, a instalação e validação inicial de novas versões deve ocorrer sempre em worktree isolado (`git worktree add ../nimbus-agy-validation`), promovendo para a branch de trabalho somente após validação completa, evitando qualquer sobreposição acidental em ambientes compartilhados.
+
+### Sincronização e Prevenção de Drift
+
+A fonte da verdade de todos os agentes `/nc-*` reside exclusivamente em `.github/skills/nc-*/`. Quando qualquer agente institucional for atualizado, execute:
+
+```bash
+./scripts/sync-nc-agents-to-integrations.sh --target all
+```
+
+O workflow de CI `.github/workflows/nc-agents-parity-check.yml` executa a suíte Bats `tests/multi-agent-integration/nc-agents-parity.bats` em todo Pull Request que altera skills ou scripts de sincronização, garantindo que nenhum drift passe despercebido.
+
 
 ## Phase 2: Automated Preset Synchronization (SPEC 020)
 

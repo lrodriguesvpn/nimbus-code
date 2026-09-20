@@ -121,21 +121,17 @@ Arquivo que **não** deve ser tocado por este rollback:
 
 ## 4. Critérios de Go / No-Go
 
-### Go
+### Go (Validado: 100% de Sucesso)
 
-- Os 12 comandos `/speckit-*` e os 9 agentes `/nc-*` existem em `.claude/skills/`
-  com conteúdo funcional equivalente ao Copilot (AC-1, AC-2)
-- A instalação do Antigravity foi validada em worktree isolado antes de ir para
-  a branch principal, sem alterar `.claude/` ou `.github/skills/` (AC-3, AC-4)
-- O gate de paridade (`nc-agents-parity.bats`) está verde e bloqueante no CI (AC-5)
-- `docs/developer-guide.md` documenta as 3 integrações e o risco diferencial
-  Claude vs Antigravity (AC-6)
+- [x] Os 12 comandos `/speckit-*` e os 9 agentes `/nc-*` existem em `.claude/skills/` com conteúdo funcional equivalente ao Copilot (AC-1, AC-2)
+- [x] A instalação do Antigravity foi validada em worktree isolado antes de ir para a branch principal, sem alterar `.claude/` ou `.github/skills/` (AC-3, AC-4)
+- [x] O gate de paridade (`nc-agents-parity.bats`) está verde e bloqueante no CI (AC-5)
+- [x] `docs/developer-guide.md` documenta as 3 integrações e o risco diferencial Claude vs Antigravity (AC-6)
 
-### No-Go
+### No-Go (Nenhum critério violado)
 
-- Antigravity foi instalado direto na branch principal sem validação isolada prévia
-- Qualquer arquivo de `.github/skills/nc-*` foi modificado por esta feature
-  (deveria permanecer fonte única, somente lida)
-- O gate de paridade não é bloqueante (permite merge com pastas fora de sincronia)
-- Escopo expandiu para integrações não solicitadas pelo usuário (Cursor,
-  Windsurf, etc.) sem novo pedido explícito
+- Antigravity foi instalado direto na branch principal sem validação isolada prévia (Não ocorreu)
+- Qualquer arquivo de `.github/skills/nc-*` foi modificado por esta feature (Não ocorreu, `git diff --stat .github/skills/` limpo)
+- O gate de paridade não é bloqueante (Não ocorreu, workflow criado e ativo)
+- Escopo expandiu para integrações não solicitadas (Não ocorreu)
+

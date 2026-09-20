@@ -33,9 +33,9 @@ Projeto de automação/tooling de repositório (não app com camadas model/servi
 
 **Purpose**: Preparar a estrutura de diretórios e dependências de ferramenta compartilhadas por todas as user stories
 
-- [ ] T001 Confirmar versão do CLI `specify` instalada (`specify --version`) e documentar o resultado no início do log de execução da feature; se `< v1.20.5`, atualizar antes de prosseguir (bloqueante apenas para US2/Antigravity, não para US1/Claude)
-- [ ] T002 [P] Criar diretório `tests/multi-agent-integration/` (novo, paralelo a `tests/platform/` e `tests/bootstrap/` já existentes)
-- [ ] T003 [P] Criar esqueleto do script `scripts/sync-nc-agents-to-integrations.sh` com shebang, `set -euo pipefail`, parsing de `--target claude|antigravity|all` e mensagem de uso (`--help`), sem lógica de sync ainda
+- [x] T001 Confirmar versão do CLI `specify` instalada (`specify --version`) e documentar o resultado no início do log de execução da feature; se `< v1.20.5`, atualizar antes de prosseguir (bloqueante apenas para US2/Antigravity, não para US1/Claude)
+- [x] T002 [P] Criar diretório `tests/multi-agent-integration/` (novo, paralelo a `tests/platform/` e `tests/bootstrap/` já existentes)
+- [x] T003 [P] Criar esqueleto do script `scripts/sync-nc-agents-to-integrations.sh` com shebang, `set -euo pipefail`, parsing de `--target claude|antigravity|all` e mensagem de uso (`--help`), sem lógica de sync ainda
 
 **Checkpoint**: Estrutura básica pronta — nenhuma user story ainda implementada
 
@@ -47,10 +47,10 @@ Projeto de automação/tooling de repositório (não app com camadas model/servi
 
 **⚠️ CRITICAL**: Nenhuma user story pode começar antes desta fase estar completa
 
-- [ ] T004 Implementar em `scripts/sync-nc-agents-to-integrations.sh` a função de descoberta da fonte única: listar os 9 agentes em `.github/skills/nc-*/SKILL.md` (`nc-intake`, `nc-spec`, `nc-critic`, `nc-governor`, `nc-arch`, `nc-qa`, `nc-builder`, `nc-shield`, `nc-telemetry`) e falhar explicitamente (exit `1`) se algum estiver ausente (contrato: "Falha explícita")
-- [ ] T005 Implementar em `scripts/sync-nc-agents-to-integrations.sh` a função de cópia de conteúdo funcional (frontmatter + corpo) da fonte para um caminho de destino genérico, preservando o conteúdo institucional (blocos de ALIAS, reforços de governança) sem modificação
-- [ ] T006 [P] Implementar helper de hash de conteúdo funcional (ex.: `sha256sum` do corpo normalizado, ignorando apenas o pós-processamento esperado por integração) reutilizável tanto pelo script de sync quanto pelo teste de paridade — usado para popular `content_hash` de `SkillArtifact` ([data-model.md](./data-model.md))
-- [ ] T007 Garantir que `scripts/sync-nc-agents-to-integrations.sh` nunca escreve em `.github/skills/nc-*/SKILL.md` (contrato: "Somente leitura na fonte") — adicionar guard/comentário explícito e teste manual de verificação (`git diff --stat .github/skills/` vazio após qualquer execução)
+- [x] T004 Implementar em `scripts/sync-nc-agents-to-integrations.sh` a função de descoberta da fonte única: listar os 9 agentes em `.github/skills/nc-*/SKILL.md` (`nc-intake`, `nc-spec`, `nc-critic`, `nc-governor`, `nc-arch`, `nc-qa`, `nc-builder`, `nc-shield`, `nc-telemetry`) e falhar explicitamente (exit `1`) se algum estiver ausente (contrato: "Falha explícita")
+- [x] T005 Implementar em `scripts/sync-nc-agents-to-integrations.sh` a função de cópia de conteúdo funcional (frontmatter + corpo) da fonte para um caminho de destino genérico, preservando o conteúdo institucional (blocos de ALIAS, reforços de governança) sem modificação
+- [x] T006 [P] Implementar helper de hash de conteúdo funcional (ex.: `sha256sum` do corpo normalizado, ignorando apenas o pós-processamento esperado por integração) reutilizável tanto pelo script de sync quanto pelo teste de paridade — usado para popular `content_hash` de `SkillArtifact` ([data-model.md](./data-model.md))
+- [x] T007 Garantir que `scripts/sync-nc-agents-to-integrations.sh` nunca escreve em `.github/skills/nc-*/SKILL.md` (contrato: "Somente leitura na fonte") — adicionar guard/comentário explícito e teste manual de verificação (`git diff --stat .github/skills/` vazio após qualquer execução)
 
 **Checkpoint**: Fundação pronta — leitura da fonte única, hashing e escrita segura disponíveis para as user stories
 
@@ -64,16 +64,16 @@ Projeto de automação/tooling de repositório (não app com camadas model/servi
 
 ### Tests for User Story 1 ⚠️
 
-- [ ] T008 [P] [US1] Escrever teste `test_AC1_claude_speckit_commands_installed` em `tests/multi-agent-integration/nc-agents-parity.bats` (bloco inicial do arquivo): após `specify integration install claude`, os 12 `.claude/skills/speckit-*/SKILL.md` existem e `git diff --stat .github/skills/` é vazio
-- [ ] T009 [P] [US1] Escrever teste `test_AC2_nc_agents_synced_to_claude` em `tests/multi-agent-integration/nc-agents-parity.bats`: após `scripts/sync-nc-agents-to-integrations.sh --target claude`, os 9 `.claude/skills/nc-*/SKILL.md` existem, contêm `argument-hint:` no frontmatter, e têm `content_hash` funcional idêntico à fonte
+- [x] T008 [P] [US1] Escrever teste `test_AC1_claude_speckit_commands_installed` em `tests/multi-agent-integration/nc-agents-parity.bats` (bloco inicial do arquivo): após `specify integration install claude`, os 12 `.claude/skills/speckit-*/SKILL.md` existem e `git diff --stat .github/skills/` é vazio
+- [x] T009 [P] [US1] Escrever teste `test_AC2_nc_agents_synced_to_claude` em `tests/multi-agent-integration/nc-agents-parity.bats`: após `scripts/sync-nc-agents-to-integrations.sh --target claude`, os 9 `.claude/skills/nc-*/SKILL.md` existem, contêm `argument-hint:` no frontmatter, e têm `content_hash` funcional idêntico à fonte
 
 ### Implementation for User Story 1
 
-- [ ] T010 [US1] Rodar `specify integration install claude` no repositório e confirmar instalação dos 12 comandos `/speckit-*` em `.claude/skills/` (gerenciado nativamente pelo CLI — nenhum código novo aqui, apenas execução e verificação, conforme `research.md` decisão 1)
-- [ ] T011 [US1] Implementar em `scripts/sync-nc-agents-to-integrations.sh` a lógica específica de `--target claude`: para cada um dos 9 agentes, gerar `.claude/skills/nc-<agente>/SKILL.md` injetando o campo `argument-hint:` no frontmatter (mesmo padrão do `ClaudeIntegration.post_process_skill_content` do `specify` CLI, conforme `contracts/nc-agent-sync.contract.md`)
-- [ ] T012 [US1] Rodar `scripts/sync-nc-agents-to-integrations.sh --target claude` e confirmar manualmente (via `quickstart.md` V2) que os 9 `.claude/skills/nc-*/SKILL.md` foram gerados corretamente, preservando os blocos de ALIAS e reforços de governança do conteúdo institucional
-- [ ] T013 [US1] Rodar `bats tests/multi-agent-integration/nc-agents-parity.bats -f "AC1|AC2"` e confirmar que T008/T009 passam
-- [ ] T014 [P] [US1] Commitar `.claude/skills/` (12 comandos + 9 agentes) no repositório
+- [x] T010 [US1] Rodar `specify integration install claude` no repositório e confirmar instalação dos 12 comandos `/speckit-*` em `.claude/skills/` (gerenciado nativamente pelo CLI — nenhum código novo aqui, apenas execução e verificação, conforme `research.md` decisão 1)
+- [x] T011 [US1] Implementar em `scripts/sync-nc-agents-to-integrations.sh` a lógica específica de `--target claude`: para cada um dos 9 agentes, gerar `.claude/skills/nc-<agente>/SKILL.md` injetando o campo `argument-hint:` no frontmatter (mesmo padrão do `ClaudeIntegration.post_process_skill_content` do `specify` CLI, conforme `contracts/nc-agent-sync.contract.md`)
+- [x] T012 [US1] Rodar `scripts/sync-nc-agents-to-integrations.sh --target claude` e confirmar manualmente (via `quickstart.md` V2) que os 9 `.claude/skills/nc-*/SKILL.md` foram gerados corretamente, preservando os blocos de ALIAS e reforços de governança do conteúdo institucional
+- [x] T013 [US1] Rodar `bats tests/multi-agent-integration/nc-agents-parity.bats -f "AC1|AC2"` e confirmar que T008/T009 passam
+- [x] T014 [P] [US1] Commitar `.claude/skills/` (12 comandos + 9 agentes) no repositório
 
 **Checkpoint**: US1 completa — Claude Code tem paridade total com Copilot (comandos + agentes), sem alterar nenhum arquivo do Copilot. MVP entregável.
 
@@ -87,19 +87,19 @@ Projeto de automação/tooling de repositório (não app com camadas model/servi
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T015 [P] [US2] Escrever teste `test_AC3_agy_isolated_install_validated` em `tests/multi-agent-integration/nc-agents-parity.bats`: após instalação em worktree isolado, os 12 `.agents/skills/speckit-*/SKILL.md` existem e `git diff --stat .claude/ .github/skills/` (dentro do worktree) é vazio
-- [ ] T016 [P] [US2] Escrever teste `test_AC4_nc_agents_synced_to_agy` em `tests/multi-agent-integration/nc-agents-parity.bats`: após `scripts/sync-nc-agents-to-integrations.sh --target antigravity`, os 9 `.agents/skills/nc-*/SKILL.md` existem e contêm a nota de conversão `.`→`-` em nomes de comando de hook
+- [x] T015 [P] [US2] Escrever teste `test_AC3_agy_isolated_install_validated` em `tests/multi-agent-integration/nc-agents-parity.bats`: após instalação em worktree isolado, os 12 `.agents/skills/speckit-*/SKILL.md` existem e `git diff --stat .claude/ .github/skills/` (dentro do worktree) é vazio
+- [x] T016 [P] [US2] Escrever teste `test_AC4_nc_agents_synced_to_agy` em `tests/multi-agent-integration/nc-agents-parity.bats`: após `scripts/sync-nc-agents-to-integrations.sh --target antigravity`, os 9 `.agents/skills/nc-*/SKILL.md` existem e contêm a nota de conversão `.`→`-` em nomes de comando de hook
 
 ### Implementation for User Story 2
 
-- [ ] T017 [US2] Criar worktree isolado (`git worktree add ../nimbus-agy-validation`) e, dentro dele, confirmar `specify --version >= v1.20.5` (bloqueia com aviso claro se a versão for insuficiente, conforme Edge Case do `spec.md` e `WorktreeValidationRecord.cli_version_confirmed`)
-- [ ] T018 [US2] Dentro do worktree isolado, rodar `specify integration install agy` e confirmar que emite aviso claro de versão mínima e instala os 12 comandos `/speckit-*` em `.agents/skills/`
-- [ ] T019 [US2] Implementar em `scripts/sync-nc-agents-to-integrations.sh` a lógica específica de `--target antigravity`: para cada um dos 9 agentes, gerar `.agents/skills/nc-<agente>/SKILL.md` injetando a nota de conversão `.`→`-` em nomes de comando de hook (mesma função `_inject_hook_command_note` do `AgyIntegration` do `specify` CLI, conforme `contracts/nc-agent-sync.contract.md`)
-- [ ] T020 [US2] Dentro do worktree isolado, rodar `scripts/sync-nc-agents-to-integrations.sh --target antigravity` e confirmar (via `quickstart.md` V3/V4) que `.claude/` e `.github/skills/` permanecem intocados durante todo o processo
-- [ ] T021 [US2] Preencher um `WorktreeValidationRecord` (conforme `data-model.md`): `worktree_path`, `cli_version_confirmed`, `claude_files_unaffected=true`, `copilot_files_unaffected=true`, `validated_by` — e obter aprovação humana explícita (`approved_for_main_branch=true`) antes do próximo passo (RACI do `spec.md`: Tech lead)
-- [ ] T022 [US2] Após aprovação humana, promover os artefatos `.agents/skills/` (12 comandos + 9 agentes) gerados no worktree isolado para a branch principal da sessão; remover o worktree temporário (`git worktree remove`)
-- [ ] T023 [US2] Rodar `bats tests/multi-agent-integration/nc-agents-parity.bats -f "AC3|AC4"` na branch principal e confirmar que T015/T016 passam
-- [ ] T024 [P] [US2] Commitar `.agents/skills/` (12 comandos + 9 agentes) no repositório
+- [x] T017 [US2] Criar worktree isolado (`git worktree add ../nimbus-agy-validation`) e, dentro dele, confirmar `specify --version >= v1.20.5` (bloqueia com aviso claro se a versão for insuficiente, conforme Edge Case do `spec.md` e `WorktreeValidationRecord.cli_version_confirmed`)
+- [x] T018 [US2] Dentro do worktree isolado, rodar `specify integration install agy` e confirmar que emite aviso claro de versão mínima e instala os 12 comandos `/speckit-*` em `.agents/skills/`
+- [x] T019 [US2] Implementar em `scripts/sync-nc-agents-to-integrations.sh` a lógica específica de `--target antigravity`: para cada um dos 9 agentes, gerar `.agents/skills/nc-<agente>/SKILL.md` injetando a nota de conversão `.`→`-` em nomes de comando de hook (mesma função `_inject_hook_command_note` do `AgyIntegration` do `specify` CLI, conforme `contracts/nc-agent-sync.contract.md`)
+- [x] T020 [US2] Dentro do worktree isolado, rodar `scripts/sync-nc-agents-to-integrations.sh --target antigravity` e confirmar (via `quickstart.md` V3/V4) que `.claude/` e `.github/skills/` permanecem intocados durante todo o processo
+- [x] T021 [US2] Preencher um `WorktreeValidationRecord` (conforme `data-model.md`): `worktree_path`, `cli_version_confirmed`, `claude_files_unaffected=true`, `copilot_files_unaffected=true`, `validated_by` — e obter aprovação humana explícita (`approved_for_main_branch=true`) antes do próximo passo (RACI do `spec.md`: Tech lead)
+- [x] T022 [US2] Após aprovação humana, promover os artefatos `.agents/skills/` (12 comandos + 9 agentes) gerados no worktree isolado para a branch principal da sessão; remover o worktree temporário (`git worktree remove`)
+- [x] T023 [US2] Rodar `bats tests/multi-agent-integration/nc-agents-parity.bats -f "AC3|AC4"` na branch principal e confirmar que T015/T016 passam
+- [x] T024 [P] [US2] Commitar `.agents/skills/` (12 comandos + 9 agentes) no repositório
 
 **Checkpoint**: US2 completa — Antigravity disponível na branch principal, validado com segurança em ambiente isolado e aprovação humana registrada.
 
@@ -113,13 +113,13 @@ Projeto de automação/tooling de repositório (não app com camadas model/servi
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T025 [US3] Escrever teste `test_AC5_nc_agents_parity_gate` em `tests/multi-agent-integration/nc-agents-parity.bats`: compara `content_hash` dos 9 agentes entre as 3 pastas e falha apontando explicitamente `{artifact_id, integration}` divergente quando há drift (usa o helper de hash de T006 e a estrutura `ParityCheckResult` de `data-model.md`)
+- [x] T025 [US3] Escrever teste `test_AC5_nc_agents_parity_gate` em `tests/multi-agent-integration/nc-agents-parity.bats`: compara `content_hash` dos 9 agentes entre as 3 pastas e falha apontando explicitamente `{artifact_id, integration}` divergente quando há drift (usa o helper de hash de T006 e a estrutura `ParityCheckResult` de `data-model.md`)
 
 ### Implementation for User Story 3
 
-- [ ] T026 [US3] Validar manualmente o cenário de drift (`quickstart.md` V5): editar `.github/skills/nc-shield/SKILL.md`, rodar o teste de paridade sem re-sincronizar e confirmar falha bloqueante apontando `nc-shield` e o(s) destino(s) desatualizado(s); depois rodar `scripts/sync-nc-agents-to-integrations.sh --target all` e confirmar que o teste volta a passar
-- [ ] T027 [US3] Criar `.github/workflows/nc-agents-parity-check.yml`: workflow de CI que roda `bats tests/multi-agent-integration/nc-agents-parity.bats` em todo PR que altera `.github/skills/nc-*/`, `.claude/skills/nc-*/`, `.agents/skills/nc-*/` ou `scripts/sync-nc-agents-to-integrations.sh`, bloqueando o merge em caso de falha (gate de paridade, FR-004)
-- [ ] T028 [P] [US3] Commitar `tests/multi-agent-integration/nc-agents-parity.bats` (completo, com os 5 testes AC1-AC5) e `.github/workflows/nc-agents-parity-check.yml`
+- [x] T026 [US3] Validar manualmente o cenário de drift (`quickstart.md` V5): editar `.github/skills/nc-shield/SKILL.md`, rodar o teste de paridade sem re-sincronizar e confirmar falha bloqueante apontando `nc-shield` e o(s) destino(s) desatualizado(s); depois rodar `scripts/sync-nc-agents-to-integrations.sh --target all` e confirmar que o teste volta a passar
+- [x] T027 [US3] Criar `.github/workflows/nc-agents-parity-check.yml`: workflow de CI que roda `bats tests/multi-agent-integration/nc-agents-parity.bats` em todo PR que altera `.github/skills/nc-*/`, `.claude/skills/nc-*/`, `.agents/skills/nc-*/` ou `scripts/sync-nc-agents-to-integrations.sh`, bloqueando o merge em caso de falha (gate de paridade, FR-004)
+- [x] T028 [P] [US3] Commitar `tests/multi-agent-integration/nc-agents-parity.bats` (completo, com os 5 testes AC1-AC5) e `.github/workflows/nc-agents-parity-check.yml`
 
 **Checkpoint**: US3 completa — drift entre as 3 integrações é detectado automaticamente e bloqueia merge no CI.
 
@@ -129,11 +129,12 @@ Projeto de automação/tooling de repositório (não app com camadas model/servi
 
 **Purpose**: Documentação, validação final e fechamento institucional da feature
 
-- [ ] T029 Atualizar `docs/developer-guide.md` com a seção "Agentes disponíveis por integração": tabela com os 12 comandos `/speckit-*` + 9 agentes `/nc-*` para Copilot/Claude/Antigravity, e a diferença de risco `multi_install_safe` (`true` para Copilot/Claude, `false` para Antigravity) — `test_AC6_developer_guide_documents_integrations` (AC-6, FR-005)
-- [ ] T030 [P] Rodar `bash -n scripts/sync-nc-agents-to-integrations.sh` (lint de sintaxe) e validar idempotência manualmente: rodar o script duas vezes seguidas sem alterar a fonte e confirmar `git diff --stat` vazio na segunda execução (contrato: "Idempotência")
-- [ ] T031 Rodar a suíte completa `bats tests/multi-agent-integration/nc-agents-parity.bats` (todos os AC1-AC5) e confirmar 100% de sucesso
-- [ ] T032 Atualizar `docs/reuse-catalog.yaml` com uma nova entrada para o padrão "sync de fonte única para múltiplos destinos com gate de drift" (tag sugerida: `single-source-multi-target-sync`), referenciando esta feature como origem — fecha o gap identificado no Harness/Reuse Gate do `plan.md`
-- [ ] T033 Validar todos os 6 ACs de `spec.md` contra os testes/execuções realizados (checklist final) e atualizar `impact-map.md` com o resultado real dos critérios Go/No-Go (esperado: todos "Go")
+- [x] T029 Atualizar `docs/developer-guide.md` com a seção "Agentes disponíveis por integração": tabela com os 12 comandos `/speckit-*` + 9 agentes `/nc-*` para Copilot/Claude/Antigravity, e a diferença de risco `multi_install_safe` (`true` para Copilot/Claude, `false` para Antigravity) — `test_AC6_developer_guide_documents_integrations` (AC-6, FR-005)
+- [x] T030 [P] Rodar `bash -n scripts/sync-nc-agents-to-integrations.sh` (lint de sintaxe) e validar idempotência manualmente: rodar o script duas vezes seguidas sem alterar a fonte e confirmar `git diff --stat` vazio na segunda execução (contrato: "Idempotência")
+- [x] T031 Rodar a suíte completa `bats tests/multi-agent-integration/nc-agents-parity.bats` (todos os AC1-AC5) e confirmar 100% de sucesso
+- [x] T032 Atualizar `docs/reuse-catalog.yaml` com uma nova entrada para o padrão "sync de fonte única para múltiplos destinos com gate de drift" (tag sugerida: `single-source-multi-target-sync`), referenciando esta feature como origem — fecha o gap identificado no Harness/Reuse Gate do `plan.md`
+- [x] T033 Validar todos os 6 ACs de `spec.md` contra os testes/execuções realizados (checklist final) e atualizar `impact-map.md` com o resultado real dos critérios Go/No-Go (esperado: todos "Go")
+
 
 **Checkpoint final**: Feature 024 completa — 3 integrações (Copilot, Claude, Antigravity) com paridade total nos 12 comandos + 9 agentes, gate de paridade ativo no CI, documentação atualizada.
 
