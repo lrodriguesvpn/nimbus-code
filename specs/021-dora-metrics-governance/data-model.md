@@ -42,8 +42,10 @@ feature, mesmo padrão de `docs/playbooks/retro-cadence-state.yaml`).
 - `author`: responsável identificado (handle/GitHub username)
 - `timestamp`: data/hora do ajuste
 - `evidence_link`: link da evidência (issue, PR, comentário, log)
-- `exception_category`: categoria da exceção (ex.: `fonte_indisponivel`, `evento_duplicado`, `correcao_retroativa`)
-- `approved_by`: quem aprovou o ajuste (pode coincidir com `author` se auto-aprovado por regra explícita — registrar mesmo assim)
+- `exception_category`: `fonte_indisponivel` | `evento_duplicado` | `correcao_retroativa` | `outro_justificado`
+- `approved_by`: quem aprovou o ajuste; obrigatório em toda entrada aceita, podendo coincidir com `author` somente quando uma regra explícita de autoaprovação se aplicar
+- `review_cycle_period`: período semanal/mensal afetado pelo ajuste
+- `supersedes_id`: ID do registro anterior quando o ajuste corrige um evento já registrado
 
 ### Review Cycle
 
@@ -56,6 +58,7 @@ combinada dos 4 indicadores.
 - `indicators_snapshot`: valores dos 4 indicadores no período
 - `combined_conclusion`: texto de conclusão sobre tendência e impacto cruzado entre indicadores (FR-007)
 - `pending_manual_adjustments`: lista de `Manual Adjustment.id` sem justificativa completa — se não vazia, o ciclo **não pode ser fechado** (FR-006)
+- `status`: `open` | `data_insufficient` | `reconciliation_pending` | `approved` | `closed`
 
 ### Improvement Action
 
@@ -70,18 +73,22 @@ arquivo próprio desta feature.
 - `priority`: label `priority:*` aplicado
 - `review_deadline`: prazo de reavaliação (FR-009)
 - `backlog_reference`: link da Issue criada/atualizada
+- `source_review_cycle`: referência ao ciclo que originou a ação
 
 ## Relationships
 
 - Uma `Review Cycle` referencia N `Collection Record` (automáticos e/ou manuais) do período
 - Um `Collection Record` do tipo `manual` sempre tem exatamente um `Manual Adjustment` correspondente
-- Uma `Review Cycle` só pode ser fechada (marcada como concluída) quando `pending_manual_adjustments` está vazio
+- Uma `Review Cycle` só pode ser fechada quando `pending_manual_adjustments` está vazio, `combined_conclusion` está preenchida e o estado anterior é `approved`
 - Uma `Review Cycle` pode gerar zero ou mais `Improvement Action` quando `combined_conclusion` identifica degradação relevante
 
 ## Validation Rules
 
-- `Manual Adjustment.justification`, `author`, `timestamp` e `evidence_link` são **todos obrigatórios** — nenhum ajuste manual é aceito com qualquer um desses campos vazio (FR-004)
+- `Manual Adjustment.justification`, `author`, `timestamp`, `evidence_link`, `exception_category`, `approved_by` e `review_cycle_period` são **todos obrigatórios** — nenhum ajuste manual é aceito com qualquer um desses campos vazio (FR-004, FR-012)
+- `exception_category` MUST pertencer ao vocabulário controlado definido acima
+- Um ajuste que substitui outro MUST preencher `supersedes_id`; o registro anterior permanece imutável
 - `Review Cycle.combined_conclusion` MUST estar preenchido antes de a rodada ser considerada concluída (FR-007)
+- `Review Cycle.status` MUST seguir a ordem `open` → `data_insufficient`/`reconciliation_pending` → `approved` → `closed`, sem saltar diretamente para `closed`
 - `Review Cycle` com `pending_manual_adjustments` não vazio MUST permanecer aberta (FR-006)
 - `Improvement Action.owner`, `priority` e `review_deadline` são obrigatórios em toda ação gerada por degradação (FR-009)
 - `Metric Definition` é imutável durante um ciclo de revisão em andamento — mudanças de definição só valem a partir do próximo ciclo (evita comparação inconsistente dentro do mesmo período)

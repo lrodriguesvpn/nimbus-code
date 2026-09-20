@@ -3,7 +3,7 @@
 **Feature Branch**: `004-platform-cmdb-dsc-model`  
 **Created**: 2026-08-12  
 **Status**: Draft  
-**Input**: User description: "Projeto de PLataforma, o constitucion deveria conseguir perguntar qual platforma (logar com a autenticacao do usuario), listar todos os recursos e dados possiveis e criar um CMDB pra IA (para ser usado em tudo, ate pra validar os terraforms), mas tbm trazer baselines de M365, configuracoes de politicas aplicadas, configuracoes CUSTOMIZADAS aplicadas (se existirem), e montar um modelo pra termos DSC de tudo, do m365 e as principais configuracoes de SEGURANCA e COMPLIANCE mapeadas."
+**Input**: User description: "Estruturação do repositório e modelo de Plataforma, integrando descoberta de recursos em nuvem, baselines de segurança do Microsoft 365 e Azure/AWS em um CMDB consumível por IA. Estabelece o modelo Desired State Configuration (DSC) para validação contínua de configurações, conformidade de políticas e auditoria de arquivos Terraform."
 
 ## Nimbus-Code — Cabeçalho Obrigatório da Spec
 

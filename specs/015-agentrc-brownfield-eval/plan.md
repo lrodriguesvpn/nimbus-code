@@ -2,6 +2,10 @@
 
 **Branch**: `[015-agentrc-brownfield-eval]` | **Date**: 2026-08-23 | **Spec**: [spec.md](./spec.md)
 
+## Status
+
+**BACKLOG — não executar piloto ou integração até nova priorização e aprovação humana**
+
 ## Summary
 
 Avaliar se o AgentRC do Microsoft Lab traz ganho líquido para análise de código
@@ -27,6 +31,7 @@ critérios de aceitação contra as fontes citadas
 
 **Constraints**:
 - AgentRC é experimental; esta fase é de avaliação, não de adoção
+- A SPEC permanece em backlog; qualquer piloto depende de nova decisão explícita
 - A comparação deve usar apenas evidências públicas e artefatos já presentes no
   repositório
 - Não há mudança de runtime, rollout ou toggle nesta feature
@@ -34,6 +39,10 @@ critérios de aceitação contra as fontes citadas
 
 **Compatibility**: o fluxo atual de spec → plan → tasks permanece intacto;
 esta feature apenas documenta a decisão sobre AgentRC
+
+**Backlog guardrail**: a recomendação existente não autoriza execução. O
+próximo passo permitido é pesquisa de mercado e atualização da recomendação;
+qualquer piloto exige retomada formal da SPEC, revisão humana e Go/No-Go.
 
 ## Constitution Check
 

@@ -1,0 +1,25 @@
+# evidence-registry.yaml — inventário versionado de evidências coletadas.
+#
+# Cada item abaixo representa uma evidência do Evidence Plane. O registry é a
+# visão consolidada; para o payload detalhado use evidence-record.yaml.
+
+schema_version: "1.0"
+default_freshness_hours: 24
+
+evidences:
+  - evidence_id: "ev-azure-prod-plan-2026-09-20"
+    platform_id: "azure-prod"
+    surface_id: "azure-hub-network"
+    lifecycle_stage: "plan_diff_zero" # discovery | imported | plan_diff_zero | landing_zone_generated | managed
+    collected_at: "2026-09-20T09:00:00Z"
+    freshness_hours: 24
+    source:
+      provider: "azure"
+      command: "terraform show -json artifacts/tfplan.json"
+      origin: "github-actions://evidence-refresh"
+    artifact_path: "artifacts/evidence/azure-prod/tfplan.json"
+    checksum_sha256: "preencher-com-sha256-real"
+    owner: "plataforma@cliente.exemplo"
+    status: "fresh" # fresh | stale | superseded | invalid
+
+  # Remova o exemplo acima e registre apenas evidências reais e rastreáveis.

@@ -1,0 +1,17 @@
+# workload-links.yaml — vínculo entre workloads e superfícies compartilhadas.
+#
+# Este arquivo é a ponte entre o repositório de plataforma e os repositórios de
+# workload que consomem superfícies desta plataforma.
+
+schema_version: "1.0"
+workloads:
+  - workload_id: "repo-aplicacao-a"
+    repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/repo-aplicacao-a"
+    owner: "time-aplicacao-a@cliente.exemplo"
+    depends_on:
+      - platform_id: "azure-prod"
+        surface_id: "azure-hub-network"
+        relationship: "network-egress"
+      - platform_id: "m365-tenant-prod"
+        surface_id: "m365-conditional-access-baseline"
+        relationship: "identity-policy"

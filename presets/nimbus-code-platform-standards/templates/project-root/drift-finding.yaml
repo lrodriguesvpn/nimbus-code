@@ -1,0 +1,19 @@
+# drift-finding.yaml — schema de um finding de drift.
+#
+# Um finding nunca autoriza apply automático. Ele registra o desvio, a severidade
+# e o caminho de resolução com owner e evidência.
+
+schema_version: "1.0"
+finding_id: "df-exemplo"
+platform_id: "azure-prod"
+surface_id: "azure-hub-network"
+severity: "high" # low | medium | high | critical
+status: "open" # open | acknowledged | mitigated | expired
+summary: "Atributo fora do baseline versionado"
+detected_at: "2026-09-20T10:00:00Z"
+evidence_ref: "ev-azure-prod-plan-2026-09-20"
+owner: "plataforma@cliente.exemplo"
+remediation:
+  plane: "desired-state" # evidence | desired-state | delivery
+  next_step: "Atualizar baseline ou abrir PR no workflow protegido"
+  due_at: "2026-09-27T00:00:00Z"

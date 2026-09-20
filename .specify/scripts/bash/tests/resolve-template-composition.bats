@@ -1,8 +1,8 @@
 #!/usr/bin/env bats
 
-COMMON_SH="/tmp/nimbus-023-remote/.specify/scripts/bash/common.sh"
-
 setup() {
+    REPO_ROOT="$(cd "$BATS_TEST_DIRNAME/../../../.." && pwd)"
+    COMMON_SH="$REPO_ROOT/.specify/scripts/bash/common.sh"
     FIXTURE_DIR="$(mktemp -d)"
     mkdir -p "$FIXTURE_DIR/.specify/templates" "$FIXTURE_DIR/.specify/presets" "$FIXTURE_DIR/lib"
     cat > "$FIXTURE_DIR/lib/yaml.py" <<'PY'

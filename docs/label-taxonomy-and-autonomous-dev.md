@@ -46,6 +46,7 @@ não tendo) uma forma consistente de responder a duas perguntas recorrentes:
 | Agente | `agent:needs-human` | `#e99695` | Bloqueia qualquer auto-assign, mesmo que `agent:autonomous-ok` também esteja presente |
 | Status | `status:needs-triage` | `#ededed` | Issue nova, ainda sem `priority:*`/`complexity:*` — não deve ser puxada por agente autônomo |
 | Status | `status:blocked` | `#5319e7` | Pular na fila, mesmo com `priority:P0-blocker` |
+| Sincronização | `sync:preset-version` | `#1d76db` | PR criado pela auditoria semanal para alinhar um satélite à versão central do preset |
 | DORA | `dora:deployment-frequency` | `#0052cc` | Issue impacta a frequência de deploy |
 | DORA | `dora:lead-time` | `#1d76db` | Issue impacta o lead time for changes |
 | DORA | `dora:change-failure-rate` | `#d93f0b` | Issue impacta a taxa de falha de mudança |
@@ -179,6 +180,41 @@ e dashboards que correlacionem issues fechadas com os **4 indicadores DORA**
    Metrics do GitHub, um dashboard próprio) podem usar esses labels como
    **complemento qualitativo** (visão de "issue → intenção"), não como
    substituto da fonte de verdade quantitativa.
+
+### 5.1 PRs de sincronização automática de preset
+
+O label `sync:preset-version` é aplicado automaticamente aos PRs gerados pelo
+workflow de auditoria semanal de presets satélite. Ele existe para sinalizar um
+tipo de mudança operacional muito específico:
+
+- o PR foi aberto pelo fluxo automático, não por uma feature do produto;
+- o objetivo é alinhar o repositório satélite à versão central do preset;
+- o merge idealmente acontece **antes** de continuar a próxima rodada de
+  desenvolvimento funcional naquele satélite.
+
+**Como coordenar com trabalho de feature em andamento**
+
+1. Se o repositório satélite já tiver qualquer PR aberto, o auto-sync **não**
+   cria um novo PR — o workflow considera que o repositório está em
+   desenvolvimento ativo e pula esse satélite para evitar conflito de branch.
+2. Se o PR `sync:preset-version` já existir, prefira revisar/mergear esse PR
+   primeiro e só depois rebasear a branch funcional. Assim o time evita drift
+   duplo (preset + feature) no mesmo review.
+3. Se for necessário continuar a feature antes do merge do auto-sync, rode
+   `bootstrap.sh --refresh-preset` manualmente na branch da feature e deixe
+   explícito no PR que a sincronização foi absorvida manualmente.
+
+**Como fazer override / desabilitar**
+
+- **Globalmente no repo central**: defina a variável de repositório
+  `NIMBUS_DISABLE_PRESET_AUTO_SYNC=true`. A auditoria semanal continuará
+  gerando o relatório e a issue, mas não despachará o workflow de auto-PR.
+- **Pontualmente por satélite**: mantenha um PR aberto no satélite enquanto a
+  feature estiver em andamento. O guardrail de “repositório em desenvolvimento
+  ativo” já impede a abertura do PR automático naquela janela.
+- **Manual**: mesmo com o auto-sync desabilitado, o time pode disparar o
+  workflow `auto-sync-preset.yml` manualmente ou executar
+  `bootstrap.sh --refresh-preset` no próprio satélite.
 
 ## 6. Ocorrências (CRM) e Issues de Infraestrutura
 
@@ -323,4 +359,3 @@ Antes de habilitar `agent-auto-assign.yml` num repositório:
 - Add to your PR if you want to prevent auto-sync from running
 - Useful when you're actively refactoring `.specify/` or have parallel feature work
 - Remove label after your work completes to re-enable auto-sync
-

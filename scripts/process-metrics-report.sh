@@ -14,11 +14,12 @@
 #
 #   --record-manual-adjustment --indicator <indicador> \
 #     --justification "<texto>" --author <handle> --evidence-link <url> \
-#     --exception-category <categoria> [--approved-by <handle>] \
-#     [--review-cycle-period <periodo>]
+#     --exception-category <categoria> --approved-by <handle> \
+#     --review-cycle-period <periodo>
 #     Registra um ajuste manual em docs/playbooks/dora-manual-adjustments-log.yaml.
-#     Rejeita a entrada se qualquer um dos 5 campos obrigatórios
-#     (indicator, justification, author, evidence_link, exception_category)
+#     Rejeita a entrada se qualquer um dos 7 campos obrigatórios
+#     (indicator, justification, author, evidence_link, exception_category,
+#     approved_by, review_cycle_period) estiver vazio.
 #     estiver vazio (FR-004/FR-005).
 #
 #   --check-review-cycle-closure --review-cycle-period <periodo>
@@ -50,8 +51,35 @@ REVIEW_CYCLE_PERIOD=""
 ADJUSTMENTS_LOG_FILE="docs/playbooks/dora-manual-adjustments-log.yaml"
 
 # --- Argument parsing ---
+show_help() {
+  echo "Uso: $0 [OPÇÕES]"
+  echo ""
+  echo "Calcula os 4 indicadores DORA a partir das labels dora:* ou executa governança de ciclo."
+  echo ""
+  echo "Opções de Cálculo e Consulta:"
+  echo "  --repo-owner <org>           Organização do repositório"
+  echo "  --repo-name <repo>           Nome do repositório"
+  echo "  --since <YYYY-MM-DD>         Data inicial do período (padrão: 30 dias atrás)"
+  echo "  --until <YYYY-MM-DD>         Data final do período (padrão: hoje)"
+  echo "  --check-retro-cadence        Verifica estado de cadência da retrospectiva"
+  echo "  -h, --help                   Exibe esta ajuda e sai"
+  echo ""
+  echo "Opções de Ajuste Manual (DORA Governance):"
+  echo "  --record-manual-adjustment   Registra um ajuste manual auditável"
+  echo "  --indicator <indicador>      Indicador ajustado (ex: deployment_frequency, lead_time_for_changes)"
+  echo "  --justification <texto>      Justificativa detalhada do ajuste"
+  echo "  --author <handle>            Autor do ajuste"
+  echo "  --evidence-link <url>        Link HTTPS com a evidência comprobatória"
+  echo "  --exception-category <cat>   Categoria (fonte_indisponivel, evento_duplicado, correcao_retroativa, outro_justificado)"
+  echo "  --approved-by <handle>       Aprovador (Tech Lead / Architecture Board)"
+  echo "  --review-cycle-period <per>  Período da revisão (YYYY-MM ou YYYY-WNN)"
+  echo "  --check-review-cycle-closure Verifica se há ajustes pendentes no período informado"
+  exit 0
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    -h|--help)    show_help ;;
     --repo-owner) REPO_OWNER="$2"; shift 2 ;;
     --repo-name)  REPO_NAME="$2";  shift 2 ;;
     --since)      SINCE="$2";      shift 2 ;;
@@ -66,7 +94,7 @@ while [[ $# -gt 0 ]]; do
     --exception-category)    EXCEPTION_CATEGORY="$2";     shift 2 ;;
     --approved-by)            APPROVED_BY="$2";            shift 2 ;;
     --review-cycle-period)   REVIEW_CYCLE_PERIOD="$2";    shift 2 ;;
-    *) echo "Argumento desconhecido: $1" >&2; exit 1 ;;
+    *) echo "Argumento desconhecido: $1" >&2; echo "Execute com --help para ver as opções válidas." >&2; exit 1 ;;
   esac
 done
 
@@ -78,10 +106,30 @@ if [[ "$RECORD_MANUAL_ADJUSTMENT" == "true" ]]; then
   [[ -z "$AUTHOR" ]] && MISSING_FIELDS+=("--author")
   [[ -z "$EVIDENCE_LINK" ]] && MISSING_FIELDS+=("--evidence-link")
   [[ -z "$EXCEPTION_CATEGORY" ]] && MISSING_FIELDS+=("--exception-category")
+  [[ -z "$APPROVED_BY" ]] && MISSING_FIELDS+=("--approved-by")
+  [[ -z "$REVIEW_CYCLE_PERIOD" ]] && MISSING_FIELDS+=("--review-cycle-period")
 
   if [[ ${#MISSING_FIELDS[@]} -gt 0 ]]; then
     echo "✗ Ajuste manual REJEITADO — campo(s) obrigatório(s) ausente(s): ${MISSING_FIELDS[*]}" >&2
-    echo "  Um ajuste manual sempre exige justificativa, autor, evidência e categoria de exceção (FR-004)." >&2
+    echo "  Um ajuste manual sempre exige justificativa, autor, evidência, categoria de exceção e aprovação (FR-004/FR-012)." >&2
+    exit 1
+  fi
+
+  case "$EXCEPTION_CATEGORY" in
+    fonte_indisponivel|evento_duplicado|correcao_retroativa|outro_justificado) ;;
+    *)
+      echo "✗ Ajuste manual REJEITADO — categoria de exceção desconhecida: ${EXCEPTION_CATEGORY}" >&2
+      echo "  Categorias permitidas: fonte_indisponivel, evento_duplicado, correcao_retroativa, outro_justificado" >&2
+      exit 1
+      ;;
+  esac
+
+  if [[ ! "$EVIDENCE_LINK" =~ ^https://[^[:space:]]+$ ]]; then
+    echo "✗ Ajuste manual REJEITADO — evidence_link deve ser uma URL HTTPS válida" >&2
+    exit 1
+  fi
+  if [[ ! "$REVIEW_CYCLE_PERIOD" =~ ^[0-9]{4}-(0[1-9]|1[0-2])$ && ! "$REVIEW_CYCLE_PERIOD" =~ ^[0-9]{4}-W(0[1-9]|[1-4][0-9]|5[0-3])$ ]]; then
+    echo "✗ Ajuste manual REJEITADO — review_cycle_period deve estar em YYYY-MM ou YYYY-WNN" >&2
     exit 1
   fi
 
@@ -100,7 +148,7 @@ if [[ "$RECORD_MANUAL_ADJUSTMENT" == "true" ]]; then
   # escrita simples e append-only.
   ESCAPED=$(python3 -c "
 import json
-fields = ['''${JUSTIFICATION}''', '''${AUTHOR}''', '''${EVIDENCE_LINK}''', '''${EXCEPTION_CATEGORY}''', '''${APPROVED_BY:-$AUTHOR}''', '''${REVIEW_CYCLE_PERIOD}''']
+fields = ['''${JUSTIFICATION}''', '''${AUTHOR}''', '''${EVIDENCE_LINK}''', '''${EXCEPTION_CATEGORY}''', '''${APPROVED_BY}''', '''${REVIEW_CYCLE_PERIOD}''']
 print('\n'.join(json.dumps(f) for f in fields))
 ")
   ESCAPED_JUSTIFICATION=$(sed -n '1p' <<< "$ESCAPED")
@@ -141,7 +189,7 @@ if [[ "$CHECK_REVIEW_CYCLE_CLOSURE" == "true" ]]; then
   RESULT=$(python3 -c "
 import re
 
-REQUIRED = ['justification', 'author', 'timestamp', 'evidence_link', 'exception_category']
+REQUIRED = ['justification', 'author', 'timestamp', 'evidence_link', 'exception_category', 'approved_by', 'review_cycle_period']
 period = '''${REVIEW_CYCLE_PERIOD}'''
 text = open('${ADJUSTMENTS_LOG_FILE}').read()
 
@@ -184,7 +232,7 @@ fi
 # --- Modo padrão: relatório de métricas DORA (requer repo-owner/repo-name) ---
 if [[ -z "$REPO_OWNER" || -z "$REPO_NAME" ]]; then
   echo "Uso: $0 --repo-owner <org> --repo-name <repo> [--since <YYYY-MM-DD>] [--until <YYYY-MM-DD>] [--check-retro-cadence]" >&2
-  echo "  ou: $0 --record-manual-adjustment --indicator <ind> --justification <texto> --author <handle> --evidence-link <url> --exception-category <cat>" >&2
+  echo "  ou: $0 --record-manual-adjustment --indicator <ind> --justification <texto> --author <handle> --evidence-link <url> --exception-category <cat> --approved-by <handle> --review-cycle-period <periodo>" >&2
   echo "  ou: $0 --check-review-cycle-closure --review-cycle-period <periodo>" >&2
   exit 1
 fi

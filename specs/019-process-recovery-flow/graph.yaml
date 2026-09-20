@@ -19,6 +19,18 @@ modules:
     owner: architecture-board
     responsibilities:
       - Definir idioma obrigatório para artefatos de código e documentação
+      - Manter paridade entre constituição local e artefatos de distribuição
+  - id: distributed-templates
+    type: distribution
+    owner: platform-standards
+    responsibilities:
+      - Replicar alterações normativas nos presets e cópias espelho aplicáveis
+      - Produzir evidência de paridade antes do Go/No-Go
+  - id: impact-assessment
+    type: governance
+    owner: platform-standards
+    responsibilities:
+      - Registrar riscos, owners, rollback e critérios de Go/No-Go
   - id: quickstart-validation
     type: documentation
     owner: platform
@@ -34,6 +46,14 @@ dependencies:
     to: language-policy
     kind: sync
     protocol: governance-reference
+  - from: language-policy
+    to: distributed-templates
+    kind: distribution
+    protocol: same-pr-validated-parity
+  - from: impact-assessment
+    to: distributed-templates
+    kind: gate
+    protocol: architecture-board-approval
   - from: quickstart-validation
     to: process-decision-guide
     kind: sync

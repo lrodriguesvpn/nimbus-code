@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: Incluir no TEMPLATE o conceito de EPIC, FEATURE, TASKS com criação de tudo no GHE com as devidas vinculações pelo TASKTOISSUES depois
+**Input**: User description: "Implementar a hierarquia Agile completa (Epic → Feature → User Story → Task) no GitHub Enterprise e GitHub Projects V2, automatizando a criação e os vínculos de sub-issues a partir dos artefatos SDD via `/speckit-taskstoissues`."
 
 ---
 

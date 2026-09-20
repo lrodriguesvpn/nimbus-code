@@ -2,8 +2,8 @@
 # Gerado automaticamente por scripts/generate-context-graph.sh — specs/014-brownfield-multirepo-context-awareness/
 
 bounded_context: "spec-kit-workflow"
-version: 1
-generated_at: "2026-08-24T05:38:06Z"
+version: 2
+generated_at: "2026-09-20T15:03:00Z"
 
 nodes:
   - id: "venha-pra-nuvem-nimbus-code-spec-kit-template"
@@ -11,9 +11,16 @@ nodes:
     repository: "venha-pra-nuvem/nimbus-code-spec-kit-template"
     cross_repo: false
     manifest_source: "unavailable"
+  - id: "venha-pra-nuvem-nimbus-agent"
+    type: "repo"
+    repository: "venha-pra-nuvem/nimbus-agent"
+    cross_repo: true
+    manifest_source: "intake contract"
 
 edges:
-  []
+  - from: "venha-pra-nuvem-nimbus-agent"
+    to: "venha-pra-nuvem-nimbus-code-spec-kit-template"
+    type: "direct-intake"
 
 unanalyzed_repos:
-  - "venha-pra-nuvem/nimbus-code-spec-kit-template"
+  []

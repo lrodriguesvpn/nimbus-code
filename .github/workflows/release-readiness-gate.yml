@@ -82,6 +82,16 @@ jobs:
                 });
                 return;
               }
+              if (releaseLabels.length === 0 && touchedVersionFile && touchedCatalogFile) {
+                core.info("Versioned release surface change detected. Auto-labeling with release:patch.");
+                await github.rest.issues.addLabels({
+                  owner,
+                  repo,
+                  issue_number: pr.number,
+                  labels: ["release:patch"],
+                });
+                return;
+              }
               core.setFailed(
                 `PR toca superfície de release e deve ter exatamente 1 label release:* (major|minor|patch|skip). Labels encontrados: ${releaseLabels.join(", ") || "nenhum"}`,
               );

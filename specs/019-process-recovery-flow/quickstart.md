@@ -14,6 +14,8 @@ correção de rota em features já existentes.
 - [contracts/process-correction-decision.contract.md](./contracts/process-correction-decision.contract.md) completo
 - [docs/developer-guide.md](../../docs/developer-guide.md) atualizado
 - [.specify/memory/constitution.md](../../.specify/memory/constitution.md) atualizado
+- presets e cópias espelho aplicáveis atualizados e comparados
+- `impact-map.md` revisado
 
 ## Validation Scenarios
 
@@ -32,7 +34,8 @@ correção de rota em features já existentes.
 
 4. **Caso que virou nova feature**
    - Confirme que existe critério explícito para abrir nova spec
-   - Confirme que “novo recorte de valor” aparece como condição de corte
+   - Confirme que resultado de negócio, atores e fronteira de entrega são avaliados
+   - Confirme que qualquer mudança independente em uma dessas dimensões abre nova spec
 
 5. **Política de idioma**
    - Abra [.specify/memory/constitution.md](../../.specify/memory/constitution.md)
@@ -43,6 +46,17 @@ correção de rota em features já existentes.
    - Confirme que o caso “erro descoberto antes do `plan.md`” aponta atualização da mesma `spec.md` antes do planejamento
    - Confirme que o caso “erro descoberto depois do merge” mantém a correção de rota válida para artefatos
    - Confirme que o caso “parece nova feature, mas ainda é o mesmo valor” mantém a mesma spec
+
+7. **Paridade e aprovação**
+   - Compare a seção de idioma da constituição local com os templates e cópias espelho aplicáveis
+   - Registre o resultado da comparação no PR
+   - Confirme que o Architecture Board aprovou o pacote antes do Go/No-Go
+
+8. **Medição pós-release do SC-002**
+   - Registre o baseline antes da publicação
+   - Aplique o questionário padronizado a uma amostra de Devs/BAs entre 30 e 90 dias
+   - Registre owner, amostra, respostas corretas e percentual final
+   - Considere aprovado somente resultado igual ou superior a 90%
 
 ## Expected Outcome
 

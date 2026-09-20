@@ -116,51 +116,62 @@ if command -v yq &>/dev/null; then
     fi
   done
 
-else
-  # ── Fallback: grep/awk sem yq ─────────────────────────────────
-  # Estratégia: encontrar linhas com o termo buscado e, para cada bloco
-  # de entrada (delimitado por "- id:"), extrair os campos relevantes.
+elif python3 -c "import yaml" &>/dev/null; then
+  # ── python3 com PyYAML disponível ─────────────────────────────
+  OUTPUT=$(python3 -c "
+import yaml, sys
 
-  # Capturar blocos que contêm o search term
-  while IFS= read -r line; do
-    if echo "${line}" | grep -qi "${SEARCH_TERM}"; then
-      # Encontrou uma linha com o termo — navegar para o início do bloco
-      # (linha com "- id:") mais próxima acima
-      BLOCK_ID=$(grep -n "^  - id:" "${CATALOG_FILE}" | awk -F: -v lineno="$(grep -n "${SEARCH_TERM}" "${CATALOG_FILE}" | grep -m1 "" | cut -d: -f1)" '
-        BEGIN { best=0 }
-        {
-          if ($1 <= lineno && $1 > best) { best=$1; id_line=$0 }
-        }
-        END { print id_line }
-      ' | awk -F'"' '{print $2}')
+catalog = sys.argv[1]
+term = sys.argv[2].lower()
 
-      if [[ -n "${BLOCK_ID}" && "${BLOCK_ID}" != "null" ]]; then
-        # Extrair campos do bloco via awk
-        PATTERN=$(awk "/^  - id: \"${BLOCK_ID}\"/,/^  - id:/" "${CATALOG_FILE}" | grep "error_pattern" | head -1 | sed 's/.*error_pattern: *//;s/^ *>//;s/^ *//')
-        PREVENTION=$(awk "/^  - id: \"${BLOCK_ID}\"/,/^  - id:/" "${CATALOG_FILE}" | grep "prevention" | head -1 | sed 's/.*prevention: *//;s/^ *>//;s/^ *//')
-        DATE=$(awk "/^  - id: \"${BLOCK_ID}\"/,/^  - id:/" "${CATALOG_FILE}" | grep "date:" | head -1 | awk '{print $2}')
-        COMPLEXITY=$(awk "/^  - id: \"${BLOCK_ID}\"/,/^  - id:/" "${CATALOG_FILE}" | grep "complexity:" | head -1 | awk '{print $2}')
+try:
+    with open(catalog, 'r', encoding='utf-8') as f:
+        data = yaml.safe_load(f)
+except Exception as e:
+    sys.exit(1)
 
-        echo -e "  ${BOLD}${GREEN}${BLOCK_ID}${NC}  ${YELLOW}[${COMPLEXITY}]${NC}  ${DATE}"
-        [[ -n "${PATTERN}" ]] && echo -e "  ${BOLD}Padrão:${NC}     ${PATTERN}"
-        [[ -n "${PREVENTION}" ]] && echo -e "  ${BOLD}Prevenção:${NC}  ${PREVENTION}"
-        echo ""
-        FOUND=$((FOUND + 1))
-      fi
-      break  # fallback encontra o primeiro match
-    fi
-  done < <(grep -i "${SEARCH_TERM}" "${CATALOG_FILE}")
+found = 0
+for entry in (data.get('entries', []) or []):
+    tags = [str(t).lower() for t in entry.get('tags', [])]
+    context = str(entry.get('bounded_context', '')).lower()
+    pattern = str(entry.get('error_pattern', '')).lower()
+    eid = str(entry.get('id', '')).lower()
+    
+    if term in tags or term in context or term in pattern or term in eid or any(term in t for t in tags):
+        found += 1
+        id_str = entry.get('id', 'HRN-????')
+        comp_str = entry.get('complexity', 'S?')
+        date_str = entry.get('date', '')
+        pat_str = ' '.join(str(entry.get('error_pattern', '')).split())
+        prev_str = ' '.join(str(entry.get('prevention', '')).split())
+        print(f'MATCH::{id_str}::{comp_str}::{date_str}::{pat_str}::{prev_str}')
+" "${CATALOG_FILE}" "${SEARCH_TERM}" 2>/dev/null || true)
 
-  if [[ $FOUND -eq 0 ]]; then
-    # Segunda tentativa: grep direto para padrões mais simples
-    MATCHING_IDS=$(awk "/${SEARCH_TERM}/{ found=1 } found && /^  - id:/{print; found=0} /^  - id:/{id=\$0} /${SEARCH_TERM}/{print id}" "${CATALOG_FILE}" 2>/dev/null | grep "id:" | awk -F'"' '{print $2}' | sort -u)
-    for BLOCK_ID in ${MATCHING_IDS}; do
-      echo -e "  ${BOLD}${GREEN}${BLOCK_ID}${NC}"
-      echo -e "  ${YELLOW}(instale yq para detalhes completos: https://github.com/mikefarah/yq)${NC}"
+  while IFS= read -r match_line; do
+    if [[ -n "${match_line}" && "${match_line}" =~ ^MATCH:: ]]; then
+      ID=$(echo "${match_line}" | awk -F'::' '{print $2}')
+      COMPLEXITY=$(echo "${match_line}" | awk -F'::' '{print $3}')
+      DATE=$(echo "${match_line}" | awk -F'::' '{print $4}')
+      PATTERN=$(echo "${match_line}" | awk -F'::' '{print $5}')
+      PREVENTION=$(echo "${match_line}" | awk -F'::' '{print $6}')
+
+      echo -e "  ${BOLD}${GREEN}${ID}${NC}  ${YELLOW}[${COMPLEXITY}]${NC}  ${DATE}"
+      echo -e "  ${BOLD}Padrão:${NC}     ${PATTERN}"
+      echo -e "  ${BOLD}Prevenção:${NC}  ${PREVENTION}"
       echo ""
       FOUND=$((FOUND + 1))
-    done
-  fi
+    fi
+  done <<< "${OUTPUT}"
+
+else
+  # ── Fallback: grep/awk sem yq nem python3 ─────────────────────
+  MATCHING_IDS=$(awk "/${SEARCH_TERM}/{ found=1 } found && /^  - id:/{print; found=0} /^  - id:/{id=\$0} /${SEARCH_TERM}/{print id}" "${CATALOG_FILE}" 2>/dev/null | grep "id:" | sed 's/.*id: *//;s/\"//g;s/'\''//g' | sort -u)
+  for BLOCK_ID in ${MATCHING_IDS}; do
+    echo -e "  ${BOLD}${GREEN}${BLOCK_ID}${NC}"
+    echo -e "  ${YELLOW}(instale yq ou python3 com pyyaml para saída formatada completa)${NC}"
+    echo ""
+    FOUND=$((FOUND + 1))
+  done
 fi
 
 # ──────────────────────────────────────────────────────────────

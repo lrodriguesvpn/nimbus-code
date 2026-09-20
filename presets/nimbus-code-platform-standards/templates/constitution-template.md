@@ -304,6 +304,17 @@ Se CMDB init falhar após 3 retries, contatar time de governança — não pross
   arquitetura organizacional — classificar como **S3 ou S4** (ver abaixo) e
   exigir `impact-map.md` mesmo dentro deste repositório de plataforma.
 
+## Idioma dos Artefatos
+
+- Artefatos de código, identificadores, schemas, contratos e mensagens
+  estruturais devem usar inglês como idioma padrão.
+- Documentação versionada, specs, runbooks, FAQs e checklists devem usar
+  português como idioma oficial, preservando termos técnicos canônicos em
+  inglês quando isso melhorar a rastreabilidade.
+- Esta constituição local é o único ponto normativo do repositório consumidor.
+  Presets, templates e cópias espelho são artefatos de distribuição e devem
+  permanecer em paridade, sem criar regras concorrentes.
+
 ## Classificação de Complexidade e Modelo de IA para Trabalho de Plataforma/Legado
 
 - Reutiliza a mesma régua S0–S4 do `nimbus-code-standards`, com o seguinte mapeamento
