@@ -447,7 +447,10 @@ apontam para esses assets e são atualizados no mesmo PR que muda a versão.
      - `release:major`, `release:minor`, `release:patch` ou `release:skip`.
    - O gate
      [`.github/workflows/release-readiness-gate.yml`](.github/workflows/release-readiness-gate.yml)
-     falha se a PR tocar superfície de release sem exatamente um label `release:*`.
+     auto-rotula `release:skip` para mudanças só de documentação de release e
+     `release:patch` quando a PR já altera arquivos versionados + `catalog.json`;
+     fora desses casos, ele falha se a PR não tiver exatamente um label
+     `release:*`.
 2. **Ao merge em `develop`**
    - O workflow
      [`.github/workflows/release-impact-advisor.yml`](.github/workflows/release-impact-advisor.yml)

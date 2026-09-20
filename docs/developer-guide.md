@@ -1098,10 +1098,13 @@ Classifique cada PR que toca superfície de bundle/preset com um label:
 
 O workflow
 [release-readiness-gate.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/release-readiness-gate.yml)
-roda em toda PR para `develop` e bloqueia merge quando:
+roda em toda PR para `develop`, auto-rotula `release:skip` para mudanças só de
+documentação de release e `release:patch` quando a PR já altera arquivos
+versionados + `catalog.json`, e bloqueia merge quando:
 
 - a PR toca superfície de release (`presets/`, `extensions/`, `workflows/`,
-  `bundles/`, docs de release e scripts de versionamento) sem label `release:*`;
+  `bundles/`, docs de release e scripts de versionamento) sem label `release:*`
+  e fora dos casos de auto-rotulagem acima;
 - há mais de um label `release:*`;
 - a PR foi classificada como `release:major|minor|patch` mas não atualizou
   arquivo de versão e `catalog.json`.
