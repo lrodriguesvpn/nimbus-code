@@ -2,8 +2,8 @@
 
 ## Intake Demand
 
-`source_event_id`, `source_repo`, `source_issue`, `title`, `description`,
-`bounded_context`, `priority`, `requested_by`, `received_at`, `status`.
+`source_event_id`, `source_channel` (`teams_bot`, `cli_command`, `transcript_upload`), `source_repo`, `source_issue`, `title`, `description`,
+`bounded_context`, `priority`, `requested_by`, `interview_file_ref`, `coverage_status`, `received_at`, `status`.
 
 `source_event_id` is globally unique. `status` is `received`, `invalid`,
 `reconciliation_pending`, `projected`, `blocked` or `closed`.

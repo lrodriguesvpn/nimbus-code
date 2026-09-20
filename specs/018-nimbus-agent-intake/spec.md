@@ -46,6 +46,40 @@ A SPEC 018 formaliza a **Camada 1 (Intake, Especificação, Crítica e Governan�
 3. **`NC-Critic` (Nimbus Spec Auditor)**: Analisa criticamente a spec buscando contradições, ambiguidades, lacunas de requisitos e termos vagos (`clarifications.md` e `[NEEDS CLARIFICATION]`).
 4. **`NC-Governor` (Nimbus Governance Gate)**: Registra hash de integridade da spec, classifica a complexidade (S0–S4) e impõe os gates de aprovação humana e rastreabilidade no GitHub Projects.
 
+## Nimbus-Code — Modais de Intake Suportados (Canais de Entrada)
+
+A SPEC 018 define e suporta **3 Canais de Intake Oficiais**, todos convergindo deterministicamente para o mesmo contrato e governança de desdobramento:
+
+```
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│                      MODAIS DE ENTRADA SUPORTADOS (INTAKE)                       │
+├──────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  [Modal 1: Teams Agent]      [Modal 2: CLI / Slash Command]   [Modal 3: Transcript]│
+│  (Bot Nimbus no Teams        (`/nc-intake`, `/speckit-interview` (Arquivo/Texto    │
+│   em reunião interativa)      ou `/nc-spec` no Copilot Chat)   anexado diretamente)│
+│            │                               │                           │         │
+│            └───────────────────────┬───────┴───────────────────────────┘         │
+│                                    ▼                                             │
+│                       [Normalizador NC-Intake]                                   │
+│                   (Validação dos 4 Blocos: Negócio,                              │
+│                    Infraestrutura, Segurança, LGPD)                              │
+│                                    │                                             │
+│                                    ▼                                             │
+│                           `interview.md`                                         │
+│                                    │                                             │
+│                                    ▼                                             │
+│                       [Pipeline NC-Spec → NC-Critic]                             │
+└──────────────────────────────────────────────────────────────────────────────────┘
+```
+
+1. **Modal 1: Nimbus Agent no Microsoft Teams (Conversacional / Reunião)**:
+   - O bot Nimbus participa da reunião ou do canal no Teams, conduzindo as perguntas dos 4 blocos interativamente ou ouvindo a reunião, gerando o intake inicial.
+2. **Modal 2: Console / Slash Command (`/nc-intake`, `/nc-spec` ou `/speckit-interview`)**:
+   - Desenvolvedores, BAs ou ADEs no VS Code / GitHub Copilot executam o comando de barra no terminal/chat para conduzir a descoberta assistida passo a passo via console.
+3. **Modal 3: Ingestão Direta de Transcript (Arquivo ou Texto Colado)**:
+   - Envio de arquivo `.txt`/`.vtt`/`.md` ou colagem do transcript de reuniões passadas (ex.: Teams Meeting Transcript ou briefing gravado). O `NC-Intake` extrai os requisitos, valida a cobertura e sinaliza lacunas sem criar suposições.
+
 ---
 
 ## Nimbus-Code — SLO Alvo desta Feature
@@ -111,11 +145,11 @@ A SPEC 018 formaliza a **Camada 1 (Intake, Especificação, Crítica e Governan�
 > **Then** a spec declara OpenFeature como abstração para toggles, independente do provider.
 > **Test ref:** `test_AC6_openfeature_intake_toggle`
 
-> **AC-7** *(Roadmap — US5)*
-> **Given** um transcript de entrevista de descoberta (Teams ou anexado manualmente),
-> **When** o Nimbus avaliar sua cobertura contra os 4 blocos obrigatórios do `interview-template.md`,
-> **Then** todo bloco ausente é sinalizado explicitamente como pendência, e nenhum bloco de Segurança, Infraestrutura ou LGPD é preenchido por suposição.
-> **Test ref:** `test_AC7_interview_coverage_gate`
+> **AC-7**
+> **Given** qualquer um dos 3 modais de entrada (Teams Bot, comando CLI `/nc-intake` / `/speckit-interview`, ou transcript de reunião/arquivo colado),
+> **When** o **NC-Intake** processar a entrada,
+> **Then** ele normaliza a descoberta no formato padrão `interview.md`, validando a cobertura dos 4 blocos obrigatórios (Negócio, Infraestrutura, Segurança e LGPD), sinalizando explicitamente quaisquer blocos ausentes e nunca preenchendo lacunas de Segurança ou LGPD por suposição silenciosa.
+> **Test ref:** `test_AC7_multichannel_intake_and_coverage_gate`
 
 ## Nimbus-Code — Backlog Hierarchy (EPIC/FEATURE/US)
 
@@ -211,10 +245,11 @@ Como Business Analyst, quero que o Nimbus conduza a entrevista de descoberta de 
 - **FR-008**: Falhas de integração no intake MUST ser explícitas e observáveis, sem mascaramento de erro.
 - **FR-009**: A feature MUST declarar OpenFeature como padrão de abstração para toggles de rollout de intake direto.
 - **FR-010**: A solução MUST permitir auditoria de quem iniciou o intake, qual modo foi definido e qual decisão de aprovação foi tomada.
-- **FR-011** *(Roadmap — US5)*: Quando a condução de entrevista via Teams estiver implementada, o agente **NC-Intake** MUST validar a cobertura dos 4 blocos obrigatórios do modelo de entrevista (`interview-template.md`: Negócio, Infraestrutura, Segurança, LGPD) antes de encaminhar a demanda para intake.
-- **FR-012** *(Roadmap — US5)*: Bloco obrigatório ausente no transcript MUST ser sinalizado explicitamente como pendência pelo **NC-Critic** — o sistema MUST NOT inferir ou inventar resposta de Segurança, Infraestrutura ou LGPD para preencher uma lacuna.
-- **FR-013**: O agente **NC-Spec** MUST estruturar o `spec.md` garantindo critérios de aceitação BDD testáveis e livres de premissas implícitas.
-- **FR-014**: O agente **NC-Governor** MUST registrar a rastreabilidade, classificação de complexidade (S0–S4) e aprovação formal antes do handoff para a Camada de Arquitetura da SPEC 017.
+- **FR-011**: O sistema MUST suportar 3 canais oficiais de intake: (a) Nimbus Agent interativo no Teams, (b) Slash commands em console/chat (`/nc-intake`, `/nc-spec`, `/speckit-interview`), e (c) Upload/colagem de transcript de reuniões ou briefings.
+- **FR-012**: Qualquer que seja o canal de entrada utilizado, o agente **NC-Intake** MUST validar a cobertura dos 4 blocos obrigatórios do modelo de entrevista (`interview-template.md`: Negócio, Infraestrutura, Segurança, LGPD) antes de encaminhar a demanda para a geração da spec.
+- **FR-013**: Bloco obrigatório ausente na entrada MUST ser sinalizado explicitamente como pendência pelo **NC-Critic** — o sistema MUST NOT inferir ou inventar resposta de Segurança, Infraestrutura ou LGPD para preencher uma lacuna.
+- **FR-014**: O agente **NC-Spec** MUST estruturar o `spec.md` garantindo critérios de aceitação BDD testáveis e livres de premissas implícitas.
+- **FR-015**: O agente **NC-Governor** MUST registrar a rastreabilidade, classificação de complexidade (S0–S4) e aprovação formal antes do handoff para a Camada de Arquitetura da SPEC 017.
 
 ### Key Entities *(include if feature involves data)*
 
