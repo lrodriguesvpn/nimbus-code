@@ -548,17 +548,6 @@ else
 fi
 
 echo
-echo "-> Installing DEVSTATS workflow..."
-DEVSTATS_WORKFLOW_SRC="$LOCAL_PATH/templates/workflows/devstats-corporate-integration.yml"
-if [[ -f "$DEVSTATS_WORKFLOW_SRC" ]]; then
-  mkdir -p "$WORKDIR/.github/workflows"
-  cp "$DEVSTATS_WORKFLOW_SRC" "$WORKDIR/.github/workflows/devstats-corporate-integration.yml"
-  echo "  OK: .github/workflows/devstats-corporate-integration.yml installed."
-else
-  echo "  WARN: missing template $DEVSTATS_WORKFLOW_SRC"
-fi
-
-echo
 echo "INFO: opt-in workflows:"
 echo "  - templates/workflows/add-to-pmo-project.yml"
 echo "  - templates/workflows/sync-priority-field.yml (prefers NIMBUS_APP_ID/NIMBUS_APP_PRIVATE_KEY; fallback ADD_TO_PROJECT_PAT)"
