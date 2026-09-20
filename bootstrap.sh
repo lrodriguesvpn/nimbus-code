@@ -517,6 +517,14 @@ if [[ "$REPO_TYPE" == "dev_standards" ]]; then
   echo "-> Installing extension cost (spec-kit-cost)..."
   install_component extension cost "extension cost (spec-kit-cost)" \
     specify extension install cost --version ">=1.0.0"
+
+  echo "-> Installing extension bug (Bug Triage Workflow)..."
+  install_component extension bug "extension bug" \
+    specify extension add bug
+
+  echo "-> Installing extension assess (Idea Assessment Pipeline)..."
+  install_component extension assess "extension assess" \
+    specify extension add assess
 fi
 
 if [[ "$REPO_TYPE" == "dev_standards" ]]; then

@@ -1,4 +1,4 @@
-# Feature Specification: Controle de Custos
+# Feature Specification: Controle de Custos Híbrido (Tokens IA + Horas Humanas)
 
 **Feature Branch**: `010-controle-de-custos`
 
@@ -10,7 +10,7 @@
 > implementação está adiada e não deve ser iniciada por `/speckit-implement`
 > até nova priorização explícita.
 
-**Input**: User description: "Controle de Custos"
+**Input**: User description: "Implementar o modelo de controle financeiro e orçamentário híbrido no ciclo SDD do Nimbus Code, consolidando o consumo real de tokens por fase com o registro de horas humanas investidas em revisão e refinamento via GitHub Projects."
 
 ## Nimbus-Code — Cabeçalho Obrigatório da Spec
 

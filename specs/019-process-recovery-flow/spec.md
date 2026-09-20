@@ -3,7 +3,7 @@
 **Branch da feature**: `019-process-recovery-flow`
 **Criado em**: 2026-08-24
 **Status**: Rascunho — aguardando remediação e Go/No-Go humano
-**Entrada**: Descrição do usuário: "Formalizar o tratamento operacional de features Nimbus Code quando a implementacao apresentar erros funcionais ou de arquitetura apos a spec ja existir: definir quando usar clarify, quando atualizar a mesma spec/plan/tasks, quando usar converge, quando abrir uma nova spec e como documentar isso no developer guide, FAQ e constituicao, com fluxo ilustrado para BA, Dev e agente."
+**Entrada**: Descrição do usuário: "Formalizar o tratamento operacional de features Nimbus Code quando a implementação apresentar erros funcionais ou de arquitetura após a spec já existir: definir quando usar clarify, quando atualizar a mesma spec/plan/tasks, quando usar converge, quando abrir uma nova spec e como documentar isso no developer guide, FAQ e constituição, com fluxo ilustrado para BA, Dev e agente."
 
 ## Nimbus-Code — Cabeçalho Obrigatório da Spec
 

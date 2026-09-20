@@ -1,4 +1,4 @@
-# Feature Specification: Nimbus Agent Process Q&A and Direct Intake
+# Feature Specification: Nimbus Agent — Process Q&A e Intake Direto de Projetos
 
 **Feature Branch**: `018-nimbus-agent-intake`
 **Created**: 2026-08-24
@@ -7,7 +7,7 @@
 > Os artefatos desta spec permanecem como referência de planejamento. A
 > implementação está adiada e não deve ser iniciada por `/speckit-implement`
 > até nova priorização explícita.
-**Input**: User description: "inciiar nova SPEC para NIMBUS AGENT REPO https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-agent.git mas a SPEC fica aqui, para que o NIMBUS seja capaz de responder perguntas sobre como o processo NIMBUS CODE funciona. E junto com a SPEC 017 fazer o INTAKE direto pro projeto."
+**Input**: User description: "Definir a especificação do Nimbus Agent para atuar como assistente de dúvidas operacionais do processo Nimbus Code e gerador de intake direto de novos projetos a partir de transcrições e reuniões de descoberta, integrando-se à plataforma de engenharia digital."
 
 ## Nimbus-Code — Cabeçalho Obrigatório da Spec
 

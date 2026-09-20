@@ -1,4 +1,4 @@
-# Feature Specification: Documentação de Controle de Segurança no GHE para Projetos e Projeto Plataforma
+# Feature Specification: Controle de Segurança no GHE para Projetos e Projeto Plataforma
 
 **Feature Branch**: `007-controle-seguranca-ghe-projetos-plataforma`
 
@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "/scpekit-specify Criar documentacao para Controle de Seguranca no GHE para controle dos projetos e projeto plataforma."
+**Input**: User description: "Estabelecer a documentação de referência e os fluxos de auditoria automatizada de segurança no GitHub Enterprise, abrangendo repositórios de projetos e o Projeto Plataforma com verificação de branch protection, RBAC de menor privilégio e relatórios de conformidade."
 
 ---
 

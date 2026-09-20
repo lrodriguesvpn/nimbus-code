@@ -15,6 +15,12 @@ requires:
     - id: "cost"
       version: ">=1.0.0"
       repository: "https://github.com/Quratulain-bilal/spec-kit-cost"
+    - id: "bug"
+      version: ">=1.0.0"
+      repository: "https://github.com/github/spec-kit"
+    - id: "assess"
+      version: ">=1.0.0"
+      repository: "https://github.com/github/spec-kit"
 
 provides:
   templates:

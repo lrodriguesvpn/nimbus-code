@@ -26,6 +26,16 @@ Este é o manual **central e objetivo** de como todo desenvolvedor e engenheiro 
 | **8. Implementar**| `/speckit-implement` | Executar as tarefas respeitando isolamento de sessão | Código, testes e docs |
 | **9. Convergir** | `/speckit-converge` | Auditar código real vs artefatos e fechar gaps remanescentes | Tasks adicionais até `✅ Converged` |
 
+### 🐛 Fluxo Dedicado de Bugs (assess → fix → test)
+*Instalado por padrão via extensão `bug`:*
+- **Diagnosticar e Reproduzir**: `/speckit-bug-assess "<sintoma do bug>" slug=<nome-do-bug>` (Gera `.specify/bugs/<slug>/assessment.md`)
+- **Aplicar Correção**: `/speckit-bug-fix slug=<nome-do-bug>` (Gera o patch cirúrgico)
+- **Verificar e Validar**: `/speckit-bug-test slug=<nome-do-bug>` (Emite o veredito formal `verified`, `partial` ou `failed`)
+
+### 💡 Fluxo de Avaliação de Ideias / Intake (intake → decide)
+*Instalado por padrão via extensão `assess`:*
+- `/speckit-assess-intake` → `/speckit-assess-research` → `/speckit-assess-define` → `/speckit-assess-shape` → `/speckit-assess-decide` (Gera `.specify/assessments/<slug>/` com decisão `go`, `needs-clarification` ou `kill`)
+
 ---
 
 ## Pré-requisitos (uma vez por máquina)
