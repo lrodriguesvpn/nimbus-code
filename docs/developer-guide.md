@@ -13,19 +13,25 @@ Este é o manual **central e objetivo** de como todo desenvolvedor e engenheiro 
 
 ## ⚡ Tabela Rápida de Comandos e Ciclo de Vida
 
-O Nimbus Code opera como uma **Fábrica de Software Agêntica** estruturada pelo esquadrão de 9 agentes especializados (`NC-*`):
+O Nimbus Code opera como uma **Fábrica de Software Agêntica** estruturada pelo esquadrão de 9 agentes especializados (`NC-*`). A partir da v1.19, todos os 9 agentes possuem **comandos nativos de barra** (`/nc-*`) com autocomplete no Copilot Chat do VS Code — não é mais necessário decorar o nome do comando `/speckit-*` subjacente.
 
-| Fase | Agente Responsável | Comando / Skill | Objetivo | Saída Principal |
-|---|---|---|---|---|
-| **0. Entrevista** | **`NC-Intake`** | `/speckit-interview` | Descoberta guiada com o cliente (Negócio, Infra, Segurança, LGPD) | `specs/<slug>/interview.md` |
-| **1. Especificar** | **`NC-Spec`** | `/speckit-specify` | Definir o **quê** e o **porquê** (requisitos SMART e User Stories BDD) | `specs/<slug>/spec.md` |
-| **2. Clarificar & Auditar** | **`NC-Critic`** | `/speckit-clarify` / `/speckit-checklist` | Eliminar ambiguidades e auditar qualidade antes do desenho técnico | `spec.md` polido / Checklist |
-| **3. Governança & Rastreabilidade** | **`NC-Governor`** | Issue Hierarchy / RACI Gate | Registrar hash SHA-256 da spec, complexidade S0–S4 e aprovação humana | Issues no Project V2 |
-| **4. Planejar Arquitetura** | **`NC-Arch`** | `/speckit-plan` | Desenhar arquitetura técnica, verificar reuso e atualizar grafos | `plan.md`, `graph.yaml` |
-| **5. DevSecOps & Compliance** | **`NC-Shield`** | Security Gate / `/security-review` | Validar os 6 itens Não-Negociáveis (TLS, cofre, segredos, backup, etc.) | Parecer de Segurança |
-| **6. Estratégia de Testes** | **`NC-QA`** | `/speckit-checklist` + TDD suíte | Elaborar a suíte de testes (TDD/E2E/BATS) antes da codificação | Testes pré-implementação |
-| **7. Implementar** | **`NC-Builder`** | `/speckit-implement` / `/speckit-converge` | Executar as tarefas sob isolamento estrito de sessão (1 branch/fase) | Código, testes e PR (`Closes #N`) |
-| **8. Observabilidade & DORA** | **`NC-Telemetry`** | `process-metrics-report.sh` | Instrumentar logs JSON/OTel, apurar métricas DORA e custo total | Métricas DORA + Custo Real |
+> ⚠️ **Importante — Tipo de comando**: cada `/nc-*` é classificado como:
+> - **🔗 Alias**: um "apelido" com persona/identidade do agente Nimbus Code sobre um comando que **já existe** no Spec Kit original do MIT/GitHub (`/speckit-*`). Usar `/nc-intake` ou `/speckit-interview` produz o mesmo resultado — a diferença é a camada de contexto institucional (RACI, complexidade S0-S4, LGPD, etc.) que o alias `NC-*` injeta.
+> - **⭐ Exclusivo Nimbus**: uma capacidade que **não existe** no Spec Kit original do MIT — foi criada por este preset (`nimbus-code-standards`) e só está disponível em repositórios provisionados pelo Nimbus Code. `NC-Shield`, `NC-Governor` e `NC-Telemetry` são os 3 agentes desta categoria.
+
+| Fase | Agente Responsável | Comando Nativo `/nc-*` | Tipo | Equivalente MIT Spec Kit | Objetivo | Saída Principal |
+|---|---|---|---|---|---|---|
+| **0. Entrevista** | **`NC-Intake`** | `/nc-intake` | 🔗 Alias | `/speckit-interview` | Descoberta guiada com o cliente (Negócio, Infra, Segurança, LGPD) | `specs/<slug>/interview.md` |
+| **1. Especificar** | **`NC-Spec`** | `/nc-spec` | 🔗 Alias | `/speckit-specify` | Definir o **quê** e o **porquê** (requisitos SMART e User Stories BDD) | `specs/<slug>/spec.md` |
+| **2. Clarificar & Auditar** | **`NC-Critic`** | `/nc-critic` | 🔗 Alias | `/speckit-clarify` + `/speckit-checklist` + `/speckit-analyze` | Eliminar ambiguidades e auditar qualidade antes do desenho técnico | `spec.md` polido / Checklist |
+| **3. Governança & Rastreabilidade** | **`NC-Governor`** | `/nc-governor` | ⭐ Exclusivo Nimbus | *(sem equivalente no MIT — camada de governança criada pela SPEC 018)* | Registrar hash SHA-256 da spec, complexidade S0–S4 e aprovação humana | Issues no Project V2 |
+| **4. Planejar Arquitetura** | **`NC-Arch`** | `/nc-arch` | 🔗 Alias | `/speckit-plan` | Desenhar arquitetura técnica, verificar reuso e atualizar grafos | `plan.md`, `graph.yaml` |
+| **5. DevSecOps & Compliance** | **`NC-Shield`** | `/nc-shield` | ⭐ Exclusivo Nimbus | *(sem equivalente no MIT — o Spec Kit original não possui gate de segurança dedicado)* | Validar os 6 itens Não-Negociáveis (TLS, cofre, segredos, backup, etc.) | Parecer de Segurança |
+| **6. Estratégia de Testes** | **`NC-QA`** | `/nc-qa` | 🔗 Alias | `/speckit-tasks` + `/speckit-checklist` | Elaborar a suíte de testes (TDD/E2E/BATS) e decompor `tasks.md` antes da codificação | Testes pré-implementação |
+| **7. Implementar** | **`NC-Builder`** | `/nc-builder` | 🔗 Alias | `/speckit-implement` + `/speckit-converge` | Executar as tarefas sob isolamento estrito de sessão (1 branch/fase) | Código, testes e PR (`Closes #N`) |
+| **8. Observabilidade & DORA** | **`NC-Telemetry`** | `/nc-telemetry` | ⭐ Exclusivo Nimbus | *(sem equivalente no MIT — métricas DORA e custo real não fazem parte do Spec Kit original)* | Instrumentar logs JSON/OTel, apurar métricas DORA e custo total | Métricas DORA + Custo Real |
+
+**Regra prática**: se você já está acostumado com os comandos `/speckit-*` do Spec Kit padrão, pode continuar usando-os normalmente — eles não foram removidos nem descontinuados. Os comandos `/nc-*` existem apenas para dar **uma identidade única por papel do agente** e, no caso do `NC-Shield`, `NC-Governor` e `NC-Telemetry`, para expor capacidades que **só existem no Nimbus Code**.
 
 ### 🐛 Fluxo Dedicado de Bugs (assess → fix → test)
 *Instalado por padrão via extensão `bug`:*

@@ -16,6 +16,8 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+> 🔗 **Tipo: ALIAS**. `/nc-arch` é um apelido institucional para `/speckit-plan` — mesmo motor, mesmo resultado — acrescido do reforço obrigatório de consultar `docs/reuse-catalog.yaml`, `docs/harness/` e os grafos de dependência definidos pelo preset Nimbus Code. Quem já usa `/speckit-plan` pode continuar usando normalmente.
+
 ## Papel e Identidade: NC-Arch (Nimbus Solution Architect)
 
 Você atua como o agente **NC-Arch** do esquadrão Nimbus Code. Sua responsabilidade é desenhar o plano de implementação técnica detalhado (`plan.md`):

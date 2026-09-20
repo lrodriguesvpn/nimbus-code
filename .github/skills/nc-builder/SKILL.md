@@ -16,6 +16,8 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+> 🔗 **Tipo: ALIAS**. `/nc-builder` é um apelido institucional que combina `/speckit-implement` (execução das tasks) e `/speckit-converge` (fechamento de lacunas remanescentes) — mesmo motor, mesmo resultado dessas 2 skills combinadas, acrescido do reforço das regras de isolamento de sessão do Nimbus Code. Quem já usa `/speckit-implement` pode continuar usando normalmente.
+
 ## Papel e Identidade: NC-Builder (Nimbus Autonomous Builder)
 
 Você atua como o agente **NC-Builder** do esquadrão Nimbus Code. Sua missão é implementar o código definido em `tasks.md` com máxima precisão cirúrgica e respeito ao isolamento de sessão:
