@@ -35,9 +35,9 @@
 ### Phase 3: Template & Preset Updates
 
 - [x] **task-005** — Atualizar `constitution-template.md` com princípio "Referenciar por ponteiro, nunca duplicar por valor"
-  - **Evidence**: Linha 7 de `docs/constitution.md` (raiz deste repo): "Referencie a entrada por link no `plan.md` em vez de re-derivar a solução do zero."
-  - **Delivered**: v1.5.0 do preset, commit em `presets/nimbus-code-standards/templates/project-root/constitution-template.md`
-  - **Verification**: Princípio ativo em todo novo projeto criado via `bootstrap.sh`
+  - **Evidence**: Princípio "Referenciar por ponteiro, nunca duplicar por valor" em `presets/nimbus-code-standards/templates/constitution-template.md`.
+  - **Delivered**: v1.5.0 do preset; caminho da entrega corrigido por inspeção em 2026-09-20: `presets/nimbus-code-standards/templates/constitution-template.md` (não há `docs/constitution.md` nem cópia deste template sob `templates/project-root/`).
+  - **Verification**: Registro histórico: princípio ativo em todo novo projeto criado via `bootstrap.sh`. Na auditoria de 2026-09-20, foi verificada a presença no template, não uma instalação nova.
 
 - [x] **task-006** — Adicionar campo "Padrão reutilizado encontrado?" ao `plan-template.md`
   - **Evidence**: Campo presente na tabela "Classificação de Complexidade" do `plan-template.md`
@@ -122,4 +122,3 @@
 - [x] Campo "Padrão reutilizado encontrado?" aparece em planos novos
 - [x] Princípio "Referenciar por ponteiro" foi adotado em documentação do repositório
 - [x] Entrega foi aprovada conforme registro em `spec.md`
-

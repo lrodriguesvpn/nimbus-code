@@ -1,5 +1,12 @@
 # Implementation Plan: Nimbus Digital Engineer Platform
 
+**Readiness auditada em 2026-09-20**: entrega documental, não plataforma runtime.
+Revisão S4 #442 aberta. Os seis arquivos `tests/spec017/*.integration.spec.md`
+são desenhos de teste em Markdown, não testes executáveis ou evidências de
+execução. Rollout, SLO e instrumentação abaixo descrevem requisitos futuros.
+O checklist de qualidade citado em #442 não existe neste checkout;
+`checklists/requirements.md` é outro artefato e não prova aprovação S4.
+
 **Feature**: `017-nimbus-digital-engineer-platform`  
 **Spec**: [spec.md](./spec.md)  
 **Branch**: `017-nimbus-digital-engineer-platform`  
@@ -31,12 +38,12 @@
 
 | ID AC | Critério (resumo) | Tipo de teste planejado | Arquivo/módulo do teste | Justificativa de ausência (se N/A) |
 |---|---|---|---|---|
-| AC-1 | Intake M365/GitHub com contexto mínimo | integração | `tests/spec017/intake-registration.integration.spec.md` | — |
-| AC-2 | Classificação por modo com justificativa | integração | `tests/spec017/mode-classification.integration.spec.md` | — |
-| AC-3 | Gate humano bloqueia avanço sem aprovação | integração | `tests/spec017/approval-gate.integration.spec.md` | — |
-| AC-4 | Handoff com evidências de custo/qualidade | integração | `tests/spec017/handoff-package.integration.spec.md` | — |
-| AC-5 | OpenFeature definido como abstração de toggle | integração | `tests/spec017/openfeature-toggle.integration.spec.md` | — |
-| AC-6 | Badges por domínio com critérios auditáveis | integração | `tests/spec017/domain-badges.integration.spec.md` | — |
+| AC-1 | Intake M365/GitHub com contexto mínimo | desenho de integração (Markdown) | `tests/spec017/intake-registration.integration.spec.md` | Execução runtime futura |
+| AC-2 | Classificação por modo com justificativa | desenho de integração (Markdown) | `tests/spec017/mode-classification.integration.spec.md` | Execução runtime futura |
+| AC-3 | Gate humano bloqueia avanço sem aprovação | desenho de integração (Markdown) | `tests/spec017/approval-gate.integration.spec.md` | Execução runtime futura |
+| AC-4 | Handoff com evidências de custo/qualidade | desenho de integração (Markdown) | `tests/spec017/handoff-package.integration.spec.md` | Execução runtime futura |
+| AC-5 | OpenFeature definido como abstração de toggle | desenho de integração (Markdown) | `tests/spec017/openfeature-toggle.integration.spec.md` | Execução runtime futura |
+| AC-6 | Badges por domínio com critérios auditáveis | desenho de integração (Markdown) | `tests/spec017/domain-badges.integration.spec.md` | Execução runtime futura |
 
 ## Nimbus-Code — Module Dependency Graph
 

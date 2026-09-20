@@ -335,14 +335,39 @@ else:
 "
 }
 
+# --- Helper: merge multiple json arrays of issues/prs deduplicating by number ---
+merge_and_dedup_json() {
+  python3 -c "
+import sys, json
+seen = set()
+merged = []
+for arg in sys.argv[1:]:
+    try:
+        items = json.loads(arg)
+        for item in items:
+            num = item.get('number')
+            if num is not None and num not in seen:
+                seen.add(num)
+                merged.append(item)
+    except Exception:
+        pass
+print(json.dumps(merged))
+" "$@"
+}
+
 # --- Collect data ---
 echo "Coletando dados de ${REPO} entre ${SINCE} e ${UNTIL}..."
 
 DEPLOY_JSON=$(list_prs_with_label "dora:deployment-frequency")
-LEAD_JSON=$(list_prs_with_label "dora:lead-time")
+LEAD_1=$(list_prs_with_label "dora:lead-time")
+LEAD_2=$(list_prs_with_label "dora:lead-time-for-changes")
+LEAD_JSON=$(merge_and_dedup_json "$LEAD_1" "$LEAD_2")
 FAILURE_ISSUES_JSON=$(list_issues_with_label "dora:change-failure-rate")
 FAILURE_PRS_JSON=$(list_prs_with_label "dora:change-failure-rate")
-MTTR_JSON=$(list_issues_with_label "dora:mttr")
+MTTR_1=$(list_issues_with_label "dora:mttr")
+MTTR_2=$(list_issues_with_label "dora:failed-deployment-recovery-time")
+MTTR_3=$(list_issues_with_label "dora:ttrs")
+MTTR_JSON=$(merge_and_dedup_json "$MTTR_1" "$MTTR_2" "$MTTR_3")
 
 # --- Helper: checagem de qualidade de dados (T006, FR-011) ---
 # Verifica, para um dataset já coletado: (a) ausência de duplicidade (mesmo
@@ -509,10 +534,10 @@ printf "  %-32s %s\n" "Change Failure Rate:"      "${CFR_DISPLAY}"
 printf "  %-32s %s\n" "MTTR:"                     "${MTTR_DISPLAY}"
 echo ""
 echo "  Labels utilizadas:"
-echo "    dora:deployment-frequency  — PRs mergeados (contagem)"
-echo "    dora:lead-time             — PRs mergeados (criação→merge, dias)"
-echo "    dora:change-failure-rate   — Issues/PRs de falha/rollback"
-echo "    dora:mttr                  — Issues encerradas (criação→close, horas)"
+echo "    dora:deployment-frequency                    — PRs mergeados (contagem)"
+echo "    dora:lead-time (ou dora:lead-time-for-changes) — PRs mergeados (criação→merge, dias)"
+echo "    dora:change-failure-rate                     — Issues/PRs de falha/rollback"
+echo "    dora:mttr (ou dora:failed-deployment-recovery-time / dora:ttrs) — Issues encerradas (criação→close, horas)"
 echo ""
 echo "  Origem dos dados: 100% automática nesta execução (labels dora:* via gh API)."
 echo "  Ajustes manuais (se houver) ficam em ${ADJUSTMENTS_LOG_FILE}, nunca neste relatório."

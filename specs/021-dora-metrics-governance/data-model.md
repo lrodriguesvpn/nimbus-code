@@ -4,14 +4,14 @@
 
 ### Metric Definition
 
-Especifica o significado oficial de cada indicador DORA. Vive em
+Especifica o significado oficial de cada indicador DORA (alinhado a dora.dev). Vive em
 `docs/playbooks/README.md` (não é um objeto persistido em arquivo próprio —
 é documentação estruturada consultada por squads e pelo script de coleta).
 
 **Fields**
-- `indicator`: `deployment_frequency` | `lead_time_for_changes` | `change_failure_rate` | `mttr`
+- `indicator`: `deployment_frequency` | `lead_time_for_changes` | `change_failure_rate` | `failed_deployment_recovery_time` | `operational_reliability`
 - `formula`: descrição textual da fórmula de cálculo
-- `source_event`: evento de origem que dispara a contagem (ex.: merge de PR rotulado)
+- `source_event`: evento de origem que dispara a contagem no GHE (ex.: deploy em produção, merge de PR rotulado, incidente)
 - `measurement_window`: início/fim da janela de medição
 - `inclusion_exclusion_rule`: regra textual do que conta ou não para o indicador
 

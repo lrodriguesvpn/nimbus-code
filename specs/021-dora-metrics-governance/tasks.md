@@ -106,7 +106,7 @@
 - [x] T020 [P] Executar a validação final dos cenários V1 a V7 em `specs/021-dora-metrics-governance/quickstart.md`, registrando os comandos efetivamente executados na seção "Validação executada nesta sessão"
 - [x] T021 [P] Confirmar que `graph.yaml`/`graph.md` continuam refletindo a implementação real (nenhum módulo novo criado fora do já mapeado)
 - [x] T022 Adicionar entrada a `docs/reuse-catalog.yaml` (tag: `dora-governance-hybrid-collection`, bounded_context: `spec-kit-workflow`, description explicando a extensão de `scripts/process-metrics-report.sh` com qualidade de dados + auditoria + gate de fechamento, source: `specs/021-dora-metrics-governance/plan.md`)
-- [x] T023 Preencher a tabela "Nimbus-Code — Estimativa vs. Consumo Real de Tokens e Horas Humanas" abaixo no fechamento desta feature, comparando com a Classificação de Complexidade do `plan.md`
+- [ ] T023 Preencher a tabela "Nimbus-Code — Estimativa vs. Consumo Real de Tokens e Horas Humanas" abaixo no fechamento desta feature, comparando com a Classificação de Complexidade do `plan.md`. Reaberta na auditoria de 2026-09-20: a tabela ainda contém placeholders; valores medidos e horas humanas não foram apresentados. Revisão #446; gates operacionais #434.
 
 ## Phase 8: Remediation & Adoption Gates
 

@@ -323,30 +323,6 @@ Com o secret `VPNDEV_STANDARDS_READ_TOKEN` configurado no projeto consumidor,
 também compara a versão mais recente do bundle; sem esse secret, o workflow
 continua e compara apenas a versão do Nimbus Code CLI.
 
-### Bônus: integração híbrida com DEVSTATS corporativo
-
-O `bootstrap.sh` também copia
-[`templates/workflows/devstats-corporate-integration.yml`](templates/workflows/devstats-corporate-integration.yml)
-para `.github/workflows/` do projeto consumidor. Esse workflow publica eventos
-semânticos de `issues`/`pull_request` em tempo real, além de um snapshot diário
-de reconciliação (e execução manual para troubleshooting/reprocessamento),
-seguindo o modelo híbrido **repo emissor + DEVSTATS reconciliador corporativo**.
-
-Pré-requisitos corporativos (nível de organização do GitHub, não por repo):
-
-- Secret obrigatório: `DEVSTATS_TOKEN`
-- Secret opcional: `DEVSTATS_CLIENT_ID`
-- Variable obrigatória: `DEVSTATS_ENDPOINT`
-- Variables opcionais: `DEVSTATS_ENV`, `DEVSTATS_ENABLED` (opt-out temporário
-  com `false`)
-
-Sem `DEVSTATS_TOKEN`/`DEVSTATS_ENDPOINT`, o workflow falha explicitamente para
-garantir observabilidade operacional.
-
-Para repositórios já existentes (retrofit), copie manualmente o template para
-`.github/workflows/`, configure os Secrets/Variables organizacionais acima e
-dispare `workflow_dispatch` para validar ingestão inicial.
-
 > **Nota sobre `specify bundle install`**: o CLI do Nimbus Code resolve os
 > componentes de um bundle (`provides.presets/extensions/workflows`) **somente
 > através de um catálogo registrado** — o campo `source` do `bundle.yml` é só
@@ -397,7 +373,6 @@ Este repositório fornece arquivos prontos para copiar em projetos que usam o Ni
 | [`templates/README-bundle-section.md`](templates/README-bundle-section.md) | Seção do README do projeto documentando versão do bundle | `README.md` do projeto (adapte para seu contexto) |
 | [`templates/BROWNFIELD-SETUP-CHECKLIST.md`](templates/BROWNFIELD-SETUP-CHECKLIST.md) | Checklist interativo para setup de Nimbus Code em repo existente | `.specify/BROWNFIELD-SETUP-CHECKLIST.md` (brownfield) |
 | [`templates/workflows/update-speckit-and-bundle.yml`](templates/workflows/update-speckit-and-bundle.yml) | GitHub Action automática para notificar atualizações do bundle | `.github/workflows/update-speckit-and-bundle.yml` (todos os projetos) |
-| [`templates/workflows/devstats-corporate-integration.yml`](templates/workflows/devstats-corporate-integration.yml) | GitHub Action padrão de integração híbrida com DEVSTATS corporativo (evento + snapshot + reprocessamento manual) | `.github/workflows/devstats-corporate-integration.yml` (todos os projetos Nimbus-Code) |
 
 Além destes, o preset `nimbus-code-standards` já instala automaticamente (sem
 cópia manual) os seguintes workflows de governança em `.github/workflows/` de

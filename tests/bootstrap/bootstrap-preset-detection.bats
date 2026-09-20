@@ -1,103 +1,58 @@
 #!/usr/bin/env bats
 
-setup_file() {
-  export REPO_ROOT="$(cd "$BATS_TEST_DIRNAME/../.." && pwd)"
-  export TEST_ROOT="$REPO_ROOT/.bats-tmp/bootstrap-preset-detection"
-  rm -rf "$TEST_ROOT"
-  mkdir -p "$TEST_ROOT"
-}
-
-teardown_file() {
-  rm -rf "$TEST_ROOT"
-}
-
 setup() {
-  export TEST_DIR="$TEST_ROOT/${BATS_TEST_NAME// /_}"
-  rm -rf "$TEST_DIR"
-  mkdir -p "$TEST_DIR/repo" "$TEST_DIR/source/presets/nimbus-code-standards"
+  REPO_ROOT="$(cd "$BATS_TEST_DIRNAME/../.." && pwd)"
+  FIXTURE="$BATS_TEST_DIRNAME/.preset-detection-${BATS_TEST_NUMBER}-$$"
+  mkdir -p "$FIXTURE/.specify/presets" "$FIXTURE/presets/nimbus-code-standards"
+  printf 'schema_version: "1.0"\npreset:\n  version: "1.17.0"\n' \
+    > "$FIXTURE/presets/nimbus-code-standards/preset.yml"
+  unset NIMBUS_PRESET_VERSION
 }
 
-write_registry() {
-  local version="$1"
-  mkdir -p "$TEST_DIR/repo/.specify/presets"
-  cat > "$TEST_DIR/repo/.specify/presets/.registry" <<JSON
+teardown() {
+  rm -rf "$FIXTURE"
+}
+
+@test "T-045-AC-1: detect_preset_version_mismatch detects exact version match" {
+  cat > "$FIXTURE/.specify/presets/.registry" <<'JSON'
 {
-  "schema_version": "1.0",
   "presets": {
-    "nimbus-code-standards": {
-      "version": "$version",
-      "installed_at": "2026-09-20T12:00:00Z"
-    }
+    "nimbus-code-standards": {"version": "1.17.0"}
   }
 }
 JSON
-}
-
-write_source_manifest() {
-  local version="$1"
-  cat > "$TEST_DIR/source/presets/nimbus-code-standards/preset.yml" <<YAML
-schema_version: "1.0"
-
-preset:
-  id: "nimbus-code-standards"
-  version: "$version"
-YAML
-}
-
-@test "T038 AC1: versão exata passa sem drift" {
-  write_registry "1.19.0"
-  write_source_manifest "1.19.0"
-
-  run bash "$REPO_ROOT/.specify/scripts/bash/detect-preset-version-mismatch.sh" \
-    --repo-root "$TEST_DIR/repo" \
-    --source-root "$TEST_DIR/source" \
-    --json
-
+  run "$REPO_ROOT/.specify/scripts/bash/detect-preset-version-mismatch.sh" \
+    --repo-root "$FIXTURE" --json
   [ "$status" -eq 0 ]
-  echo "$output" | jq -e '.status == "ok"'
-  echo "$output" | jq -e '.expected_version == "1.19.0"'
-  echo "$output" | jq -e '.actual_version == "1.19.0"'
+  echo "$output" | jq -e '.status == "in_sync" and .version == "1.17.0"'
 }
 
-@test "T038 AC2: diretório .specify ausente retorna erro" {
-  write_source_manifest "1.19.0"
-
-  run bash "$REPO_ROOT/.specify/scripts/bash/detect-preset-version-mismatch.sh" \
-    --repo-root "$TEST_DIR/repo" \
-    --source-root "$TEST_DIR/source" \
-    --json
-
+@test "T-045-AC-2: detect_preset_version_mismatch detects stale registry version" {
+  cat > "$FIXTURE/.specify/presets/.registry" <<'JSON'
+{
+  "presets": {
+    "nimbus-code-standards": {"version": "1.15.0"}
+  }
+}
+JSON
+  run "$REPO_ROOT/.specify/scripts/bash/detect-preset-version-mismatch.sh" \
+    --repo-root "$FIXTURE" --json
   [ "$status" -eq 1 ]
+  echo "$output" | jq -e '.status == "mismatch" and
+    .mismatches[0].expected == "1.17.0" and .mismatches[0].actual == "1.15.0"'
+}
+
+@test "T-045-AC-3: detect_preset_version_mismatch errors when registry missing" {
+  run "$REPO_ROOT/.specify/scripts/bash/detect-preset-version-mismatch.sh" \
+    --repo-root "$FIXTURE" --json
+  [ "$status" -eq 2 ]
   echo "$output" | jq -e '.status == "error"'
-  echo "$output" | jq -e '.details | contains("Diretório .specify ausente")'
 }
 
-@test "T038 AC3: registry desatualizado é detectado como mismatch" {
-  write_registry "1.18.0"
-  write_source_manifest "1.19.0"
-
-  run bash "$REPO_ROOT/.specify/scripts/bash/detect-preset-version-mismatch.sh" \
-    --repo-root "$TEST_DIR/repo" \
-    --source-root "$TEST_DIR/source" \
-    --json
-
-  [ "$status" -eq 1 ]
-  echo "$output" | jq -e '.status == "mismatch"'
-  echo "$output" | jq -e '.mismatches[0].expected == "1.19.0"'
-  echo "$output" | jq -e '.mismatches[0].actual == "1.18.0"'
-}
-
-@test "T038 AC4: registry mais novo gera aviso e não falha" {
-  write_registry "1.20.0"
-  write_source_manifest "1.19.0"
-
-  run bash "$REPO_ROOT/.specify/scripts/bash/detect-preset-version-mismatch.sh" \
-    --repo-root "$TEST_DIR/repo" \
-    --source-root "$TEST_DIR/source" \
-    --json
-
+@test "T-045-AC-4: detect_preset_version_mismatch handles JSON mode correctly" {
+  echo '{"version":"1.17.0"}' > "$FIXTURE/.specify/presets/.registry"
+  run "$REPO_ROOT/.specify/scripts/bash/detect-preset-version-mismatch.sh" \
+    --repo-root "$FIXTURE" --json
   [ "$status" -eq 0 ]
-  echo "$output" | jq -e '.status == "warn"'
-  echo "$output" | jq -e '.warnings[0].expected == "1.19.0"'
-  echo "$output" | jq -e '.warnings[0].actual == "1.20.0"'
+  echo "$output" | jq -e '.status == "in_sync" and .version == "1.17.0"'
 }

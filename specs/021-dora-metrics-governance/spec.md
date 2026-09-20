@@ -1,9 +1,9 @@
-# Feature Specification: Governança de Métricas DORA com Coleta Híbrida
+# Feature Specification: Governança de Métricas DORA com Coleta Híbrida e GitHub Nativo (GHE)
 
 **Feature Branch**: `021-dora-metrics-governance`  
 **Created**: 2026-08-24  
-**Status**: Draft  
-**Input**: Solicitação formalizada do usuário: "Formalizar um padrão organizacional de métricas DORA para a Nimbus-Code, cobrindo coleta automática e manual assistida, interpretação executiva e técnica, e governança de uso em backlog e melhoria contínua. A feature deve definir claramente como medir Deployment Frequency, Lead Time for Changes, Change Failure Rate e MTTR; quando a coleta automática é obrigatória; quando ajustes manuais são permitidos com trilha de auditoria; quais papéis são responsáveis por registrar, validar e revisar as métricas; e como transformar sinais de degradação em ações priorizadas. A solução deve incluir regras de qualidade dos dados, prevenção de manipulação de métricas, leitura combinada dos 4 indicadores (evitando interpretação isolada), e cadência operacional semanal/mensal para squads e PMO. Também deve padronizar critérios de sucesso mensuráveis para adoção do modelo DORA em repositórios e portfólios, com foco em decisões orientadas por evidência e melhoria contínua."
+**Status**: Ready  
+**Input**: Solicitação formalizada do usuário: "Formalizar um padrão organizacional de métricas DORA para a Nimbus-Code, cobrindo coleta automática nativa no GitHub Enterprise (GHE) e manual assistida, interpretação executiva e técnica, e governança de uso em backlog e melhoria contínua alinhada às diretrizes do Google DORA (dora.dev). A feature define como medir Deployment Frequency, Lead Time for Changes (commit-to-production), Change Failure Rate e Failed Deployment Recovery Time (FDRT/TTRS), além da 5ª métrica de Confiabilidade Operacional (SLOs/Disponibilidade); elimina dependências de ferramentas SaaS externas proprietárias (ex.: DevStats) e centraliza a visualização no GitHub Projects V2 (GHE) e Insights nativos; quando ajustes manuais são permitidos com trilha de auditoria; quais papéis são responsáveis por registrar, validar e revisar as métricas; e como transformar sinais de degradação em ações priorizadas. A solução inclui regras de qualidade dos dados, prevenção de manipulação de métricas, leitura combinada dos indicadores, e cadência operacional semanal/mensal para squads e PMO."
 
 ## Nimbus-Code — Cabeçalho Obrigatório da Spec
 
@@ -13,7 +13,7 @@
 | **Complexidade estimada** | S3 |
 | **Bounded Context** | `spec-kit-workflow` |
 | **PR de referência / Issue** | novo |
-| **Data alvo de entrega** | sem data |
+| **Data alvo de entrega** | 2026-09-30 |
 
 > S0 = doc · S1 = função isolada · S2 = módulo · S3 = múltiplos módulos · S4 = arquitetura, segurança, dados ou integração crítica
 
@@ -21,19 +21,19 @@
 
 | Componente | Latência p99 (ms) | Taxa de erro máx. (%) | Disponibilidade alvo | RTO | RPO |
 |---|---|---|---|---|---|
-| Ingestão automática de eventos DORA | 5000 | 1,0% | 99,9% | 30 min | 5 min |
+| Ingestão automática de eventos DORA (GHE) | 5000 | 1,0% | 99,9% | 30 min | 5 min |
 | Registro manual assistido com auditoria | 4000 | 1,0% | 99,9% | 30 min | 5 min |
 | Consolidação semanal/mensal de indicadores | 8000 | 1,0% | 99,5% | 60 min | 15 min |
 
 ## Nimbus-Code — Objetivo e Contexto
 
-**Objetivo:** definir um padrão único de medição e uso de DORA na Nimbus-Code, combinando coleta automática e ajustes manuais auditáveis para garantir decisão baseada em evidência.
+**Objetivo:** definir um padrão único de medição e uso de DORA na Nimbus-Code 100% nativo no GitHub Enterprise (GHE) e GitHub Projects V2, combinando coleta automática (Deployments API, Pull Requests, Commits, Releases e labels `dora:*`) com ajustes manuais auditáveis para garantir decisão baseada em evidência e alinhada às diretrizes do Google Cloud DORA ([dora.dev](https://dora.dev)).
 
-**Motivação:** hoje existem sinais dispersos (issues, labels, workflows e dados de entrega), mas sem um modelo operacional completo e consistente para leitura executiva/técnica e melhoria contínua.
+**Motivação:** eliminar a dependência frágil de serviços SaaS proprietários e endpoints externos bloqueados (como o DevStats e credenciais organizacionais ausentes), permitindo que squads e PMO consolidem velocidade, estabilidade e confiabilidade diretamente no GHE sem custo adicional de licenciamento por usuário.
 
-**Critério de done (alto nível):** squads e PMO operam os 4 indicadores DORA com definições padronizadas, qualidade de dados rastreável, interpretação conjunta e geração disciplinada de ações de melhoria.
+**Critério de done (alto nível):** squads e PMO operam as 4 métricas centrais DORA + Confiabilidade com definições padronizadas do dora.dev, qualidade de dados rastreável, visualização integrada no GitHub Projects V2 e relatórios consolidados em `scripts/process-metrics-report.sh`.
 
-**Fora de escopo:** construção de painéis visuais finais, mudanças em infraestrutura de telemetria externa e alteração de metas de performance específicas de cada time.
+**Fora de escopo:** contratação e manutenção de plataformas de telemetria SaaS de terceiros pagas por assento e alteração de metas de performance de negócio específicas de cada squad.
 
 ## Nimbus-Code — Hybrid Collaboration Model
 
@@ -49,7 +49,7 @@
 > **AC-1**  
 > **Given** um repositório com fluxo de entrega ativo,  
 > **When** a governança DORA for aplicada,  
-> **Then** os quatro indicadores (Deployment Frequency, Lead Time for Changes, Change Failure Rate, MTTR) ficam definidos com fórmula, evento de origem e janela de medição padronizada.  
+> **Then** os indicadores centrais (Deployment Frequency, Lead Time for Changes commit-to-production, Change Failure Rate, Failed Deployment Recovery Time / TTRS) e a 5ª métrica de Confiabilidade Operacional ficam definidos com fórmula, evento de origem no GHE e janela de medição padronizada.  
 > **Test ref:** `test_AC1_dora_metric_definition`
 
 > **AC-2**  

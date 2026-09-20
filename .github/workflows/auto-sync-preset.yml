@@ -1,151 +1,94 @@
-name: Auto-Sync Satellite Preset Version
+name: Propose Satellite Preset Sync (Manual)
 
 on:
   workflow_dispatch:
     inputs:
       repo:
-        description: 'Repositório satélite no formato owner/repo'
+        description: 'Approved pilot satellite (owner/repo); same organization only'
         required: true
+        type: string
       target_version:
-        description: 'Versão alvo do preset'
+        description: 'Version X.Y.Z matching the selected central bundle checkout'
         required: true
-      audit_issue_number:
-        description: 'Issue da auditoria semanal no repositório central'
-        required: false
+        type: string
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+
+concurrency:
+  group: satellite-preset-sync-${{ inputs.repo }}
+  cancel-in-progress: false
 
 jobs:
-  auto-sync-drifted-repo:
-    name: Create auto-sync PR for one satellite repository
+  disabled:
+    if: vars.NIMBUS_SATELLITE_SYNC_ENABLED != 'true'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout central repository
-        uses: actions/checkout@v4
+      - run: echo "Sync disabled by default. Human pilot approval (#433/#445) and explicit repository-variable opt-in are required."
+  sync:
+    if: vars.NIMBUS_SATELLITE_SYNC_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    env:
+      NIMBUS_SATELLITE_SYNC_ENABLED: ${{ vars.NIMBUS_SATELLITE_SYNC_ENABLED }}
+      NIMBUS_APP_CONFIGURED: ${{ secrets.NIMBUS_APP_ID != '' && secrets.NIMBUS_APP_PRIVATE_KEY != '' }}
+      TARGET_REPO: ${{ inputs.repo }}
+      TARGET_VERSION: ${{ inputs.target_version }}
+    steps:
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-
-      - name: Setup uv
-        uses: astral-sh/setup-uv@v4
-
-      - name: Install specify CLI
-        run: uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
-
-      - name: Add uv tools to PATH
-        run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-
+          persist-credentials: false
+      - name: Validate manual inputs before authentication
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$TARGET_REPO" =~ ^[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9][A-Za-z0-9_.-]*$ ]] || exit 2
+          [[ "${TARGET_REPO%%/*}" == "$GITHUB_REPOSITORY_OWNER" ]] || exit 2
+          [[ "$TARGET_REPO" != "$GITHUB_REPOSITORY" ]] || exit 2
+          [[ "$TARGET_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || exit 2
+          version="$(python3 scripts/preset-audit-report.py version presets/nimbus-code-standards/preset.yml)"
+          [[ "$TARGET_VERSION" == "$version" ]] || { echo "::error::Requested version differs from bundle checkout"; exit 2; }
+          echo "repository_name=${TARGET_REPO#*/}" >> "$GITHUB_ENV"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install bundle-pinned Spec Kit CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(python3 -c 'import json; print(json.load(open(".specify/integration.json"))["version"])')"
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::Invalid bundle CLI version"; exit 2; }
+          python3 -m pip install --no-cache-dir "git+https://github.com/github/spec-kit.git@v${version}"
+          specify preset --help >/dev/null
       - name: Generate GitHub App installation token
         id: app-token
-        if: ${{ secrets.NIMBUS_APP_ID != '' && secrets.NIMBUS_APP_PRIVATE_KEY != '' }}
+        if: env.NIMBUS_APP_CONFIGURED == 'true'
         uses: actions/create-github-app-token@v1
         with:
           app-id: ${{ secrets.NIMBUS_APP_ID }}
           private-key: ${{ secrets.NIMBUS_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          repositories: ${{ env.repository_name }}
           github-api-url: ${{ github.api_url }}
-          permission-metadata: read
           permission-contents: write
           permission-pull-requests: write
-
-      - name: Resolve write token for satellite repository
-        id: resolve-token
+          permission-workflows: write
+      - name: Propose managed refresh via reviewed PR
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          PAT_TOKEN: ${{ secrets.VPNDEV_PROJECT_TOKEN }}
+          SERVER_URL: ${{ github.server_url }}
+        shell: bash
         run: |
-          if [ -n "${{ steps.app-token.outputs.token }}" ]; then
-            echo "token=${{ steps.app-token.outputs.token }}" >> "$GITHUB_OUTPUT"
-            echo "::notice::Autenticado via GitHub App para sincronizar preset em repositório satélite."
-          elif [ -n "${{ secrets.VPNDEV_STANDARDS_WRITE_TOKEN }}" ]; then
-            echo "token=${{ secrets.VPNDEV_STANDARDS_WRITE_TOKEN }}" >> "$GITHUB_OUTPUT"
-            echo "::warning::GitHub App indisponível — usando VPNDEV_STANDARDS_WRITE_TOKEN como fallback de escrita."
+          set -euo pipefail
+          if [[ -n "$APP_TOKEN" ]]; then
+            export GH_TOKEN="$APP_TOKEN"
+          elif [[ -n "$PAT_TOKEN" ]]; then
+            export GH_TOKEN="$PAT_TOKEN"
+            echo "::warning::Using existing VPNDEV_PROJECT_TOKEN fallback; human write-permission validation required."
           else
-            echo "::error::Defina NIMBUS_APP_ID/NIMBUS_APP_PRIVATE_KEY ou VPNDEV_STANDARDS_WRITE_TOKEN para abrir PRs automáticos em repositórios satélite."
-            exit 1
+            echo "::error::No cross-repo App/PAT credential. Pilot blocked (#433/#445); GITHUB_TOKEN cannot replace it."
+            exit 2
           fi
-
-      - name: Check if satellite repository already has active development
-        id: active
-        env:
-          GH_TOKEN: ${{ steps.resolve-token.outputs.token }}
-          TARGET_REPO: ${{ inputs.repo }}
-          TARGET_VERSION: ${{ inputs.target_version }}
-        run: |
-          branch="fix/preset-sync-to-v${TARGET_VERSION}"
-          open_prs=$(gh pr list --repo "$TARGET_REPO" --state open --json number,headRefName --jq 'length')
-          existing_sync_pr=$(gh pr list --repo "$TARGET_REPO" --state open --head "$branch" --json number --jq 'length')
-
-          echo "open_prs=$open_prs" >> "$GITHUB_OUTPUT"
-          echo "existing_sync_pr=$existing_sync_pr" >> "$GITHUB_OUTPUT"
-
-          if [ "$existing_sync_pr" -gt 0 ]; then
-            echo "should_sync=false" >> "$GITHUB_OUTPUT"
-            echo "reason=Já existe um PR de sincronização aberto para esta versão." >> "$GITHUB_OUTPUT"
-          elif [ "$open_prs" -gt 0 ]; then
-            echo "should_sync=false" >> "$GITHUB_OUTPUT"
-            echo "reason=O repositório possui PRs abertos e está em desenvolvimento ativo." >> "$GITHUB_OUTPUT"
-          else
-            echo "should_sync=true" >> "$GITHUB_OUTPUT"
-            echo "reason=" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Clone satellite repository
-        if: ${{ steps.active.outputs.should_sync == 'true' }}
-        env:
-          GH_TOKEN: ${{ steps.resolve-token.outputs.token }}
-        run: gh repo clone "${{ inputs.repo }}" satellite-repo
-
-      - name: Refresh preset and create pull request
-        if: ${{ steps.active.outputs.should_sync == 'true' }}
-        env:
-          GH_TOKEN: ${{ steps.resolve-token.outputs.token }}
-          TARGET_REPO: ${{ inputs.repo }}
-          TARGET_VERSION: ${{ inputs.target_version }}
-          AUDIT_ISSUE_NUMBER: ${{ inputs.audit_issue_number }}
-        run: |
-          cd satellite-repo
-
-          default_branch=$(gh repo view "$TARGET_REPO" --json defaultBranchRef --jq '.defaultBranchRef.name')
-          branch="fix/preset-sync-to-v${TARGET_VERSION}"
-          pr_title="fix(preset): sync to v${TARGET_VERSION}"
-
-          git checkout -B "$branch"
-          bash "$GITHUB_WORKSPACE/bootstrap.sh" --local "$GITHUB_WORKSPACE" --refresh-preset
-
-          if git diff --quiet; then
-            echo "Nenhuma mudança adicional foi necessária para ${TARGET_REPO}."
-            exit 0
-          fi
-
-          git config user.name "GitHub Actions"
-          server_host="$(echo "${{ github.server_url }}" | sed -E 's#^https?://##')"
-          git config user.email "actions@users.noreply.${server_host}"
-          git add -A
-          git commit -m "$pr_title"
-          git push --set-upstream origin "$branch" --force
-
-          gh label create "sync:preset-version" \
-            --repo "$TARGET_REPO" \
-            --color "1d76db" \
-            --description "PR de sincronização automática do preset Nimbus Code gerado pela auditoria semanal" \
-            --force >/dev/null 2>&1 || true
-
-          pr_body="## Sincronização automática de preset\n\nEste PR foi gerado automaticamente pela auditoria semanal de presets satélite para alinhar o repositório à versão **v${TARGET_VERSION}** do preset central.\n\n- Branch: \`${branch}\`\n- Comando executado: \`bootstrap.sh --refresh-preset\`\n- Label aplicada: \`sync:preset-version\`\n"
-          if [ -n "$AUDIT_ISSUE_NUMBER" ]; then
-            pr_body="${pr_body}\nIssue de auditoria: ${{ github.server_url }}/${{ github.repository }}/issues/${AUDIT_ISSUE_NUMBER}\n"
-          fi
-          pr_body="${pr_body}\nSe este repositório estiver em uma feature ativa, prefira revisar/mergear este PR antes de continuar a branch funcional para evitar drift adicional."
-
-          gh pr create \
-            --repo "$TARGET_REPO" \
-            --base "$default_branch" \
-            --head "$branch" \
-            --title "$pr_title" \
-            --body "$pr_body" \
-            --label "sync:preset-version" \
-            --label "type:chore"
-
-      - name: Report skipped sync
-        if: ${{ steps.active.outputs.should_sync != 'true' }}
-        run: |
-          echo "Sincronização automática ignorada para ${{ inputs.repo }}."
-          echo "Motivo: ${{ steps.active.outputs.reason }}"
+          export GH_HOST="${SERVER_URL#https://}"
+          bash scripts/sync-satellite-preset.sh "$TARGET_REPO" "$TARGET_VERSION" \
+            "$GITHUB_WORKSPACE" "$GITHUB_WORKSPACE/satellite-checkout"

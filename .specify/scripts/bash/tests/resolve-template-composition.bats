@@ -1,12 +1,13 @@
 #!/usr/bin/env bats
 
+COMMON_SH="$(cd "$BATS_TEST_DIRNAME/.." && pwd)/common.sh"
+
 setup() {
-    REPO_ROOT="$(cd "$BATS_TEST_DIRNAME/../../../.." && pwd)"
-    COMMON_SH="$REPO_ROOT/.specify/scripts/bash/common.sh"
     FIXTURE_DIR="$(mktemp -d)"
     mkdir -p "$FIXTURE_DIR/.specify/templates" "$FIXTURE_DIR/.specify/presets" "$FIXTURE_DIR/lib"
     cat > "$FIXTURE_DIR/lib/yaml.py" <<'PY'
 import json
+YAMLError = ValueError
 
 def safe_load(stream):
     if hasattr(stream, "read"):
@@ -63,6 +64,24 @@ materialize_content() {
     resolve_content "plan-template"
     [ "$status" -eq 0 ]
     [ "$output" = "WRAP:CORE:END" ]
+}
+
+@test "installed presets without a registry fail instead of dropping composition" {
+    write_core_template "plan-template" "CORE"
+    write_preset_template "preset-a" "plan-template" "append" "APPEND"
+    resolve_content "plan-template"
+    [ "$status" -eq 2 ]
+    [[ "$output" == *"requires python3"* ]]
+}
+
+@test "a missing declared preset template fails instead of falling back to core" {
+    write_core_template "plan-template" "CORE"
+    write_preset_template "preset-a" "plan-template" "append" "APPEND"
+    write_registry
+    rm "$FIXTURE_DIR/.specify/presets/preset-a/templates/plan-template.md"
+    resolve_content "plan-template"
+    [ "$status" -eq 2 ]
+    [[ "$output" == *"Missing declared template"* ]]
 }
 
 @test "append strategy concatenates after the base template (AC-2)" {
@@ -135,4 +154,64 @@ APPENDED-TASKS" ]
     resolve_content "plan-template"
     [ "$status" -eq 0 ]
     [ "$output" = "CORE" ]
+}
+
+@test "materialization preserves every native byte including final newlines" {
+    write_core_template "plan-template" $'CORE\n\n'
+    materialize_content "plan-template" "$FIXTURE_DIR/output.md"
+    [ "$status" -eq 0 ]
+    cmp "$FIXTURE_DIR/.specify/templates/plan-template.md" "$FIXTURE_DIR/output.md"
+}
+
+@test "command composition keeps only highest-priority frontmatter and both bodies" {
+    write_core_template "command" $'---\ndescription: core\n---\nCORE\n'
+    write_preset_template "preset-a" "command" "append" $'---\ndescription: preset\n---\nPRESET\n\n'
+    # The manifest is JSON, a supported YAML subset.
+    sed -i.bak 's/"type":"template"/"type":"command"/' "$FIXTURE_DIR/.specify/presets/preset-a/preset.yml"
+    write_registry
+    materialize_content "command" "$FIXTURE_DIR/output.md"
+    [ "$status" -eq 0 ]
+    printf '%s' $'---\ndescription: preset\n---\nCORE\n\n\nPRESET\n\n' > "$FIXTURE_DIR/expected.md"
+    cmp "$FIXTURE_DIR/expected.md" "$FIXTURE_DIR/output.md"
+}
+
+@test "wrap does not recursively replace placeholders inside native content" {
+    write_core_template "plan-template" "CORE {CORE_TEMPLATE}"
+    write_preset_template "preset-a" "plan-template" "wrap" "BEGIN {CORE_TEMPLATE} END"
+    write_registry
+    resolve_content "plan-template"
+    [ "$status" -eq 0 ]
+    [ "$output" = "BEGIN CORE {CORE_TEMPLATE} END" ]
+}
+
+@test "invalid strategy fails without replacing an existing output" {
+    write_core_template "plan-template" "CORE"
+    write_preset_template "preset-a" "plan-template" "invalid" "PRESET"
+    write_registry
+    printf 'EXISTING' > "$FIXTURE_DIR/output.md"
+    materialize_content "plan-template" "$FIXTURE_DIR/output.md"
+    [ "$status" -eq 2 ]
+    [[ "$output" == *"Unknown template strategy"* ]]
+    [ "$(cat "$FIXTURE_DIR/output.md")" = EXISTING ]
+}
+
+@test "malformed manifest fails explicitly instead of replacing with raw template" {
+    write_core_template "plan-template" "CORE"
+    write_preset_template "preset-a" "plan-template" "append" "PRESET"
+    write_registry
+    printf '{broken' > "$FIXTURE_DIR/.specify/presets/preset-a/preset.yml"
+    resolve_content "plan-template"
+    [ "$status" -eq 2 ]
+    [[ "$output" == *"Invalid preset manifest"* ]]
+}
+
+@test "project override bypasses lower composition" {
+    write_core_template "plan-template" "CORE"
+    write_preset_template "preset-a" "plan-template" "append" "PRESET"
+    write_registry
+    mkdir -p "$FIXTURE_DIR/.specify/templates/overrides"
+    printf 'OVERRIDE\n' > "$FIXTURE_DIR/.specify/templates/overrides/plan-template.md"
+    materialize_content "plan-template" "$FIXTURE_DIR/output.md"
+    [ "$status" -eq 0 ]
+    cmp "$FIXTURE_DIR/.specify/templates/overrides/plan-template.md" "$FIXTURE_DIR/output.md"
 }

@@ -185,11 +185,14 @@ racional das features 001 e 011).
 | Backup & Disaster Recovery | N/A — sem datastore de produção | Não — bloqueante | N/A | Arquivo versionado no Git |
 | Segredos no código/repositório | Nenhum segredo — script usa token de sessão do `gh` CLI já autenticado | Não — bloqueante | ✅ OK | — |
 | Branch/merge protegido | PR obrigatório + revisão antes de merge | Não — bloqueante | ✅ OK | Convenção já vigente |
-| Isolamento de ambiente | N/A — script somente leitura, sem escrita em produção | Não — bloqueante | N/A | `process-metrics-report.sh` não grava nada, só lê e imprime |
+| Isolamento de ambiente | Sem escrita remota; a opção de cadência altera estado local | Não — bloqueante | N/A para produção | `--check-retro-cadence` incrementa e grava `docs/playbooks/retro-cadence-state.yaml`, conforme T015; não executar essa opção em auditoria read-only |
 | Observabilidade | N/A — sem componente em runtime | Sim, com justificativa no ADL | N/A | Script CLI local sem execução contínua |
 
 **Riscos identificados e decisão:**
-Nenhum risco de segurança identificado — script é somente-leitura (`gh api`/`gh issue list`/`gh pr list`), sem escrita em issues/PRs nem acesso a dado sensível.
+As consultas GHE (`gh api`/`gh issue list`/`gh pr list`) são somente leitura,
+sem escrita em issues/PRs. Isso não torna toda execução local imutável:
+`--check-retro-cadence` grava o contador versionado. A opção deve ser executada
+somente no fechamento de feature ou com fixture isolada.
 
 ## Nimbus-Code — Qualidade de Código, Testes e Observabilidade Gate
 

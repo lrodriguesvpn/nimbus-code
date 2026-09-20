@@ -4,6 +4,17 @@
 
 ```mermaid
 graph LR
+  VB[validate-bootstrap workflow] --> VD[preset-version-detector]
+  AU[satellite-preset-audit workflow] --> SC[scan-org-rename-references]
+  AU --> CSV[preset-audit-report helper]
+  SY[auto-sync manual opt-in] --> SH[sync-satellite-preset helper]
+  SH --> RF[bootstrap managed refresh]
+  SH --> VD
+  SH --> PR[PR para revisão humana]
+  TT[testes locais com mocks] --> VB
+  TT --> SC
+  TT --> CSV
+  TT --> SH
   BCC[bootstrap-context-classifier] --> TDI[topology-decision-intake]
   TDI --> DTG[domain-topology-guide]
   TDI --> CSG[central-spec-governance]
@@ -17,6 +28,15 @@ graph LR
 
 ```mermaid
 graph TD
+  AUD[Auditoria somente leitura] --> REP[CSV e erros explícitos]
+  REP --> HUM[Aprovação humana piloto 433/445]
+  HUM --> FLAG{Opt-in explícito?}
+  FLAG -->|Não| STOP[Sync desligado]
+  FLAG -->|Sim| DIS[Dispatch repo e versão validados]
+  DIS --> REF[Refresh sem provisionamento]
+  REF --> VER{Versão verificada?}
+  VER -->|Não| ERR[Erro bloqueia escrita remota]
+  VER -->|Sim| REV[PR revisado sem merge automático]
   A[Bootstrap iniciado] --> B{Existe código de aplicação relevante?}
   B -->|Não| C[Fluxo Greenfield]
   B -->|Sim| D[Fluxo Brownfield]
@@ -34,6 +54,9 @@ graph TD
 
 ## Notas
 
+- `preset-version-detector` infere `nimbus-code-standards` ou
+  `nimbus-code-platform-standards` da registry nomeada; ambiguidade exige `--preset`.
+  O wrapper instalado e `validate-bootstrap` usam a mesma interface `--repo-root`.
 - `bootstrap-context-classifier` evita que repositórios quase vazios sejam tratados como brownfield real.
 - `topology-decision-intake` transforma mono vs multirepo em decisão rastreável e persistida em `.specify/feature.json`.
 - `domain-topology-guide` acelera a primeira decomposição sem engessar produtos diferentes.

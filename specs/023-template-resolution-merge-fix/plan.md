@@ -6,6 +6,39 @@
 
 ## Summary
 
+### Remediação aprovada em 2026-09-20
+
+A auditoria reproduziu falhas além dos call sites: composição de `command`
+ignorada, perda de quebras finais, testes dependentes de `/tmp` e ausência de
+entrega explícita dos scripts corrigidos pelo bootstrap. As afirmações abaixo
+de que a composição já era integralmente correta são o diagnóstico histórico,
+superado por esta verificação.
+
+- **Complexidade da remediação: S3**, aprovada pelo responsável nesta sessão;
+  aprovação para implementar não substitui revisão de release da issue #448.
+- **Arquitetura:** manter `TASKS_TEMPLATE` como caminho absoluto materializado;
+  compor corpos e frontmatter separadamente, preservar bytes e propagar erros.
+- **Distribuição:** overlay explícito dos scripts do bundle após `specify init`.
+  Atualizações usam hashes dos arquivos entregues; conflito com customização
+  local interrompe a atualização, sem sobrescrever silenciosamente. Catálogos,
+  overrides e configuração do projeto não são substituídos.
+- **Release:** `--refresh-preset` é opt-in, sem provisioning, labels ou hooks.
+  Automação cross-repo permanece desabilitada até piloto humano (#433/#445).
+  Remover a restrição somente após piloto novo/existente, sem perda de
+  customizações, e aprovação registrada; não há habilitação nesta remediação.
+- **Validação:** regressões de conteúdo byte a byte, frontmatter, erro, CLI real,
+  bootstrap novo e atualização; testes internos entram na suíte mandatória.
+- **Templates reais (#408):** o smoke confirmou `{CORE_TEMPLATE}` residual
+  nos dois spec-templates declarados como `prepend`. Remover o marcador,
+  sem mudar a estratégia nem ensinar o resolver a mascarar templates inválidos.
+- **Reuso:** `single-mandatory-test-gate` e
+  `skill-mid-flow-instruction-reliability-gate` do catálogo.
+- **Harness:** HRN-0001 — limitar a alteração ao escopo aprovado, sem rollout.
+- **Playbook:** reutilizar os testes isolados existentes; nenhum novo padrão
+  será catalogado como sucesso antes da validação humana.
+
+Ver [grafo](graph.md) e [impacto da remediação](impact-map.md).
+
 Corrigir o ponto exato em que a composição de templates quebra: `common.sh` **já** tem uma
 função de composição correta (`resolve_template_content()`, com suporte completo a
 `replace`/`prepend`/`append`/`wrap`, recursiva, com paridade quase 1:1 com `resolve_content()`

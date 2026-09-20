@@ -1,5 +1,11 @@
 # Tasks: Brownfield MultiRepo Context Awareness — Harvest Automático de Padrões e Grafo de Repositórios por Bounded Context
 
+**Estado auditado em 2026-09-20**: implementação e testes locais presentes;
+revisão humana #440 permanece aberta. O `checklists/requirements-quality.md`
+alegado como 10/10 em #440 não existe neste checkout. Execução de testes,
+harvest via LLM e integrações reais não são comprovadas pela narrativa da
+issue. T033 foi reaberta: tabela estrutural não equivale a consumo medido.
+
 **Input**: Design documents from `/specs/014-brownfield-multirepo-context-awareness/`
 
 **Prerequisites**: `plan.md` ✅, `spec.md` ✅, `graph.yaml` ✅, `graph.md` ✅, `impact-map.md` ✅ (S3 — obrigatório)
@@ -35,7 +41,7 @@
 - [x] T008 [US1] Implementar tratamento de manifest corrompido/inválido isolado por repo — registrar a falha de parse para aquele repo sem abortar os demais (edge case do `spec.md`)
 - [x] T009 [US1] Implementar detecção de bounded context sem repos mapeados: emitir aviso e sair com código não-bloqueante (AC-5, FR-001)
 - [x] T010 [US1] Garantir idempotência: duas execuções com os mesmos inputs NÃO devem sobrescrever um grafo mais recente com um mais antigo (FR-010, SC-005)
-- [x] T011 [P] [US1] Criar `scripts/tests/generate-context-graph.bats` cobrindo: `test_AC1_generate_context_graph_output`, `test_AC5_graceful_fallback_no_repos`, `test_AC6_ci_api_fallback` — usar fixtures de `bounded-contexts.yaml` e mock de `gh api` (plan.md — Rastreabilidade AC → Teste → Módulo)
+- [x] T011 [P] [US1] Criar `tests/scripts/generate-context-graph.bats` cobrindo: `test_AC1_generate_context_graph_output`, `test_AC5_graceful_fallback_no_repos`, `test_AC6_ci_api_fallback` — usar fixtures de `bounded-contexts.yaml` e mock de `gh api` (plan.md — Rastreabilidade AC → Teste → Módulo)
 - [x] T012 [P] [US1] Instalar `bats-core` em `scripts/setup-dev-environment.sh` se a lacuna foi confirmada em T003
 
 **Checkpoint**: `generate-context-graph.sh` funcional e testes passando — MVP entregável como script standalone antes mesmo da integração ao `/speckit-specify`.
@@ -57,7 +63,7 @@
 - [x] T019 [US2] Implementar log de custo de tokens (`tokens_used`, `estimated_cost`) a cada execução (FR-004a, Constitution Check do `plan.md`)
 - [x] T020 [US2] Garantir idempotência: execução dupla com os mesmos inputs não duplica entradas no catálogo (FR-010, SC-005)
 - [x] T021 [US2] Tratar o caso de repo sem padrões detectáveis — informar explicitamente que nenhum padrão foi encontrado; não gerar entradas vazias ou genéricas (US2 — Acceptance Scenario 3)
-- [x] T022 [P] [US2] Criar `scripts/tests/harvest-patterns.bats` cobrindo: `test_AC3_harvest_patterns_java_interfaces` (fixture Java), `test_AC10_idempotency` (execução dupla) — usar fixture de repo Java com interfaces públicas em `domain/port/` (plan.md — Rastreabilidade AC → Teste → Módulo)
+- [x] T022 [P] [US2] Criar `tests/scripts/harvest-patterns.bats` cobrindo: `test_AC3_harvest_patterns_java_interfaces` (fixture Java), `test_AC10_idempotency` (execução dupla) — usar fixture de repo Java com interfaces públicas em `domain/port/` (plan.md — Rastreabilidade AC → Teste → Módulo)
 
 **Checkpoint**: `harvest-patterns.sh` funcional com testes passando — Tech Lead pode executar harvest em qualquer repo do bounded context.
 
@@ -99,7 +105,7 @@
 - [x] T030 [P] Validar os 5 Success Criteria do `spec.md` (SC-001 a SC-005) após todas as fases anteriores concluídas
 - [x] T031 [P] Confirmar que `graph.yaml`/`graph.md` de `specs/014-brownfield-multirepo-context-awareness/` continuam refletindo a implementação real — Graph Guard valida automaticamente na PR
 - [x] T032 Adicionar entrada a `docs/reuse-catalog.yaml` com `tag: brownfield-multirepo-context-graph`, `bounded_context: spec-kit-workflow`, `description` e `source: specs/014-brownfield-multirepo-context-awareness/plan.md` ao fechar a feature (plan.md — Arquivos alterados)
-- [x] T033 Preencher a tabela "Estimativa vs. Consumo Real de Tokens e Horas Humanas" no fechamento desta feature, comparando com a Classificação de Complexidade do `plan.md` _(estrutura preenchida; números reais de tokens/horas dependem de Copilot Usage da organização e do campo "Horas Humanas" do GitHub Project — preencher após o PR ser revisado)_
+- [ ] T033 Preencher a tabela "Estimativa vs. Consumo Real de Tokens e Horas Humanas" com medições do Copilot Usage e GitHub Project — indisponíveis nesta auditoria, não estimar como se fossem consumo real.
 
 ---
 
@@ -216,7 +222,7 @@ Humano: não
       (AC-1, AC-3, AC-5, AC-6 — testes bats; AC-2, AC-4 — manuais com justificativa no `plan.md`; AC-governance — inspeção estática T026)
 - [x] Feature flag: N/A — deploy `direct` justificado no `plan.md` (ADL-005)
 - [x] SLO: scripts CLI/CI sem SLO de latência; critérios binários de erro definidos no `plan.md`
-- [x] Revisão de código por IA (GitHub Copilot code review) solicitada no PR
+- [ ] Revisão de código por IA (GitHub Copilot code review) solicitada no PR
       de implementação e sem findings High/Critical pendentes _(pendente: solicitar ao abrir a PR)_
 - [x] Testes de integração cobrindo AC-1, AC-3, AC-5, AC-6 via bats-core — testes manuais para AC-2 e AC-4 documentados
 - [x] Observabilidade: log de custo de tokens por execução do harvest (FR-004a); output colorido com resumo de repos analisados no `generate-context-graph.sh`
@@ -242,8 +248,8 @@ Humano: não
 
 | Métrica | Estimado (`plan.md`) | Real | Variância | Fonte da medição |
 |---|---|---|---|---|
-| Tokens (input+output) | ~45–65 mil tokens | [preencher ao fechar] | — | Copilot Usage da organização |
-| Horas humanas | ~2–4 horas | [total lançado no GitHub Project] | — | GitHub Project — campo "Horas Humanas" |
+| Tokens (input+output) | ~45–65 mil tokens | Não disponível — T033 pendente | Não calculável | A obter do Copilot Usage da organização |
+| Horas humanas | ~2–4 horas | Não disponível — T033 pendente | Não calculável | A confirmar no GitHub Project — campo "Horas Humanas" |
 
 ## Nimbus-Code — Checklist de Qualidade para Tarefas de Infraestrutura/Deploy
 

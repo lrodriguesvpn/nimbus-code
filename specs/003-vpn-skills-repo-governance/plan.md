@@ -73,13 +73,13 @@ The VPN-SKILLS system comprises 5 primary components:
 
 - **GitHub Enterprise** (`venha-pra-nuvem.ghe.com`): Repository hosting, Actions para CI/CD —
   **exclusivamente** este domínio para todo conteúdo próprio da Venha Pra Nuvem; nenhuma URL
-  `github.com` público é aceitável aqui (ver `specs/006-bootstrap-governance-hardening/`, FR-007).
+  `github.com` público é aceitável aqui (ver `specs/008-bootstrap-governance-hardening/`, FR-007).
 - **GitHub App organizacional** (`venha-pra-nuvem`): identidade de autenticação única para
   automações server-to-server e login humano no dashboard — ver ADL-004. Substitui qualquer
   necessidade de PAT clássico ou esquemas de auth ad-hoc por integração.
 - **Spec Kit CLI**: única exceção deliberada à regra acima — obtido sempre da fonte oficial
   pública do GitHub (`github.com/github/spec-kit`), por ser a ferramenta open source mantida
-  publicamente pelo GitHub (ver `specs/006-bootstrap-governance-hardening/`, FR-006).
+  publicamente pelo GitHub (ver `specs/008-bootstrap-governance-hardening/`, FR-006).
 - **Package registry** (optional): If skills are distributed as packages (npm, pip, Maven)
 - **OpenFeature SDK** (if using feature flags for compliance/discovery tooling)
 
@@ -127,12 +127,20 @@ The VPN-SKILLS system comprises 5 primary components:
 
 ---
 
-## Quality Gates — Status (atualizado após revisão de convergência com specs/006)
+## Quality Gates — Status (histórico da revisão de convergência com a atual spec 008)
+
+**Atualização verificável (2026-09-20):** esta tabela registra prontidão de design,
+não aprovação de rollout. O retrofit do contrato híbrido foi registrado como
+resolvido em "Known Gaps", item 2, e T115. A implementação proposta para T114
+está em PR externa ainda aberta, não integrada; ver
+[estado verificável em tasks.md](tasks.md#estado-verificável--2026-09-20)
+para PRs #1/#2 e pendências centrais #71/#73/#72. As referências anteriormente
+numeradas `006-bootstrap-governance-hardening` foram corrigidas para 008.
 
 > **Nota de revisão (2026-08-20)**: esta tabela estava desatualizada — dizia "PENDING" para
 > itens que a seção "Phase 1 Completion Status" (mais abaixo, já existente) mostra como
 > completos desde a fase de design. Corrigida abaixo para refletir o estado real, e revisada
-> contra as decisões de `specs/006-bootstrap-governance-hardening/` (GitHub App, domínio GHE).
+> contra as decisões de `specs/008-bootstrap-governance-hardening/` (GitHub App, domínio GHE).
 
 | Gate | Status | Notes |
 |------|--------|-------|
@@ -140,7 +148,7 @@ The VPN-SKILLS system comprises 5 primary components:
 | **Requirement Traceability** | ✅ PASS | AC → test mapping presente em `quickstart.md` |
 | **Module Dependency Graph** | ✅ PASS | `graph.yaml` + `graph.md` completos; edges de autenticação unificados sob GitHub App (ADL-004) |
 | **Impact Map (S3)** | ✅ PASS | `impact-map.md` completo; itens de auth reconciliados com ADL-004 |
-| **Security & DevSecOps** | ✅ PASS (com ressalva) | Estratégia de auth unificada via ADL-004; **pendente**: alinhar `spec.md`/`tasks.md` desta feature ao contrato híbrido obrigatório introduzido por `specs/016-hybrid-agent-human-dev/` (cabeçalho Nimbus-Code, AC-N formal, tabela de SLO, Cost Reference) — ver "Known Gaps" abaixo |
+| **Security & DevSecOps** | Design definido; operação não comprovada | Estratégia de auth unificada via ADL-004; retrofit do contrato híbrido registrado como resolvido em "Known Gaps", item 2/T115. Auth proposta em PR externa #2 ainda aberta na consulta de 2026-09-20; App/secrets e aprovação não comprovados por esta tabela. |
 | **SLO Gate** | ✅ PASS | SLOs definidos em `impact-map.md` (API <1s cached, <3s uncached; 99.5% uptime) |
 | **Release Strategy** | ✅ PASS | ADL-003 (`direct` strategy, sem feature flag) |
 
@@ -237,7 +245,7 @@ forma coerente.
   hardcoded).
 
 **Rationale**: Alinha esta feature com a política definida em
-`specs/006-bootstrap-governance-hardening/spec.md` (FR-004/FR-005/AC-4/AC-5), decidida com o
+`specs/008-bootstrap-governance-hardening/spec.md` (FR-004/FR-005/AC-4/AC-5), decidida com o
 Dev para eliminar PAT clássico de qualquer automação de escopo organizacional/cross-repo em
 toda a Nimbus-Code — VPN-SKILLS é exatamente esse tipo de automação (o compliance report
 generator precisa ler manifestos e status de 10+ projetos em repositórios distintos).
@@ -419,7 +427,7 @@ Will document:
 naquela spec). As correções de URL (GHE) e de estratégia de autenticação (ADL-004)
 já foram aplicadas na primeira revisão. Status atualizado abaixo:*
 
-1. **`tasks.md` já existe mas não reflete o ADL-004** — **ainda em aberto**: um
+1. **`tasks.md` já existe mas não reflete o ADL-004** — **registro histórico da revisão de 2026-08-20**: um
    `tasks.md` foi gerado anteriormente (113 tasks) antes da aprovação formal dos
    gates recomendada na seção "Next Steps" acima. A task T095 trata a camada de
    autenticação como "optional for v1, placeholder" — isso está desatualizado; a
@@ -427,6 +435,9 @@ já foram aplicadas na primeira revisão. Status atualizado abaixo:*
    task de convergência (T114, `## Phase 8: Convergence` em `tasks.md`) cobrindo
    exatamente esta substituição** — não requer nova ação de planejamento, apenas
    `/speckit-implement` executar T114 quando a fase de implementação começar.
+   **Estado em 2026-09-20:** T114 já está marcada no registro histórico e tem
+   implementação proposta em `vpn-skills#2`, ainda sem merge. Não repetir a
+   implementação local nem tratar a PR aberta como autenticação implantada.
 2. **Contrato híbrido obrigatório (feature 005) não aplicado a esta spec** — **✅
    RESOLVIDO nesta revisão (2026-08-20)**: `spec.md` foi retrofitado com o
    cabeçalho Nimbus-Code (slug/complexidade/bounded context), tabela de SLO,

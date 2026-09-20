@@ -606,6 +606,11 @@ if [ "$DRY_RUN" != true ]; then
                 echo "Materialized composed spec template to $SPEC_FILE"
             fi
         else
+            template_status=$?
+            if [ "$template_status" -ne 1 ]; then
+                echo "ERROR: Could not compose spec template; spec was not created" >&2
+                exit "$template_status"
+            fi
             if $JSON_MODE; then
                 echo "Warning: Spec template not found; created empty spec file" >&2
             else

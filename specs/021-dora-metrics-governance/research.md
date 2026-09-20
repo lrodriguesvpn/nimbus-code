@@ -102,3 +102,23 @@ organizacionalmente (feature 002), mantendo rastreabilidade num único board.
 **Alternatives considered**:
 - Board dedicado a ações DORA — rejeitado por fragmentar o backlog e duplicar
   o mecanismo de priorização já existente.
+
+### 7) Dashboard consolidado nativo no GitHub Enterprise (GHE) via GitHub Projects V2
+
+**Decision**: utilizar o **GitHub Projects V2 (GHE)** como o painel central consolidado para governança DORA, dispensando ferramentas SaaS proprietárias de terceiros (como DevStats SaaS).
+
+**Rationale**:
+- O GitHub Projects V2 já está nativamente integrado à organização GHE da Nimbus-Code (provisionado via `scripts/setup-github-project.sh`), possui suporte a campos customizados (ex.: *Horas Humanas*, *Tipo de Item*, *Status*), agrega múltiplos repositórios do mesmo Bounded Context e permite criar *Views* e *Insights/Charts* analíticos diretamente sobre as Issues e PRs com labels `dora:*`.
+- Elimina custos de licenciamento por desenvolvedor e riscos de vazamento de dados de código para SaaS externos.
+- Remove a dependência frágil de segredos organizacionais bloqueantes (`DEVSTATS_TOKEN` e `DEVSTATS_ENDPOINT` da Issue #334).
+
+**Alternatives considered**:
+- **DevStats SaaS (devstats.com)** — Rejeitado por exigir assinatura externa paga por assento, enviar metadados de engenharia para cloud de terceiros e falhar silenciosamente no template sem secrets corporativos.
+- **Apache DevLake / Google Four Keys** — Excelentes para cenários com data lake centralizado dedicado, mas introduzem overhead de infraestrutura (banco SQL / Cloud Run). Podem ser adotados futuramente como destino secundário via Webhook da organização, mantendo o GitHub Projects V2 como a visualização padrão primária.
+
+### 8) Alinhamento com os novos padrões DORA do Google Cloud (dora.dev)
+
+**Decision**: incorporar as diretrizes mais recentes do Google DORA:
+- Atualizar a métrica de tempo de recuperação de **MTTR** para **Failed Deployment Recovery Time (FDRT / TTRS)**.
+- Medir o **Lead Time for Changes** real a partir do commit de origem até o deploy em produção (`environment: production` via GitHub Deployments API ou merge com tag de release).
+- Formalizar a **5ª métrica de Confiabilidade Operacional (Reliability / SLOs)** integrada à revisão semanal/mensal de qualidade.

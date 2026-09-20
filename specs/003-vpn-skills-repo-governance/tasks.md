@@ -5,6 +5,29 @@
 **Complexity**: S3 (múltiplos módulos, integração entre serviços, governança crítica)  
 **Created**: 2026-08-12
 
+## Estado verificável — 2026-09-20
+
+O registro de 2026-08-20 abaixo e seus 116 marcadores `Txxx` concluídos são
+históricos: não comprovam integração em `main` nem aprovação operacional.
+Na consulta somente-leitura de 2026-09-20, as PRs externas
+[vpn-skills#1 (bootstrap)](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/vpn-skills/pull/1)
+e [vpn-skills#2 (T114/auth)](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/vpn-skills/pull/2)
+estavam **OPEN**, com `mergedAt: null`. A expressão histórica "resolvida" para
+T114 significa código proposto na PR, não merge confirmado.
+
+- [#71](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/71)
+  permanece aberta: o comentário registra bootstrap executado e 33 labels
+  criadas, mas Project V2 e escolha da constituição canônica continuam pendentes.
+- [#73](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/73)
+  permanece aberta para proteção de branch/CODEOWNERS; esta auditoria não
+  verificou a configuração administrativa ao vivo.
+- [#72](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/72)
+  retorna `CLOSED`, mas seu último comentário relata fechamento incorreto e
+  App/secrets não configurados naquela verificação. O estado da issue não é
+  evidência suficiente para liberar autenticação ou rollout de 003/007/008.
+
+Essas pendências não foram executadas nem aprovadas neste saneamento.
+
 > **Status (2026-08-20): implementação migrada para repositório externo próprio.**
 > Conforme `plan.md` (ADL-001), o código do VPN-SKILLS não vive mais neste
 > template — foi extraído (histórico do subdiretório `vpn-skills/` preservado
@@ -264,7 +287,7 @@ This tasks.md outlines the implementation plan for the VPN-SKILLS feature, organ
 
 ## Phase 8: Convergence
 
-**Purpose**: Fechar lacunas encontradas na revisão de convergência de 2026-08-20 entre spec.md/plan.md/tasks.md e as decisões de `specs/006-bootstrap-governance-hardening/` (nota: renumeração pendente — ver achado de colisão de números reportado separadamente).
+**Purpose**: Fechar lacunas encontradas na revisão de convergência de 2026-08-20 entre spec.md/plan.md/tasks.md e as decisões de `specs/008-bootstrap-governance-hardening/` (referência renumerada corrigida em 2026-09-20; antes citada como 006).
 
 - [x] T114 Replace the placeholder authentication layer with a real GitHub App-based middleware (installation token for server-to-server calls, user-to-server OAuth for the discovery dashboard) in `vpn-skills/src/api/middleware/auth.ts`, superseding the "optional for v1, placeholder" framing in T095 per plan.md ADL-004 (contradicts)
   - **Nota**: implementado em [venha-pra-nuvem/vpn-skills#2](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/vpn-skills/pull/2) — verificação de installation token via `GET /installation/repositories` e de user OAuth token via `GET /user` + checagem de membership em `GET /orgs/{org}/members/{login}`, ambos contra a API GHE (`fetch` nativo, sem dependência nova). 9 testes unitários novos. A criação do GitHub App real (App ID/chave/installation) permanece pendente — consolidada em [issue #72](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/72), junto com a mesma necessidade das specs 007/008.

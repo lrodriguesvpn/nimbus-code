@@ -15,9 +15,9 @@
 | `spec-template.md` | Defines spec output format | Specs without hybrid header; ambiguity in agent/human roles | Template must be in `.specify/presets/nimbus-code-standards/` before feature rollout |
 | `plan-template.md` | Defines plan output format | Plan lacks release strategy, gates, cost tracking sections | Template locked in Git; tested on 2 pilot projects before merge |
 | `task-template.md` | Defines GHE issue format | Tasks lack operational steps; humans can't execute without context | Template validated by tech lead before GHE issues published |
-| `speckit-specify` skill | Generates spec.md | Feature 005 cannot be specified | Skill atualizado para reforçar BDD, colaboração híbrida e padrão Impeccable em contexto WEB |
-| `speckit-plan` skill | Generates plan.md | Feature 005 cannot be planned | Skill atualizado para exigir graph/impact-map, OpenFeature e bloco de custo (SPEC KIT COST) |
-| `speckit-tasks` skill | Generates tasks.md | Feature 005 cannot be tasked; no GHE issues published | Skill atualizado para emitir tasks com contrato executável por humano |
+| `speckit-specify` skill | Generates spec.md | Feature 016 cannot be specified | Skill atualizado para reforçar BDD, colaboração híbrida e padrão Impeccable em contexto WEB |
+| `speckit-plan` skill | Generates plan.md | Feature 016 cannot be planned | Skill atualizado para exigir graph/impact-map, OpenFeature e bloco de custo (SPEC KIT COST) |
+| `speckit-tasks` skill | Generates tasks.md | Feature 016 cannot be tasked; no GHE issues published | Skill atualizado para emitir tasks com contrato executável por humano |
 | `validate-hybrid-contracts.sh` | Contract validation for fixture outputs | CI pode aceitar mudança regressiva de template | Script executado no workflow de validação para bloquear regressões |
 | `constitution.md` | Governance principles | Plan validation fails; no clear responsibility assignment | Existing doc; no changes needed (used as-is in plan validation) |
 | `reuse-catalog.yaml` | Pattern library | Duplicate work; no guidance for future features | Updated post-implementation with new pattern entry (tag: `hybrid-dev-templates`) |
@@ -47,7 +47,7 @@
 
 ## 3. Rollback Plan
 
-### Scenario: Feature 005 Deployment Fails
+### Scenario: Feature 016 Deployment Fails
 
 **Trigger Conditions**:
 - Pilot project 1 or 2 reports "task template unclear" or "unable to execute" (Step 6 of quickstart fails)
@@ -82,8 +82,8 @@
 
 4. **Publish Incident** (GitHub Issue)
    ```markdown
-   Title: Feature 005 Rollback — Hybrid Templates Disabled
-   Label: incident, feature:005
+   Title: Feature 016 Rollback — Hybrid Templates Disabled
+   Label: incident, feature:016
    Severity: P2
    
    Root cause: [brief reason]
@@ -101,7 +101,7 @@
 
 6. **Communicate** (Slack/Email)
    ```
-   "Feature 005 (Hybrid Templates) has been rolled back.
+   "Feature 016 (Hybrid Templates) has been rolled back.
    New features will use standard templates until issue is resolved.
    See Issue #XXX for details."
    ```
@@ -159,7 +159,7 @@ All projects automatically revert to standard templates. No manual intervention 
 ## 6. Critical Path & Success Milestones
 
 ```
-Day 0 (Today):    Feature 005 spec & plan approved
+Day 0 (planned): Feature 016 spec & plan approval (not an approval record)
                   ↓
 Day 1–2:          Implement Phase 1 (templates + skills)
                   ↓
@@ -213,9 +213,9 @@ Day 8+:           Monitoring, adoption tracking, cost data collection
 
 | Phase | Estimated Tokens | Actual Tokens | Variance | Adjustment |
 |---|---|---|---|---|
-| Specify (Feature 005) | ~10k | ~9.2k | -8% | ✓ Within tolerance |
-| Plan (Feature 005) | ~45–65k | TBD (after execution) | ? | Recorded in `tasks.md` |
-| Tasks (Feature 005) | ~20–30k | TBD (after execution) | ? | Recorded in `tasks.md` |
+| Specify (Feature 016) | ~10k | Indisponível — sem fonte de medição verificável | Não calculável | O valor anterior ~9.2k não deve ser tratado como consumo medido |
+| Plan (Feature 016) | ~45–65k | Indisponível | Não calculável | A registrar com fonte em `tasks.md` |
+| Tasks (Feature 016) | ~20–30k | Indisponível | Não calculável | A registrar com fonte em `tasks.md` |
 
 **Use Case**: Compare actual vs. estimated for improving future token estimates.  
 **Feedback Mechanism**: After `/speckit-tasks` completes, update reuse-catalog.yaml with real metrics.

@@ -2,8 +2,8 @@
 
 feature: "011-harness-engineering"
 complexity: "S3"
-version: 1
-updated_at: "2026-08-20"
+version: 2
+updated_at: "2026-09-20"
 spec_ref: "specs/011-harness-engineering/spec.md"
 
 nodes:
@@ -31,6 +31,16 @@ nodes:
     type: "module"
     path: "scripts/harness-search.sh"
     description: "Script CLI de busca no harness-catalog.yaml por tags e bounded_context; retorna IDs e resumos para uso pelo agente"
+
+  - id: "harness-search-preset"
+    type: "module"
+    path: "presets/nimbus-code-standards/templates/project-root/scripts/harness-search.sh"
+    description: "Cópia distribuída do CLI, mantida idêntica à implementação local"
+
+  - id: "harness-search-tests"
+    type: "module"
+    path: "tests/scripts/harness-search.bats"
+    description: "Regressões offline de busca literal, múltiplas entradas, YAML multiline, ausência de yq e paridade da cópia"
 
   - id: "plan-template"
     type: "module"
@@ -73,8 +83,26 @@ edges:
   - src: "harness-search"
     dst: "harness-catalog"
     type: "sync"
-    protocol: "file read (grep/yq)"
+    protocol: "file read (awk)"
     description: "Script lê harness-catalog.yaml e filtra por tags/bounded_context"
+
+  - src: "harness-search-preset"
+    dst: "harness-search"
+    type: "sync"
+    protocol: "distribution parity"
+    description: "Distribuição do mesmo comportamento para projetos consumidores"
+
+  - src: "harness-search-tests"
+    dst: "harness-search"
+    type: "sync"
+    protocol: "local CLI execution"
+    description: "Verifica resultados, campos e termos literais sem rede"
+
+  - src: "harness-search-tests"
+    dst: "harness-search-preset"
+    type: "sync"
+    protocol: "file comparison and local CLI execution"
+    description: "Impede regressão divergente entre fonte local e cópia distribuída"
 
   - src: "tasks-template"
     dst: "harness-catalog"

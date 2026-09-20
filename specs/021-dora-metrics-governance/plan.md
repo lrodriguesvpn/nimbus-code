@@ -6,16 +6,11 @@
 
 ## Summary
 
-Formalizar um padrão organizacional único para os quatro indicadores DORA
-(Deployment Frequency, Lead Time for Changes, Change Failure Rate, MTTR),
-combinando coleta automática como caminho padrão com ajustes manuais
-excepcionais e auditáveis, interpretação semanal/mensal combinada dos quatro
-indicadores e conversão disciplinada de degradação em ações de backlog.
-Abordagem técnica: **estender** a infraestrutura já entregue pela feature
-[012-loop-melhoria-continua](../012-loop-melhoria-continua/) — script
-`scripts/process-metrics-report.sh` e cadência documentada em
-`docs/playbooks/README.md` — em vez de criar um segundo mecanismo paralelo de
-coleta DORA.
+Formalizar um padrão organizacional único para as métricas DORA (Deployment Frequency, Lead Time for Changes commit-to-production, Change Failure Rate, Failed Deployment Recovery Time / TTRS) e Confiabilidade Operacional (SLOs/Disponibilidade), alinhado ao padrão Google DORA (dora.dev).
+A solução adota uma **arquitetura 100% nativa no GitHub Enterprise (GHE)**:
+1. **Camada Local no Repositório**: Coleta automática via GitHub Events/Deployments/PRs/Labels e auditoria determinística de ajustes manuais (`dora-manual-adjustments-log.yaml`) via `scripts/process-metrics-report.sh`.
+2. **Camada de Visibilidade e Portfólio**: Centralizada no **GitHub Projects V2 (GHE)**, dispensando dependências de ferramentas SaaS proprietárias de terceiros (como DevStats SaaS) e evitando quebras por secrets de organização ausentes.
+3. **Governança de Processo**: Interpretação semanal/mensal combinada e conversão disciplinada de degradação em ações no backlog.
 
 ## Technical Context
 

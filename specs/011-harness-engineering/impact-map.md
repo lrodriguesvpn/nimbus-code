@@ -123,3 +123,16 @@ O rollback é trivial:
 | Labels `harness:*` criados sem erro | AC-5 | `gh label list --repo org/repo \| grep harness` |
 | `harness-search.sh` executável e retorna resultado | AC-4 | `./scripts/harness-search.sh agent-scope-creep` retorna HRN-0001 |
 | Copilot instructions menciona harness-catalog explicitamente | AC-1 | Grep por "harness-catalog" em `.github/copilot-instructions.md` |
+
+## Remediação S3 — 2026-09-20
+
+| Superfície | Risco | Mitigação / validação |
+|---|---|---|
+| CLI local e cópia no preset | Divergência de distribuição ou falso negativo sem `yq` | Teste de paridade e execução das duas cópias sem `yq` |
+| Parser do schema YAML do catálogo | Perder entradas, campos multiline ou aspas | Fixtures com IDs/scalars quoted/unquoted, listas block/flow e múltiplos matches |
+| Termo fornecido pelo usuário | Interpretar regex, escapes ou código | Termo via ambiente, comparação literal `index`, sem interpolação de programa |
+| Revisões institucionais | Confundir regressão local com aprovação humana | #453/#437 permanecem abertas; nenhum label ou ambiente remoto é alterado |
+
+Rollback: reverter conjuntamente as duas cópias do script e o teste desta
+remediação, preservando os dados do catálogo. Nenhuma migração ou alteração
+operacional externa é necessária.

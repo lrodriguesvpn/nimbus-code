@@ -4,7 +4,30 @@
 
 **Prerequisites**: `plan.md` ✅, `spec.md` ✅, `research.md` ✅, `data-model.md` ✅, `contracts/` ✅, `quickstart.md` ✅, `graph.yaml` ✅, `graph.md` ✅, `impact-map.md` ✅ (S4 — obrigatório)
 
-**Organization**: Tasks agrupadas por User Story (US1 P1, US2 P1, US3 P2, US4 P2) para entrega incremental e teste independente, conforme `spec.md`. Repositório de destino: `venha-pra-nuvem/nimbus-harvest-gateway` (novo, a criar na Fase 1).
+**Organization**: Tasks agrupadas por User Story (US1 P1, US2 P1, US3 P2, US4 P2) para entrega incremental e teste independente, conforme `spec.md`. Repositório de destino já criado: `venha-pra-nuvem/nimbus-harvest-gateway`.
+
+## Reconciliação de evidências — 2026-09-20
+
+Fonte consultada: [satélite, commit 4de7532](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-harvest-gateway/tree/4de753209caf0c0c19c3e67856d86dcb794f6292).
+O satélite registra 21/31 tarefas marcadas. Aqui foram reconciliadas 19/31:
+estrutura, dependências, endpoint/router/observabilidade, três conectores,
+testes de contrato/unitários e consulta KQL existem no código publicado.
+Isso comprova entrega de arquivos, não execução real contra provedores.
+Os testes remotos não foram executados nesta auditoria; README relata 28
+testes e tasks relata 31, divergência que requer atualização com um log real.
+
+T029 permanece aberta: o catálogo central ainda não registra o padrão. T030
+permanece aberta até validar a correspondência do grafo com a implementação e
+reconciliar as cópias históricas de specs no satélite. Conforme SPEC 020, a
+fonte canônica de governança é este repositório; não apagar cópias remotas
+automaticamente.
+
+- Azure/T012 e validação T013: `venha-pra-nuvem/nimbus-harvest-gateway#7`.
+- Google/T017 e validação T018: `venha-pra-nuvem/nimbus-harvest-gateway#8`.
+- AWS/T022 e validação T023: `venha-pra-nuvem/nimbus-harvest-gateway#9`.
+- Aprovação S4/T028: `venha-pra-nuvem/nimbus-harvest-gateway#10`, #397 e #447.
+- Cenários operacionais T026/T027, métricas T031 e reconciliação T029/T030
+  permanecem pendentes para acompanhamento em #447; não há aprovação implícita.
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -52,11 +75,9 @@
   1. Criar o repositório vazio na organização `venha-pra-nuvem`.
   2. Rodar `curl -fsSL <url-raw-do-bootstrap.sh> | bash` dentro do repositório clonado.
   3. Confirmar branch padrão e branch protection conforme a issue #325.
-  4. Copiar `specs/022-nimbuscode-harvest-gateway/` (spec.md, plan.md, research.md,
-     data-model.md, contracts/, quickstart.md, graph.yaml, graph.md,
-     impact-map.md) deste repositório-fonte para o novo repositório, em
-     `specs/001-nimbus-harvest-gateway/` (ou renumerar conforme convenção do
-     novo repo).
+  4. Referenciar esta feature canônica no README do satélite, sem criar uma
+     segunda fonte de verdade. Cópias históricas já existentes exigem
+     reconciliação revisada, conforme SPEC 020 e T030.
 
   ## Dependências
   Nenhuma
@@ -74,8 +95,8 @@
   - Feature: specs/022-nimbuscode-harvest-gateway
   ```
 
-- [ ] T002 [P] Criar estrutura de diretórios `src/`, `src/connectors/`, `tests/contract/`, `tests/unit/`, `tests/integration/`, `infra/` no repositório novo, conforme Project Structure do `plan.md`
-- [ ] T003 [P] Configurar projeto Python (`pyproject.toml` ou `requirements.txt`) com `azure-functions`, `openai`, `google-genai` (ou `google-cloud-aiplatform`), `boto3`, `pytest`, conforme Technical Context do `plan.md`
+- [x] T002 [P] Criar estrutura de diretórios `src/`, `src/connectors/`, `tests/contract/`, `tests/unit/`, `tests/integration/`, `infra/` no repositório novo, conforme Project Structure do `plan.md`
+- [x] T003 [P] Configurar projeto Python (`pyproject.toml` ou `requirements.txt`) com `azure-functions`, `openai`, `google-genai` (ou `google-cloud-aiplatform`), `boto3`, `pytest`, conforme Technical Context do `plan.md`
 
 **Checkpoint**: repositório existe, governança Nimbus-Code aplicada, estrutura de pastas pronta.
 
@@ -87,11 +108,11 @@
 
 **⚠️ CRITICAL**: Nenhuma User Story pode ser considerada completa/testável sem esta fase.
 
-- [ ] T004 Implementar `src/connectors/base.py` com a interface `LLMConnector` (Protocol) e a exceção `HarvestConnectorError`, conforme `contracts/llm-connector-interface.md`
-- [ ] T005 Implementar `src/function_app.py` — endpoint HTTP único, valida o payload de entrada (`repo`, `stack`, `prompt`, `metadata`) contra `contracts/harvest-external-contract.md`, sem introduzir nenhum campo novo (FR-001)
-- [ ] T006 Implementar `src/router.py` — Connector Router, lê `HARVEST_LLM_PROVIDER`, valida contra os 3 valores reconhecidos (`azure`, `google`, `aws`), levanta `HarvestConnectorError` explícito se não reconhecido (FR-009)
-- [ ] T007 Implementar `src/observability.py` — grava `ObservabilityRecord` (repo, provider, model, tokens_used, custo estimado, status, timestamp) no Application Insights a cada requisição, sucesso ou falha (FR-005)
-- [ ] T008 [P] Criar teste de contrato `tests/contract/test_harvest_contract.py` — valida que a resposta do Gateway é bit-a-bit compatível com o formato já esperado por `scripts/harvest-patterns.sh` (AC-1, test ref `test_AC1_harvest_contract_unchanged`)
+- [x] T004 Implementar `src/connectors/base.py` com a interface `LLMConnector` (Protocol) e a exceção `HarvestConnectorError`, conforme `contracts/llm-connector-interface.md`
+- [x] T005 Implementar `src/function_app.py` — endpoint HTTP único, valida o payload de entrada (`repo`, `stack`, `prompt`, `metadata`) contra `contracts/harvest-external-contract.md`, sem introduzir nenhum campo novo (FR-001)
+- [x] T006 Implementar `src/router.py` — Connector Router, lê `HARVEST_LLM_PROVIDER`, valida contra os 3 valores reconhecidos (`azure`, `google`, `aws`), levanta `HarvestConnectorError` explícito se não reconhecido (FR-009)
+- [x] T007 Implementar `src/observability.py` — grava `ObservabilityRecord` (repo, provider, model, tokens_used, custo estimado, status, timestamp) no Application Insights a cada requisição, sucesso ou falha (FR-005)
+- [x] T008 [P] Criar teste de contrato `tests/contract/test_harvest_contract.py` — valida que a resposta do Gateway é bit-a-bit compatível com o formato já esperado por `scripts/harvest-patterns.sh` (AC-1, test ref `test_AC1_harvest_contract_unchanged`)
 
 **Checkpoint**: endpoint responde, roteia (mesmo sem nenhum conector real ainda) e grava observabilidade — pronto para a primeira User Story.
 
@@ -103,9 +124,9 @@
 
 **Independent Test**: Configurar `HARVEST_LLM_PROVIDER=azure` e `HARVEST_AZURE_MODEL=<modelo>` no Gateway, rodar `scripts/harvest-patterns.sh . --dry-run` num repositório satélite de teste e confirmar HTTP 200 com padrões propostos — Independent Test do `spec.md`, US1.
 
-- [ ] T009 [P] [US1] Implementar `src/connectors/azure_ai.py` (`AzureAIConnector`), modelo selecionável via `HARVEST_AZURE_MODEL`, conforme `contracts/llm-connector-interface.md`
-- [ ] T010 [US1] Registrar `AzureAIConnector` no dicionário `CONNECTORS` do Router (depende de T006, T009)
-- [ ] T011 [P] [US1] Criar teste unitário `tests/unit/test_azure_ai_connector.py` com SDK Azure mockado — nenhuma chamada real de LLM (AC-2, test ref `test_AC2_azure_connector_model_selection`)
+- [x] T009 [P] [US1] Implementar `src/connectors/azure_ai.py` (`AzureAIConnector`), modelo selecionável via `HARVEST_AZURE_MODEL`, conforme `contracts/llm-connector-interface.md`
+- [x] T010 [US1] Registrar `AzureAIConnector` no dicionário `CONNECTORS` do Router (depende de T006, T009)
+- [x] T011 [P] [US1] Criar teste unitário `tests/unit/test_azure_ai_connector.py` com SDK Azure mockado — nenhuma chamada real de LLM (AC-2, test ref `test_AC2_azure_connector_model_selection`)
 - [ ] T012 [Humano] [US1] Provisionar recurso real do Azure AI Foundry + Key Vault (Terraform, `infra/main.tf`) e configurar `AZURE_AI_ENDPOINT`/`AZURE_AI_KEY` no Gateway
 
   ```markdown
@@ -162,9 +183,9 @@
 
 **Independent Test**: Trocar `HARVEST_LLM_PROVIDER` de `azure` para `google` só no Gateway, rodar o mesmo `harvest-patterns.sh` num repositório satélite sem alterar nada nele, e confirmar que a resposta agora vem do Google — Independent Test do `spec.md`, US2.
 
-- [ ] T014 [P] [US2] Implementar `src/connectors/google.py` (`GoogleConnector`), modelo selecionável via `HARVEST_GOOGLE_MODEL`
-- [ ] T015 [US2] Registrar `GoogleConnector` no dicionário `CONNECTORS` do Router (depende de T006, T014)
-- [ ] T016 [P] [US2] Criar teste unitário `tests/unit/test_google_connector.py` com SDK Google mockado (AC-3, test ref `test_AC3_google_connector_model_selection`)
+- [x] T014 [P] [US2] Implementar `src/connectors/google.py` (`GoogleConnector`), modelo selecionável via `HARVEST_GOOGLE_MODEL`
+- [x] T015 [US2] Registrar `GoogleConnector` no dicionário `CONNECTORS` do Router (depende de T006, T014)
+- [x] T016 [P] [US2] Criar teste unitário `tests/unit/test_google_connector.py` com SDK Google mockado (AC-3, test ref `test_AC3_google_connector_model_selection`)
 - [ ] T017 [Humano] [US2] Provisionar projeto Google Cloud/Vertex AI e configurar `GOOGLE_PROJECT_ID`/`GOOGLE_CREDENTIALS` no Gateway (mesmo padrão de T012, adaptado ao Google)
 - [ ] T018 [US2] Validar o Cenário 2 do [quickstart.md](./quickstart.md) — trocar `HARVEST_LLM_PROVIDER` de `azure` para `google` e confirmar zero mudança necessária em repositório satélite (AC-5, test ref `test_AC5_provider_model_switch_zero_satellite_change`)
 
@@ -178,9 +199,9 @@
 
 **Independent Test**: Trocar `HARVEST_AWS_MODEL` para um modelo diferente dentro do mesmo provedor e confirmar, via `ObservabilityRecord`, que a próxima chamada usou o novo modelo — Independent Test do `spec.md`, US3.
 
-- [ ] T019 [P] [US3] Implementar `src/connectors/aws_bedrock.py` (`AWSBedrockConnector`), modelo (`modelId`) selecionável via `HARVEST_AWS_MODEL`, autenticação via IAM role/instance profile (nunca access key hardcoded)
-- [ ] T020 [US3] Registrar `AWSBedrockConnector` no dicionário `CONNECTORS` do Router (depende de T006, T019)
-- [ ] T021 [P] [US3] Criar teste unitário `tests/unit/test_aws_bedrock_connector.py` com SDK `boto3` mockado (AC-4, test ref `test_AC4_aws_bedrock_connector_model_selection`)
+- [x] T019 [P] [US3] Implementar `src/connectors/aws_bedrock.py` (`AWSBedrockConnector`), modelo (`modelId`) selecionável via `HARVEST_AWS_MODEL`, autenticação via IAM role/instance profile (nunca access key hardcoded)
+- [x] T020 [US3] Registrar `AWSBedrockConnector` no dicionário `CONNECTORS` do Router (depende de T006, T019)
+- [x] T021 [P] [US3] Criar teste unitário `tests/unit/test_aws_bedrock_connector.py` com SDK `boto3` mockado (AC-4, test ref `test_AC4_aws_bedrock_connector_model_selection`)
 - [ ] T022 [Humano] [US3] Provisionar acesso IAM ao AWS Bedrock Runtime (role, não access key) e configurar `AWS_REGION` no Gateway (mesmo padrão de T012, adaptado à AWS)
 - [ ] T023 [US3] Validar o Cenário 3 do [quickstart.md](./quickstart.md) — trocar `HARVEST_AZURE_MODEL` (ou `HARVEST_AWS_MODEL`) para outro modelo dentro do mesmo provedor e confirmar no `ObservabilityRecord`
 
@@ -194,8 +215,8 @@
 
 **Independent Test**: Fazer chamadas de harvest de 2+ repositórios diferentes e confirmar que cada uma aparece individualmente no registro de observabilidade — Independent Test do `spec.md`, US4.
 
-- [ ] T024 [P] [US4] Criar consulta KQL de referência (documentada em `README.md` do novo repo) para consolidar `ObservabilityRecord` por repositório/provedor/modelo no Application Insights (AC-6, test ref `test_AC6_observability_per_call`)
-- [ ] T025 [P] [US4] Criar teste unitário `tests/unit/test_credential_failure_explicit.py` — confirma que credencial ausente/inválida produz erro explícito, nunca resposta 200 silenciosa (AC-7, test ref `test_AC7_explicit_credential_failure`)
+- [x] T024 [P] [US4] Criar consulta KQL de referência (documentada em `README.md` do novo repo) para consolidar `ObservabilityRecord` por repositório/provedor/modelo no Application Insights (AC-6, test ref `test_AC6_observability_per_call`)
+- [x] T025 [P] [US4] Criar teste unitário `tests/unit/test_credential_failure_explicit.py` — confirma que credencial ausente/inválida produz erro explícito, nunca resposta 200 silenciosa (AC-7, test ref `test_AC7_explicit_credential_failure`)
 - [ ] T026 [US4] Validar o Cenário 4 do [quickstart.md](./quickstart.md) — observabilidade de custo por repositório (depende de T007, T024)
 - [ ] T027 [US4] Validar os Cenários 5 e 6 do [quickstart.md](./quickstart.md) — falha explícita com credencial ausente e provedor não reconhecido (depende de T006, T025)
 
