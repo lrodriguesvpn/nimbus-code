@@ -14,6 +14,13 @@ DECISION_OWNER=""
 SATELLITE_DOMAINS=""
 CUSTOM_DOMAIN_JUSTIFICATION=""
 CUSTOM_DOMAIN_OWNERSHIP=""
+BOOTSTRAP_MODE="apply"
+OUTPUT_JSON="false"
+TARGET_REPO_ROOT=""
+SOURCE_REPO_ROOT=""
+PRESET_REFRESH_SNAPSHOT_DIR=""
+PRESET_REINSTALLED="false"
+SKIP_BOOTSTRAP_SIDE_EFFECTS="false"
 
 IGNORED_TOP_LEVEL_ARTIFACTS=(
   .github .specify docs templates presets extensions workflows tests specs bundles reports scripts
@@ -24,7 +31,8 @@ IGNORED_TOP_LEVEL_ARTIFACTS=(
 print_usage() {
   cat <<'EOF'
 Usage:
-  ./bootstrap.sh [--local <path>] [--ref <tag|branch>] [--integration <copilot|claude|gemini>] [--repo-type <platform|dev_standards>] [--delivery-model <monorepo|multirepo>] [--decision-reason <text>] [--decision-owner <team|role>] [--satellite-domains <CSV>] [--custom-domain-justification <text>] [--custom-domain-ownership <text>]
+  ./bootstrap.sh [--local <path>] [--ref <tag|branch>] [--integration <copilot|claude|gemini>] [--repo-type <platform|dev_standards>] [--delivery-model <monorepo|multirepo>] [--decision-reason <text>] [--decision-owner <team|role>] [--satellite-domains <CSV>] [--custom-domain-justification <text>] [--custom-domain-ownership <text>] [--refresh-preset]
+  ./bootstrap.sh --detect-preset-version-mismatch [--repo-root <path>] [--source-root <path>] [--json]
 EOF
 }
 
@@ -327,6 +335,344 @@ classify_repository_context() {
   fi
 }
 
+load_repository_type_from_metadata() {
+  local repo_root="$1"
+  local metadata_file="$repo_root/.nimbus/bootstrap.json"
+
+  if [[ -f "$metadata_file" ]]; then
+    jq -r '.repository_type // empty' "$metadata_file" 2>/dev/null || true
+  fi
+}
+
+load_preset_id_from_metadata() {
+  local repo_root="$1"
+  local metadata_file="$repo_root/.nimbus/bootstrap.json"
+
+  if [[ -f "$metadata_file" ]]; then
+    jq -r '.preset // empty' "$metadata_file" 2>/dev/null || true
+  fi
+}
+
+normalize_repo_root() {
+  local candidate="${1:-}"
+
+  if [[ -z "$candidate" ]]; then
+    pwd
+    return 0
+  fi
+
+  python3 -c 'import os, sys; print(os.path.abspath(sys.argv[1]))' "$candidate"
+}
+
+registry_file_for_repo() {
+  local repo_root="$1"
+  echo "$repo_root/.specify/presets/.registry"
+}
+
+preset_manifest_for_source() {
+  local source_root="$1"
+  local preset_id="$2"
+  echo "$source_root/presets/$preset_id/preset.yml"
+}
+
+project_root_destination_for_template() {
+  local rel_path="$1"
+
+  case "$rel_path" in
+    "copilot-instructions.md")
+      echo ".github/copilot-instructions.md"
+      ;;
+    "bounded-contexts.yaml")
+      echo "docs/bounded-contexts.yaml"
+      ;;
+    ".specify/cost/cost-config-template.yml")
+      echo ".specify/cost/cost-config.yml"
+      ;;
+    *)
+      echo "$rel_path"
+      ;;
+  esac
+}
+
+extract_version_from_preset_manifest() {
+  local manifest="$1"
+  grep -m1 -E '^[[:space:]]*version:[[:space:]]*' "$manifest" 2>/dev/null |
+    sed -E 's/^[[:space:]]*version:[[:space:]]*"?([^"[:space:]]+)"?.*/\1/'
+}
+
+extract_installed_preset_id() {
+  local repo_root="$1"
+  local preset_id=""
+  local registry_file
+  registry_file="$(registry_file_for_repo "$repo_root")"
+
+  if [[ -n "${REPO_TYPE:-}" ]]; then
+    preset_id="$(preset_for_repo_type "$REPO_TYPE")"
+  fi
+
+  if [[ -z "$preset_id" ]]; then
+    preset_id="$(load_preset_id_from_metadata "$repo_root")"
+  fi
+
+  if [[ -z "$preset_id" && -f "$registry_file" ]]; then
+    preset_id="$(python3 - "$registry_file" <<'PY'
+import json, sys
+path = sys.argv[1]
+try:
+    with open(path, "r", encoding="utf-8") as fh:
+        data = json.load(fh)
+    presets = data.get("presets", {})
+    print(next(iter(presets.keys()), ""))
+except Exception:
+    print("")
+PY
+)"
+  fi
+
+  printf '%s' "$preset_id"
+}
+
+extract_registry_value() {
+  local registry_file="$1"
+  local preset_id="$2"
+  local field="$3"
+
+  python3 - "$registry_file" "$preset_id" "$field" <<'PY'
+import json, sys
+registry_path, preset_id, field = sys.argv[1:4]
+try:
+    with open(registry_path, "r", encoding="utf-8") as fh:
+        data = json.load(fh)
+    presets = data.get("presets", {}) if isinstance(data, dict) else {}
+    preset = presets.get(preset_id, {}) if isinstance(presets, dict) else {}
+    value = preset.get(field, "") if isinstance(preset, dict) else ""
+    if not value and field == "version" and isinstance(data, dict):
+        value = data.get("version", "")
+    print(value if value is not None else "")
+except Exception:
+    print("")
+PY
+}
+
+sanitize_version_segment() {
+  local segment="$1"
+  segment="${segment//[^0-9]/}"
+  if [[ -z "$segment" ]]; then
+    echo 0
+  else
+    echo "$segment"
+  fi
+}
+
+compare_semver_versions() {
+  local left="$1"
+  local right="$2"
+  local IFS='.'
+  local left_parts right_parts idx
+  read -r -a left_parts <<< "$left"
+  read -r -a right_parts <<< "$right"
+
+  for idx in 0 1 2; do
+    local left_segment="${left_parts[$idx]:-0}"
+    local right_segment="${right_parts[$idx]:-0}"
+    left_segment="$(sanitize_version_segment "$left_segment")"
+    right_segment="$(sanitize_version_segment "$right_segment")"
+
+    if (( 10#$left_segment > 10#$right_segment )); then
+      echo 1
+      return 0
+    fi
+    if (( 10#$left_segment < 10#$right_segment )); then
+      echo -1
+      return 0
+    fi
+  done
+
+  echo 0
+}
+
+emit_preset_report() {
+  local status="$1"
+  local preset_id="$2"
+  local registry_file="$3"
+  local source_manifest="$4"
+  local expected="$5"
+  local actual="$6"
+  local details="$7"
+  local relation="$8"
+
+  if [[ "$OUTPUT_JSON" == "true" ]]; then
+    local mismatches_json='[]'
+    local warnings_json='[]'
+
+    case "$relation" in
+      older)
+        mismatches_json="$(jq -cn --arg file ".specify/presets/.registry" --arg expected "$expected" --arg actual "$actual" '[{file:$file, expected:$expected, actual:$actual}]')"
+        ;;
+      newer)
+        warnings_json="$(jq -cn --arg file ".specify/presets/.registry" --arg expected "$expected" --arg actual "$actual" --arg message "$details" '[{file:$file, expected:$expected, actual:$actual, message:$message}]')"
+        ;;
+    esac
+
+    jq -cn \
+      --arg status "$status" \
+      --arg preset "$preset_id" \
+      --arg registry_file "$registry_file" \
+      --arg source_manifest "$source_manifest" \
+      --arg expected "$expected" \
+      --arg actual "$actual" \
+      --arg details "$details" \
+      --argjson mismatches "$mismatches_json" \
+      --argjson warnings "$warnings_json" \
+      '{
+        status: $status,
+        preset: $preset,
+        registry_file: $registry_file,
+        source_manifest: $source_manifest,
+        expected_version: (if $expected == "" then null else $expected end),
+        actual_version: (if $actual == "" then null else $actual end),
+        mismatches: $mismatches,
+        warnings: $warnings,
+        details: $details
+      }'
+    return 0
+  fi
+
+  case "$status" in
+    ok)
+      echo "OK: preset $preset_id is synchronized at version $expected."
+      ;;
+    warn)
+      echo "WARN: $details" >&2
+      ;;
+    mismatch|error)
+      echo "ERROR: $details" >&2
+      ;;
+  esac
+}
+
+detect_preset_version_mismatch() {
+  local repo_root source_root registry_file preset_id source_manifest expected_version actual_version compare_result
+  repo_root="$(normalize_repo_root "${1:-$(pwd)}")"
+  source_root="$(normalize_repo_root "${2:-$repo_root}")"
+  registry_file="$(registry_file_for_repo "$repo_root")"
+  preset_id="$(extract_installed_preset_id "$repo_root")"
+
+  if [[ ! -d "$repo_root/.specify" ]]; then
+    emit_preset_report "error" "$preset_id" "$registry_file" "" "" "" "Diretório .specify ausente em $repo_root." ""
+    return 1
+  fi
+
+  if [[ -z "$preset_id" ]]; then
+    emit_preset_report "error" "$preset_id" "$registry_file" "" "" "" "Não foi possível determinar qual preset está instalado neste repositório." ""
+    return 1
+  fi
+
+  source_manifest="$(preset_manifest_for_source "$source_root" "$preset_id")"
+  if [[ ! -f "$source_manifest" ]]; then
+    emit_preset_report "error" "$preset_id" "$registry_file" "$source_manifest" "" "" "Manifesto de origem não encontrado em $source_manifest." ""
+    return 1
+  fi
+
+  expected_version="$(extract_version_from_preset_manifest "$source_manifest")"
+  if [[ -z "$expected_version" ]]; then
+    emit_preset_report "error" "$preset_id" "$registry_file" "$source_manifest" "" "" "Não foi possível extrair a versão declarada em $source_manifest." ""
+    return 1
+  fi
+
+  if [[ ! -f "$registry_file" ]]; then
+    emit_preset_report "error" "$preset_id" "$registry_file" "$source_manifest" "$expected_version" "" "Arquivo .specify/presets/.registry ausente em $repo_root." ""
+    return 1
+  fi
+
+  actual_version="$(extract_registry_value "$registry_file" "$preset_id" version)"
+  if [[ -z "$actual_version" ]]; then
+    emit_preset_report "error" "$preset_id" "$registry_file" "$source_manifest" "$expected_version" "" "Não foi possível extrair a versão instalada do preset a partir de .specify/presets/.registry." ""
+    return 1
+  fi
+
+  compare_result="$(compare_semver_versions "$actual_version" "$expected_version")"
+  case "$compare_result" in
+    0)
+      emit_preset_report "ok" "$preset_id" "$registry_file" "$source_manifest" "$expected_version" "$actual_version" "Preset sincronizado." "equal"
+      return 0
+      ;;
+    -1)
+      emit_preset_report "mismatch" "$preset_id" "$registry_file" "$source_manifest" "$expected_version" "$actual_version" "Preset instalado está defasado: esperado $expected_version, atual $actual_version." "older"
+      return 1
+      ;;
+    1)
+      emit_preset_report "warn" "$preset_id" "$registry_file" "$source_manifest" "$expected_version" "$actual_version" "Preset instalado está à frente da origem declarada: esperado $expected_version, atual $actual_version." "newer"
+      return 0
+      ;;
+  esac
+
+  emit_preset_report "error" "$preset_id" "$registry_file" "$source_manifest" "$expected_version" "$actual_version" "Não foi possível comparar as versões do preset." ""
+  return 1
+}
+
+snapshot_installed_project_root_templates() {
+  local repo_root="$1"
+  local preset_id="$2"
+  local installed_root="$repo_root/.specify/presets/$preset_id/templates/project-root"
+  local snapshot_root="$repo_root/.nimbus/preset-refresh-cache/$preset_id"
+
+  rm -rf "$snapshot_root"
+
+  if [[ -d "$installed_root" ]]; then
+    mkdir -p "$(dirname "$snapshot_root")"
+    cp -R "$installed_root" "$snapshot_root"
+    printf '%s' "$snapshot_root"
+    return 0
+  fi
+
+  printf ''
+}
+
+refresh_managed_project_root_files() {
+  local repo_root="$1"
+  local source_root="$2"
+  local preset_id="$3"
+  local snapshot_root="$4"
+  local template_root="$source_root/presets/$preset_id/templates/project-root"
+
+  [[ -d "$template_root" ]] || return 0
+
+  while IFS= read -r -d '' src_file; do
+    local rel_path="${src_file#"$template_root"/}"
+    local dest_rel
+    local dest_file
+    local snapshot_file=""
+
+    dest_rel="$(project_root_destination_for_template "$rel_path")"
+    dest_file="$repo_root/$dest_rel"
+
+    if [[ -n "$snapshot_root" ]]; then
+      snapshot_file="$snapshot_root/$rel_path"
+    fi
+
+    if [[ ! -f "$dest_file" ]]; then
+      mkdir -p "$(dirname "$dest_file")"
+      cp -p "$src_file" "$dest_file"
+      echo "  OK: $dest_rel refreshed (file was missing)."
+      continue
+    fi
+
+    if [[ -n "$snapshot_file" && -f "$snapshot_file" ]] && cmp -s "$dest_file" "$snapshot_file"; then
+      cp -p "$src_file" "$dest_file"
+      echo "  OK: $dest_rel refreshed from preset source."
+      continue
+    fi
+
+    if cmp -s "$dest_file" "$src_file"; then
+      echo "  INFO: $dest_rel already matches the current preset source."
+      continue
+    fi
+
+    echo "  WARN: $dest_rel has local customizations and was not overwritten during preset refresh."
+  done < <(find "$template_root" -type f -print0)
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --local)
@@ -371,6 +717,29 @@ while [[ $# -gt 0 ]]; do
       CUSTOM_DOMAIN_OWNERSHIP="$2"
       shift 2
       ;;
+    --refresh-preset)
+      BOOTSTRAP_MODE="refresh"
+      SKIP_BOOTSTRAP_SIDE_EFFECTS="true"
+      shift
+      ;;
+    --detect-preset-version-mismatch)
+      BOOTSTRAP_MODE="detect"
+      shift
+      ;;
+    --repo-root)
+      [[ $# -ge 2 && -n "$2" ]] || { echo "ERROR: --repo-root requires a path." >&2; exit 1; }
+      TARGET_REPO_ROOT="$2"
+      shift 2
+      ;;
+    --source-root)
+      [[ $# -ge 2 && -n "$2" ]] || { echo "ERROR: --source-root requires a path." >&2; exit 1; }
+      SOURCE_REPO_ROOT="$2"
+      shift 2
+      ;;
+    --json)
+      OUTPUT_JSON="true"
+      shift
+      ;;
     -h|--help)
       print_usage
       exit 0
@@ -383,6 +752,11 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+if [[ "$BOOTSTRAP_MODE" == "detect" ]]; then
+  detect_preset_version_mismatch "${TARGET_REPO_ROOT:-$(pwd)}" "${SOURCE_REPO_ROOT:-${LOCAL_PATH:-$(pwd)}}"
+  exit $?
+fi
+
 if ! command -v specify >/dev/null 2>&1; then
   echo "ERROR: 'specify' CLI not found. Install it first: https://github.com/github/spec-kit" >&2
   exit 1
@@ -391,8 +765,10 @@ fi
 WORKDIR="$(pwd)"
 
 if [[ -z "$LOCAL_PATH" ]]; then
-  TMP_CLONE="$(mktemp -d)"
+  TMP_CLONE="$WORKDIR/.nimbus/bootstrap-source-$$"
   trap 'rm -rf "$TMP_CLONE"' EXIT
+  mkdir -p "$WORKDIR/.nimbus"
+  rm -rf "$TMP_CLONE"
   echo "-> Cloning $STANDARDS_REPO at ref $NIMBUS_REF..."
   git clone --depth 1 --branch "$NIMBUS_REF" "$STANDARDS_REPO" "$TMP_CLONE" >/dev/null
   LOCAL_PATH="$TMP_CLONE"
@@ -401,23 +777,41 @@ elif [[ ! -d "$LOCAL_PATH" ]]; then
   exit 1
 fi
 
+if [[ "$BOOTSTRAP_MODE" == "refresh" && -z "$REPO_TYPE" ]]; then
+  REPO_TYPE="$(load_repository_type_from_metadata "$WORKDIR")"
+  if [[ -z "$REPO_TYPE" ]]; then
+    case "$(extract_installed_preset_id "$WORKDIR")" in
+      nimbus-code-platform-standards)
+        REPO_TYPE="platform"
+        ;;
+      nimbus-code-standards)
+        REPO_TYPE="dev_standards"
+        ;;
+    esac
+  fi
+fi
+
 resolve_repo_type
 SELECTED_PRESET="$(preset_for_repo_type "$REPO_TYPE")"
 
-echo "-> Classifying repository context (greenfield vs brownfield)..."
-classify_repository_context
-echo "  Detected context: $DETECTED_CONTEXT"
-if [[ "$DETECTED_CONTEXT" == "brownfield" ]]; then
-  echo "  Interpretation: relevant application code is present, so the repo follows the brownfield path."
-else
-  echo "  Interpretation: no relevant application code was found, so the repo follows the greenfield path."
-fi
-echo "  Evidence: $CONTEXT_INDICATOR"
-resolve_greenfield_topology_decision
+if [[ "$BOOTSTRAP_MODE" != "refresh" ]]; then
+  echo "-> Classifying repository context (greenfield vs brownfield)..."
+  classify_repository_context
+  echo "  Detected context: $DETECTED_CONTEXT"
+  if [[ "$DETECTED_CONTEXT" == "brownfield" ]]; then
+    echo "  Interpretation: relevant application code is present, so the repo follows the brownfield path."
+  else
+    echo "  Interpretation: no relevant application code was found, so the repo follows the greenfield path."
+  fi
+  echo "  Evidence: $CONTEXT_INDICATOR"
+  resolve_greenfield_topology_decision
 
-echo "-> Initializing Nimbus Code in $WORKDIR (integration: $INTEGRATION)..."
-specify init --here --integration "$INTEGRATION" --force
-persist_topology_decision
+  echo "-> Initializing Nimbus Code in $WORKDIR (integration: $INTEGRATION)..."
+  specify init --here --integration "$INTEGRATION" --force
+  persist_topology_decision
+else
+  echo "-> Refreshing preset files for $SELECTED_PRESET in $WORKDIR..."
+fi
 
 persist_bootstrap_metadata() {
   local metadata_file="$WORKDIR/.nimbus/bootstrap.json"
@@ -477,35 +871,37 @@ install_component() {
 }
 
 echo "-> Installing preset $SELECTED_PRESET..."
-# Detect a stale already-installed preset and upgrade it automatically.
-# `specify preset add` has no "update" verb: re-running it on a repo that
-# already has the same preset ID installed just fails/no-ops, so simply
-# re-running bootstrap.sh after a preset version bump silently kept every
-# repo on its old (possibly broken) preset forever. Compare the version
-# recorded in .specify/presets/.registry against the version declared in
-# the source preset.yml, and remove+reinstall when they differ.
 SOURCE_PRESET_MANIFEST="$LOCAL_PATH/presets/$SELECTED_PRESET/preset.yml"
-SOURCE_PRESET_VERSION="$({ grep -E '^version:' "$SOURCE_PRESET_MANIFEST" 2>/dev/null || true; } | head -1 | sed -E 's/^version:[[:space:]]*"?([^"[:space:]]+)"?.*/\1/')"
-INSTALLED_REGISTRY="$WORKDIR/.specify/presets/.registry"
-INSTALLED_PRESET_VERSION=""
-if [[ -f "$INSTALLED_REGISTRY" ]] && command -v python3 >/dev/null 2>&1; then
-  INSTALLED_PRESET_VERSION="$(SPECKIT_REGISTRY="$INSTALLED_REGISTRY" SPECKIT_PRESET="$SELECTED_PRESET" python3 -c "
-import json, os
-try:
-    with open(os.environ['SPECKIT_REGISTRY']) as f:
-        data = json.load(f)
-    print(data.get('presets', {}).get(os.environ['SPECKIT_PRESET'], {}).get('version', ''))
-except Exception:
-    print('')
-" 2>/dev/null)"
-fi
-if [[ -n "$INSTALLED_PRESET_VERSION" && -n "$SOURCE_PRESET_VERSION" && "$INSTALLED_PRESET_VERSION" != "$SOURCE_PRESET_VERSION" ]]; then
-  echo "  Installed preset version ($INSTALLED_PRESET_VERSION) differs from source ($SOURCE_PRESET_VERSION) - upgrading..."
-  if ! specify preset remove "$SELECTED_PRESET"; then
-    echo "ERROR: could not remove existing preset $SELECTED_PRESET before upgrade." >&2
-    exit 1
+SOURCE_PRESET_VERSION="$(extract_version_from_preset_manifest "$SOURCE_PRESET_MANIFEST")"
+INSTALLED_REGISTRY="$(registry_file_for_repo "$WORKDIR")"
+INSTALLED_PRESET_VERSION="$(extract_registry_value "$INSTALLED_REGISTRY" "$SELECTED_PRESET" version)"
+PRESET_REINSTALLED="false"
+PRESET_REFRESH_SNAPSHOT_DIR=""
+
+if [[ "$BOOTSTRAP_MODE" == "refresh" ]]; then
+  PRESET_REFRESH_SNAPSHOT_DIR="$(snapshot_installed_project_root_templates "$WORKDIR" "$SELECTED_PRESET")"
+  if component_is_installed preset "$SELECTED_PRESET"; then
+    echo "  Refresh mode requested - reinstalling preset $SELECTED_PRESET from source."
+    specify preset remove "$SELECTED_PRESET"
   fi
+  PRESET_REINSTALLED="true"
+elif [[ -n "$INSTALLED_PRESET_VERSION" && -n "$SOURCE_PRESET_VERSION" ]]; then
+  case "$(compare_semver_versions "$INSTALLED_PRESET_VERSION" "$SOURCE_PRESET_VERSION")" in
+    -1)
+      echo "  Installed preset version ($INSTALLED_PRESET_VERSION) is older than source ($SOURCE_PRESET_VERSION) - upgrading..."
+      PRESET_REFRESH_SNAPSHOT_DIR="$(snapshot_installed_project_root_templates "$WORKDIR" "$SELECTED_PRESET")"
+      if ! specify preset remove "$SELECTED_PRESET"; then
+        echo "ERROR: could not remove existing preset $SELECTED_PRESET before upgrade." >&2
+        exit 1
+      fi
+      PRESET_REINSTALLED="true"
+      ;;
+    1)
+      echo "  WARN: installed preset version ($INSTALLED_PRESET_VERSION) is newer than source ($SOURCE_PRESET_VERSION); skipping automatic downgrade."
+      ;;
+  esac
 fi
+
 install_component preset "$SELECTED_PRESET" "preset $SELECTED_PRESET" \
   specify preset add --dev "$LOCAL_PATH/presets/$SELECTED_PRESET" --priority 5
 
@@ -666,6 +1062,13 @@ if [[ ! -d "$PRESET_ROOT_DIR" ]]; then
   exit 1
 fi
 
+if [[ "$PRESET_REINSTALLED" == "true" ]]; then
+  refresh_managed_project_root_files "$WORKDIR" "$LOCAL_PATH" "$SELECTED_PRESET" "$PRESET_REFRESH_SNAPSHOT_DIR"
+  if [[ -n "$PRESET_REFRESH_SNAPSHOT_DIR" ]]; then
+    rm -rf "$PRESET_REFRESH_SNAPSHOT_DIR"
+  fi
+fi
+
 if [[ -d "$PRESET_ROOT_DIR" ]]; then
   while IFS= read -r -d '' src_file; do
     rel_path="${src_file#"$PRESET_ROOT_DIR"/}"
@@ -729,7 +1132,7 @@ auto_assign_hint() {
   echo "  INFO: to enable auto-assign, configure NIMBUS_APP_ID/NIMBUS_APP_PRIVATE_KEY; COPILOT_AGENT_ASSIGN_TOKEN remains a temporary fallback during rollout."
 }
 
-if [[ "$REPO_TYPE" == "dev_standards" ]] && command -v gh >/dev/null 2>&1; then
+if [[ "$SKIP_BOOTSTRAP_SIDE_EFFECTS" != "true" && "$REPO_TYPE" == "dev_standards" ]] && command -v gh >/dev/null 2>&1; then
   echo
   echo "-> Configuring GitHub Project V2 and labels..."
   if GIT_REMOTE=$(git config --get remote.origin.url 2>/dev/null); then
@@ -770,7 +1173,7 @@ elif [[ "$REPO_TYPE" == "dev_standards" ]]; then
 fi
 
 # Install version synchronization hooks
-if [[ "$REPO_TYPE" == "dev_standards" ]]; then
+if [[ "$SKIP_BOOTSTRAP_SIDE_EFFECTS" != "true" && "$REPO_TYPE" == "dev_standards" ]]; then
   echo
   echo "-> Installing git hooks for version synchronization..."
   HOOKS_SCRIPT="$LOCAL_PATH/scripts/install-hooks.sh"
@@ -785,9 +1188,18 @@ if [[ "$REPO_TYPE" == "dev_standards" ]]; then
 fi
 
 echo
-echo "✅ Bootstrap complete!"
-echo ""
-echo "Next steps:"
-echo "  1. Review docs/version-synchronization.md for version management"
-echo "  2. Run: ./scripts/validate-versions.sh to verify all versions are synced"
-echo "  3. If this is the Repo Central, create/update specs/<feature>/spec.md there; if this is a satellite repo, keep specs only in the product central repo and route code tasks here."
+if [[ "$BOOTSTRAP_MODE" == "refresh" ]]; then
+  echo "✅ Preset refresh complete!"
+  echo ""
+  echo "Next steps:"
+  echo "  1. Revise os arquivos atualizados e os avisos de customizações preservadas."
+  echo "  2. Rode ./scripts/validate-versions.sh se este repositório já expõe esse script."
+  echo "  3. Abra um PR com a label sync:preset-version para revisar a sincronização."
+else
+  echo "✅ Bootstrap complete!"
+  echo ""
+  echo "Next steps:"
+  echo "  1. Review docs/version-synchronization.md for version management"
+  echo "  2. Run: ./scripts/validate-versions.sh to verify all versions are synced"
+  echo "  3. If this is the Repo Central, create/update specs/<feature>/spec.md there; if this is a satellite repo, keep specs only in the product central repo and route code tasks here."
+fi

@@ -273,17 +273,17 @@ satellite repos stay synchronized with the central preset version.
 **Description**: Implement automated detection of mismatched preset versions 
 and provide tooling to validate bootstraps.
 
-- [ ] **T036**: Implement `detect_preset_version_mismatch()` in bootstrap.sh
+- [x] **T036**: Implement `detect_preset_version_mismatch()` in bootstrap.sh
   - Compare `.specify/presets/.registry` version with `preset.yml` source version
   - Return exit code 0 if matched, 1 if diverged
   - Output JSON report of mismatches (file, expected, actual)
 
-- [ ] **T037**: Add GitHub Actions workflow `validate-bootstrap.yml`
+- [x] **T037**: Add GitHub Actions workflow `validate-bootstrap.yml`
   - Trigger on: PR to any satellite repo touching `.specify/`
   - Run detection logic, fail if version drift detected
   - Comment on PR with version mismatch details
 
-- [ ] **T038**: Add test coverage for detection logic
+- [x] **T038**: Add test coverage for detection logic
   - Test: exact version match → pass
   - Test: missing .specify/ directory → error
   - Test: stale registry version → detection
@@ -294,19 +294,19 @@ and provide tooling to validate bootstraps.
 **Description**: Extend org-wide audit to run on schedule and report preset 
 version drift across all satellite repos.
 
-- [ ] **T039**: Extend `scripts/scan-org-rename-references.sh`
+- [x] **T039**: Extend `scripts/scan-org-rename-references.sh`
   - Add mode: `--mode satellite-preset-audit`
   - Check each repo's `.specify/presets/.registry` vs central v1.16.0
   - Output: CSV report (repo, current version, drift status, last updated)
 
-- [ ] **T040**: Create CI job `.github/workflows/satellite-preset-audit.yml`
+- [x] **T040**: Create CI job `.github/workflows/satellite-preset-audit.yml`
   - Trigger: Weekly (Monday 09:00 UTC)
   - Run extended audit script
   - Create issue if >0 repos are drifted: 
     "Satellite repos out of sync with v1.16.0: N repos need upgrade"
   - Attach report as artifact
 
-- [ ] **T041**: Implement auto-PR creation for drifted repos
+- [x] **T041**: Implement auto-PR creation for drifted repos
   - On audit detection of drift, automatically:
     - Fork branch: `fix/preset-sync-to-vX.Y.Z`
     - Run `bootstrap.sh --refresh-preset`
@@ -318,15 +318,15 @@ version drift across all satellite repos.
 
 **Description**: Update quickstart and docs to reflect Phase 2 automation.
 
-- [ ] **T042**: Update `specs/020-satellite-repo-governance/quickstart.md`
+- [x] **T042**: Update `specs/020-satellite-repo-governance/quickstart.md`
   - Document: "After Phase 1, satellite repos receive automated preset sync"
   - Include: Weekly audit schedule, auto-PR flow, manual override steps
 
-- [ ] **T043**: Add section to `docs/developer-guide.md`
+- [x] **T043**: Add section to `docs/developer-guide.md`
   - Title: "Automated Preset Synchronization (Phase 2)"
   - Explain: How weekly audit works, how auto-PRs are created, how to disable
 
-- [ ] **T044**: Document in `docs/label-taxonomy-and-autonomous-dev.md`
+- [x] **T044**: Document in `docs/label-taxonomy-and-autonomous-dev.md`
   - Add label: `sync:preset-version` (auto-applied by audit-generated PRs)
   - Add: How to override auto-sync, coordination with feature work
 

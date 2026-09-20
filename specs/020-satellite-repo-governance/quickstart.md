@@ -246,138 +246,157 @@ bats tests/bootstrap/bootstrap-entrypoints.bats
 
 ---
 
-## Roadmap: Phase 2 — Automated Preset Synchronization
+## Fase 2 — Sincronização Automatizada de Preset
 
-> Esta fase está em backlog e não deve ser executada como parte do Go/No-Go
-> atual da SPEC 020. Os cenários abaixo preservam o desenho para futura
-> priorização.
+**Visão geral da Fase 2**: após a Fase 1 documentar a governança entre repositório
+central e satélites, a Fase 2 automatiza a detecção de drift, a auditoria semanal
+e a abertura controlada de PRs de sincronização.
 
-**Phase 2 Overview**: After Phase 1 establishes the governance model, Phase 2 automates 
-ongoing validation and synchronization so satellite repos stay aligned with the central 
-preset version without manual intervention.
+### V8: Auditoria semanal detecta drift de preset
 
-### V8: Weekly Audit Detects Preset Drift (Phase 2)
-
-**Scenario**: A satellite repository's `.specify/presets/.registry` version lags behind 
-the central `preset.yml` version due to delayed PR merges or administrative oversight.
+**Cenário**: toda segunda-feira, às 09:00 UTC, o repositório central executa uma
+varredura organizacional para descobrir quais satélites estão atrás da versão
+corrente do preset.
 
 **Validation steps**:
+1. Confirmar em `.github/workflows/satellite-preset-audit.yml` que o gatilho é:
+   - `schedule: cron: '0 9 * * 1'`
+   - `workflow_dispatch`
+2. Confirmar em `scripts/scan-org-rename-references.sh --mode satellite-preset-audit`
+   que a versão central é lida de `presets/catalog.json`.
+3. Verificar que o CSV de saída contém as colunas:
+   - `repo`
+   - `current_version`
+   - `drift_status`
+   - `last_updated`
+4. Verificar que os status previstos incluem pelo menos:
+   - `in_sync`
+   - `drift`
+   - `ahead`
+   - `not_bootstrapped`
+5. Confirmar que, quando `drift > 0`, o workflow cria/atualiza uma issue com o
+   título `Satellite repos out of sync with vX.Y.Z: N repos need upgrade`.
+6. Confirmar que o artifact `preset-audit-report` é anexado ao run.
 
-1. Confirm in `.github/workflows/satellite-preset-audit.yml` that:
-   - Trigger: Weekly on Monday 09:00 UTC
-   - Runs `scripts/scan-org-rename-references.sh --mode satellite-preset-audit`
-   - Generates CSV report: `repo,current_version,drift_status,last_updated`
-
-2. Verify in `scripts/scan-org-rename-references.sh` (satellite-preset-audit mode) that:
-   - It queries `.specify/presets/.registry` version from each satellite
-   - Compares against central `preset.yml` version (1.16.0)
-   - Reports: `in_sync`, `drift`, or `not_bootstrapped`
-
-3. Confirm in `.github/workflows/satellite-preset-audit.yml` that:
-   - If drifted repos found: Creates issue with title "Satellite repos out of sync with v1.16.0: N repos need upgrade"
-   - Attaches CSV report as artifact
-   - Labels issue: `type:automation`, `area:preset-sync`, `priority:P2`
-
-**Assertion**: Weekly audit runs automatically and creates actionable issue if drift detected.
-
-**Files involved**:
-- `.github/workflows/satellite-preset-audit.yml` (T040)
-- `scripts/scan-org-rename-references.sh` (T039, satellite-preset-audit mode)
-- `.specify/scripts/bash/detect-preset-version-mismatch.sh` (T036)
-
-### V9: Auto-PR Flow for Drifted Repos (Phase 2)
-
-**Scenario**: The audit detects a drifted satellite repo and attempts to create a PR 
-automatically if the repo is not in active development.
-
-**Validation steps**:
-
-1. Confirm in `.github/workflows/auto-sync-preset.yml` that:
-   - Trigger: On audit issue creation (`issue opened` event)
-   - Also supports: `workflow_dispatch` for manual override
-
-2. Verify workflow logic:
-   - Parse drifted repos from audit issue
-   - For each repo:
-     - Check if there are open PRs (if yes, skip to avoid conflicts)
-     - Create branch: `fix/preset-sync-to-vX.Y.Z`
-     - Run `bootstrap.sh --refresh-preset`
-     - Create PR with title: `fix(preset): sync to vX.Y.Z`
-     - Label: `sync:preset-version`, `type:automation`
-     - Link to audit issue in PR body
-
-3. Confirm in `bootstrap.sh` that:
-   - Supports flag `--refresh-preset` to update preset without full re-initialization
-   - Detects version mismatch via `.specify/scripts/bash/detect-preset-version-mismatch.sh`
-
-**Assertion**: Auto-PR creation respects active development (skips repos with open PRs) 
-and creates linked PRs for drifted repos.
+**Assertion**: a auditoria semanal transforma drift em evidência rastreável,
+com issue + artifact, sem depender de inspeção manual repo a repo.
 
 **Files involved**:
-- `.github/workflows/auto-sync-preset.yml` (T041)
-- `bootstrap.sh` (extended with `--refresh-preset` support)
-- `.specify/scripts/bash/detect-preset-version-mismatch.sh` (T036)
-
-### V10: Preset Detection in Validation Workflow (Phase 2)
-
-**Scenario**: A developer opens a PR to a satellite repo touching `.specify/` files. 
-The validation workflow should detect if preset version drift exists.
-
-**Validation steps**:
-
-1. Confirm in `.github/workflows/validate-bootstrap.yml` that:
-   - Trigger: On PR touching `.specify/`, `bootstrap.sh`, or the workflow itself
-   - Runs `.specify/scripts/bash/detect-preset-version-mismatch.sh --json`
-
-2. Verify workflow behavior:
-   - Parses JSON output from detection script
-   - If `status: "mismatch"` found: Comments on PR with mismatch details
-   - Exits with failure code to block merge if drift detected
-
-3. Confirm comment format includes:
-   - `⚠️ Preset Version Mismatch Detected`
-   - Expected version vs. Actual version
-   - Recovery instruction: "Please run bootstrap.sh --refresh-preset"
-
-**Assertion**: PR validation catches preset drift early and provides guidance to fix it.
-
-**Files involved**:
-- `.github/workflows/validate-bootstrap.yml` (T037)
-- `.specify/scripts/bash/detect-preset-version-mismatch.sh` (T036)
-
-### V11: Test Coverage for Detection Logic (Phase 2)
-
-**Scenario**: Verify that the detection function handles all edge cases correctly.
-
-**Validation steps**:
-
-1. Confirm in `tests/bootstrap/bootstrap-preset-detection.bats` that:
-   - Test AC-1: Exact version match → exit code 0, status "ok"
-   - Test AC-2: Stale registry (e.g., 1.15.0 vs 1.16.0) → exit code 1, status "mismatch"
-   - Test AC-3: Missing .registry file → exit code 1, status "error"
-   - Test AC-4: JSON output is valid and parseable
-
-2. Run tests:
-   ```bash
-   bats tests/bootstrap/bootstrap-preset-detection.bats
-   ```
-
-3. Verify all tests pass and cover the detection scenarios.
-
-**Assertion**: Detection function is thoroughly tested for matching, drift, and error cases.
-
-**Files involved**:
-- `tests/bootstrap/bootstrap-preset-detection.bats` (T038)
-- `.specify/scripts/bash/detect-preset-version-mismatch.sh` (T036)
+- `.github/workflows/satellite-preset-audit.yml`
+- `scripts/scan-org-rename-references.sh`
+- `presets/catalog.json`
 
 ---
 
-## Phase 1 + Phase 2 Integration
+### V9: Fluxo de auto-PR para satélites com drift
 
-After a future Phase 2 implementation, the full governance model would be:
+**Cenário**: ao encontrar um satélite atrás da versão central, o repositório
+central pode abrir automaticamente um PR de sincronização — desde que o satélite
+não esteja em desenvolvimento ativo.
 
-1. **Phase 1 (Manual)**: Bootstrap classifies greenfield/brownfield, records topology decision, suggests baseline domains, enforces central repo as source of specs, documents central → satélite update flow.
+**Validation steps**:
+1. Confirmar em `.github/workflows/auto-sync-preset.yml` que o workflow recebe:
+   - `repo`
+   - `target_version`
+   - `audit_issue_number` (opcional)
+2. Verificar que o workflow consulta `gh pr list` no repositório satélite.
+3. Confirmar o guardrail:
+   - se houver qualquer PR aberto → **não criar** PR automático
+   - se já existir branch/PR `fix/preset-sync-to-vX.Y.Z` → **não duplicar**
+4. Verificar que, quando liberado, o workflow:
+   - cria branch `fix/preset-sync-to-vX.Y.Z`
+   - executa `bootstrap.sh --refresh-preset`
+   - abre PR com título `fix(preset): sync to vX.Y.Z`
+   - aplica a label `sync:preset-version`
+   - referencia a issue da auditoria no corpo do PR (quando informada)
+5. Confirmar o override manual documentado:
+   - variável `NIMBUS_DISABLE_PRESET_AUTO_SYNC=true` desabilita o auto-dispatch
+     mantendo a auditoria semanal ativa
+   - PR aberto no satélite bloqueia o auto-sync daquela janela
+   - o time ainda pode rodar `bootstrap.sh --refresh-preset` manualmente
 
-2. **Phase 2 (Automated)**: Weekly audit detects preset drift, auto-PRs refresh drifted repos, validation workflow catches drift on PR, test coverage ensures detection reliability.
+**Assertion**: a automação respeita o contexto de trabalho do satélite e não abre
+PR em paralelo quando já existe desenvolvimento ativo.
 
-**Expected Outcome**: Satellite repos stay synchronized with central preset version without manual intervention, while governance rules remain explicit and traceable.
+**Files involved**:
+- `.github/workflows/satellite-preset-audit.yml`
+- `.github/workflows/auto-sync-preset.yml`
+- `bootstrap.sh`
+
+---
+
+### V10: Validação de preset em PRs que alteram `.specify/`
+
+**Cenário**: um PR em repositório satélite altera arquivos dentro de `.specify/`.
+A CI deve bloquear merge quando o registry estiver defasado em relação à origem
+central do preset.
+
+**Validation steps**:
+1. Confirmar em `.github/workflows/validate-bootstrap.yml` que o gatilho é
+   `pull_request` com path `.specify/**`.
+2. Confirmar que o workflow faz checkout do repositório central e executa:
+   `./.specify/scripts/bash/detect-preset-version-mismatch.sh --json`
+3. Verificar o comportamento por status:
+   - `ok` → passa sem comentário de erro
+   - `mismatch` → comenta no PR e falha o job
+   - `warn` → comenta aviso, mas **não** falha
+   - `error` → comenta erro operacional e falha o job
+4. Validar o conteúdo do comentário de mismatch:
+   - arquivo afetado (`.specify/presets/.registry`)
+   - versão esperada
+   - versão atual
+   - instrução explícita para rodar `bootstrap.sh --refresh-preset`
+
+**Assertion**: drift de preset é detectado cedo, no próprio PR que mexe em
+`.specify/`, com mensagem objetiva de correção.
+
+**Files involved**:
+- `.github/workflows/validate-bootstrap.yml`
+- `.specify/scripts/bash/detect-preset-version-mismatch.sh`
+- `bootstrap.sh`
+
+---
+
+### V11: Cobertura de testes para a lógica de detecção
+
+**Cenário**: a função de detecção precisa tratar match, ausência de `.specify/`,
+registry defasado e registry mais novo que a origem central.
+
+**Validation steps**:
+1. Confirmar em `tests/bootstrap/bootstrap-preset-detection.bats` os cenários:
+   - versão exata → `status == "ok"`
+   - `.specify/` ausente → `status == "error"`
+   - registry desatualizado → `status == "mismatch"`
+   - registry mais novo → `status == "warn"` com exit code 0
+2. Rodar:
+   ```bash
+   bats tests/bootstrap/bootstrap-preset-detection.bats
+   ```
+3. Confirmar que a suíte passa sem depender de `/tmp`, usando diretórios locais
+   do próprio repositório para fixtures temporárias.
+
+**Assertion**: a detecção possui cobertura determinística para match, drift,
+erro estrutural e aviso de versão à frente.
+
+**Files involved**:
+- `tests/bootstrap/bootstrap-preset-detection.bats`
+- `.specify/scripts/bash/detect-preset-version-mismatch.sh`
+- `bootstrap.sh`
+
+---
+
+## Integração Fase 1 + Fase 2
+
+Com a Fase 2 implementada, o modelo completo fica assim:
+
+1. **Fase 1 (governança)**: o bootstrap classifica greenfield/brownfield,
+   registra a decisão mono vs multirepo, reforça o repositório central como
+   fonte única de `spec.md`/`plan.md`/`tasks.md` e documenta o fluxo oficial de
+   atualização central → satélite.
+2. **Fase 2 (automação)**: a auditoria semanal detecta drift, cria/atualiza a
+   issue de acompanhamento, despacha o auto-sync quando permitido, e a CI de PR
+   barra merges com preset defasado.
+
+**Resultado esperado**: os satélites permanecem próximos da versão central do
+preset com rastreabilidade formal (issue, artifact, label e PR revisado), sem
+perder o controle humano sobre conflitos ou janelas de desenvolvimento ativo.

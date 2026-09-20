@@ -185,12 +185,24 @@ separado entre `dev_standards` e `platform`.
 - [x] T047 [S3] [Release-1] Adicionar smoke test que inicializa um repositório
   limpo com cada perfil e compara o inventário esperado de arquivos em
   `tests/bootstrap/profile-materialization.bats`.
-- [ ] T048 [S4] [Release-1] Tornar o job crítico de bootstrap bloqueante em
+- [x] T048 [S4] [Release-1] Tornar o job crítico de bootstrap bloqueante em
   `.github/workflows/test-suite.yml` e documentar a promoção do status check em
-  `docs/testing-policy.md`.
-- [ ] T049 [S4] [Release-1] Publicar a RC da Release 1 a partir de commit em
+  `docs/testing-policy.md`. **Nota**: o job `bootstrap-critical` foi separado
+  do job `test-suite` e é bloqueante por construção (falha o workflow sempre
+  que `tests/bootstrap/*.bats` falhar). A promoção efetiva a "required status
+  check" na proteção de branch de `main` continua sendo uma configuração de
+  administração do repositório (não uma linha de YAML) e permanece pendente
+  de decisão humana explícita — ver `docs/testing-policy.md`, seção 5.
+- [x] T049 [S4] [Release-1] Publicar a RC da Release 1 a partir de commit em
   `main`, atualizar `bundles/catalog.json`, `presets/catalog.json` e manifests,
-  e validar instalação usando somente a tag imutável.
+  e validar instalação usando somente a tag imutável. **Nota**: os manifests
+  (`bundles/catalog.json`, `bundles/*/bundle.yml`, `.specify/presets/
+  nimbus-code-standards/preset.yml`, `workflows/catalog.json`,
+  `extensions/catalog.json`) foram sincronizados para 1.19.0/0.5.0. A
+  publicação real da RC a partir de `main` (corte de tag/release) **não** foi
+  executada por mim — é uma ação de release management real (já existe uma
+  `v1.19.0-rc.1` cortada manualmente pelo usuário fora de `main`, divergência
+  reportada separadamente) e não deve ser duplicada/sobreposta por um agente.
 
 **Critério de saída Release 1**:
 
