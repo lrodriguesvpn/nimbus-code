@@ -6,6 +6,58 @@
 
 ## Summary
 
+### Remediação SPEC020 — 2026-09-20 (S3 aprovada, sem rollout)
+
+Implementação rastreada em #460; gates humanos #433/#445/#448 continuam abertos.
+
+Escopo: detector instalado, validação de PR, auditoria CSV e sincronização manual
+cross-repo. Reuso: `bootstrap-github-app-auth`
+([contrato](../../docs/github-app-auth-snippet.md)); contexto `spec-kit-workflow`.
+Antes do código, [grafo](./graph.yaml) e [impact-map](./impact-map.md) foram
+atualizados para os módulos executáveis e seus testes locais.
+
+Contrato: detector retorna `in_sync`/0, `mismatch`/1 ou `error`/2; erro,
+script ausente e JSON inválido bloqueiam CI. No consumidor sem árvore `presets/`,
+a versão esperada vem de `--expected-version`/`NIMBUS_PRESET_VERSION` ou do
+manifesto instalado; essa comparação local não comprova alinhamento remoto.
+O preset é inferido pela única entrada Nimbus (`nimbus-code-standards` ou
+`nimbus-code-platform-standards`) na registry, ou selecionado por `--preset`.
+Zero entradas suportadas ou mais de uma sem seleção explícita causam erro.
+Registry flat legada mantém o padrão dev; platform flat exige `--preset`.
+Auditoria consulta o manifesto central e registra falhas de leitura como erro,
+nunca como sincronização ou ausência de bootstrap confirmada.
+
+Sincronização aceita apenas `workflow_dispatch` estruturado (repo + versão),
+restrita à mesma organização e ao checkout do bundle com a versão pedida.
+O helper executa o bootstrap **do bundle**, dentro do checkout satélite:
+`bash <bundle>/bootstrap.sh --refresh-preset --local <bundle> --repo-type dev_standards`.
+Não há provisionamento, merge, force-push nem extração de comandos de issues.
+Falha de refresh ou detector bloqueia commit/push/PR.
+
+Gates humanos permanecem abertos:
+- [ ] #433/#445: validar permissões App/PAT de escrita de conteúdo, PR e workflows no piloto.
+- [ ] Aprovar piloto e evidência de PR revisado antes de qualquer lote.
+- [ ] Aprovar habilitação da variável `NIMBUS_SATELLITE_SYNC_ENABLED=true`.
+- [ ] Confirmar proteção de branch e revisão obrigatória no satélite.
+- [ ] #448: preservar o gate humano pendente; implementação local não o encerra.
+
+Testes locais com mocks não autorizam rollout nem comprovam permissões reais.
+
+Harness Gate da remediação: HRN-0001 consultado; ownership exclusivo respeitado,
+incluindo ampliação explícita de ownership pelo coordenador antes de alterar o
+teste legado `tests/bootstrap/bootstrap-preset-detection.bats`.
+Playbook de Sucesso Gate: nenhum padrão relevante encontrado para este fluxo
+após consulta ao catálogo; o reuso de autenticação está no catálogo técnico.
+Pré-requisito do piloto: validar instalação do CLI na versão de
+`.specify/integration.json` (tag `v<version>` do Spec Kit); o workflow usa essa
+versão, não HEAD. Erro de instalação é bloqueante antes da autenticação de escrita.
+
+Compatibilidade do detector: `ok` foi normalizado para `in_sync` e erros
+operacionais passaram de exit 1 para exit 2; drift continua exit 1. O objetivo é
+evitar tratar erro de leitura como divergência de versão. Workflow e testes foram
+migrados juntos. As fixtures antigas com `version` na raiz do YAML foram
+alinhadas ao manifesto real `preset.version`; registry JSON flat segue coberta.
+
 Formalizar a camada de governança que diferencia projetos greenfield e brownfield
 no bootstrap do Nimbus Code, registra a decisão entre monorepo e multirepo com
 justificativa explícita, orienta o momento correto para sugerir uma topologia
@@ -210,13 +262,16 @@ sem criar um segundo mecanismo paralelo fora do bundle oficial.
 
 | Campo | Valor |
 |---|---|
-| **Estratégia** | `direct` |
-| **Feature flag name** | `N/A` |
-| **Flag provider** | `N/A` |
-| **Critério de ativação** | merge do bundle oficial após revisão humana |
+| **Estratégia** | piloto manual opt-in; sem rollout nesta remediação |
+| **Feature flag name** | `NIMBUS_SATELLITE_SYNC_ENABLED` (ausente/false = desligado) |
+| **Flag provider** | variável de repositório GitHub Actions; sem runtime/SDK OpenFeature |
+| **Critério de ativação** | aprovação humana do piloto #433/#445 e permissões App/PAT confirmadas |
+| **Critério de remoção** | somente após piloto aprovado, evidência de PR revisado e decisão humana registrada; até lá manter desligada por padrão |
 | **Critério de rollback** | reverter o commit/PR se o bootstrap orientar incorretamente a topologia ou quebrar a governança central → satélite |
 
-**Justificativa para deploy `direct`**: a feature altera scripts e documentação do bundle organizacional, sem runtime progressivo por usuário final. O controle de risco vem de revisão humana, quickstart e rollback por revert de PR.
+**Decisão de release**: a escrita cross-repo exige opt-in e revisão humana. A
+auditoria é somente leitura dos satélites e não dispara sincronização. Desligar
+a variável interrompe novas execuções de sync; reverter um PR segue revisão.
 
 ## Nimbus-Code — Cost Reference
 

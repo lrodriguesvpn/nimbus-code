@@ -1,8 +1,35 @@
 # Implementation Plan: Bootstrap Governance & Repo Provisioning Hardening
 
-**Branch**: `008-bootstrap-governance-hardening` | **Date**: 2026-08-20 | **Spec**: [spec.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/vpn-skills-repo-governance-specs/specs/008-bootstrap-governance-hardening/spec.md)
+**Branch**: `008-bootstrap-governance-hardening` | **Date**: 2026-08-20 | **Spec**: [spec.md](spec.md)
 
 **Input**: Feature specification from `specs/008-bootstrap-governance-hardening/spec.md`
+
+## Estado verificável — 2026-09-20
+
+O plano original permanece como histórico de design. A auditoria local verificou
+paridade dos templates de issue (fontes e cópias ativas), a asserção de URLs de
+`tests/bootstrap/no-public-github-urls.bats` e sintaxe Bash; não executou
+bootstrap remoto, piloto autenticado nem aprovação de segurança. Esses testes
+não comprovam atualização/reinstalação correta de versões de preset.
+
+- **Divergência de classificação:** este plano registra S3 com revisão obrigatória
+  de segurança, enquanto
+  [#451](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/451)
+  solicita revisão S4. A classificação precisa de ratificação humana; nenhuma
+  delas foi alterada ou aprovada neste saneamento. A alegação "19/19 Bats" da
+  issue não foi reproduzida nesta auditoria.
+- **Pendências abertas consultadas:**
+  [#433](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/433)
+  (verificar App existente e piloto),
+  [#103/T022](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/103)
+  (piloto com/sem secrets),
+  [#107/T026](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/107)
+  (teste com desenvolvedor) e
+  [#111/T030](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/111)
+  (aprovação humana). T005/T006 continuam dependendo da confirmação do App e
+  dos secrets; o fechamento de #72 não comprova essa configuração, pois seu
+  último comentário relata fechamento incorreto e ausência de App/secrets
+  naquela verificação.
 
 ## Summary
 
@@ -142,17 +169,19 @@ seu workflow de CI correspondente.
 
 | ID AC | Critério (resumo) | Tipo de teste planejado | Arquivo/módulo do teste | Justificativa de ausência (se N/A) |
 |---|---|---|---|---|
-| AC-1 | Bootstrap pergunta tipo de preset | integração (shell) | `tests/bootstrap-preset-selection.bats` | — |
-| AC-2 | Paridade de issue templates | integração (script) | `scripts/validate-issue-template-parity.sh` + `tests/issue-template-parity.bats` | — |
+| AC-1 | Bootstrap pergunta tipo de preset | shell + validação manual | `tests/bootstrap/bootstrap-entrypoints.bats` (caso `/dev/tty`) e Cenário 1 de `quickstart.md` | O teste existente inspeciona o fallback do prompt; não equivale ao fluxo completo com operador. O arquivo planejado `bootstrap-preset-selection.bats` não existe |
+| AC-2 | Paridade de issue templates | integração (script) | `scripts/validate-issue-template-parity.sh` + `tests/bootstrap/issue-template-parity.bats` | Script de paridade executado na auditoria; suite Bats não reexecutada |
 | AC-4 | GitHub App para automação cross-repo/org | integração (workflow) | `.github/workflows/ensure-github-project.yml` (dry-run em ambiente de teste) | — |
 | AC-5 | `GITHUB_TOKEN` nativo para escopo próprio repo | integração (workflow) | Mesmo workflow acima — valida que não requer secret adicional | — |
-| AC-6 | Spec Kit sempre de fonte oficial | unitário (grep/lint) | `tests/bootstrap-official-source.bats` | — |
-| AC-7 | Domínio GHE-only para conteúdo VPN | unitário (grep/lint) | `tests/no-public-github-urls.bats` | — |
+| AC-6 | Spec Kit sempre de fonte oficial | inspeção/manual | `bootstrap.sh` e Cenário 4 de `quickstart.md` | Não foi localizado o teste dedicado planejado `bootstrap-official-source.bats`; permitir a URL oficial no teste de URLs não comprova a origem da instalação |
+| AC-7 | Domínio GHE-only para conteúdo VPN | unitário (grep/lint) | `tests/bootstrap/no-public-github-urls.bats` | Asserção executada sem o runner Bats na auditoria de 2026-09-20; respeita a allowlist literal do teste |
 | AC-8 | Manual de skills locais vs. remotas | manual (revisão humana) | `docs/skills-distribution-guide.md` | Documentação — validação é de clareza/completude, não automatizável |
 
 ## Nimbus-Code — Module Dependency Graph
 
-**Status**: Será gerado como artefato Phase 1 (`graph.yaml`, `graph.md`, `impact-map.md`).
+**Status (atualização documental de 2026-09-20)**: `graph.yaml`, `graph.md` e
+`impact-map.md` existem nesta SPEC. Presença verificada não significa aprovação
+humana nem validação de rollout.
 
 **Módulos previstos:**
 - Bootstrap Layer: `bootstrap.sh`
@@ -283,6 +312,6 @@ conteúdo VPN.
 
 ## Next Steps (Readiness for `/speckit-tasks`)
 
-- [ ] Gerar `research.md`, `data-model.md`, `contracts/*.md`, `quickstart.md`, `graph.yaml`, `graph.md`, `impact-map.md` (Phase 1)
+- [ ] Revisar os artefatos de Phase 1 existentes (`research.md`, `data-model.md`, `contracts/*.md`, `quickstart.md`, `graph.yaml`, `graph.md`, `impact-map.md`); a geração era o próximo passo histórico, mas os arquivos já estão presentes em 2026-09-20. Revisão não aprovada neste saneamento
 - [ ] Validar todos os gates acima (Security, Quality, Constitution)
 - [ ] **Obter aprovação humana explícita** antes de `/speckit-tasks` — esta feature altera mecanismo de autenticação de automações em produção (tratado como decisão de segurança, não apenas por ser S3)

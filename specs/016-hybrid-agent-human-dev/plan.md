@@ -1,5 +1,13 @@
 # Implementation Plan: Hybrid Agent-Human Delivery Templates
 
+**Readiness auditada em 2026-09-20**: artefatos e implementação local presentes,
+revisão #441 aberta; validar fixtures não equivale a validar pilotos reais.
+A divergência entre URL externa obrigatória nos contratos e Cost Reference
+interno no gerador bloqueia o fechamento de T016/T017 até decisão humana.
+As grafias `hybrid-dev-templates-v1` e `hybrid_dev_templates_v1`
+abaixo também precisam de reconciliação antes de configurar rollout; nenhuma
+chave operacional foi escolhida neste saneamento.
+
 **Branch**: `016-hybrid-agent-human-dev`
 
 **Created**: 2026-08-18
@@ -331,11 +339,11 @@ Checklist:
 
 ## Next Steps (Readiness for `/speckit-tasks`)
 
-- [ ] Gerar `graph.yaml`, `graph.md`, `impact-map.md` como artefatos Phase 1
-- [ ] Gerar `research.md` (consolidar findings de Phase 0 — neste caso, mínimo)
-- [ ] Gerar `data-model.md` com entidades detalhadas
-- [ ] Gerar `contracts/*.md` com schemas de output esperado
-- [ ] Gerar `quickstart.md` com validação E2E
+- [x] `graph.yaml`, `graph.md`, `impact-map.md` presentes como artefatos Phase 1
+- [x] `research.md` presente (findings de Phase 0)
+- [x] `data-model.md` presente com entidades detalhadas
+- [x] `contracts/*.md` presentes; conformidade do contrato de custo ainda bloqueada
+- [x] `quickstart.md` presente como guia de validação E2E, não prova de execução
 - [ ] Validar todos os gates (Security, Quality, Constitution)
 - [ ] Obter aprovação de Tech Lead via PR review antes de `/speckit-tasks`
 
@@ -352,6 +360,6 @@ Checklist:
   - [x] `data-model.md` — entidades com validação (já criado em fase anterior)
   - [x] `contracts/*` — spec-contract.md, plan-contract.md, task-contract.md
   - [x] `quickstart.md` — guia de validação E2E (9 steps)
-- [x] Todos os gates passando (Security, Quality, Constitution)
-- [x] ADL completo com 3 decisões arquiteturais
-- [x] Pronto para `/speckit-tasks`
+- [ ] Gates aprovados com evidências; revisões e contrato de custo ainda pendentes
+- [x] ADL contém 5 decisões arquiteturais (existência, não nova aprovação)
+- [x] `tasks.md` gerado; fechamento não implica aceitação das pendências acima

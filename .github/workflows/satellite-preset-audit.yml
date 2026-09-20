@@ -1,191 +1,120 @@
 name: Satellite Preset Version Audit
 
-# Autenticação:
-#   - Preferencial: GitHub App (`NIMBUS_APP_ID` + `NIMBUS_APP_PRIVATE_KEY`)
-#   - Fallback temporário: `VPNDEV_STANDARDS_READ_TOKEN` (PAT de qualquer
-#     membro da org, já documentado em update-speckit-and-bundle.yml)
-#
-# Todos os 34 repositórios satélites são privados/internos, então o token
-# padrão do Actions (GITHUB_TOKEN, escopo restrito a este próprio repositório)
-# não consegue listar/ler conteúdo de outros repos da org — é obrigatório um
-# token com leitura org-wide aqui. Ver docs/github-app-auth-snippet.md.
-
 on:
   schedule:
-    # Weekly audit: Monday at 09:00 UTC
     - cron: '0 9 * * 1'
   workflow_dispatch:
 
 permissions:
-  issues: write
-  actions: write
   contents: read
+  issues: write
+
+concurrency:
+  group: satellite-preset-audit
+  cancel-in-progress: false
 
 jobs:
   audit-satellite-presets:
-    name: Audit Preset Versions Across Org
     runs-on: ubuntu-latest
+    env:
+      NIMBUS_APP_CONFIGURED: ${{ secrets.NIMBUS_APP_ID != '' && secrets.NIMBUS_APP_PRIVATE_KEY != '' }}
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 1
-
-      - name: Set up GitHub CLI
-        run: |
-          which gh || brew install gh
-
+          persist-credentials: false
       - name: Generate GitHub App installation token
         id: app-token
-        if: ${{ env.NIMBUS_APP_CONFIGURED == 'true' }}
-        env:
-          # 'secrets' não é permitido em jobs.<job_id>.steps.if (ver
-          # https://docs.github.com/actions/reference/workflows-and-actions/contexts#context-availability) —
-          # avaliar aqui em env (permitido) e ler via env.* no if acima.
-          NIMBUS_APP_CONFIGURED: ${{ secrets.NIMBUS_APP_ID != '' && secrets.NIMBUS_APP_PRIVATE_KEY != '' }}
+        if: env.NIMBUS_APP_CONFIGURED == 'true'
         uses: actions/create-github-app-token@v1
         with:
           app-id: ${{ secrets.NIMBUS_APP_ID }}
           private-key: ${{ secrets.NIMBUS_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           github-api-url: ${{ github.api_url }}
-          permission-metadata: read
           permission-contents: read
-
-      - name: Resolve auth token (App or PAT fallback)
-        id: resolve-token
-        run: |
-          if [ -n "${{ steps.app-token.outputs.token }}" ]; then
-            echo "token=${{ steps.app-token.outputs.token }}" >> "$GITHUB_OUTPUT"
-            echo "::notice::Autenticado via GitHub App (instalação de curta duração)."
-          elif [ -n "${{ secrets.VPNDEV_STANDARDS_READ_TOKEN }}" ]; then
-            echo "token=${{ secrets.VPNDEV_STANDARDS_READ_TOKEN }}" >> "$GITHUB_OUTPUT"
-            echo "::warning::GitHub App não configurado — usando VPNDEV_STANDARDS_READ_TOKEN de fallback (ver docs/github-app-auth-snippet.md)."
-          else
-            echo "::error::Nenhuma credencial configurada. Defina NIMBUS_APP_ID/NIMBUS_APP_PRIVATE_KEY ou VPNDEV_STANDARDS_READ_TOKEN. Repos satélites são privados/internos; o GITHUB_TOKEN padrão não tem acesso a eles."
-            exit 1
-          fi
-
       - name: Run preset audit
         id: audit
         env:
-          GH_TOKEN: ${{ steps.resolve-token.outputs.token }}
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          PAT_TOKEN: ${{ secrets.VPNDEV_STANDARDS_READ_TOKEN }}
+          SERVER_URL: ${{ github.server_url }}
+        shell: bash
         run: |
-          # Run the extended audit script
-          chmod +x scripts/scan-org-rename-references.sh
-          ./scripts/scan-org-rename-references.sh \
-            --mode satellite-preset-audit \
-            --org venha-pra-nuvem \
-            --output preset-audit-report.csv
-
+          set -euo pipefail
+          if [[ -n "$APP_TOKEN" ]]; then
+            export GH_TOKEN="$APP_TOKEN"
+          elif [[ -n "$PAT_TOKEN" ]]; then
+            export GH_TOKEN="$PAT_TOKEN"
+            echo "::warning::Using existing read-only PAT fallback."
+          else
+            echo "::error::No cross-repository read credential; GITHUB_TOKEN is repository-scoped."
+            exit 2
+          fi
+          export GH_HOST="${SERVER_URL#https://}"
+          bash scripts/scan-org-rename-references.sh --mode satellite-preset-audit \
+            --org "$GITHUB_REPOSITORY_OWNER" --output preset-audit-report.csv
       - name: Parse audit results
         id: parse
+        if: always() && steps.audit.outcome != 'skipped'
+        env:
+          AUDIT_OUTCOME: ${{ steps.audit.outcome }}
+        shell: bash
         run: |
-          drifted_count=$(grep ",drift," preset-audit-report.csv | wc -l)
-          not_bootstrapped_count=$(grep ",not_bootstrapped," preset-audit-report.csv | wc -l)
-          in_sync_count=$(grep ",in_sync," preset-audit-report.csv | wc -l)
-
-          echo "drifted=$drifted_count" >> $GITHUB_OUTPUT
-          echo "not_bootstrapped=$not_bootstrapped_count" >> $GITHUB_OUTPUT
-          echo "in_sync=$in_sync_count" >> $GITHUB_OUTPUT
-
-          # Fonte única de verdade da versão central: presets/nimbus-code-standards/preset.yml.
-          # Não reaproveitar o CENTRAL_VERSION hardcoded dentro de
-          # scan-org-rename-references.sh para o título da issue — aquele valor
-          # já precisa ser bumpado manualmente a cada release (ver comentário no
-          # próprio script) e esquecer de bumpá-lo ali não deve também deixar o
-          # título desta issue com uma versão antiga.
-          central_version=$(grep -m1 -E '^[[:space:]]*version:' presets/nimbus-code-standards/preset.yml | sed -E 's/.*"([0-9.]+)".*/\1/')
-          echo "central_version=$central_version" >> $GITHUB_OUTPUT
-
-          echo "## Satellite Preset Audit Results" > audit-summary.md
-          echo "" >> audit-summary.md
-          echo "- **In Sync**: $in_sync_count repos" >> audit-summary.md
-          echo "- **Drifted**: $drifted_count repos" >> audit-summary.md
-          echo "- **Not Bootstrapped**: $not_bootstrapped_count repos" >> audit-summary.md
-          echo "" >> audit-summary.md
-
-          if [ $drifted_count -gt 0 ]; then
-            echo "### Drifted Repos" >> audit-summary.md
-            grep ",drift," preset-audit-report.csv | cut -d',' -f1-3 | while read line; do
-              echo "- $line" >> audit-summary.md
-            done
+          set -euo pipefail
+          status=0
+          python3 scripts/preset-audit-report.py summary preset-audit-report.csv \
+            --manifest presets/nimbus-code-standards/preset.yml \
+            --summary audit-summary.md --outputs "$GITHUB_OUTPUT" || status=$?
+          if [[ "$AUDIT_OUTCOME" != success ]]; then
+            echo "Audit incomplete: scanner/authentication failed; counts may be partial." >> audit-summary.md
+            exit 2
           fi
-
+          exit "$status"
       - name: Upload audit report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: preset-audit-report
-          path: preset-audit-report.csv
+          path: |
+            preset-audit-report.csv
+            audit-summary.md
+          if-no-files-found: warn
           retention-days: 30
-
-      - name: Create issue if repos are drifted
-        if: steps.parse.outputs.drifted > 0
+      - name: Publish job summary
+        if: always()
+        shell: bash
+        run: |
+          if [[ -f audit-summary.md ]]; then
+            cat audit-summary.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Audit incomplete; inspect authentication or parsing errors." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Create or update central drift issue
+        if: success() && steps.parse.outputs.drifted != '0'
         uses: actions/github-script@v7
+        env:
+          CENTRAL_VERSION: ${{ steps.parse.outputs.central_version }}
+          DRIFTED: ${{ steps.parse.outputs.drifted }}
         with:
           script: |
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            const centralVersion = "${{ steps.parse.outputs.central_version }}";
-            const drifted = "${{ steps.parse.outputs.drifted }}";
-            const inSync = "${{ steps.parse.outputs.in_sync }}";
-            const notBootstrapped = "${{ steps.parse.outputs.not_bootstrapped }}";
-
-            const issueTitle = `🔄 Satellite repos out of sync with v${centralVersion}: ${drifted} repos need upgrade`;
-
-            // Idempotência: evita abrir uma issue nova a cada execução semanal
-            // enquanto o drift já reportado anteriormente ainda não foi resolvido
-            // — reaproveita uma issue aberta existente com o mesmo label em vez
-            // de duplicar. Usa "type:chore" (não "area:preset-sync", que nunca
-            // existiu na taxonomia real de labels deste repo — ver
-            // docs/label-taxonomy-and-autonomous-dev.md) como critério de busca.
-            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
-              owner,
-              repo,
-              state: "open",
-              labels: "type:chore,priority:P2-medium",
-              per_page: 100,
-            });
-            const existing = openIssues.find((i) => !i.pull_request && i.title.startsWith("🔄 Satellite repos out of sync"));
-
+            const fs = require('fs');
+            const {owner, repo} = context.repo;
+            const marker = '<!-- nimbus-satellite-preset-audit -->';
+            const title = `Satellite repos out of sync with v${process.env.CENTRAL_VERSION}: ${process.env.DRIFTED} repos`;
             const body = [
-              `Automated preset audit found **${drifted}** satellite repositories with preset version drift.`,
-              "",
-              "See artifact `preset-audit-report` for full details.",
-              "",
-              "**Next Steps:**",
-              "1. Review the drifted repos in the audit report",
-              "2. For each drifted repo, either:",
-              "   - Manually run `bootstrap.sh --refresh-preset` and create a PR, OR",
-              "   - Wait for auto-PR generation (if enabled)",
-              "3. Link PRs to this issue once created",
-              "",
-              "**Audit Details:**",
-              `- In Sync: ${inSync}`,
-              `- Drifted: ${drifted}`,
-              `- Not Bootstrapped: ${notBootstrapped}`,
-            ].join("\n");
-
+              marker,
+              fs.readFileSync('audit-summary.md', 'utf8'),
+              `Report: ${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`,
+              'After human pilot approval (#433/#445), opt in with NIMBUS_SATELLITE_SYNC_ENABLED=true.',
+              'Dispatch auto-sync-preset.yml manually with validated repo and target_version matching the selected bundle.',
+              'Sync proposes a PR for review. This audit does not dispatch sync, merge PRs or change satellites.'
+            ].join('\n\n');
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner, repo, state: 'open', per_page: 100
+            });
+            const existing = issues.find(i => !i.pull_request && (i.body || '').includes(marker));
             if (existing) {
-              await github.rest.issues.update({
-                owner,
-                repo,
-                issue_number: existing.number,
-                title: issueTitle,
-                body,
-              });
-              core.info(`Updated existing issue #${existing.number}`);
+              await github.rest.issues.update({owner, repo, issue_number: existing.number, title, body});
             } else {
-              const created = await github.rest.issues.create({
-                owner,
-                repo,
-                title: issueTitle,
-                body,
-                labels: ["type:chore", "priority:P2-medium"],
-              });
-              core.info(`Created issue #${created.data.number}`);
+              await github.rest.issues.create({owner, repo, title, body});
             }
-
-      - name: Comment summary on dashboard
-        run: |
-          echo "## Audit completed at $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
-          cat audit-summary.md

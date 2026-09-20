@@ -13,6 +13,7 @@ DECISION_OWNER=""
 SATELLITE_DOMAINS=""
 CUSTOM_DOMAIN_JUSTIFICATION=""
 CUSTOM_DOMAIN_OWNERSHIP=""
+REFRESH_PRESET=false
 
 IGNORED_TOP_LEVEL_ARTIFACTS=(
   .github .specify docs templates presets extensions workflows tests specs bundles reports scripts
@@ -24,6 +25,8 @@ print_usage() {
   cat <<'EOF'
 Usage:
   ./bootstrap.sh [--local <path>] [--integration <copilot|claude|gemini>] [--repo-type <platform|dev_standards>] [--delivery-model <monorepo|multirepo>] [--decision-reason <text>] [--decision-owner <team|role>] [--satellite-domains <CSV>] [--custom-domain-justification <text>] [--custom-domain-ownership <text>]
+  ./bootstrap.sh --refresh-preset --local <bundle-checkout> --repo-type <platform|dev_standards>
+Refresh updates the preset and unmodified managed files only; no init or GitHub provisioning.
 EOF
 }
 
@@ -343,6 +346,10 @@ while [[ $# -gt 0 ]]; do
       LOCAL_PATH="$2"
       shift 2
       ;;
+    --refresh-preset)
+      REFRESH_PRESET=true
+      shift
+      ;;
     --integration)
       INTEGRATION="$2"
       shift 2
@@ -394,6 +401,11 @@ fi
 
 WORKDIR="$(pwd)"
 
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "ERROR: python3 is required for preset registry and managed-file validation." >&2
+  exit 1
+fi
+
 if [[ -z "$LOCAL_PATH" ]]; then
   TMP_CLONE="$(mktemp -d)"
   trap 'rm -rf "$TMP_CLONE"' EXIT
@@ -402,8 +414,72 @@ if [[ -z "$LOCAL_PATH" ]]; then
   LOCAL_PATH="$TMP_CLONE"
 fi
 
+if [[ "$REFRESH_PRESET" == true && -z "$REPO_TYPE" ]]; then
+  REPO_TYPE="$(python3 - "$WORKDIR/.specify/presets/.registry" <<'PY'
+import json, sys
+try:
+    with open(sys.argv[1]) as stream:
+        presets = json.load(stream).get("presets", {})
+    types = {"nimbus-code-standards": "dev_standards", "nimbus-code-platform-standards": "platform"}
+    installed = [types[key] for key in presets if key in types]
+    if len(installed) != 1:
+        raise ValueError("Pass --repo-type when no unique Nimbus preset is installed")
+    print(installed[0])
+except (OSError, ValueError, AttributeError) as error:
+    print("ERROR: " + str(error), file=sys.stderr)
+    sys.exit(1)
+PY
+)"
+fi
 resolve_repo_type
 SELECTED_PRESET="$(preset_for_repo_type "$REPO_TYPE")"
+
+install_preset() {
+  local manifest="$LOCAL_PATH/presets/$SELECTED_PRESET/preset.yml"
+  local source_version installed_version=""
+  source_version="$(awk '/^[[:space:]]*version:/ {print $2; exit}' "$manifest" | tr -d "\"'")"
+  if [[ ! "$source_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+([+-][A-Za-z0-9.-]+)?$ ]]; then
+    echo "ERROR: Invalid or missing preset version in $manifest" >&2
+    return 1
+  fi
+  if [[ -f "$WORKDIR/.specify/presets/.registry" ]]; then
+    installed_version="$(python3 - "$WORKDIR/.specify/presets/.registry" "$SELECTED_PRESET" <<'PY'
+import json, sys
+try:
+    with open(sys.argv[1]) as stream:
+        data = json.load(stream)
+    entry = data.get("presets", {}).get(sys.argv[2])
+    print(entry.get("version", data.get("version", "")) if entry is not None else "")
+except (OSError, ValueError, AttributeError) as error:
+    print("ERROR: Cannot read installed preset registry: " + str(error), file=sys.stderr)
+    sys.exit(1)
+PY
+)" || return 1
+  fi
+  if [[ -n "$installed_version" ]]; then
+    if [[ "$installed_version" == "$source_version" && "$REFRESH_PRESET" != true ]]; then
+      echo "  Preset $SELECTED_PRESET already at $source_version."
+      return 0
+    fi
+    echo "  Updating $SELECTED_PRESET from $installed_version to $source_version..."
+    specify preset remove "$SELECTED_PRESET" || return 1
+  fi
+  specify preset add --dev "$LOCAL_PATH/presets/$SELECTED_PRESET" --priority 5
+}
+
+if [[ "$REFRESH_PRESET" == true ]]; then
+  if [[ ! -f "$WORKDIR/.specify/presets/.registry" ]]; then
+    echo "ERROR: Refresh requires an initialized repository and preset registry." >&2
+    exit 1
+  fi
+  python3 "$LOCAL_PATH/scripts/sync-bundle-artifacts.py" \
+    --bundle "$LOCAL_PATH" --target "$WORKDIR" --preset "$SELECTED_PRESET" --check
+  install_preset
+  python3 "$LOCAL_PATH/scripts/sync-bundle-artifacts.py" \
+    --bundle "$LOCAL_PATH" --target "$WORKDIR" --preset "$SELECTED_PRESET"
+  echo "OK: preset refresh complete. Review and commit the diff through a PR."
+  exit 0
+fi
 
 echo "-> Classifying repository context (greenfield vs brownfield)..."
 read -r DETECTED_CONTEXT CONTEXT_INDICATOR <<< "$(classify_repository_context)"
@@ -421,33 +497,7 @@ specify init --here --integration "$INTEGRATION" --force
 persist_topology_decision
 
 echo "-> Installing preset $SELECTED_PRESET..."
-# Detect a stale already-installed preset and upgrade it automatically.
-# `specify preset add` has no "update" verb: re-running it on a repo that
-# already has the same preset ID installed just fails/no-ops, so simply
-# re-running bootstrap.sh after a preset version bump silently kept every
-# repo on its old (possibly broken) preset forever. Compare the version
-# recorded in .specify/presets/.registry against the version declared in
-# the source preset.yml, and remove+reinstall when they differ.
-SOURCE_PRESET_MANIFEST="$LOCAL_PATH/presets/$SELECTED_PRESET/preset.yml"
-SOURCE_PRESET_VERSION="$({ grep -E '^version:' "$SOURCE_PRESET_MANIFEST" 2>/dev/null || true; } | head -1 | sed -E 's/^version:[[:space:]]*"?([^"[:space:]]+)"?.*/\1/')"
-INSTALLED_REGISTRY="$WORKDIR/.specify/presets/.registry"
-INSTALLED_PRESET_VERSION=""
-if [[ -f "$INSTALLED_REGISTRY" ]] && command -v python3 >/dev/null 2>&1; then
-  INSTALLED_PRESET_VERSION="$(SPECKIT_REGISTRY="$INSTALLED_REGISTRY" SPECKIT_PRESET="$SELECTED_PRESET" python3 -c "
-import json, os
-try:
-    with open(os.environ['SPECKIT_REGISTRY']) as f:
-        data = json.load(f)
-    print(data.get('presets', {}).get(os.environ['SPECKIT_PRESET'], {}).get('version', ''))
-except Exception:
-    print('')
-" 2>/dev/null)"
-fi
-if [[ -n "$INSTALLED_PRESET_VERSION" && -n "$SOURCE_PRESET_VERSION" && "$INSTALLED_PRESET_VERSION" != "$SOURCE_PRESET_VERSION" ]]; then
-  echo "  Installed preset version ($INSTALLED_PRESET_VERSION) differs from source ($SOURCE_PRESET_VERSION) - upgrading..."
-  specify preset remove "$SELECTED_PRESET" || echo "  WARN: could not remove existing preset $SELECTED_PRESET before upgrade"
-fi
-specify preset add --dev "$LOCAL_PATH/presets/$SELECTED_PRESET" --priority 5   || echo "  (preset already installed - skipped; use 'specify preset remove $SELECTED_PRESET' before reinstalling)"
+install_preset
 
 echo "-> Installing extension nimbus-code-backlog-sync..."
 specify extension add --dev "$LOCAL_PATH/extensions/nimbus-code-backlog-sync"   || echo "  (extension already installed - skipped; use 'specify extension remove nimbus-code-backlog-sync' before reinstalling)"
@@ -622,6 +672,8 @@ else
 fi
 
 BUNDLE_VERSION="$(grep -A4 '^bundle:' "$LOCAL_PATH/bundles/nimbus-code-project-bundle/bundle.yml" | grep -E '^\s*version:' | head -1 | sed -E 's/.*"([0-9.]+)".*/\1/')"
+python3 "$LOCAL_PATH/scripts/sync-bundle-artifacts.py" \
+  --bundle "$LOCAL_PATH" --target "$WORKDIR" --preset "$SELECTED_PRESET" --initialize
 echo
 echo "OK: bundle nimbus-code-project-bundle v${BUNDLE_VERSION} applied."
 echo "OK: preset installed: $SELECTED_PRESET (repository type: $REPO_TYPE)"

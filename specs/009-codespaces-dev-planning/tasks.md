@@ -2,7 +2,7 @@
 
 **Feature**: Codespaces para DEV e CI/CD
 **Feature Branch**: `009-codespaces-dev-planning`
-**Complexity**: S3 (sem revisão humana bloqueante — feature de planejamento/documentação)
+**Complexity**: S3 (planejamento/documentação; revisão humana de adoção pendente em #455/#436, ver estado verificável abaixo)
 **Created**: 2026-08-20
 
 **Input**: Design docs from `specs/009-codespaces-dev-planning/` (plan.md, research.md, data-model.md, contracts/, quickstart.md, graph.yaml, impact-map.md)
@@ -12,9 +12,27 @@
 ## Overview
 
 Feature de planejamento: o entregável é o devcontainer de referência e a
-documentação de decisão, não um rollout em produção. Verificação confirma que
-nenhum artefato (`.devcontainer/`, guias de adoção) existe ainda no repositório
-— todas as tasks são trabalho novo.
+documentação de decisão, não um rollout em produção. Na geração inicial das
+tasks, os artefatos ainda não existiam; esse diagnóstico histórico foi superado
+pelo registro de implementação de 2026-08-20 abaixo.
+
+### Estado verificável — 2026-09-20
+
+O devcontainer e os guias existem; JSON e sintaxe do script foram verificados
+localmente, sem abrir Codespace. Os 11 marcadores concluídos não aprovam adoção:
+[#455](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/455)
+e [#436](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/436)
+estavam abertas, solicitando decisão do Architecture Board, Platform Lead e
+DevSecOps sobre Local First, Codespaces opcional, custos e segredos. Essas
+propostas permanecem para decisão humana, não são uma arquitetura aprovada.
+
+A narrativa de #455 diz "11/11" no checklist de qualidade e cita
+`checklists/dev-environments-and-cicd-tradeoffs.md`, mas o checkout auditado
+mantém os 11 itens de `checklists/requirements-quality.md` abertos e não contém
+o checklist adicional. É uma divergência de evidência a reconciliar com #455,
+não autorização para criar o artefato ou marcar itens sem revisão. T001,
+T006 e T014 continuam pendentes; T009 registra execução em ambiente equivalente,
+não teste em Codespace real nem comparação medida de tempo com CI.
 
 **Total Tasks**: 14 tasks across 4 phases
 **MVP Scope**: Phase 1 (Setup) + Phase 2 (US1 — devcontainer padrão)
@@ -117,19 +135,20 @@ Phase 1 (Setup) [T001–T002]
 
 ## Parallel Opportunities
 
-Todas as 4 user stories (Phases 2–5) são independentes entre si e podem ser
-executadas em paralelo por agentes/desenvolvedores diferentes, desde que
-Phase 1 (confirmação de licenciamento) esteja concluída.
+As 4 user stories (Phases 2–5) permitem trabalho documental em paralelo.
+Conforme a decisão já registrada em `research.md` e T001, o design prosseguiu
+sem confirmação de licenciamento. Provisionamento e validação hospedada
+continuam dependendo da confirmação administrativa e dos gates de adoção.
 
 ## Implementation Strategy
 
 ### MVP First
 
-1. Completar Phase 1 (confirmar licenciamento — bloqueante para tudo mais fazer sentido).
+1. Completar Phase 1 para provisionamento/validação hospedada; confirmação de licenciamento não bloqueia o design documental já autorizado em `research.md`.
 2. Completar Phase 2 (US1) — devcontainer funcional é o valor mais direto e demonstrável.
 3. Completar Phases 3–5 em paralelo — não há dependência técnica entre elas.
 
 ### Validation Strategy
 
 - Cada user story tem cenário de validação correspondente no `quickstart.md`.
-- Esta feature não bloqueia merge em revisão humana obrigatória (diferente da 008) — mas revisão é recomendada dado o impacto em todos os times.
+- O planejamento inicial não exigia revisão humana bloqueante para produzir os artefatos de referência. Em 2026-09-20, #455/#436 solicitam aprovação formal para a decisão arquitetural/adoção; este saneamento não a concede nem autoriza rollout.

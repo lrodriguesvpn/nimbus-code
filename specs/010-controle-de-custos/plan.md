@@ -6,6 +6,13 @@
 
 **Status**: Phase 1 Design Complete ✓
 
+**Readiness auditada em 2026-09-20**: backlog de implementação, sem `tasks.md`
+e sem os serviços/testes `cost-*` planejados abaixo. Revisão humana #454 aberta.
+O desenho não comprova operação de backup, TLS, segredos ou isolamento.
+Embora #454 relate 12/12 itens de qualidade satisfeitos, os 12 itens de
+`checklists/requirements-quality.md` permanecem abertos neste repositório.
+Nenhuma aprovação ou execução operacional foi inferida dessa narrativa.
+
 **Spec**: [spec.md](./spec.md)
 
 ## Summary
@@ -217,11 +224,11 @@ Ver `quickstart.md` para guia E2E completo.
 
 ### Não-Negociáveis (zero exceção):
 
-- [x] **Backup & DR**: Dados de custo em banco com backup automático; histórico append-only (imutável); rollback via feature flag sem perda de dados
-- [x] **Segredos em cofre**: `GITHUB_TOKEN` para GitHub Project API em GitHub Secrets; credenciais de banco em vault; nunca em variáveis de ambiente expostas
-- [x] **Branch protegida**: Alterações em coleta e armazenamento requerem PR com revisão antes de merge em `develop`
-- [x] **TLS**: Dashboard exposto apenas por HTTPS; GitHub API via HTTPS; notificações via HTTPS webhook
-- [x] **Isolamento de ambiente**: Feature flag `cost_control_v1` separa dev/hml/prod; banco de dados por ambiente
+- [ ] **Backup & DR — projetado, não verificado**: Dados de custo em banco com backup automático; histórico append-only (imutável); rollback via feature flag sem perda de dados
+- [ ] **Segredos em cofre — projetado, não verificado**: `GITHUB_TOKEN` para GitHub Project API em GitHub Secrets; credenciais de banco em vault; nunca em variáveis de ambiente expostas
+- [ ] **Branch protegida — requisito, configuração não verificada**: Alterações em coleta e armazenamento requerem PR com revisão antes de merge em `develop`
+- [ ] **TLS — projetado, não verificado**: Dashboard exposto apenas por HTTPS; GitHub API via HTTPS; notificações via HTTPS webhook
+- [ ] **Isolamento de ambiente — projetado, não verificado**: Feature flag `cost_control_v1` separa dev/hml/prod; banco de dados por ambiente
 
 ### Escapáveis via Architecture Decision Log:
 
@@ -229,7 +236,8 @@ Ver `quickstart.md` para guia E2E completo.
 - **SSO**: dashboard interno; autenticação via GitHub OAuth (já padrão organizacional); não exige ADR separado
 - **IaC**: infraestrutura do banco e dashboard versionados como IaC (Terraform recomendado); desvio exige ADL
 
-**Status**: Todos os itens não-negociáveis atendidos. Nenhum item escapável ativo sem justificativa.
+**Status**: controles não-negociáveis especificados, ainda sem evidência de
+implementação/validação. Não equivalem a gates operacionais aprovados.
 
 ---
 
@@ -293,7 +301,7 @@ Ver `quickstart.md` para guia E2E completo.
 - [x] `data-model.md` com entidades e validações completas
 - [x] `contracts/` com schemas de API e entidades
 - [x] `quickstart.md` com guia de validação E2E
-- [x] Todos os gates passando (Security, Quality, Constitution Check)
+- [ ] Validar gates com evidências e revisão humana; desenho não equivale à execução
 - [x] ADL completo com 5 decisões arquiteturais
 - [ ] Aprovação humana via PR review antes de `/speckit-tasks`
 
@@ -310,6 +318,6 @@ Ver `quickstart.md` para guia E2E completo.
   - [x] `data-model.md` — entidades com validação completa
   - [x] `contracts/` — API contract e entity contracts
   - [x] `quickstart.md` — guia de validação E2E
-- [x] Todos os gates passando (Security, Quality, Constitution)
+- [ ] Gates operacionais ainda não verificados; aprovação humana permanece pendente
 - [x] ADL completo (5 decisões arquiteturais)
 - [ ] Aprovação humana → pronto para `/speckit-tasks`

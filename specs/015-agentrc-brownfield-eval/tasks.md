@@ -4,6 +4,12 @@
 **Prerequisites**: `plan.md` ✅, `spec.md` ✅, `research.md` ✅, `data-model.md` ✅, `quickstart.md` ✅, `graph.yaml` ✅, `graph.md` ✅  
 **Organization**: Tasks grouped by user story for independent validation and recommendation closure.
 
+**Fechamento documental ≠ aprovação (2026-09-20)**: as 22 tarefas marcadas
+representam a entrega dos artefatos. A revisão #449 continua aberta e propõe
+No-Go imediato, divergindo do Go local. Ver [recommendation.md](./recommendation.md).
+A ata de decisão exigida por SC-003 não foi localizada; piloto e adoção
+permanecem dependentes de revisão humana, sem nova execução nesta fase.
+
 ## Format: `[ID] [P?] [US?] Description with file path`
 
 - `[P]`: Task can run in parallel (different file, no blocking dependency)

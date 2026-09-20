@@ -1,8 +1,43 @@
 feature: "020-satellite-repo-governance"
 bounded_context: "spec-kit-workflow"
-version: 1
+version: 2
 
 modules:
+  - id: preset-version-detector
+    type: script
+    owner: platform
+    responsibilities:
+      - Comparar versões locais ou esperada explícita com a registry instalada
+      - Inferir preset Nimbus único dev ou platform; exigir seleção explícita em ambiguidade
+      - Distinguir in_sync, mismatch e erro operacional
+  - id: bootstrap-validation-workflow
+    type: workflow
+    owner: platform
+    responsibilities:
+      - Bloquear drift, detector ausente e erros de execução
+  - id: satellite-preset-audit
+    type: script-workflow
+    owner: platform
+    responsibilities:
+      - Produzir CSV e contadores determinísticos sem modificar satélites
+      - Expor falhas de autenticação e leitura sem mascarar como ausência
+  - id: satellite-preset-sync
+    type: script-workflow
+    owner: platform
+    responsibilities:
+      - Exigir opt-in e dispatch manual validado
+      - Executar refresh gerenciado do bundle e abrir PR para revisão
+      - Proibir merge e force-push
+  - id: managed-preset-refresh
+    type: script
+    owner: platform
+    responsibilities:
+      - Atualizar somente artefatos gerenciados sem provisionar recursos
+  - id: satellite-governance-tests
+    type: tests
+    owner: platform
+    responsibilities:
+      - Exercitar detector, CSV e sync com mocks sem rede ou mutações GitHub
   - id: bootstrap-context-classifier
     type: script
     owner: platform
@@ -42,6 +77,30 @@ modules:
       - Explicar mono vs multirepo e o papel de repo central/satélites
 
 dependencies:
+  - from: bootstrap-validation-workflow
+    to: preset-version-detector
+    kind: sync
+    protocol: json-exit-status
+  - from: satellite-preset-sync
+    to: managed-preset-refresh
+    kind: sync
+    protocol: bootstrap-refresh-local
+  - from: satellite-preset-sync
+    to: preset-version-detector
+    kind: sync
+    protocol: expected-version-validation
+  - from: satellite-governance-tests
+    to: satellite-preset-sync
+    kind: sync
+    protocol: mocked-cli
+  - from: satellite-governance-tests
+    to: satellite-preset-audit
+    kind: sync
+    protocol: csv-fixtures
+  - from: satellite-governance-tests
+    to: bootstrap-validation-workflow
+    kind: sync
+    protocol: workflow-shell-fixtures
   - from: bootstrap-context-classifier
     to: topology-decision-intake
     kind: sync

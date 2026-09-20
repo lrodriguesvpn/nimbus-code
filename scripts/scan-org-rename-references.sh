@@ -162,74 +162,48 @@ fi # MODE != satellite-preset-audit
 # ============================================================================
 
 if [[ "$MODE" == "satellite-preset-audit" ]]; then
-  ORG="${ORG:-venha-pra-nuvem}"
   OUTPUT_FILE="${OUTPUT:-preset-audit-$(date +%Y%m%d-%H%M%S).csv}"
-
-  # Fonte única de verdade: presets/nimbus-code-standards/preset.yml no repo
-  # central. Nunca hardcodear a versão aqui — isso exigiria lembrar de
-  # bumpar em dois lugares a cada release (aqui e no preset.yml), e
-  # esquecer faria todo satélite já atualizado aparecer como "drift" contra
-  # uma versão central desatualizada.
-  PRESET_YML="presets/nimbus-code-standards/preset.yml"
-  if [[ -f "$PRESET_YML" ]]; then
-    CENTRAL_VERSION="$(grep -m1 -E '^[[:space:]]*version:' "$PRESET_YML" | sed -E 's/.*"([0-9.]+)".*/\1/')"
-  else
-    echo "❌ Não encontrei ${PRESET_YML} a partir do diretório atual — rode este script a partir da raiz do repositório central." >&2
-    exit 1
-  fi
-  
+  SCRIPT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+  REPORT_HELPER="$SCRIPT_ROOT/scripts/preset-audit-report.py"
+  CENTRAL_VERSION="$(python3 "$REPORT_HELPER" version "$SCRIPT_ROOT/presets/nimbus-code-standards/preset.yml")"
+  export GH_HOST
+  [[ "$ORG" =~ ^[A-Za-z0-9][A-Za-z0-9-]*$ ]] || { echo "Invalid organization" >&2; exit 2; }
   echo "repo,current_version,drift_status,last_updated" > "$OUTPUT_FILE"
-  
-  # Query GitHub API for all repos in org
-  repos=$(gh repo list "$ORG" --limit 1000 --json nameWithOwner --jq '.[].nameWithOwner')
-  
+  repos="$(gh api --paginate "orgs/$ORG/repos?per_page=100" --jq '.[].full_name')"
+  errors=0
   for repo in $repos; do
-    # Skip central repo (we're looking at satellites only)
-    if [[ "$repo" == *"nimbus-code-spec-kit-template" ]]; then
+    [[ "$repo" =~ ^[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9][A-Za-z0-9_.-]*$ ]] || {
+      echo "Invalid repository returned by API" >&2; exit 2;
+    }
+    if [[ "$repo" == "$ORG/$NEW_SLUG" ]]; then
       continue
     fi
-    
-    # Query preset version from satellite repo. Não usar "|| echo missing" aqui:
-    # com pipefail, um estágio intermediário do pipe (ex.: base64 -d recebendo
-    # entrada vazia) pode falhar mas o jq final ainda produzir saída válida —
-    # checar se a variável ficou vazia no final é mais confiável do que
-    # confiar no exit code do pipe inteiro.
-    preset_version="$(gh api "repos/$repo/contents/.specify/presets/.registry" \
-      --jq '.content' 2>/dev/null | base64 -d 2>/dev/null | \
-      jq -r '.version // "unknown"' 2>/dev/null)" || preset_version=""
-    if [[ -z "$preset_version" ]]; then
-      preset_version="missing"
-    fi
-    
-    # Determine drift status
-    if [[ "$preset_version" == "$CENTRAL_VERSION" ]]; then
+    if ! preset_version="$(gh api "repos/$repo/contents/.specify/presets/.registry" |
+      python3 "$REPORT_HELPER" registry)"; then
+      # 404 may hide an inaccessible private repository; never infer not_bootstrapped.
+      printf '%s,unknown,error,N/A\n' "$repo" >> "$OUTPUT_FILE"
+      echo "ERROR: unable to read preset registry for $repo" >&2
+      errors=$((errors + 1))
+      continue
+    elif [[ "$preset_version" == "$CENTRAL_VERSION" ]]; then
       drift_status="in_sync"
-    elif [[ "$preset_version" == "missing" ]] || [[ "$preset_version" == "unknown" ]]; then
-      drift_status="not_bootstrapped"
     else
       drift_status="drift"
     fi
-    
-    # Get last update time for .specify directory. Usar "if cmd; then ...
-    # else ...; fi" em vez de "cmd || echo N/A": com $(...), a saída parcial
-    # (ex.: corpo de erro JSON de um repo vazio/409) já foi capturada pela
-    # substituição de comando mesmo quando o comando falha, então um "||"
-    # simplesmente concatenaria o JSON de erro com "N/A" em vez de substituí-lo.
-    if last_updated="$(gh api "repos/$repo/commits" \
-      --jq 'map(select(.files[].path | startswith(".specify"))) | .[0].commit.committer.date // "N/A"' 2>/dev/null)" \
-      && [[ -n "$last_updated" ]]; then
-      :
-    else
+    if ! last_updated="$(gh api --method GET "repos/$repo/commits" \
+      -f path=.specify -F per_page=1 --jq '.[0].commit.committer.date // "N/A"')"; then
+      echo "ERROR: unable to read preset commit date for $repo" >&2
       last_updated="N/A"
+      drift_status="error"
+      errors=$((errors + 1))
     fi
-    
-    echo "$repo,$preset_version,$drift_status,$last_updated" >> "$OUTPUT_FILE"
+    if [[ "$last_updated" != "N/A" && ! "$last_updated" =~ ^[0-9TZ:+.-]+$ ]]; then
+      last_updated="N/A"
+      drift_status="error"
+      errors=$((errors + 1))
+    fi
+    printf '%s,%s,%s,%s\n' "$repo" "$preset_version" "$drift_status" "$last_updated" >> "$OUTPUT_FILE"
   done
-  
-  echo "✓ Preset audit complete. Report saved to: $OUTPUT_FILE"
-  echo "  Drifted repos:"
-  # "|| true": nenhum repo em drift é o resultado esperado/de sucesso, não uma
-  # falha do script — sem isso, o exit code 1 do grep (nenhum match) propagava
-  # via pipefail e derrubava todo o job do workflow mesmo com auditoria OK.
-  grep ",drift," "$OUTPUT_FILE" | cut -d',' -f1 || true
+  echo "Preset audit report: $OUTPUT_FILE (read errors: $errors)"
+  [[ "$errors" == 0 ]] || exit 2
 fi

@@ -219,6 +219,11 @@ sistema de controle de custos reflete o valor sem intervenção manual adicional
 - **FR-009**: O sistema MUST registrar, por feature, a variação entre estimativa e consumo real, tornando o dado disponível para auditoria e melhoria de processo.
 - **FR-010**: O sistema MUST [NEEDS CLARIFICATION: definir se o custo de recursos de nuvem (compute, storage) entra no escopo desta fase ou é uma fase futura].
 
+  **Reconciliação pendente (2026-09-20)**: o ADR-3 em [plan.md](./plan.md)
+  propõe adiar nuvem para fase 2, mas a revisão humana #454 continua aberta.
+  Manter essa proposta distinta de uma decisão aprovada; não iniciar integração
+  financeira de nuvem nem remover a clarificação sem confirmação.
+
 ### Key Entities *(include if feature involves data)*
 
 - **CostRecord**: representa o custo real de uma feature em uma dimensão específica (tokens, horas humanas ou nuvem); atributos: `feature_id`, `dimension`, `amount`, `currency`, `period`, `source`.

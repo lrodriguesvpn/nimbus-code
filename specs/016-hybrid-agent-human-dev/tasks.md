@@ -1,7 +1,17 @@
 # Tasks: Hybrid Agent-Human Delivery Templates
 
 **Input**: Design docs from `/specs/016-hybrid-agent-human-dev/`
-**Prerequisites**: [plan.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/vpn-skills-repo-governance-specs/specs/016-hybrid-agent-human-dev/plan.md), [spec.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/vpn-skills-repo-governance-specs/specs/016-hybrid-agent-human-dev/spec.md), [research.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/vpn-skills-repo-governance-specs/specs/016-hybrid-agent-human-dev/research.md), [data-model.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/vpn-skills-repo-governance-specs/specs/016-hybrid-agent-human-dev/data-model.md), [contracts/](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/vpn-skills-repo-governance-specs/specs/016-hybrid-agent-human-dev/contracts/)
+**Prerequisites**: [plan.md](./plan.md), [spec.md](./spec.md), [research.md](./research.md), [data-model.md](./data-model.md), [contracts/](./contracts/)
+
+**Estado auditado em 2026-09-20 — contrato de custo bloqueado**: revisão #441
+aberta. T016/T017 entregaram blocos de custo, mas a URL externa exigida em
+`contracts/plan-contract.md` e `contracts/task-contract.md` diverge da orientação
+de Cost Reference interno em `.github/skills/speckit-plan/SKILL.md`. Reabertas
+como parciais até decisão humana: este saneamento não escolhe contrato, altera
+gerador nem aprova a divergência. O validador híbrido passou contra fixtures,
+não comprova outputs reais do gerador ou pilotos humano/agente. Os 11 itens
+de `checklists/requirements-quality.md` permanecem abertos, apesar de #441
+relatá-los completos.
 **Organization**: Tasks are ordered to make the template rollout safe, reviewable, and independently testable.
 
 ## Format: `[ID] [P?] [US?] Description`
@@ -69,8 +79,8 @@
 
 **Independent Test**: Generate the target artifacts and confirm that the public SPEC KIT COST URL appears in the expected template sections.
 
-- [x] T016 [P] [US3] Add the Cost Reference block and SPEC KIT COST URL to `.specify/presets/nimbus-code-standards/templates/plan-template.md`
-- [x] T017 [P] [US3] Add the SPEC KIT COST reference and human-hour guidance to `.specify/presets/nimbus-code-standards/templates/tasks-template.md`
+- [ ] T016 [P] [US3] **PARCIAL/BLOQUEADA — decisão humana**: Cost Reference block exists in `.specify/presets/nimbus-code-standards/templates/plan-template.md`; reconcile external SPEC KIT COST URL required by the contract versus internal-reference generator guidance before declaring compliance.
+- [ ] T017 [P] [US3] **PARCIAL/BLOQUEADA — decisão humana**: cost/human-hour guidance exists in `.specify/presets/nimbus-code-standards/templates/tasks-template.md`; resolve the same external-URL versus internal-reference contract divergence without silently selecting either.
 - [x] T018 [P] [US3] Add cost-tracking and pilot rollout validation steps to `specs/016-hybrid-agent-human-dev/quickstart.md`
 - [x] T019 [US3] Add the reusable `hybrid-dev-templates` pattern entry to `docs/reuse-catalog.yaml` with tag, bounded context, description, and source
 

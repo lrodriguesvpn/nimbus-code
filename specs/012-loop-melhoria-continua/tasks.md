@@ -6,6 +6,13 @@
 
 **Organization**: Tasks agrupadas por User Story (US1 P1, US2 P1, US3 P2) para entrega incremental e teste independente, conforme `spec.md`.
 
+**Estado auditado em 2026-09-20**: implementação presente; revisões humanas
+#452/#438 abertas. T021 corresponde à issue #218, bloqueada por dados reais de
+tokens/horas humanos. Os 21/21 testes relatados em #452 não foram reexecutados
+nesta auditoria read-only; não equivalem a comprovação de SLO em GHE real.
+`checklists/requirements-quality.md` mantém 12 itens abertos, distintos dos
+21 itens marcados em `checklists/requirements.md`.
+
 **Tests**: `plan.md` (Rastreabilidade AC → Teste → Módulo) já define testes de integração para AC-2 e AC-4 (`tests/scripts/process-metrics-report.*.test.sh`) — incluídos como parte da implementação de cada User Story, não como fase TDD separada. AC-1, AC-3, AC-5 são convenções de processo/template sem comportamento executável (justificado no `plan.md`).
 
 ---
@@ -182,5 +189,5 @@
 
 | Métrica | Estimado (`plan.md`) | Real | Variância | Fonte da medição |
 |---|---|---|---|---|
-| Tokens (input+output) | ~30–45 mil | [preencher ao fechar] | — | Copilot Usage da organização |
-| Horas humanas | ~2–4 horas | [total lançado no GitHub Project] | — | GitHub Project — campo "Horas Humanas" |
+| Tokens (input+output) | ~30–45 mil | Não disponível — T021/#218 pendente | Não calculável | A obter do Copilot Usage da organização |
+| Horas humanas | ~2–4 horas | Não disponível — T021/#218 pendente | Não calculável | A confirmar no GitHub Project — campo "Horas Humanas" |

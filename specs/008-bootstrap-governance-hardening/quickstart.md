@@ -87,3 +87,14 @@ qual o estado atual de disponibilidade.
 - [ ] AC-4/AC-5 pendentes de piloto com GitHub App real (bloqueado por T005/T006); fallback e permanencia do `graph-guard.yml` foram verificados por inspecao e lint.
 - [x] AC-6/AC-7 validados localmente pelo teste de URLs publicas.
 - [ ] AC-8 com medicao por desenvolvedor real pendente (T026); clareza do manual revisada localmente.
+
+### Limite do registro histórico — 2026-09-20
+
+Os marcadores acima são preservados como registro da implementação, não como
+aprovação de adoção. O teste existente
+`tests/bootstrap/no-public-github-urls.bats` verifica ocorrências de URLs e sua
+allowlist: não demonstra que a instalação efetivamente obteve o Spec Kit da
+fonte oficial (AC-6), nem que a atualização/reinstalação do preset funciona.
+Não foi localizado o teste dedicado `bootstrap-official-source.bats` planejado
+originalmente. O [mapa de testes corrigido no plano](plan.md) distingue
+essa lacuna da cobertura de AC-7 e do piloto real ainda pendente em #103/T022.

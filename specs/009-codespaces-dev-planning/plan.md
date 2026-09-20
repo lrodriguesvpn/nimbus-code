@@ -1,8 +1,21 @@
 # Implementation Plan: Codespaces para DEV e CI/CD
 
-**Branch**: `009-codespaces-dev-planning` | **Date**: 2026-08-20 | **Spec**: [spec.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/vpn-skills-repo-governance-specs/specs/009-codespaces-dev-planning/spec.md)
+**Branch**: `009-codespaces-dev-planning` | **Date**: 2026-08-20 | **Spec**: [spec.md](spec.md)
 
 **Input**: Feature specification from `specs/009-codespaces-dev-planning/spec.md`
+
+## Estado verificável — 2026-09-20
+
+Os artefatos de referência existem, mas não representam rollout nem decisão
+arquitetural aprovada. As issues
+[#455](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/455)
+e [#436](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/436)
+estavam abertas na consulta desta data e exigem revisão humana da adoção.
+Ver [estado verificável em tasks.md](tasks.md#estado-verificável--2026-09-20)
+para a divergência entre as alegações de #455 e os checklists locais.
+Nenhuma decisão sobre Local First/Codespaces foi alterada por esta atualização.
+T001/T006/T014 permanecem pendentes; validação estrutural e execução local
+equivalente não comprovam licenciamento, Codespace hospedado ou idle shutdown.
 
 ## Summary
 
@@ -128,7 +141,9 @@ documentação de decisão, não altera nenhum sistema em produção.
 
 ## Nimbus-Code — Module Dependency Graph
 
-**Status**: Será gerado como artefato Phase 1.
+**Status (verificado em 2026-09-20)**: `graph.yaml`, `graph.md` e `impact-map.md`
+estão presentes. A geração deixou de ser pendência; revisão e aprovação não
+foram presumidas pela presença dos arquivos.
 
 **Módulos previstos:**
 - Configuration Layer: `.devcontainer/devcontainer.json`
@@ -204,6 +219,6 @@ agente.
 
 ## Next Steps (Readiness for `/speckit-tasks`)
 
-- [ ] Gerar `research.md`, `data-model.md`, `contracts/*.md`, `quickstart.md`, `graph.yaml`, `graph.md`, `impact-map.md` (Phase 1)
+- [ ] Revisar os artefatos de Phase 1 já presentes (`research.md`, `data-model.md`, `contracts/*.md`, `quickstart.md`, `graph.yaml`, `graph.md`, `impact-map.md`); atualização de estado em 2026-09-20, sem aprovação de revisão
 - [ ] Validar gates (Constitution Check já ✓ Pass)
-- [ ] Pronta para `/speckit-tasks` sem necessidade de aprovação humana bloqueante prévia (diferente da 008)
+- [ ] Registrar a decisão humana de adoção solicitada em #455/#436; a dispensa histórica de aprovação prévia para elaborar planejamento não libera rollout nem substitui esse gate

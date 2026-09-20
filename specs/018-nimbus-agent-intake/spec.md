@@ -3,6 +3,11 @@
 **Feature Branch**: `018-nimbus-agent-intake`
 **Created**: 2026-08-24
 **Status**: Draft
+
+**Auditoria 2026-09-20**: backlog sob revisão humana #443. Existem spec, grafos e
+checklist; `plan.md`, `tasks.md` e `data-model.md` ainda não existem nesta feature.
+A descrição da issue como planejamento concluído não constitui evidência desses
+artefatos. Não iniciar implementação nem antecipar o roadmap Teams sem priorização.
 **Input**: User description: "inciiar nova SPEC para NIMBUS AGENT REPO https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-agent.git mas a SPEC fica aqui, para que o NIMBUS seja capaz de responder perguntas sobre como o processo NIMBUS CODE funciona. E junto com a SPEC 017 fazer o INTAKE direto pro projeto."
 
 ## Nimbus-Code — Cabeçalho Obrigatório da Spec

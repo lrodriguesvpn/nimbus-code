@@ -1,5 +1,18 @@
 # AgentRC Brownfield Evaluation — Recommendation
 
+## Decisão bloqueada por divergência — 2026-09-20
+
+A recomendação local abaixo propõe **adotar com restrições / Go para piloto**.
+A revisão humana **#449**, ainda aberta, propõe **backlog / No-Go para piloto
+imediato**. Nenhuma dessas narrativas constitui aprovação final: aguardar a
+ata com aprovador, data e justificativa exigida por SC-003 antes de alterar
+a decisão ou executar piloto. Este saneamento registra a divergência, não
+escolhe Go ou No-Go.
+
+#449 também cita `checklists/requirements-quality.md`, inexistente neste
+checkout. Os documentos presentes são `checklists/agentrc-eval.md` e
+`checklists/requirements.md`; não presumir equivalência ou criar aprovação.
+
 ## Executive Summary
 
 Recommendation: **Adotar com restrições**.
@@ -41,7 +54,7 @@ Close the evaluation with one decision and a clear next step that preserves the 
 
 ## Final Decision
 
-**Decision**: Adotar com restrições.
+**Proposta local anterior, ainda sem decisão reconciliada com #449**: Adotar com restrições.
 
 **Rationale**:
 1. AgentRC contributes useful readiness diagnostics.
@@ -84,7 +97,7 @@ Close the evaluation with one decision and a clear next step that preserves the 
 
 - **Responsável**: Architecture board + Tech Lead
 - **Prazo**: até 5 dias úteis após aprovação desta recomendação
-- **Status (Go/No-Go)**: Go para piloto restrito
+- **Status (Go/No-Go)**: bloqueado para decisão humana — proposta local: Go para piloto restrito; #449: No-Go imediato
 - **Escopo**: execução de 1 ciclo de avaliação brownfield com AgentRC em modo advisory
 
 ## Release/Toggle Note

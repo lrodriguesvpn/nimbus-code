@@ -1,114 +1,101 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-###############################################################################
-# detect-preset-version-mismatch.sh
-# 
-# T-043: Detect preset version mismatches between source and installed
-# 
-# Usage:
-#   ./detect-preset-version-mismatch.sh [--repo-root /path/to/repo] [--json]
-#
-# Output (JSON mode):
-#   {
-#     "status": "ok|error",
-#     "mismatches": [
-#       { "file": ".specify/presets/.registry", "expected": "1.16.0", "actual": "1.15.0" }
-#     ],
-#     "details": "error message if status=error"
-#   }
-#
-###############################################################################
+# Exit contract: in_sync=0, mismatch=1, error=2. No network access.
+exec python3 - "$@" <<'PY'
+import json
+import os
+from pathlib import Path
+import re
+import sys
 
-REPO_ROOT="."
-JSON_MODE=false
+args = sys.argv[1:]
+json_mode = "--json" in args
+root = Path(".")
+expected = os.environ.get("NIMBUS_PRESET_VERSION", "")
+preset = None
+supported_presets = ("nimbus-code-standards", "nimbus-code-platform-standards")
+version_pattern = r"[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?"
 
-while (( $# > 0 )); do
-  case "$1" in
-    --repo-root)
-      REPO_ROOT="$2"
-      shift 2
-      ;;
-    --json)
-      JSON_MODE=true
-      shift
-      ;;
-    *)
-      shift
-      ;;
-  esac
-done
+def version(value):
+    if not isinstance(value, str) or not re.fullmatch(version_pattern, value):
+        raise ValueError("Invalid or missing preset version")
+    return value
 
-cd "$REPO_ROOT"
+def manifest_version(path):
+    text = path.read_text()
+    block = re.search(r"(?m)^preset:\s*\n((?:[ \t]+[^\n]*\n|\n)*)", text)
+    matches = re.findall(r"(?m)^  version:\s*['\"]?([^'\"\s#]+)['\"]?\s*(?:#.*)?$",
+                         block.group(1) if block else "")
+    if len(matches) != 1:
+        raise ValueError(f"Missing or ambiguous preset.version in {path}")
+    return version(matches[0])
 
-# Extract version from source preset.yml
-PRESET_MANIFEST=".specify/presets/.registry"
-PRESET_SOURCE="presets/nimbus-code-standards/preset.yml"
-
-if [ ! -f "$PRESET_SOURCE" ]; then
-  if $JSON_MODE; then
-    echo '{"status":"error","details":"preset.yml not found at presets/nimbus-code-standards/preset.yml"}'
-  else
-    echo "ERROR: preset.yml not found" >&2
-  fi
-  exit 1
-fi
-
-# Get source version from preset.yml (inside the preset: block)
-SOURCE_VERSION=$(grep -E '^[[:space:]]*version:[[:space:]]*' "$PRESET_SOURCE" | head -1 | sed -E 's/^[[:space:]]*version:[[:space:]]*"?([^"[:space:]]+)"?.*/\1/')
-
-if [ -z "$SOURCE_VERSION" ]; then
-  if $JSON_MODE; then
-    echo '{"status":"error","details":"Could not parse version from preset.yml"}'
-  else
-    echo "ERROR: Could not parse version from preset.yml" >&2
-  fi
-  exit 1
-fi
-
-# Check if .registry exists
-if [ ! -f "$PRESET_MANIFEST" ]; then
-  if $JSON_MODE; then
-    echo "{\"status\":\"error\",\"details\":\"Preset not installed (.registry missing)\"}"
-  else
-    echo "ERROR: Preset not installed (.registry missing)" >&2
-  fi
-  exit 1
-fi
-
-# Get installed version from .registry
-INSTALLED_VERSION=$(cat "$PRESET_MANIFEST" | python3 -c "
-import json, sys
 try:
-  data = json.load(sys.stdin)
-  version = data.get('version', '')
-  if not version and 'presets' in data:
-    for key in data['presets']:
-      version = data['presets'][key].get('version', '')
-      break
-  print(version)
-except:
-  print('')
-" 2>/dev/null || echo "")
+    i = 0
+    while i < len(args):
+        arg = args[i]
+        if arg == "--json":
+            i += 1
+            continue
+        if arg not in ("--repo-root", "--expected-version", "--preset") or i + 1 >= len(args):
+            raise ValueError(f"Unknown or incomplete argument: {arg}")
+        if arg == "--repo-root":
+            root = Path(args[i + 1])
+        elif arg == "--preset":
+            preset = args[i + 1]
+        else:
+            expected = args[i + 1]
+        i += 2
 
-# Fallback: extract from registry filename pattern if parsing fails
-if [ -z "$INSTALLED_VERSION" ]; then
-  INSTALLED_VERSION="unknown"
-fi
+    if not root.is_dir():
+        raise ValueError(f"Repository directory does not exist: {root}")
+    if preset is not None and preset not in supported_presets:
+        raise ValueError(f"Unsupported Nimbus preset: {preset}")
+    registry_path = ".specify/presets/.registry"
+    registry = json.loads((root / registry_path).read_text())
+    if not isinstance(registry, dict):
+        raise ValueError("Registry must be a JSON object")
+    if "presets" in registry:
+        if not isinstance(registry["presets"], dict):
+            raise ValueError("Registry presets must be a JSON object")
+        if preset is None:
+            candidates = [name for name in supported_presets if name in registry["presets"]]
+            if len(candidates) != 1:
+                raise ValueError("Registry must contain one Nimbus preset; pass --preset when ambiguous")
+            preset = candidates[0]
+        actual = version(registry["presets"][preset]["version"])
+    else:
+        preset = preset or "nimbus-code-standards"
+        actual = version(registry.get("version"))
+    source = root / "presets" / preset / "preset.yml"
+    installed_path = f".specify/presets/{preset}/preset.yml"
+    installed = root / installed_path
+    if expected:
+        expected = version(expected)
+        basis = "explicit"
+    elif source.is_file():
+        expected = manifest_version(source)
+        basis = "bundle_manifest"
+    else:
+        expected = manifest_version(installed)
+        basis = "installed_manifest"
 
-# Compare versions
-if [ "$SOURCE_VERSION" != "$INSTALLED_VERSION" ]; then
-  if $JSON_MODE; then
-    echo "{\"status\":\"mismatch\",\"mismatches\":[{\"file\":\"$PRESET_MANIFEST\",\"expected\":\"$SOURCE_VERSION\",\"actual\":\"$INSTALLED_VERSION\"}]}"
-  else
-    echo "MISMATCH: Expected $SOURCE_VERSION, got $INSTALLED_VERSION" >&2
-  fi
-  exit 1
-else
-  if $JSON_MODE; then
-    echo "{\"status\":\"ok\",\"version\":\"$SOURCE_VERSION\",\"details\":\"Versions match\"}"
-  else
-    echo "OK: Preset version matches ($SOURCE_VERSION)"
-  fi
-  exit 0
-fi
+    mismatches = []
+    if actual != expected:
+        mismatches.append({"file": registry_path, "expected": expected, "actual": actual})
+    if installed.is_file():
+        installed_version = manifest_version(installed)
+        if installed_version != expected:
+            mismatches.append({"file": installed_path,
+                               "expected": expected, "actual": installed_version})
+    code = 1 if mismatches else 0
+    result = {"status": "mismatch" if mismatches else "in_sync",
+              "preset": preset, "version": expected, "basis": basis, "mismatches": mismatches}
+except (OSError, ValueError, KeyError, TypeError) as exc:
+    code = 2
+    result = {"status": "error", "details": str(exc)}
+
+print(json.dumps(result) if json_mode else f"{result['status']}: {result}")
+sys.exit(code)
+PY

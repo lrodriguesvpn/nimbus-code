@@ -6,6 +6,24 @@
 
 **Organization**: Tasks agrupadas por User Story para entrega incremental e teste independente.
 
+## Remediação e limite de fechamento — 2026-09-20
+
+As 15 tarefas originais entregues não encerram as revisões humanas #453/#437.
+A issue #431 já acompanha o defeito de busca sem `yq`; a remediação S3 aprovada
+atualiza as duas cópias do script e adiciona `tests/scripts/harness-search.bats`.
+Evidência local: `tests/scripts/harness-search.bats`, **12/12 testes aprovados**
+em 2026-09-20, com Bash `/opt/homebrew/bin/bash` e Bats já instalado, sem `yq`
+no PATH dos casos de busca. Inclui IDs quoted/unquoted, múltiplos resultados,
+multiline, hash literal em bloco e caracteres de regex tratados literalmente.
+Suíte direcionada, offline; não valida labels no GHE,
+revisão institucional ou métricas de produção. O alegado problema de troca de
+instruções no satélite, também descrito em #431, não foi reproduzido/corrigido
+nesta remediação.
+
+Os 11 itens de `checklists/requirements-quality.md` continuam abertos; não
+foram aprovados automaticamente. As repetições Txxx no checklist de fechamento
+abaixo não constituem novas tarefas.
+
 ---
 
 ## Phase 1: Setup (Artefatos de planejamento)
@@ -72,14 +90,16 @@
 - [x] T010 [US2] Criar `scripts/harness-search.sh`
   - Argumento posicional: `<tag-ou-bounded-context>` (obrigatório)
   - Argumento opcional: `--file <caminho>` (default: `docs/harness/harness-catalog.yaml`)
-  - Lógica de busca: `yq` quando disponível, fallback para `grep`/`awk`
+  - Lógica original: `yq` opcional e fallback. Substituída na remediação #431
+    por um único leitor `awk` do schema, com busca literal em tags/contexto.
   - Output: ID, error_pattern e prevention de cada entrada que faz match
   - Mensagem de uso quando executado sem argumentos
   - Mensagem "Nenhum resultado encontrado para: <tag>" quando sem match
   - Mensagem de erro quando arquivo de catálogo não existe
   - `chmod +x` no próprio script
 
-**Checkpoint**: Script executável, busca em < 5s, fallback funciona sem `yq`.
+**Checkpoint atualizado**: script executável e busca sem `yq` cobertos pela
+suíte offline; alvo < 5s não foi tratado como SLO de produção medido.
 
 ---
 
@@ -184,7 +204,7 @@
 
 ```markdown
 ## Contexto
-Feature 010 — Harness Engineering: incorporação do conceito de memória
+Feature 011 — Harness Engineering: incorporação do conceito de memória
 organizacional de erros ao workflow NIMBUS CODE.
 
 ## Objetivo

@@ -8,6 +8,7 @@ set -euo pipefail
 # (feature specs/013-governanca-testes-pr/). Descobre e executa:
 #   (a) todo arquivo tests/**/*.bats  — via `bats`
 #   (b) todo arquivo tests/**/*.test.sh — via `bash`
+#   (c) .specify/scripts/bash/tests/*.bats — via `bats`
 #
 # Usado tanto localmente (contribuidor, antes de abrir PR) quanto pelo
 # .github/workflows/test-suite.yml (CI) — o mesmo script, garantindo
@@ -59,7 +60,7 @@ echo ""
 run_bats_group() {
   local dir="$1"
   local segment
-  segment="$(basename "$dir")"
+  segment="${2:-$(basename "$dir")}"
   local files=()
   while IFS= read -r -d '' f; do
     files+=("$f")
@@ -131,6 +132,8 @@ for dir in "$ROOT_DIR"/tests/*/; do
   run_shell_test_group "$dir" || true
 done
 
+run_bats_group "$ROOT_DIR/.specify/scripts/bash/tests" templates || true
+
 echo "============================================================"
 PASSED_FILES=$((TOTAL_FILES - FAILED_FILES))
 echo "Resultado consolidado: ${PASSED_FILES}/${TOTAL_FILES} arquivos de teste passaram."
@@ -144,4 +147,4 @@ if (( FAILED_FILES > 0 )); then
   exit 1
 fi
 
-echo -e "${GREEN}✓ Todos os grupos passaram (bootstrap, docs, scripts, workflows).${NC}"
+echo -e "${GREEN}✓ Todos os grupos passaram (bootstrap, docs, scripts, workflows, templates).${NC}"

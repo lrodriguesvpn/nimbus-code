@@ -1232,8 +1232,10 @@ Ver também: [FAQ — Como atualizo um projeto criado com uma versão antiga do 
 
 ## Phase 2: Automated Preset Synchronization (SPEC 020)
 
-After Phase 1 establishes the governance model, Phase 2 automates ongoing validation
-and synchronization of preset versions across satellite repositories.
+Esta fase fornece auditoria de versões e um caminho controlado de atualização.
+**Não significa rollout aprovado**: o auto-sync permanece desabilitado por padrão,
+dependente de opt-in, credencial com acesso aos satélites e piloto humano
+(#433/#445). O token padrão do workflow não concede acesso cross-repo.
 
 ### Weekly Satellite Preset Audit
 
@@ -1241,14 +1243,13 @@ and synchronization of preset versions across satellite repositories.
 
 The central repository runs `.github/workflows/satellite-preset-audit.yml`, which:
 
-1. Queries all satellite repos in the organization
-2. Checks their `.specify/presets/.registry` version
-3. Compares against the central `preset.yml` version (currently 1.18.0)
-4. Reports status for each repo: `in_sync`, `drift`, or `not_bootstrapped`
-5. If drifted repos found:
-   - Creates a GitHub issue with title: "Satellite repos out of sync with vX.Y.Z: N repos need upgrade"
-   - Attaches CSV report as artifact
-   - Labels: `type:automation`, `area:preset-sync`, `priority:P2`
+1. Consulta os satélites acessíveis à credencial configurada.
+2. Lê `.specify/presets/.registry` e compara com os manifests do checkout
+   central, sem versão fixa no script.
+3. Produz relatório CSV e distingue drift, ausência de bootstrap e erros de
+   consulta; ausência de acesso não é prova de ausência de preset.
+4. Publica evidência/issue quando aplicável. Um relatório sem drift é válido
+   e não deve falhar por um filtro sem correspondências.
 
 **View audit results**:
 ```bash
@@ -1260,80 +1261,73 @@ gh run list --workflow=satellite-preset-audit.yml --limit 1 \
 
 ### Auto-PR Generation for Drifted Repos
 
-When the audit detects drifted repos, the workflow `.github/workflows/auto-sync-preset.yml`
-can automatically create PRs to sync them. This workflow:
+O workflow `.github/workflows/auto-sync-preset.yml` é um mecanismo opt-in,
+não autorização para alterar todos os satélites. O fluxo só pode usar uma
+versão existente no checkout de origem, executar refresh sem provisioning e
+abrir PR para revisão. Não deve mascarar falhas nem sobrescrever branches
+remotas por force-push.
 
-1. Reads the audit issue with detected drifts
-2. For each drifted repo:
-   - Checks if there are open PRs (skips if active development)
-   - Creates branch: `fix/preset-sync-to-vX.Y.Z`
-   - Runs `bootstrap.sh --refresh-preset` to update the preset
-   - Creates PR with:
-     - Title: `fix(preset): sync to vX.Y.Z`
-     - Body: Links to audit issue, explains sync
-     - Labels: `sync:preset-version`, `type:automation`
+`NIMBUS_SATELLITE_SYNC_ENABLED=true` habilita apenas o dispatch manual;
+ausente/false mantém o sync desabilitado. Nesta entrega, o auto-sync suporta
+somente `dev_standards`. O preset `platform` pode usar o refresh manual
+documentado abaixo, mas não está incluído no rollout automatizado.
 
-**Manual Trigger**:
-```bash
-# Sync a specific drifted repo
-gh workflow run auto-sync-preset.yml \
-  -f repo="org/satellite-repo" \
-  -f target_version="1.18.0"
-```
-
-**Manual Override**: If you need to prevent auto-sync for a specific repo:
-- Add label `no:auto-sync` to the PR before it's auto-created, OR
-- Close the audit issue before the workflow runs
+Consulte os inputs, variáveis e autenticação vigentes no workflow e no
+[quickstart da SPEC 020](../specs/020-satellite-repo-governance/quickstart.md)
+antes de habilitar um piloto. Não existe a operação “adicionar label a um PR
+antes de ele ser criado”; mantenha o opt-in desabilitado enquanto a revisão
+humana estiver pendente.
 
 ### Preset Version Validation in CI/CD
 
-When you open a PR to a satellite repo touching `.specify/` files, the workflow
-`.github/workflows/validate-bootstrap.yml` runs automatically:
+O bootstrap entrega `.github/workflows/validate-bootstrap.yml` e seu detector.
+O check deve preservar o exit code de mismatch/erro, não somente publicar uma
+mensagem. No consumidor, a referência local é o manifest instalado em
+`.specify/presets/`, não um diretório `presets/` central que ele não possui.
+Comparação local verifica consistência da instalação; não substitui a auditoria
+central de versão mais recente. Tornar o check obrigatório depende da proteção
+de branch aprovada pelo responsável.
 
-1. Executes `.specify/scripts/bash/detect-preset-version-mismatch.sh`
-2. Checks if `.specify/presets/.registry` version matches `preset.yml`
-3. If drift detected:
-   - Comments on PR with version mismatch details
-   - Fails the check to block merge
-   - Provides guidance: "Please run bootstrap.sh --refresh-preset"
-
-**To fix version drift in your PR**:
-```bash
-# In your satellite repo
-./bootstrap.sh --refresh-preset
-
-# Commit and push
-git add .specify/
-git commit -m "chore(preset): refresh to v1.18.0"
-git push
-```
+O hook `scripts/validate-versions.sh` entregue ao consumidor usa esse detector.
+O script homônimo do repositório central valida também bundles/catalogs e
+**não deve ser copiado diretamente para um satélite**.
 
 ### Manual Preset Refresh
 
-If you need to manually update a satellite repo's preset outside the auto-sync workflow:
+Use um checkout confiável da versão desejada do bundle e execute a partir
+do repositório consumidor. O bootstrap não precisa existir no satélite:
 
 ```bash
-# In the satellite repository
-./bootstrap.sh --refresh-preset
-
-# Review changes
+# Dentro do repositorio consumidor; ajuste para o checkout do bundle desejado
+bash /caminho/do/bundle/bootstrap.sh \
+  --local /caminho/do/bundle --refresh-preset --repo-type dev_standards
 git diff --stat
-
-# Create PR for team review
-git checkout -b fix/preset-sync-to-v1.18.0
-git add .specify/
-git commit -m "chore(preset): refresh to v1.18.0
-
-Manually synced to central preset v1.18.0."
-git push origin fix/preset-sync-to-v1.18.0
-
-# Open PR in GitHub UI
 ```
+
+Use `platform` para o preset de plataforma. O tipo pode ser omitido somente
+quando o registro identifica exatamente um preset Nimbus suportado.
+
+Pré-requisitos: Bash 4+, `specify`, `python3` com PyYAML. O refresh não executa
+`specify init`, extensões, topology, GitHub Projects, labels ou instalação de
+hooks. Reinstala o preset e sincroniza arquivos gerenciados sem sobrescrever
+instruções locais, catálogos, configuração de custos ou overrides.
+
+`.specify/bundle-files.json` registra hashes dos arquivos entregues. Alteração
+local ou arquivo legado divergente sem baseline interrompe o preflight antes
+de remover o preset. Reconcilie conscientemente os arquivos indicados: não
+apague o estado nem use o bootstrap normal como um “force refresh”.
+O bootstrap normal continua sendo o caminho de criação/inicialização.
+Uma falha de instalação é reportada; não equivale a atualização concluída.
+
+Revise **todas** as alterações (incluindo scripts e workflows, não apenas
+`.specify/`), valide e envie um PR pela branch de trabalho aprovada, sem merge
+automático. A distribuição geral de skills enriquecidas continua sujeita à
+decisão #367/#405; copiar scripts corrigidos não resolve esse gate.
 
 ### Phase 2 Compliance Checklist
 
-- [ ] Your satellite repo receives weekly audit checks
-- [ ] You understand the audit issue and auto-PR flow
-- [ ] You know how to manually refresh preset if needed
-- [ ] You've reviewed `.specify/presets/.registry` version matches expectations
-- [ ] Your CI/CD validates preset versions on `.specify/` PRs
+- [ ] Credencial cross-repo e piloto humano aprovados antes de habilitar opt-in
+- [ ] Relatório distingue drift, instalação ausente e falha de acesso
+- [ ] Refresh executado em fixture antes de um satélite real
+- [ ] Registry, manifest instalado, arquivos gerenciados e overrides revisados
+- [ ] Check de CI realmente falha em drift/erro e proteção de branch revisada

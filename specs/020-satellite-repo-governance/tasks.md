@@ -253,16 +253,16 @@ Humano: sim
 
 ## PHASE 2: Bootstrap Detection & Satellite Monitoring Automation
 
-*Status*: Complete ✅  
+*Status*: Remediação local #460 validada; piloto/rollout pendentes, sem prova (#433/#445/#448).
 **Estimated Duration**: 1–2 weeks  
 **Parallelizable with**: SPEC 022 implementation  
-**Complexity**: S2 (build-time scripts, no new service)  
+**Complexity**: S3 (integração detector, auditoria, bootstrap e escrita cross-repo)
 
 ### Phase 2 Overview
 
 Phase 1 established the governance model and applied it manually to 31 repos.
-Phase 2 automates the ongoing validation and monitoring so satellite repos 
-stay synchronized with the central preset version without manual intervention.
+Phase 2 valida e monitora versões. Sincronização requer dispatch manual, opt-in
+explícito e PR revisado. Conclusão local não equivale a piloto/rollout aprovado.
 
 ### User Stories & Tasks
 
@@ -271,21 +271,24 @@ stay synchronized with the central preset version without manual intervention.
 **Description**: Implement automated detection of mismatched preset versions 
 and provide tooling to validate bootstraps.
 
-- [x] **T-043**: Implement `detect_preset_version_mismatch()` in bootstrap.sh
-  - Compare `.specify/presets/.registry` version with `preset.yml` source version
-  - Return exit code 0 if matched, 1 if diverged
-  - Output JSON report of mismatches (file, expected, actual)
+- [x] **T-043**: Detector independente `.specify/scripts/bash/detect-preset-version-mismatch.sh`
+  - Registry nomeada (legada flat compatível), inferência Nimbus único dev/platform,
+    fonte central ou manifesto instalado; ambiguidade exige `--preset`
+  - `--expected-version`/`NIMBUS_PRESET_VERSION` permite baseline externo explícito
+  - JSON `in_sync`/0, `mismatch`/1, `error`/2; inclui divergência do manifesto instalado
 
 - [x] **T-044**: Add GitHub Actions workflow `validate-bootstrap.yml`
   - Trigger on: PR to any satellite repo touching `.specify/`
   - Run detection logic, fail if version drift detected
-  - Comment on PR with version mismatch details
+  - Publish diagnostics in log/job summary without requiring PR comment-write permission
+  - Missing detector and inconsistent JSON/exit-status contract block CI
 
 - [x] **T-045**: Add test coverage for detection logic
   - Test: exact version match → pass
   - Test: missing .specify/ directory → error
   - Test: stale registry version → detection
-  - Test: newer registry than source → warn
+  - Test: newer registry than source → mismatch/block
+  - Evidence: `tests/scripts/preset-version-mismatch.bats` (13 cases, incluindo platform)
 
 #### LS-009: Continuous Satellite Monitoring
 
@@ -294,41 +297,58 @@ version drift across all satellite repos.
 
 - [x] **T-046**: Extend `scripts/scan-org-rename-references.sh`
   - Add mode: `--mode satellite-preset-audit`
-  - Check each repo's `.specify/presets/.registry` vs central v1.16.0
+  - Check each repo's named registry against the central manifest version, never a hardcoded release
   - Output: CSV report (repo, current version, drift status, last updated)
+  - API/parse errors remain explicit; no inference of missing bootstrap from private-repo 404
 
 - [x] **T-047**: Create CI job `.github/workflows/satellite-preset-audit.yml`
   - Trigger: Weekly (Monday 09:00 UTC)
   - Run extended audit script
   - Create issue if >0 repos are drifted: 
-    "Satellite repos out of sync with v1.16.0: N repos need upgrade"
+    "Satellite repos out of sync with v<manifest version>: N repos"
   - Attach report as artifact
+  - Zero counters and partial error reports covered by local fixtures
 
-- [x] **T-048**: Implement auto-PR creation for drifted repos
-  - On audit detection of drift, automatically:
-    - Fork branch: `fix/preset-sync-to-vX.Y.Z`
-    - Run `bootstrap.sh --refresh-preset`
-    - Create PR with title: "fix(preset): sync to v1.16.0"
-    - Link to audit issue
-  - Only if repo is not already in active development (check for open PRs)
+- [x] **T-048-local**: Implementar proposta de PR por dispatch manual validado
+  - `NIMBUS_SATELLITE_SYNC_ENABLED=true` obrigatório; desligado por padrão
+  - App/PAT existente cross-repo; sem token implica bloqueio explícito
+  - Bundle versionado executa refresh gerenciado; falha bloqueia commit/push/PR
+  - Branch `fix/preset-sync-to-vX.Y.Z`, PR para default branch, sem merge/force-push
+  - PR ativo/branch existente bloqueiam; nenhum parser de issue ou dispatch pela auditoria
+- [ ] **T-048-pilot**: Aprovação e execução humana do piloto #433/#445, inclusive
+  permissões de conteúdo/PR/workflows quando aplicável e proteção de branch
+- [ ] **T-048-human-gate**: #448 permanece aberto; nenhuma aceitação humana inferida
 
 #### LS-010: Phase 2 Quickstart & Documentation
 
 **Description**: Update quickstart and docs to reflect Phase 2 automation.
 
 - [x] **T-049**: Update `specs/020-satellite-repo-governance/quickstart.md`
-  - Document: "After Phase 1, satellite repos receive automated preset sync"
-  - Include: Weekly audit schedule, auto-PR flow, manual override steps
+  - Documentar auditoria versus consistência local; sync manual opt-in e gates abertos
+  - Remover promessa de sincronização/rollout sem intervenção humana
 
-- [x] **T-050**: Add section to `docs/developer-guide.md`
+- [ ] **T-050**: Coordenador: alinhar `docs/developer-guide.md` ao contrato remediado
   - Title: "Automated Preset Synchronization (Phase 2)"
   - Explain: How weekly audit works, how auto-PRs are created, how to disable
 
-- [x] **T-051**: Document in `docs/label-taxonomy-and-autonomous-dev.md`
-  - Add label: `sync:preset-version` (auto-applied by audit-generated PRs)
-  - Add: How to override auto-sync, coordination with feature work
+- [ ] **T-051**: Revisar proposta de labels com humano; nenhuma label inexistente é
+  requisito da implementação local, nenhum provisionamento de label foi executado
+
+### Evidência da remediação local (2026-09-20)
+
+- [x] `bash tests/workflows/satellite-preset-governance.test.sh`: mocks offline
+  exercitam gate real do workflow, scan/CSV, inputs, opt-in, auth, refresh e PR.
+- [x] `bats tests/scripts/preset-version-mismatch.bats`: 13 casos aprovados,
+  incluindo consumidor platform sem fonte, drift e ambiguidade de presets.
+- [x] `actionlint` nos três workflows e `shellcheck` nos scripts/teste alterados.
+- [x] Com ownership ampliado explicitamente, migrar os 4 casos legados de
+  `tests/bootstrap/bootstrap-preset-detection.bats`: `in_sync`/0, drift/1 e erro/2;
+  fixtures reais de manifesto e registry; preservar cobertura flat legada.
+- [ ] Piloto humano, evidência remota, habilitação da flag e rollout.
+
+Não houve criação/edição remota de issue/PR, commit, branch ou credencial nesta
+remediação. Os testes não comprovam permissões reais nem autorizam rollout.
 
 ---
 
 **End of Phase 2 scope. Estimated completion: 1–2 weeks.**
-

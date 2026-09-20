@@ -54,5 +54,3 @@ não apenas o comportamento funcional.*
 > **Test ref:** `test_AC1_<descricao>`
 
 > *(Adicionar AC-N conforme necessário.)*
-
-{CORE_TEMPLATE}

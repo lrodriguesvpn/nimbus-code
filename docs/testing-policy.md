@@ -121,7 +121,10 @@ Este é o mesmo caminho usado por `.github/workflows/test-suite.yml` — paridad
 por construção, não por manutenção paralela (AC-4, FR-008).
 
 **Pré-requisitos**:
-- `bash`, `git` (já disponíveis em qualquer ambiente de desenvolvimento deste bundle)
+- `bash` 4+, `git`, `python3` e `jq`
+- PyYAML no mesmo `python3` utilizado pelos scripts para composição de presets
+  reais; fixtures de composição usam manifests JSON isolados, sem dependência
+  de acesso externo
 - `bats` — instalado automaticamente por `scripts/setup-dev-environment.sh`
   (Codespaces/devcontainer) ou manualmente via `npm install -g bats-core`
 
@@ -131,10 +134,11 @@ por construção, não por manutenção paralela (AC-4, FR-008).
 ./scripts/run-tests.sh
 ```
 
-**Resultado esperado**: todos os 10 arquivos de teste hoje existentes rodam em
-sequência; a saída final resume quantos grupos passaram/falharam e, em caso de
-falha, identifica o segmento (`bootstrap`, `docs`, `scripts`, `workflows`) que
-falhou primeiro.
+**Resultado esperado**: todos os arquivos `.bats` e `.test.sh` nos grupos
+diretos de `tests/`, mais os `.bats` em `.specify/scripts/bash/tests/`, rodam
+em sequência. A saída resume arquivos aprovados/falhos e identifica o primeiro
+segmento com falha. A contagem é descoberta, não um número fixo documentado.
+Os testes internos usam o checkout corrente, nunca um snapshot fixo em `/tmp`.
 
 ### ⚠️ Atenção — macOS: use bash 4+ (não o `/bin/bash` padrão do sistema)
 
@@ -156,7 +160,11 @@ antes de reportar uma falha real:
 ```bash
 brew install bash
 # /opt/homebrew/bin/bash (Apple Silicon) ou /usr/local/bin/bash (Intel) — bash 5+
+PATH="/opt/homebrew/bin:$PATH" /opt/homebrew/bin/bash scripts/run-tests.sh
 ```
+
+O `PATH` também seleciona o Bash novo para os subprocessos dos testes; no Intel,
+substitua `/opt/homebrew/bin` por `/usr/local/bin`.
 
 `scripts/run-tests.sh` detecta essa situação e emite um aviso explícito (ver
 seção "Requisitos de bash" do próprio script) em vez de deixar o contribuidor

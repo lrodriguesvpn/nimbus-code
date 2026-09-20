@@ -486,7 +486,7 @@ except Exception:
 # from multiple layers using prepend, append, or wrap strategies.
 #
 # Usage: CONTENT=$(resolve_template_content "template-name" "$REPO_ROOT")
-# Returns composed content string on stdout; exit code 1 if not found.
+# Returns content on stdout, 1 if absent, or 2 for invalid composition.
 resolve_template_content() {
     local template_name="$1"
     local repo_root="$2"
@@ -495,12 +495,13 @@ resolve_template_content() {
     # Collect all layers (highest priority first)
     local -a layer_paths=()
     local -a layer_strategies=()
+    local is_command=false
 
     # Priority 1: Project overrides (always "replace")
     local override="$base/overrides/${template_name}.md"
     if [ -f "$override" ]; then
-        layer_paths+=("$override")
-        layer_strategies+=("replace")
+        cat "$override" || return 2
+        return 0
     fi
 
     # Priority 2: Installed presets (sorted by priority from .registry)
@@ -518,62 +519,62 @@ try:
     for pid, meta in sorted(presets.items(), key=lambda x: x[1].get('priority', 10) if isinstance(x[1], dict) else 10):
         if isinstance(meta, dict) and meta.get('enabled', True) is not False:
             print(pid)
-except Exception:
+except (OSError, ValueError, TypeError, AttributeError):
     sys.exit(1)
 " 2>/dev/null); then
                 if [ -n "$sorted_presets" ]; then
-                    local yaml_warned=false
                     while IFS= read -r preset_id; do
                         # Read strategy and file path from preset manifest
                         local strategy="replace"
                         local manifest_file=""
                         local manifest="$presets_dir/$preset_id/preset.yml"
                         if [ -f "$manifest" ] && command -v python3 >/dev/null 2>&1; then
-                            # Requires PyYAML; falls back to replace/convention if unavailable
                             local result
-                            local py_stderr
-                            py_stderr=$(mktemp)
-                            result=$(SPECKIT_MANIFEST="$manifest" SPECKIT_TMPL="$template_name" python3 -c "
+                            if ! result=$(SPECKIT_MANIFEST="$manifest" SPECKIT_TMPL="$template_name" python3 -c "
 import sys, os
 try:
     import yaml
 except ImportError:
-    print('yaml_missing', file=sys.stderr)
-    print('replace\t')
-    sys.exit(0)
+    print('ERROR: PyYAML is required to resolve preset strategies', file=sys.stderr)
+    sys.exit(1)
 try:
     with open(os.environ['SPECKIT_MANIFEST']) as f:
         data = yaml.safe_load(f)
     for t in data.get('provides', {}).get('templates', []):
-        if t.get('name') == os.environ['SPECKIT_TMPL'] and t.get('type', 'template') == 'template':
-            print(t.get('strategy', 'replace') + '\t' + t.get('file', ''))
+        if t.get('name') == os.environ['SPECKIT_TMPL'] and t.get('type', 'template') in ('template', 'command'):
+            print(t.get('strategy', 'replace') + '\t' + t.get('file', '') + '\t' + t.get('type', 'template'))
             sys.exit(0)
     print('replace\t')
-except Exception:
-    print('replace\t')
-" 2>"$py_stderr")
-                            local parse_status=$?
-                            if [ $parse_status -eq 0 ] && [ -n "$result" ]; then
-                                IFS=$'\t' read -r strategy manifest_file <<< "$result"
+except (OSError, ValueError, TypeError, AttributeError, yaml.YAMLError) as error:
+    print('ERROR: Invalid preset manifest: ' + str(error), file=sys.stderr)
+    sys.exit(1)
+"); then
+                                return 2
+                            fi
+                            if [ -n "$result" ]; then
+                                local template_type
+                                IFS=$'\t' read -r strategy manifest_file template_type <<< "$result"
                                 strategy=$(printf '%s' "$strategy" | tr '[:upper:]' '[:lower:]')
+                                [ "$template_type" != "command" ] || is_command=true
                             fi
-                            if [ "$yaml_warned" = false ] && grep -q 'yaml_missing' "$py_stderr" 2>/dev/null; then
-                                echo "Warning: PyYAML not available; composition strategies may be ignored" >&2
-                                yaml_warned=true
-                            fi
-                            rm -f "$py_stderr"
                         fi
                         # Try manifest file path first, then convention path
                         local candidate=""
                         if [ -n "$manifest_file" ]; then
                             # Reject absolute paths and parent traversal
                             case "$manifest_file" in
-                                /*|*../*|../*) manifest_file="" ;;
+                                /*|*../*|..)
+                                    echo "ERROR: Invalid template path in $manifest: $manifest_file" >&2
+                                    return 2 ;;
                             esac
                         fi
                         if [ -n "$manifest_file" ]; then
                             local mf="$presets_dir/$preset_id/$manifest_file"
-                            [ -f "$mf" ] && candidate="$mf"
+                            if [ ! -f "$mf" ]; then
+                                echo "ERROR: Missing declared template: $mf" >&2
+                                return 2
+                            fi
+                            candidate="$mf"
                         fi
                         if [ -z "$candidate" ]; then
                             local cf="$presets_dir/$preset_id/templates/${template_name}.md"
@@ -586,25 +587,15 @@ except Exception:
                     done <<< "$sorted_presets"
                 fi
             else
-                # python3 failed — fall back to unordered directory scan (replace only)
-                for preset in "$presets_dir"/*/; do
-                    [ -d "$preset" ] || continue
-                    local candidate="$preset/templates/${template_name}.md"
-                    if [ -f "$candidate" ]; then
-                        layer_paths+=("$candidate")
-                        layer_strategies+=("replace")
-                    fi
-                done
+                echo "ERROR: Cannot parse preset registry: $registry_file" >&2
+                return 2
             fi
         else
-            # No python3 or registry — fall back to unordered directory scan (replace only)
+            # An installed preset needs its registry to establish precedence.
             for preset in "$presets_dir"/*/; do
                 [ -d "$preset" ] || continue
-                local candidate="$preset/templates/${template_name}.md"
-                if [ -f "$candidate" ]; then
-                    layer_paths+=("$candidate")
-                    layer_strategies+=("replace")
-                fi
+                echo "ERROR: Preset resolution requires python3 and $registry_file" >&2
+                return 2
             done
         fi
     fi
@@ -633,21 +624,10 @@ except Exception:
     local count=${#layer_paths[@]}
     [ "$count" -eq 0 ] && return 1
 
-    # Check if any layer uses a non-replace strategy
-    local has_composition=false
-    for s in "${layer_strategies[@]}"; do
-        [ "$s" != "replace" ] && has_composition=true && break
-    done
-
     # If the top (highest-priority) layer is replace, it wins entirely —
     # lower layers are irrelevant regardless of their strategies.
     if [ "${layer_strategies[0]}" = "replace" ]; then
-        cat "${layer_paths[0]}"
-        return 0
-    fi
-
-    if [ "$has_composition" = false ]; then
-        cat "${layer_paths[0]}"
+        cat "${layer_paths[0]}" || return 2
         return 0
     fi
 
@@ -663,44 +643,58 @@ except Exception:
     done
 
     if [ $base_idx -lt 0 ]; then
-        return 1  # no base layer found
+        echo "ERROR: No base template for composition: $template_name" >&2
+        return 2
     fi
 
-    # Read the base content; compose layers above the base (higher priority)
-    local content
-    content=$(cat "${layer_paths[$base_idx]}"; printf x)
-    content="${content%x}"
-
-    for (( i=base_idx-1; i>=0; i-- )); do
-        local path="${layer_paths[$i]}"
-        local strat="${layer_strategies[$i]}"
-        local layer_content
-        # Preserve trailing newlines
-        layer_content=$(cat "$path"; printf x)
-        layer_content="${layer_content%x}"
-
-        case "$strat" in
-            replace) content="$layer_content" ;;
-            prepend) content="$(printf '%s\n\n%s' "$layer_content" "$content")" ;;
-            append)  content="$(printf '%s\n\n%s' "$content" "$layer_content")" ;;
-            wrap)
-                case "$layer_content" in
-                    *'{CORE_TEMPLATE}'*) ;;
-                    *) echo "Error: wrap strategy missing {CORE_TEMPLATE} placeholder" >&2; return 1 ;;
-                esac
-                while [[ "$layer_content" == *'{CORE_TEMPLATE}'* ]]; do
-                    local before="${layer_content%%\{CORE_TEMPLATE\}*}"
-                    local after="${layer_content#*\{CORE_TEMPLATE\}}"
-                    layer_content="${before}${content}${after}"
-                done
-                content="$layer_content"
-                ;;
-            *) echo "Error: unknown strategy '$strat'" >&2; return 1 ;;
-        esac
+    local -a layers=()
+    for (( i=base_idx; i>=0; i-- )); do
+        layers+=("${layer_strategies[$i]}" "${layer_paths[$i]}")
     done
+    if ! python3 - "$is_command" "${layers[@]}" <<'PY'
+import pathlib
+import sys
 
-    printf '%s' "$content"
-    return 0
+
+def split_frontmatter(text):
+    lines = text.splitlines(keepends=True)
+    if not lines or lines[0].strip() != "---":
+        return "", text
+    for index, line in enumerate(lines[1:], 1):
+        if line.strip() == "---":
+            return "".join(lines[:index + 1]), "".join(lines[index + 1:])
+    raise ValueError("Unterminated command frontmatter")
+
+
+try:
+    content, header = "", ""
+    args = sys.argv[2:]
+    for strategy, filename in zip(args[::2], args[1::2]):
+        layer = pathlib.Path(filename).read_bytes().decode("utf-8")
+        if sys.argv[1] == "true":
+            layer_header, layer = split_frontmatter(layer)
+            if layer_header:
+                header = layer_header
+        if strategy == "replace":
+            content = layer
+        elif strategy == "prepend":
+            content = layer + "\n\n" + content
+        elif strategy == "append":
+            content = content + "\n\n" + layer
+        elif strategy == "wrap":
+            if "{CORE_TEMPLATE}" not in layer:
+                raise ValueError("wrap strategy missing {CORE_TEMPLATE} placeholder")
+            content = layer.replace("{CORE_TEMPLATE}", content)
+        else:
+            raise ValueError("Unknown template strategy: " + strategy)
+    sys.stdout.buffer.write((header + content).encode("utf-8"))
+except (OSError, UnicodeError, ValueError) as error:
+    print("ERROR: Template composition failed: " + str(error), file=sys.stderr)
+    sys.exit(1)
+PY
+    then
+        return 2
+    fi
 }
 
 # Materialize composed template content into a file on disk.
@@ -709,12 +703,16 @@ materialize_template_content() {
     local template_name="$1"
     local repo_root="$2"
     local output_file="$3"
-    local content
-
-    if content=$(resolve_template_content "$template_name" "$repo_root"); then
-        printf '%s' "$content" > "$output_file"
-        return 0
+    local temporary status
+    temporary=$(mktemp "${output_file}.XXXXXX") || return 2
+    if resolve_template_content "$template_name" "$repo_root" > "$temporary"; then
+        if ! mv "$temporary" "$output_file"; then
+            rm -f "$temporary"
+            return 2
+        fi
+    else
+        status=$?
+        rm -f "$temporary"
+        return "$status"
     fi
-
-    return 1
 }

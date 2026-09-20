@@ -115,12 +115,12 @@ docs/reuse-catalog.yaml                    ← + entrada brownfield-multirepo-co
 
 | ID AC | Critério (resumo) | Tipo de teste | Arquivo/módulo do teste | Justificativa de ausência |
 |---|---|---|---|---|
-| AC-1 | `generate-context-graph.sh` lê `bounded-contexts.yaml` e gera `graph.yaml` + `graph.md` com nós e arestas | Unitário (bats) | `scripts/tests/generate-context-graph.bats` | — |
+| AC-1 | `generate-context-graph.sh` lê `bounded-contexts.yaml` e gera `graph.yaml` + `graph.md` com nós e arestas | Unitário (bats) | `tests/scripts/generate-context-graph.bats` | — |
 | AC-2 | `/speckit-specify` invoca o script automaticamente antes de abrir `spec.md` | Manual (instrução no SKILL.md validada numa sessão real de spec) | `SKILL.md` (inspeção) | Comportamento de agente não automatizável em CI |
-| AC-3 | `harvest-patterns.sh` apontado para repo Java produz entradas com `tag`, `source`, `description` | Unitário (bats) com fixture Java | `scripts/tests/harvest-patterns.bats` | — |
+| AC-3 | `harvest-patterns.sh` apontado para repo Java produz entradas com `tag`, `source`, `description` | Unitário (bats) com fixture Java | `tests/scripts/harvest-patterns.bats` | — |
 | AC-4 | Após harvest, agente referencia entrada do catálogo no plan da próxima feature | Manual (sessão de plan com catálogo populado) | — | Comportamento de agente não automatizável em CI |
-| AC-5 | Bounded context sem repos → aviso + prossegue sem bloqueio | Unitário (bats) | `scripts/tests/generate-context-graph.bats` | — |
-| AC-6 | Em CI sem clone: fallback via `gh api` + log de repos não analisados | Unitário (bats) com mock de `gh api` | `scripts/tests/generate-context-graph.bats` | — |
+| AC-5 | Bounded context sem repos → aviso + prossegue sem bloqueio | Unitário (bats) | `tests/scripts/generate-context-graph.bats` | — |
+| AC-6 | Em CI sem clone: fallback via `gh api` + log de repos não analisados | Unitário (bats) com mock de `gh api` | `tests/scripts/generate-context-graph.bats` | — |
 | AC-governance | `harvest-patterns.sh` não aparece em nenhum workflow de CI | Inspeção estática dos `.github/workflows/*.yml` | — | Verificação de arquivo estático |
 
 ---
@@ -185,7 +185,7 @@ docs/reuse-catalog.yaml                    ← + entrada brownfield-multirepo-co
 | Isolamento de ambiente | Parâmetros explícitos em todos os scripts; sem variáveis globais com credenciais | **Não — bloqueante** | ✅ | |
 | Privacidade de código-fonte no harvest | Apenas metadados estruturais enviados ao LLM (nomes, assinaturas, anotações) — nunca corpo de métodos, strings literais ou dados de runtime | **Não — bloqueante** | ✅ | Definido em FR-004; mitigação documentada no ADL |
 | Containers | N/A — scripts shell | N/A | ✅ N/A | |
-| CI/CD | `GITHUB_TOKEN` via secrets do CI; least privilege | Sim | ✅ | Workflow `context-graph-refresh.yml` usa apenas permissão `contents: write` mínima |
+| CI/CD | `GITHUB_TOKEN` via secrets do CI; least privilege | Sim | ✅ configuração local | Workflow `context-graph-refresh.yml` usa `contents: read` e publica artefatos; não commita o grafo automaticamente |
 | IaC | N/A — sem infra provisionada | N/A | ✅ N/A | |
 | Observabilidade | Log de custo de tokens a cada execução do harvest; output colorido nos scripts | Sim | ✅ | Scripts CLI/CI |
 

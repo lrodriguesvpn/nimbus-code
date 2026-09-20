@@ -6,6 +6,20 @@
 
 ## 1. Módulos Impactados
 
+Remediação S3 de 2026-09-20, aprovada para implementação local, **não rollout**:
+
+| Módulo adicional | Risco | Mitigação |
+|---|---|---|
+| Detector + `validate-bootstrap.yml` | erro/mismatch tratado como sucesso | contrato JSON/exit 0/1/2; script ausente bloqueia |
+| Scanner + `satellite-preset-audit.yml` + report helper | erro de API classificado como não instalado; contagem zero falha | CSV validado, estado error, falha operacional propagada |
+| `auto-sync-preset.yml` + sync helper | mutação cross-repo não autorizada | opt-in desligado, dispatch manual, mesma org, credencial App/PAT existente; sem GITHUB_TOKEN cross-repo |
+| Bootstrap refresh gerenciado (ownership coordenador) | provisionamento ou commit indevido | executar bundle com --refresh-preset/--local no satélite; verificar versão antes de escrita remota |
+| Testes de governança locais | falsa evidência de rollout | mocks sem rede; gates #433/#445 explicitamente abertos |
+
+Rollback: desabilitar `NIMBUS_SATELLITE_SYNC_ENABLED`, revisar/reverter PR quando
+necessário. Não apagar branches nem forçar histórico. Habilitação/remoção da
+flag depende de evidência e aprovação humana no [plan](./plan.md).
+
 | Módulo | Tipo de impacto | Risco | Mitigação |
 |---|---|---|---|
 | `bootstrap.sh` | Extensão do fluxo de intake, registro da decisão de topologia e handoff para multirepo | Médio — bootstrap é ponto crítico de entrada | Introduzir comportamento adicional só no ramo greenfield; validar prompts não interativos e manter bugfixes fora desta feature |
