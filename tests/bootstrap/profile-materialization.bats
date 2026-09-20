@@ -53,7 +53,7 @@ run_bootstrap() {
   run_bootstrap "$platform_repo" "$fake_bin" platform
 
   [ -f "$dev_repo/.github/workflows/ensure-github-project.yml" ]
-  [ -f "$dev_repo/.github/workflows/devstats-corporate-integration.yml" ]
+  [ ! -e "$dev_repo/.github/workflows/devstats-corporate-integration.yml" ]
   [ -f "$dev_repo/docs/cost-profiles-and-rates.md" ]
   [ -f "$dev_repo/docs/agent-session-manual.md" ]
 

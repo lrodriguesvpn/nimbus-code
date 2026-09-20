@@ -247,7 +247,7 @@ cat specs/005-hybrid-collaboration-test/checklists/requirements.md
 
 ## Success Criteria
 
-**Feature 005 considerada PRONTA se**:
+**Feature 016 considerada PRONTA se** (a pasta `005-hybrid-collaboration-test` acima é apenas fixture de exemplo):
 
 - [ ] Todos os 9 steps acima completam sem erro fatal
 - [ ] Pelo menos 2 projetos piloto passam validação completa
@@ -259,7 +259,7 @@ cat specs/005-hybrid-collaboration-test/checklists/requirements.md
 
 **Rollback Criteria** (se não passar):
 
-- [ ] Publicar Issue "Validation failed: Feature 005" com detalhes
+- [ ] Publicar Issue "Validation failed: Feature 016" com detalhes
 - [ ] Revert merge de feature branch
 - [ ] Atualizar plan.md com blockers identificados
 - [ ] Re-executar `/speckit-plan` com refinements
@@ -274,7 +274,11 @@ cat specs/005-hybrid-collaboration-test/checklists/requirements.md
 
 ---
 
-## Implementation Validation Evidence (Feature 005)
+## Implementation Validation Evidence (Feature 016)
+
+**Limite (2026-09-20)**: checks locais/fixtures não comprovam execução dos
+pilotos acima. Revisão #441 e divergência do contrato de custo continuam
+pendentes; não usar o checklist abaixo como aprovação humana/operacional.
 
 Use esta seção para registrar rapidamente a conclusão das tarefas de implementação
 do contrato híbrido.

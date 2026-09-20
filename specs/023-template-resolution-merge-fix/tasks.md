@@ -1,5 +1,34 @@
 # Tasks: Template Composition Merge Fix
 
+## Remediação da auditoria — 2026-09-20
+
+As marcações históricas T001–T014 não comprovaram todos os FRs: os testes
+dependiam de um snapshot absoluto e não cobriam frontmatter nem bytes finais.
+O escopo adicional S3 foi aprovado para implementação, não para release (#448).
+
+- [x] T015 Atualizar plano, grafo de módulos e impacto da remediação.
+- [x] T016 Corrigir composição de commands/frontmatter, preservação de bytes,
+  substituição não recursiva do placeholder e propagação de erros.
+- [x] T017 Tornar testes portáveis e validar CLI real de tasks, erro de plan
+  e comparação integral do golden 021; incluir testes internos no runner.
+- [x] T018 Entregar scripts corrigidos pelo bootstrap e implementar refresh
+  explícito com preflight de hashes e preservação de customizações.
+- [x] T019 Validar instalação/refresh/consumidores com CLI `specify` real em
+  diretório temporário isolado, sem provisioning ou alteração remota.
+- [x] T020 Executar suíte mandatória consolidada após todas as frentes:
+  28/28 arquivos aprovados com Bash 5.3.20.
+- [ ] T021 Obter revisão de release e piloto autorizado (#448/#433/#445).
+- [x] T022 Remover placeholder exclusivo de wrap dos dois spec-templates
+  declarados como prepend, preservando a estratégia dos manifests (#408).
+
+Validação final: suíte mandatória completa 28/28 arquivos aprovados. Smoke com
+CLI real para **ambos** os presets: init, preset add, entrega, refresh e geração
+de spec/plan/tasks concluídos. Os seis arquivos preservam os bytes nativos,
+incluem o conteúdo do preset e não contêm marcador wrap residual. Os hooks
+distribuídos retornam `in_sync` para os dois consumidores, sem árvore central
+de presets/catalogs. O CLI instalado foi reutilizado, sem instalar dependências.
+Essas evidências não aprovam a atualização dos satélites existentes.
+
 ## Phase 1: Setup
 
 - [x] T001 [P] Add isolated fixture helpers in `.specify/scripts/bash/tests/resolve-template-composition.bats` and `.specify/scripts/bash/tests/template-materialization-regression.bats`

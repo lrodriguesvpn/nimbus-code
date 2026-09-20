@@ -1,8 +1,17 @@
 # AgentRC Brownfield Evaluation — Recommendation
 
-> **Status:** BACKLOG — esta recomendação não autoriza piloto, integração ou
-> adoção. A SPEC só poderá ser retomada após a pesquisa de mercado e novo
-> Go/No-Go humano.
+## Decisão bloqueada por divergência — 2026-09-20
+
+A recomendação local abaixo propõe **adotar com restrições / Go para piloto**.
+A revisão humana **#449**, ainda aberta, propõe **backlog / No-Go para piloto
+imediato**. Nenhuma dessas narrativas constitui aprovação final: aguardar a
+ata com aprovador, data e justificativa exigida por SC-003 antes de alterar
+a decisão ou executar piloto. Este saneamento registra a divergência, não
+escolhe Go ou No-Go.
+
+#449 também cita `checklists/requirements-quality.md`, inexistente neste
+checkout. Os documentos presentes são `checklists/agentrc-eval.md` e
+`checklists/requirements.md`; não presumir equivalência ou criar aprovação.
 
 ## Executive Summary
 
@@ -43,30 +52,14 @@ Close the evaluation with one decision and a clear next step that preserves the 
 - **Pros**: Zero operational change.
 - **Cons**: Missed opportunity to accelerate readiness diagnostics.
 
-## Current Backlog Decision
+## Final Decision
 
-**Decision**: Não executar agora; manter em backlog.
+**Proposta local anterior, ainda sem decisão reconciliada com #449**: Adotar com restrições.
 
 **Rationale**:
-1. A pesquisa de mercado e a maturidade pública do AgentRC ainda precisam ser
-   confirmadas antes de investir em um piloto.
-2. O fluxo Nimbus atual já possui controles de governança customizados.
-3. A hipótese de uso continua válida, mas deve permanecer advisory e fora do
-   fluxo normativo até nova aprovação.
-
-## Sugestão de uso futuro
-
-Se a pesquisa confirmar maturidade suficiente, usar AgentRC somente como uma
-camada advisory de triagem brownfield:
-
-- executar contra um repositório de avaliação não produtivo;
-- gerar diagnóstico inicial de estrutura, dependências e riscos;
-- registrar os resultados em `evidence-register.md`;
-- comparar o diagnóstico com `graph.yaml`, `reuse-catalog.yaml` e Harness;
-- nunca permitir que o AgentRC altere `spec.md`, `plan.md`, `tasks.md`,
-  constituição, IaC ou políticas;
-- usar o resultado apenas para informar o ciclo
-  `specify → plan → tasks`, sujeito aos gates existentes.
+1. AgentRC contributes useful readiness diagnostics.
+2. Current Nimbus flow already has stronger and customized governance controls.
+3. A constrained pilot allows evidence-based validation with low disruption.
 
 ## Conflict & Mitigation
 
@@ -104,9 +97,8 @@ camada advisory de triagem brownfield:
 
 - **Responsável**: Architecture board + Tech Lead
 - **Prazo**: até 5 dias úteis após aprovação desta recomendação
-- **Status (Go/No-Go)**: No-Go por backlog; reavaliar após pesquisa de mercado
-- **Escopo futuro**: 1 ciclo controlado de avaliação brownfield em modo advisory,
-  somente após retomada formal e aprovação humana
+- **Status (Go/No-Go)**: bloqueado para decisão humana — proposta local: Go para piloto restrito; #449: No-Go imediato
+- **Escopo**: execução de 1 ciclo de avaliação brownfield com AgentRC em modo advisory
 
 ## Release/Toggle Note
 

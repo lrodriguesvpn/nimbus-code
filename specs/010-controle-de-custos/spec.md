@@ -223,6 +223,11 @@ sistema de controle de custos reflete o valor sem intervenção manual adicional
 - **FR-009**: O sistema MUST registrar, por feature, a variação entre estimativa e consumo real, tornando o dado disponível para auditoria e melhoria de processo.
 - **FR-010**: O MVP MUST exclude direct collection and aggregation of cloud resource costs (compute, storage, and provider billing APIs). The data model MAY reserve a future cloud-cost dimension, but the MVP MUST label it as out of scope and MUST NOT present it as collected cost.
 
+  **Reconciliação pendente (2026-09-20)**: o ADR-3 em [plan.md](./plan.md)
+  propõe adiar nuvem para fase 2, mas a revisão humana #454 continua aberta.
+  Manter essa proposta distinta de uma decisão aprovada; não iniciar integração
+  financeira de nuvem nem remover a clarificação sem confirmação.
+
 ### Key Entities *(include if feature involves data)*
 
 - **CostRecord**: representa o custo real de uma feature em uma dimensão específica (tokens, horas humanas ou nuvem); atributos: `feature_id`, `dimension`, `amount`, `currency`, `period`, `source`.

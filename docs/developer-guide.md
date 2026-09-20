@@ -1,49 +1,31 @@
 # Manual do Dev — Começando com GHE + Nimbus Code na Nimbus-Code
 
-> **TL;DR (Guia Rápido v1.19)**:
-> - **Repositório de Aplicação/Serviço (Padrão)**: `curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bootstrap.sh | bash`
-> - **Repositório de Infraestrutura/Plataforma**: `curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bootstrap.sh | bash -s -- --repo-type platform`
-> - **Ciclo de Entrega**: `/speckit-interview` → `/speckit-specify` → `/speckit-clarify` → `/speckit-plan` → `/speckit-tasks` → `/speckit-analyze` → `/speckit-implement` → `/speckit-converge`
-> - **Regra de Ouro em PRs**: Toda issue implementada deve ser fechada com `Closes #<n>` ou `Fixes #<n>` no corpo do PR.
-> - **Complexidade S4**: Tarefas S4 (arquitetura crítica, auth, dados sensíveis) exigem aprovação humana formal antes do código.
+> **TL;DR** (S0/S1 — leitura completa reservada para primeira vez em cada
+> cenário ou dúvida específica): repo novo → `curl ... bootstrap.sh | bash`
+> (seção 1); repo existente sem Nimbus Code/sem Spec Kit → `curl ... bootstrap.sh | bash`
+> no próprio repo (ou `specify init --here` + bootstrap, se quiser separar) e
+> só depois ler o código/Boards antes de especificar (seção 2, brownfield);
+> ponto de partida a partir de um card do ADO/JIRA → prompt de importação pronto
+> (seção 3); ponto de partida a partir de uma entrevista de descoberta com o
+> cliente (ainda sem card/issue) → `/speckit.interview` (seção 3.5).
+> Pré-requisitos (`specify` CLI, `uv`, Copilot) na tabela logo abaixo.
 
-Este é o manual **central e objetivo** de como todo desenvolvedor e engenheiro da Nimbus-Code deve operar o **Nimbus Code (v1.19)** no dia a dia com GitHub Enterprise, Azure DevOps/JIRA e GitHub Copilot.
+Este é o manual **central** de como todo dev da Nimbus-Code deve usar o
+[GitHub Spec Kit](https://github.com/github/spec-kit) no dia a dia, com as
+ferramentas da empresa (GHE, Azure DevOps/JIRA, GitHub Copilot). Ele cobre três
+cenários, na ordem em que você provavelmente vai precisar deles:
 
----
+1. [Repositório novo](#1-repositório-novo) — bootstrap padrão em 1 comando.
+2. [Repositório existente sem Nimbus Code](#2-repositório-existente-sem-nimbus-code-brownfield) —
+   como instalar e rodar o Nimbus Code entendendo o contexto pelo **código
+   (brownfield)** e pelos **Boards** (cards já existentes).
+3. [Importar um card do Azure DevOps/JIRA para começar uma feature](#3-importar-um-card-do-azure-devops-ou-jira-para-começar-uma-feature) —
+   o prompt exato para puxar um work item/issue como ponto de partida.
+   - [3.5. Conduzindo uma entrevista de descoberta antes do `/speckit.specify`](#35-conduzindo-uma-entrevista-de-descoberta-antes-do-speckitspecify-speckitinterview) —
+     ponto de partida a partir de uma conversa com o cliente, ao vivo ou por transcript, quando ainda não existe card/issue.
 
-## ⚡ Tabela Rápida de Comandos e Ciclo de Vida
-
-O Nimbus Code opera como uma **Fábrica de Software Agêntica** estruturada pelo esquadrão de 9 agentes especializados (`NC-*`). A partir da v1.19, todos os 9 agentes possuem **comandos nativos de barra** (`/nc-*`) com autocomplete no Copilot Chat do VS Code — não é mais necessário decorar o nome do comando `/speckit-*` subjacente.
-
-> ⚠️ **Importante — Tipo de comando**: cada `/nc-*` é classificado como:
-> - **🔗 Alias**: um "apelido" com persona/identidade do agente Nimbus Code sobre um comando que **já existe** no Spec Kit original do MIT/GitHub (`/speckit-*`). Usar `/nc-intake` ou `/speckit-interview` produz o mesmo resultado — a diferença é a camada de contexto institucional (RACI, complexidade S0-S4, LGPD, etc.) que o alias `NC-*` injeta.
-> - **⭐ Exclusivo Nimbus**: uma capacidade que **não existe** no Spec Kit original do MIT — foi criada por este preset (`nimbus-code-standards`) e só está disponível em repositórios provisionados pelo Nimbus Code. `NC-Shield`, `NC-Governor` e `NC-Telemetry` são os 3 agentes desta categoria.
-
-| Fase | Agente Responsável | Comando Nativo `/nc-*` | Tipo | Equivalente MIT Spec Kit | Objetivo | Saída Principal |
-|---|---|---|---|---|---|---|
-| **0. Entrevista** | **`NC-Intake`** | `/nc-intake` | 🔗 Alias | `/speckit-interview` | Descoberta guiada com o cliente (Negócio, Infra, Segurança, LGPD) | `specs/<slug>/interview.md` |
-| **1. Especificar** | **`NC-Spec`** | `/nc-spec` | 🔗 Alias | `/speckit-specify` | Definir o **quê** e o **porquê** (requisitos SMART e User Stories BDD) | `specs/<slug>/spec.md` |
-| **2. Clarificar & Auditar** | **`NC-Critic`** | `/nc-critic` | 🔗 Alias | `/speckit-clarify` + `/speckit-checklist` + `/speckit-analyze` | Eliminar ambiguidades e auditar qualidade antes do desenho técnico | `spec.md` polido / Checklist |
-| **3. Governança & Rastreabilidade** | **`NC-Governor`** | `/nc-governor` | ⭐ Exclusivo Nimbus | *(sem equivalente no MIT — camada de governança criada pela SPEC 018)* | Registrar hash SHA-256 da spec, complexidade S0–S4 e aprovação humana | Issues no Project V2 |
-| **4. Planejar Arquitetura** | **`NC-Arch`** | `/nc-arch` | 🔗 Alias | `/speckit-plan` | Desenhar arquitetura técnica, verificar reuso e atualizar grafos | `plan.md`, `graph.yaml` |
-| **5. DevSecOps & Compliance** | **`NC-Shield`** | `/nc-shield` | ⭐ Exclusivo Nimbus | *(sem equivalente no MIT — o Spec Kit original não possui gate de segurança dedicado)* | Validar os 6 itens Não-Negociáveis (TLS, cofre, segredos, backup, etc.) | Parecer de Segurança |
-| **6. Estratégia de Testes** | **`NC-QA`** | `/nc-qa` | 🔗 Alias | `/speckit-tasks` + `/speckit-checklist` | Elaborar a suíte de testes (TDD/E2E/BATS) e decompor `tasks.md` antes da codificação | Testes pré-implementação |
-| **7. Implementar** | **`NC-Builder`** | `/nc-builder` | 🔗 Alias | `/speckit-implement` + `/speckit-converge` | Executar as tarefas sob isolamento estrito de sessão (1 branch/fase) | Código, testes e PR (`Closes #N`) |
-| **8. Observabilidade & DORA** | **`NC-Telemetry`** | `/nc-telemetry` | ⭐ Exclusivo Nimbus | *(sem equivalente no MIT — métricas DORA e custo real não fazem parte do Spec Kit original)* | Instrumentar logs JSON/OTel, apurar métricas DORA e custo total | Métricas DORA + Custo Real |
-
-**Regra prática**: se você já está acostumado com os comandos `/speckit-*` do Spec Kit padrão, pode continuar usando-os normalmente — eles não foram removidos nem descontinuados. Os comandos `/nc-*` existem apenas para dar **uma identidade única por papel do agente** e, no caso do `NC-Shield`, `NC-Governor` e `NC-Telemetry`, para expor capacidades que **só existem no Nimbus Code**.
-
-### 🐛 Fluxo Dedicado de Bugs (assess → fix → test)
-*Instalado por padrão via extensão `bug`:*
-- **Diagnosticar e Reproduzir**: `/speckit-bug-assess "<sintoma do bug>" slug=<nome-do-bug>` (Gera `.specify/bugs/<slug>/assessment.md`)
-- **Aplicar Correção**: `/speckit-bug-fix slug=<nome-do-bug>` (Gera o patch cirúrgico)
-- **Verificar e Validar**: `/speckit-bug-test slug=<nome-do-bug>` (Emite o veredito formal `verified`, `partial` ou `failed`)
-
-### 💡 Fluxo de Avaliação de Ideias / Intake (intake → decide)
-*Instalado por padrão via extensão `assess`:*
-- `/speckit-assess-intake` → `/speckit-assess-research` → `/speckit-assess-define` → `/speckit-assess-shape` → `/speckit-assess-decide` (Gera `.specify/assessments/<slug>/` com decisão `go`, `needs-clarification` ou `kill`)
-
----
+Se algo aqui divergir do que você vê na prática, este arquivo é a fonte da
+verdade — abra um PR corrigindo, não crie um manual paralelo em outro lugar.
 
 ## Pré-requisitos (uma vez por máquina)
 
@@ -1098,13 +1080,10 @@ Classifique cada PR que toca superfície de bundle/preset com um label:
 
 O workflow
 [release-readiness-gate.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/release-readiness-gate.yml)
-roda em toda PR para `develop`, auto-rotula `release:skip` para mudanças só de
-documentação de release e `release:patch` quando a PR já altera arquivos
-versionados + `catalog.json`, e bloqueia merge quando:
+roda em toda PR para `develop` e bloqueia merge quando:
 
 - a PR toca superfície de release (`presets/`, `extensions/`, `workflows/`,
-  `bundles/`, docs de release e scripts de versionamento) sem label `release:*`
-  e fora dos casos de auto-rotulagem acima;
+  `bundles/`, docs de release e scripts de versionamento) sem label `release:*`;
 - há mais de um label `release:*`;
 - a PR foi classificada como `release:major|minor|patch` mas não atualizou
   arquivo de versão e `catalog.json`.
@@ -1251,76 +1230,104 @@ Ver também: [FAQ — Como atualizo um projeto criado com uma versão antiga do 
 - [`docs/extension-candidates.md`](extension-candidates.md) — quais extensões
   (oficiais e da Nimbus-Code) considerar instalar além do bundle padrão.
 
-## Automated Preset Synchronization (Phase 2)
+## Phase 2: Automated Preset Synchronization (SPEC 020)
 
-A Phase 2 da SPEC 020 adiciona uma esteira contínua para manter repositórios
-satélite alinhados com a versão central do preset, sem transformar o satélite em
-segunda fonte de verdade.
+Esta fase fornece auditoria de versões e um caminho controlado de atualização.
+**Não significa rollout aprovado**: o auto-sync permanece desabilitado por padrão,
+dependente de opt-in, credencial com acesso aos satélites e piloto humano
+(#433/#445). O token padrão do workflow não concede acesso cross-repo.
 
-### Como funciona a auditoria semanal
+### Weekly Satellite Preset Audit
 
-O workflow `.github/workflows/satellite-preset-audit.yml` roda:
+**Schedule**: Every Monday at 09:00 UTC
 
-- **automaticamente** toda segunda-feira às **09:00 UTC**;
-- **sob demanda** via `workflow_dispatch`.
+The central repository runs `.github/workflows/satellite-preset-audit.yml`, which:
 
-Ele executa `scripts/scan-org-rename-references.sh --mode satellite-preset-audit`,
-que:
+1. Consulta os satélites acessíveis à credencial configurada.
+2. Lê `.specify/presets/.registry` e compara com os manifests do checkout
+   central, sem versão fixa no script.
+3. Produz relatório CSV e distingue drift, ausência de bootstrap e erros de
+   consulta; ausência de acesso não é prova de ausência de preset.
+4. Publica evidência/issue quando aplicável. Um relatório sem drift é válido
+   e não deve falhar por um filtro sem correspondências.
 
-1. lista os repositórios da organização;
-2. lê `.specify/presets/.registry` de cada satélite;
-3. compara a versão instalada com a versão central publicada em
-   `presets/catalog.json`;
-4. gera um CSV com `repo,current_version,drift_status,last_updated`;
-5. cria/atualiza uma issue no repositório central quando houver satélites com
-   `drift`.
+**View audit results**:
+```bash
+# Download latest audit report
+gh run list --workflow=satellite-preset-audit.yml --limit 1 \
+  --json databaseId,createdAt --jq '.[0].databaseId' | xargs -I {} \
+  gh run download {} -n preset-audit-report
+```
 
-O artifact `preset-audit-report` fica anexado ao run para auditoria posterior.
+### Auto-PR Generation for Drifted Repos
 
-### Como os auto-PRs são criados
+O workflow `.github/workflows/auto-sync-preset.yml` é um mecanismo opt-in,
+não autorização para alterar todos os satélites. O fluxo só pode usar uma
+versão existente no checkout de origem, executar refresh sem provisioning e
+abrir PR para revisão. Não deve mascarar falhas nem sobrescrever branches
+remotas por force-push.
 
-Quando a auditoria encontra drift e a variável
-`NIMBUS_DISABLE_PRESET_AUTO_SYNC` **não** está marcada como `true`, o workflow
-central despacha `.github/workflows/auto-sync-preset.yml` para cada satélite em
-atraso.
+`NIMBUS_SATELLITE_SYNC_ENABLED=true` habilita apenas o dispatch manual;
+ausente/false mantém o sync desabilitado. Nesta entrega, o auto-sync suporta
+somente `dev_standards`. O preset `platform` pode usar o refresh manual
+documentado abaixo, mas não está incluído no rollout automatizado.
 
-O auto-sync segue estes guardrails:
+Consulte os inputs, variáveis e autenticação vigentes no workflow e no
+[quickstart da SPEC 020](../specs/020-satellite-repo-governance/quickstart.md)
+antes de habilitar um piloto. Não existe a operação “adicionar label a um PR
+antes de ele ser criado”; mantenha o opt-in desabilitado enquanto a revisão
+humana estiver pendente.
 
-1. consulta `gh pr list` no satélite;
-2. se já existir qualquer PR aberto, **não** abre novo PR automático;
-3. se já existir branch/PR `fix/preset-sync-to-vX.Y.Z`, também não duplica;
-4. quando liberado, cria a branch `fix/preset-sync-to-vX.Y.Z`;
-5. executa `bootstrap.sh --refresh-preset` usando a versão central do script;
-6. abre PR com título `fix(preset): sync to vX.Y.Z`;
-7. aplica a label `sync:preset-version` e referencia a issue da auditoria.
+### Preset Version Validation in CI/CD
 
-> Importante: `--refresh-preset` foi pensado para reaplicar o preset sem
-> reinicializar o repositório inteiro. Arquivos que já foram customizados no
-> satélite são preservados; arquivos que ainda espelham a versão antiga do
-> template podem ser atualizados automaticamente.
+O bootstrap entrega `.github/workflows/validate-bootstrap.yml` e seu detector.
+O check deve preservar o exit code de mismatch/erro, não somente publicar uma
+mensagem. No consumidor, a referência local é o manifest instalado em
+`.specify/presets/`, não um diretório `presets/` central que ele não possui.
+Comparação local verifica consistência da instalação; não substitui a auditoria
+central de versão mais recente. Tornar o check obrigatório depende da proteção
+de branch aprovada pelo responsável.
 
-### Como desabilitar
+O hook `scripts/validate-versions.sh` entregue ao consumidor usa esse detector.
+O script homônimo do repositório central valida também bundles/catalogs e
+**não deve ser copiado diretamente para um satélite**.
 
-Há três níveis de controle:
+### Manual Preset Refresh
 
-1. **Desabilitar a criação automática de PRs, mas manter a auditoria**:
-   defina a variável de repositório `NIMBUS_DISABLE_PRESET_AUTO_SYNC=true` no
-   repositório central.
-2. **Bloqueio pontual por satélite**: mantenha um PR aberto no satélite. O
-   guardrail de “desenvolvimento ativo” faz o auto-sync pular aquele repositório
-   naquela execução.
-3. **Operação manual**: rode `bootstrap.sh --refresh-preset` no satélite e abra
-   o PR manualmente, ou dispare `auto-sync-preset.yml` com `workflow_dispatch`.
+Use um checkout confiável da versão desejada do bundle e execute a partir
+do repositório consumidor. O bootstrap não precisa existir no satélite:
 
-### Validação em PRs que alteram `.specify/`
+```bash
+# Dentro do repositorio consumidor; ajuste para o checkout do bundle desejado
+bash /caminho/do/bundle/bootstrap.sh \
+  --local /caminho/do/bundle --refresh-preset --repo-type dev_standards
+git diff --stat
+```
 
-Todo satélite pode habilitar `.github/workflows/validate-bootstrap.yml`. O job:
+Use `platform` para o preset de plataforma. O tipo pode ser omitido somente
+quando o registro identifica exatamente um preset Nimbus suportado.
 
-- faz checkout do repositório central;
-- executa `.specify/scripts/bash/detect-preset-version-mismatch.sh --json`;
-- comenta no PR quando encontra mismatch, warning ou erro operacional;
-- falha o check somente quando o preset está **atrás** da origem central ou
-  quando a estrutura de `.specify/` está inválida.
+Pré-requisitos: Bash 4+, `specify`, `python3` com PyYAML. O refresh não executa
+`specify init`, extensões, topology, GitHub Projects, labels ou instalação de
+hooks. Reinstala o preset e sincroniza arquivos gerenciados sem sobrescrever
+instruções locais, catálogos, configuração de custos ou overrides.
 
-Isso permite bloquear merge de drift real, sem punir casos em que o satélite já
-esteja à frente da origem consultada (status `warn`).
+`.specify/bundle-files.json` registra hashes dos arquivos entregues. Alteração
+local ou arquivo legado divergente sem baseline interrompe o preflight antes
+de remover o preset. Reconcilie conscientemente os arquivos indicados: não
+apague o estado nem use o bootstrap normal como um “force refresh”.
+O bootstrap normal continua sendo o caminho de criação/inicialização.
+Uma falha de instalação é reportada; não equivale a atualização concluída.
+
+Revise **todas** as alterações (incluindo scripts e workflows, não apenas
+`.specify/`), valide e envie um PR pela branch de trabalho aprovada, sem merge
+automático. A distribuição geral de skills enriquecidas continua sujeita à
+decisão #367/#405; copiar scripts corrigidos não resolve esse gate.
+
+### Phase 2 Compliance Checklist
+
+- [ ] Credencial cross-repo e piloto humano aprovados antes de habilitar opt-in
+- [ ] Relatório distingue drift, instalação ausente e falha de acesso
+- [ ] Refresh executado em fixture antes de um satélite real
+- [ ] Registry, manifest instalado, arquivos gerenciados e overrides revisados
+- [ ] Check de CI realmente falha em drift/erro e proteção de branch revisada

@@ -1,5 +1,12 @@
 # Tasks: Fluxo de Correção de Rota para Specs Existentes
 
+> Auditoria 2026-09-20: as 26 tarefas marcadas registram entrega documental,
+> não aprovação humana. Revisão e validação operacional continuam em #435/#444.
+> Essas issues descrevem remediação S3/impact-map; o conteúdo publicado auditado
+> permanece S2 e não contém esse mapa. Localizar a branch/evidência da remediação
+> antes de declarar integração ou alterar a classificação. Contratos humanos
+> abertos abaixo não foram aprovados por esta auditoria.
+
 **Entrada**: Artefatos de design de `/specs/019-process-recovery-flow/`  
 **Pré-requisitos**: `plan.md` ✅, `spec.md` ✅, `research.md` ✅, `data-model.md` ✅, `quickstart.md` ✅, `graph.yaml` ✅, `graph.md` ✅, `contracts/` ✅  
 **Organização**: Tarefas agrupadas por user story para validação independente do fluxo operacional de decisão.

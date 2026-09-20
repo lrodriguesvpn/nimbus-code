@@ -4,6 +4,13 @@
 **Prerequisites**: `plan.md` ✅, `spec.md` ✅, `research.md` ✅, `data-model.md` ✅, `contracts/` ✅, `quickstart.md` ✅, `graph.yaml` ✅, `graph.md` ✅, `impact-map.md` ✅  
 **Organization**: Tasks grouped by user story for independent implementation and validation.
 
+**Estado auditado em 2026-09-20**: artefatos documentais presentes; revisão S4
+#442 aberta. Os testes `tests/spec017/*.integration.spec.md` especificam cenários,
+não são executáveis. `quickstart.md` define passos/resultados esperados, sem
+log de simulação executada. T040 é parcial e T041 não possui medições verificáveis;
+ambas reabertas. #276 continua aberta/bloqueada até rollout estável e critério
+D+21; criar a issue não comprova ativação ou remoção da flag.
+
 ## Format: `[ID] [P?] [US?] Description with file path`
 
 - `[P]`: Task can run in parallel (different file, no blocking dependency)
@@ -204,21 +211,21 @@
 ## Nimbus-Code — Checklist de Qualidade de Código, Testes e Observabilidade
 
 - [x] `graph.yaml` e `graph.md` atualizados para refletir módulos adicionados/alterados
-- [x] Para complexidade S4: `impact-map.md` atualizado e revisado antes do merge
+- [ ] Para complexidade S4: revisão humana do `impact-map.md` comprovada (#442 aberta)
 - [x] Critérios de aceitação da `spec.md` cobertos com ID de teste rastreável
-- [x] Feature flag configurada conforme estratégia de release do `plan.md`
-- [x] Testes contemplam os caminhos da flag (ON/OFF) ou há exceção justificada
-- [x] Estratégia de rollout progressivo executada em homologação com evidência anexada
+- [ ] Feature flag configurada em runtime conforme estratégia de release do `plan.md` (fase atual documental)
+- [x] Desenho de testes contempla caminhos ON/OFF; execução runtime não comprovada
+- [ ] Estratégia de rollout progressivo executada em homologação com evidência anexada
 - [x] Tarefa/issue de remoção da flag criada com prazo e owner definidos
-- [x] SLO medido em staging dentro dos limites do SLO Gate do `plan.md`
-- [x] Revisão de código por IA solicitada no PR sem findings High/Critical pendentes
-- [x] Teste de integração cobrindo critérios de aceitação aplicáveis
-- [x] Observabilidade instrumentada: logs estruturados, métricas e alertas mínimos
+- [ ] SLO medido em staging (não aplicável à execução desta fase documental; sem medição real)
+- [ ] Revisão de código por IA comprovada no PR sem findings High/Critical pendentes
+- [x] Desenhos de integração rastreiam os critérios de aceitação; não constituem testes executados
+- [ ] Observabilidade instrumentada em runtime (não aplicável à execução desta fase documental)
 - [x] Correlation-id/trace-id propagado entre serviços (ou N/A justificado)
 - [x] Bugs fora de escopo encontrados durante execução abertos como issue
 
 **Evidências / N-A justificados**
-- Rollout progressivo: evidência documental de execução definida no cenário 5 de `quickstart.md` (simulação controlada).
+- Rollout progressivo: cenário 5 de `quickstart.md` é um roteiro de simulação controlada, não evidência de execução; manter T040 parcial.
 - Issue de remoção da flag: #276 (owner: Squad ADE Platform, prazo D+21 após estabilização).
 - SLO e observabilidade: N/A em ambiente de staging real nesta fase documental; critérios e pontos de medição definidos em `plan.md`.
 - Revisão de código por IA: será executada no PR final desta feature (N/A no workspace local).
@@ -229,11 +236,11 @@
 | Métrica | Estimado (`plan.md`) | Real | Variância | Fonte da medição |
 |---|---|---|---|---|
 | Tokens (input+output) | ~120–220 mil | não disponível (sem telemetria local de tokens) | N/A | execução local via Copilot CLI sem medidor de token por feature |
-| Horas humanas | ~28–44 horas | ~6h (rodada atual de refine + implement + converge) | abaixo da estimativa | registro operacional da sessão atual |
+| Horas humanas | ~28–44 horas | Não disponível — ~6h foi relatado sem fonte verificável | Não calculável | A confirmar no GitHub Project/registro humano, sem inferir tempo de sessão como trabalho humano |
 
-- [x] Consumo real registrado e comparado com estimativa
-- [x] Horas humanas lançadas no campo "Horas Humanas" do GitHub Project
-- [x] Variância acima de 2x analisada e com ação de melhoria
+- [ ] Consumo real registrado e comparado com estimativa (T041 pendente)
+- [ ] Horas humanas lançadas no campo "Horas Humanas" do GitHub Project (sem comprovação)
+- [ ] Variância analisada quando houver medições; não calculável com dados indisponíveis
 
 ---
 
@@ -246,5 +253,5 @@
 - [x] T037 Create integration test spec for OpenFeature toggle coverage (ON/OFF) in `tests/spec017/openfeature-toggle.integration.spec.md` per AC-5 (missing)
 - [x] T038 Create integration test spec for domain badges validation in `tests/spec017/domain-badges.integration.spec.md` per AC-6 (missing)
 - [x] T039 Update quality checklist statuses with concrete evidence or justified N/A entries in `specs/017-nimbus-digital-engineer-platform/tasks.md` per plan: Qualidade de Código, Testes e Observabilidade Gate (partial)
-- [x] T040 Register rollout evidence and create flag removal task/issue reference in `specs/017-nimbus-digital-engineer-platform/tasks.md` per plan: Plano de Toggle e Rollout (partial)
-- [x] T041 Fill real token/human-hours consumption table with measured source data in `specs/017-nimbus-digital-engineer-platform/tasks.md` per plan: Cost Reference (partial)
+- [ ] T040 **PARTIAL**: flag-removal issue #276 exists and is blocked; runtime rollout evidence is not available. Attach actual evidence before closing; `quickstart.md` is only the procedure.
+- [ ] T041 Fill real token/human-hours consumption table with measured source data in `specs/017-nimbus-digital-engineer-platform/tasks.md` per plan: Cost Reference — unavailable, not inferred from estimates.

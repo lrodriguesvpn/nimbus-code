@@ -1,4 +1,5 @@
-# Feature Specification: Controle de Segurança no GHE para Projetos e Projeto Plataforma
+# Feature Specification: Documentação de Controle de Segurança no GHE para Projetos e Projeto Plataforma
+﻿# Feature Specification: Documentação de Controle de Segurança no GHE para Projetos e Projeto Plataforma
 
 **Feature Branch**: `007-controle-seguranca-ghe-projetos-plataforma`
 
@@ -6,7 +7,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "Estabelecer a documentação de referência e os fluxos de auditoria automatizada de segurança no GitHub Enterprise, abrangendo repositórios de projetos e o Projeto Plataforma com verificação de branch protection, RBAC de menor privilégio e relatórios de conformidade."
+**Input**: User description: "/scpekit-specify Criar documentacao para Controle de Seguranca no GHE para controle dos projetos e projeto plataforma."
 
 ---
 
@@ -78,13 +79,23 @@ Como **time de engenharia e governança**, quero uma rotina de auditoria periód
 
 ### Functional Requirements
 
+> **Saneamento documental (2026-09-20):** removidas as repetições textuais de
+> FR-002/003/004/005, preservando seus IDs e vínculos. As duas formulações
+> anteriormente identificadas como SC-003 foram consolidadas no mesmo ID,
+> mantendo tanto a auditoria mensal quanto a varredura semanal/relatório mensal.
+> Isso não aprova requisitos, checklist ou rollout. As revisões
+> [#450](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/450)
+> e [#60/T038](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/60)
+> estavam abertas na consulta desta data; aprovação S4, ADR-0008 aceito e
+> evidência do piloto continuam dependências humanas.
+
 - **FR-001**: A documentação DEVE listar os controles obrigatórios de segurança para repositórios de projeto no GHE (acesso, branch protection, revisão, Actions, secrets).
-- **FR-001a**: A feature DEVE entregar automação (scripts e/ou GitHub Actions) que detecta e reporta (não corrige automaticamente) os controles documentados nos repositórios de projeto e no Projeto Plataforma, gerando issue/relatório rastreável para correção manual seguindo o fluxo existente.
 - **FR-002**: A documentação DEVE separar claramente controles para nível de repositório e controles para o Projeto Plataforma (Project V2 consolidado).
 - **FR-003**: A documentação DEVE definir modelo de acesso por papéis (owner/admin/maintainer/contributor/leitor) com princípio de menor privilégio.
 - **FR-004**: A documentação DEVE definir padrão para uso de tokens e secrets de automação (escopo mínimo, rotação, armazenamento e revogação).
-- **FR-004a**: A automação de varredura organizacional DEVE autenticar-se via GitHub App dedicado instalado na organização, com permissões somente-leitura mínimas necessárias (least privilege), em vez de PAT de usuário ou credenciais de escopo amplo.
 - **FR-005**: A documentação DEVE incluir checklist operacional de auditoria periódica com critérios objetivos de conformidade.
+- **FR-001a**: A feature DEVE entregar automação (scripts e/ou GitHub Actions) que detecta e reporta (não corrige automaticamente) os controles documentados nos repositórios de projeto e no Projeto Plataforma, gerando issue/relatório rastreável para correção manual seguindo o fluxo existente.
+- **FR-004a**: A automação de varredura organizacional DEVE autenticar-se via GitHub App dedicado instalado na organização, com permissões somente-leitura mínimas necessárias (least privilege), em vez de PAT de usuário ou credenciais de escopo amplo.
 - **FR-005a**: A automação DEVE executar a varredura de conformidade em agendamento semanal (cron) para repositórios de projeto e Projeto Plataforma, e DEVE consolidar os resultados em um relatório mensal.
 - **FR-005b**: A automação DEVE descobrir automaticamente todos os repositórios da organização via API do GHE (sem depender de lista manual configurada) para determinar o escopo de varredura.
 - **FR-006**: A documentação DEVE incluir procedimento de resposta para não conformidades (registro, prioridade, responsável, prazo e validação de correção).
@@ -105,8 +116,7 @@ Como **time de engenharia e governança**, quero uma rotina de auditoria periód
 
 - **SC-001**: 100% dos novos repositórios conseguem aplicar o baseline de segurança usando apenas esta documentação.
 - **SC-002**: O Projeto Plataforma passa a operar com matriz de permissões documentada e sem concessão de acesso administrativo fora da matriz aprovada.
-- **SC-003a**: Pelo menos 1 auditoria mensal é executada com checklist completo e evidência registrada para cada projeto ativo.
-- **SC-003b**: A automação executa a varredura semanalmente sem falha e gera um relatório consolidado mensal com evidência registrada para cada projeto ativo.
+- **SC-003**: Pelo menos 1 auditoria mensal é executada com checklist completo e evidência registrada para cada projeto ativo; a automação executa a varredura semanalmente sem falha e gera um relatório consolidado mensal com evidência registrada para cada projeto ativo.
 - **SC-004**: Reduzir em pelo menos 80% a ocorrência de falhas operacionais por secret/token ausente em workflows de governança de Projects.
 
 ## Assumptions

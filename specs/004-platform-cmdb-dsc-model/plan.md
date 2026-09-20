@@ -121,6 +121,13 @@ A solucao e organizada em 6 blocos:
 
 ## Quality Gates — Status Before Planning
 
+> **Estado verificável (2026-09-20):** os `PASS` abaixo registram decisões e
+> artefatos de planejamento, não controles operacionais ou aprovação humana S4.
+> A execução local passou 16/16 testes com fixtures. SSO/descoberta reais,
+> persistência durável e atualização operacional em 24h não foram comprovados.
+> Ver [estado verificável em tasks.md](tasks.md#estado-verificável--2026-09-20)
+> para limites e entregas não localizadas. Nenhum gate foi aprovado nesta revisão.
+
 | Gate | Status | Notes |
 |---|---|---|
 | Specification Quality | ✅ PASS | Spec validada e clarificada |
@@ -137,10 +144,13 @@ A solucao e organizada em 6 blocos:
 
 | ID AC | Criterio (resumo) | Tipo de teste planejado | Arquivo/modulo do teste | Justificativa de ausencia (se N/A) |
 |---|---|---|---|---|
-| AC-1 | Selecao de plataforma + autenticacao SSO | e2e | `tests/e2e/auth-scope-validation.test` | — |
-| AC-2 | Atualizacao CMDB com evidencias | integracao | `tests/integration/cmdb-consolidation.test` | — |
-| AC-3 | Baseline/politicas/customizacoes | integracao | `tests/integration/baseline-comparison.test` | — |
-| AC-4 | Geracao DSC versionada | e2e | `tests/e2e/dsc-versioning.test` | — |
+| AC-1 | Selecao de plataforma + autenticacao SSO | contrato/integração/e2e com fixtures | `platform-governance/tests/contract/auth-session.contract.test.js`, `platform-governance/tests/integration/execution-scope.test.js`, `platform-governance/tests/e2e/auth-rejection.test.js` | Cobertura local; não valida um IdP corporativo real |
+| AC-2 | Atualizacao CMDB com evidencias | integração com fixtures | `platform-governance/tests/integration/cmdb-ingestion.test.js`, `platform-governance/tests/e2e/cmdb-history.test.js` | Não comprova descoberta cloud real ou persistência durável |
+| AC-3 | Baseline/politicas/customizacoes | integração/e2e com fixtures | `platform-governance/tests/integration/m365-baseline.test.js`, `platform-governance/tests/e2e/customization-report.test.js` | Não comprova coleta de políticas no tenant |
+| AC-4 | Geracao DSC versionada | integração com fixtures | `platform-governance/tests/integration/dsc-profile-generation.test.js` | Não comprova versionamento persistente em operação |
+
+Mapa corrigido em 2026-09-20 para arquivos existentes; substituir os caminhos
+planejados não amplia a cobertura demonstrada pelos testes.
 
 ---
 

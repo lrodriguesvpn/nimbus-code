@@ -246,157 +246,103 @@ bats tests/bootstrap/bootstrap-entrypoints.bats
 
 ---
 
-## Fase 2 — Sincronização Automatizada de Preset
+## Phase 2: Validação local e piloto manual pendente
 
-**Visão geral da Fase 2**: após a Fase 1 documentar a governança entre repositório
-central e satélites, a Fase 2 automatiza a detecção de drift, a auditoria semanal
-e a abertura controlada de PRs de sincronização.
+**Estado**: remediação testável localmente; nenhuma execução de rollout comprovada
+ou autorizada. Implementação #460; gates humanos #433/#445/#448 permanecem abertos.
 
-### V8: Auditoria semanal detecta drift de preset
+### V8: Auditoria semanal somente leitura dos satélites
 
-**Cenário**: toda segunda-feira, às 09:00 UTC, o repositório central executa uma
-varredura organizacional para descobrir quais satélites estão atrás da versão
-corrente do preset.
+`satellite-preset-audit.yml` roda segunda às 09:00 UTC ou por dispatch manual.
+Usa App com leitura de conteúdo, ou o fallback existente
+`VPNDEV_STANDARDS_READ_TOKEN`; `GITHUB_TOKEN` não serve para leitura cross-repo.
+O token do workflow central pode criar/atualizar a issue de relatório central.
 
-**Validation steps**:
-1. Confirmar em `.github/workflows/satellite-preset-audit.yml` que o gatilho é:
-   - `schedule: cron: '0 9 * * 1'`
-   - `workflow_dispatch`
-2. Confirmar em `scripts/scan-org-rename-references.sh --mode satellite-preset-audit`
-   que a versão central é lida de `presets/catalog.json`.
-3. Verificar que o CSV de saída contém as colunas:
-   - `repo`
-   - `current_version`
-   - `drift_status`
-   - `last_updated`
-4. Verificar que os status previstos incluem pelo menos:
-   - `in_sync`
-   - `drift`
-   - `ahead`
-   - `not_bootstrapped`
-5. Confirmar que, quando `drift > 0`, o workflow cria/atualiza uma issue com o
-   título `Satellite repos out of sync with vX.Y.Z: N repos need upgrade`.
-6. Confirmar que o artifact `preset-audit-report` é anexado ao run.
+O scanner lê a versão de `presets/nimbus-code-standards/preset.yml`, consulta a
+registry nomeada e produz `repo,current_version,drift_status,last_updated`.
+Estados: `in_sync`, `drift`, `error`. Uma falha HTTP, inclusive 404 de repo privado,
+**não comprova** `not_bootstrapped`: falha o job e fica visível no CSV.
+O contador `not_bootstrapped` é mantido por compatibilidade, mas não é inferido de
+erros. Zero drift e organização vazia produzem contagens zero sem falha.
+A data usa a API de commits filtrada por `.specify`, não `.files` ausente na listagem.
 
-**Assertion**: a auditoria semanal transforma drift em evidência rastreável,
-com issue + artifact, sem depender de inspeção manual repo a repo.
+O artefato e o resumo continuam disponíveis quando há erro de leitura parcial.
+Falha de listagem/autenticação deixa o job vermelho: um CSV vazio nesse caso não
+é evidência de cobertura completa. Nenhum relatório dispara sync automaticamente.
 
-**Files involved**:
-- `.github/workflows/satellite-preset-audit.yml`
-- `scripts/scan-org-rename-references.sh`
-- `presets/catalog.json`
+### V9: PR de atualização — desabilitado por padrão
 
----
+Antes de ativar, um humano precisa aprovar o piloto (#433/#445), confirmar
+proteções/revisão no satélite, disponibilidade da tag do CLI em
+`.specify/integration.json` e permissões do App/PAT existente:
+conteúdo, PRs e workflows em escrita. O token App solicita essas permissões apenas
+se já concedidas à instalação pelo humano; não altera a instalação. Se a política/token
+negar essa escrita, o push falha e o bloqueio deve ser resolvido pelo humano.
+O workflow não concede permissões, cria credenciais ou força push.
 
-### V9: Fluxo de auto-PR para satélites com drift
+1. Após aprovação, definir `NIMBUS_SATELLITE_SYNC_ENABLED=true` no repo central.
+   Ausente/false deixa o sync desligado; desligar a variável bloqueia novos runs.
+2. Executar **manualmente** `auto-sync-preset.yml`, informando `repo=owner/repo`
+   da mesma organização e `target_version=X.Y.Z` igual ao checkout selecionado.
+   Não há parser de títulos/corpos de issue e não há versão padrão hardcoded.
+3. O workflow instala o CLI na versão do bundle e gera token App limitado ao
+   satélite, ou usa `VPNDEV_PROJECT_TOKEN` legado. Credencial ausente ou sem
+   escrita bloqueia explicitamente; nunca cai para `GITHUB_TOKEN`.
+4. O helper recusa PRs ativos/branch existente, clona a default branch e cria
+   `fix/preset-sync-to-vX.Y.Z`. Executa o bootstrap **do bundle** dentro do satélite:
 
-**Cenário**: ao encontrar um satélite atrás da versão central, o repositório
-central pode abrir automaticamente um PR de sincronização — desde que o satélite
-não esteja em desenvolvimento ativo.
-
-**Validation steps**:
-1. Confirmar em `.github/workflows/auto-sync-preset.yml` que o workflow recebe:
-   - `repo`
-   - `target_version`
-   - `audit_issue_number` (opcional)
-2. Verificar que o workflow consulta `gh pr list` no repositório satélite.
-3. Confirmar o guardrail:
-   - se houver qualquer PR aberto → **não criar** PR automático
-   - se já existir branch/PR `fix/preset-sync-to-vX.Y.Z` → **não duplicar**
-4. Verificar que, quando liberado, o workflow:
-   - cria branch `fix/preset-sync-to-vX.Y.Z`
-   - executa `bootstrap.sh --refresh-preset`
-   - abre PR com título `fix(preset): sync to vX.Y.Z`
-   - aplica a label `sync:preset-version`
-   - referencia a issue da auditoria no corpo do PR (quando informada)
-5. Confirmar o override manual documentado:
-   - variável `NIMBUS_DISABLE_PRESET_AUTO_SYNC=true` desabilita o auto-dispatch
-     mantendo a auditoria semanal ativa
-   - PR aberto no satélite bloqueia o auto-sync daquela janela
-   - o time ainda pode rodar `bootstrap.sh --refresh-preset` manualmente
-
-**Assertion**: a automação respeita o contexto de trabalho do satélite e não abre
-PR em paralelo quando já existe desenvolvimento ativo.
-
-**Files involved**:
-- `.github/workflows/satellite-preset-audit.yml`
-- `.github/workflows/auto-sync-preset.yml`
-- `bootstrap.sh`
-
----
-
-### V10: Validação de preset em PRs que alteram `.specify/`
-
-**Cenário**: um PR em repositório satélite altera arquivos dentro de `.specify/`.
-A CI deve bloquear merge quando o registry estiver defasado em relação à origem
-central do preset.
-
-**Validation steps**:
-1. Confirmar em `.github/workflows/validate-bootstrap.yml` que o gatilho é
-   `pull_request` com path `.specify/**`.
-2. Confirmar que o workflow faz checkout do repositório central e executa:
-   `./.specify/scripts/bash/detect-preset-version-mismatch.sh --json`
-3. Verificar o comportamento por status:
-   - `ok` → passa sem comentário de erro
-   - `mismatch` → comenta no PR e falha o job
-   - `warn` → comenta aviso, mas **não** falha
-   - `error` → comenta erro operacional e falha o job
-4. Validar o conteúdo do comentário de mismatch:
-   - arquivo afetado (`.specify/presets/.registry`)
-   - versão esperada
-   - versão atual
-   - instrução explícita para rodar `bootstrap.sh --refresh-preset`
-
-**Assertion**: drift de preset é detectado cedo, no próprio PR que mexe em
-`.specify/`, com mensagem objetiva de correção.
-
-**Files involved**:
-- `.github/workflows/validate-bootstrap.yml`
-- `.specify/scripts/bash/detect-preset-version-mismatch.sh`
-- `bootstrap.sh`
-
----
-
-### V11: Cobertura de testes para a lógica de detecção
-
-**Cenário**: a função de detecção precisa tratar match, ausência de `.specify/`,
-registry defasado e registry mais novo que a origem central.
-
-**Validation steps**:
-1. Confirmar em `tests/bootstrap/bootstrap-preset-detection.bats` os cenários:
-   - versão exata → `status == "ok"`
-   - `.specify/` ausente → `status == "error"`
-   - registry desatualizado → `status == "mismatch"`
-   - registry mais novo → `status == "warn"` com exit code 0
-2. Rodar:
    ```bash
-   bats tests/bootstrap/bootstrap-preset-detection.bats
+   cd /caminho/do/satelite
+   bash /caminho/do/bundle/bootstrap.sh --refresh-preset \
+     --local /caminho/do/bundle --repo-type dev_standards
    ```
-3. Confirmar que a suíte passa sem depender de `/tmp`, usando diretórios locais
-   do próprio repositório para fixtures temporárias.
 
-**Assertion**: a detecção possui cobertura determinística para match, drift,
-erro estrutural e aviso de versão à frente.
+5. Refresh e detector precisam passar antes de commit/push. O PR aponta para a
+   default branch descoberta; não há merge automático. Falha de push/PR falha o
+   job e exige inspeção humana, sem retries com force-push.
+6. Remover a flag somente após evidência de piloto/PR revisado e decisão humana
+   registrada no plan. Nenhuma ativação ocorreu nesta remediação.
 
-**Files involved**:
-- `tests/bootstrap/bootstrap-preset-detection.bats`
-- `.specify/scripts/bash/detect-preset-version-mismatch.sh`
-- `bootstrap.sh`
+O fluxo cobre `nimbus-code-standards`; outros presets precisam de decisão explícita.
+Essa restrição é da proposta de PR, não do detector, que também valida platform.
 
----
+### V10: Validação de PR fail-closed
 
-## Integração Fase 1 + Fase 2
+O detector executa sem rede. Contrato JSON/exit: `in_sync`/0, `mismatch`/1,
+`error`/2. Script ausente, saída inválida e divergência entre status/exit bloqueiam.
+Infere o preset Nimbus único da registry (`nimbus-code-standards` ou
+`nimbus-code-platform-standards`). Múltiplos presets exigem `--preset <id>`;
+zero entradas suportadas falham explicitamente. Registry flat legada mantém
+o padrão dev e permite selecionar platform por `--preset`.
+O relatório é publicado no log e job summary, sem exigir escrita de comentários
+em PRs de forks.
 
-Com a Fase 2 implementada, o modelo completo fica assim:
+Ordem da versão esperada: `--expected-version` / `NIMBUS_PRESET_VERSION`,
+manifesto central local, manifesto instalado. Em consumidor sem árvore
+`presets/`, a comparação com manifesto instalado comprova apenas consistência
+local. Configure a variável `NIMBUS_PRESET_VERSION` no satélite para aplicar um
+baseline externo aprovado; a auditoria central continua responsável pelo drift remoto.
 
-1. **Fase 1 (governança)**: o bootstrap classifica greenfield/brownfield,
-   registra a decisão mono vs multirepo, reforça o repositório central como
-   fonte única de `spec.md`/`plan.md`/`tasks.md` e documenta o fluxo oficial de
-   atualização central → satélite.
-2. **Fase 2 (automação)**: a auditoria semanal detecta drift, cria/atualiza a
-   issue de acompanhamento, despacha o auto-sync quando permitido, e a CI de PR
-   barra merges com preset defasado.
+```bash
+bash .specify/scripts/bash/detect-preset-version-mismatch.sh --json
+bash .specify/scripts/bash/detect-preset-version-mismatch.sh \
+  --repo-root /caminho/do/satelite --expected-version X.Y.Z --json
+```
 
-**Resultado esperado**: os satélites permanecem próximos da versão central do
-preset com rastreabilidade formal (issue, artifact, label e PR revisado), sem
-perder o controle humano sobre conflitos ou janelas de desenvolvimento ativo.
+### V11: Regressão offline
+
+```bash
+bash tests/workflows/satellite-preset-governance.test.sh
+mkdir -p .spec020-bats
+BATS_TMPDIR="$PWD/.spec020-bats" bats tests/scripts/preset-version-mismatch.bats \
+  tests/bootstrap/bootstrap-preset-detection.bats
+rmdir .spec020-bats
+actionlint .github/workflows/{validate-bootstrap,auto-sync-preset,satellite-preset-audit}.yml
+```
+
+Os testes usam fixtures dentro do projeto e mocks de `gh`/`git`, sem rede nem
+mutações GitHub. Cobrem consumidor sem fonte, registry legada/nomeada, drift,
+erros, detector ausente, JSON inconsistente, zero contagens CSV, opt-in desligado,
+validação de inputs, autenticação, PR ativo, branch existente, falha de refresh,
+versão pós-refresh, nenhum diff, push/PR falhando e estratégia de PR revisado.
+Passar esses testes não comprova acesso cross-repo nem autorização de rollout.

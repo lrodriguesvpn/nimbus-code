@@ -225,6 +225,7 @@ declare -a VIEWS=(
   "Board por Epic|BOARD_LAYOUT|"
   "Board por Prioridade|BOARD_LAYOUT|"
   "Tabela — P0 Blocker|TABLE_LAYOUT|label:\"priority:P0-blocker\""
+  "Métricas DORA & Incidentes|TABLE_LAYOUT|label:\"dora:deployment-frequency\",\"dora:lead-time\",\"dora:change-failure-rate\",\"dora:mttr\",\"type:incident\""
 )
 
 # Buscar views já existentes ANTES de criar (idempotência — mesma lógica do

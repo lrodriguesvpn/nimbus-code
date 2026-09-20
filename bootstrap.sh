@@ -33,6 +33,7 @@ print_usage() {
 Usage:
   ./bootstrap.sh [--local <path>] [--ref <tag|branch>] [--integration <copilot|claude|gemini>] [--repo-type <platform|dev_standards>] [--delivery-model <monorepo|multirepo>] [--decision-reason <text>] [--decision-owner <team|role>] [--satellite-domains <CSV>] [--custom-domain-justification <text>] [--custom-domain-ownership <text>] [--refresh-preset]
   ./bootstrap.sh --detect-preset-version-mismatch [--repo-root <path>] [--source-root <path>] [--json]
+Refresh updates the preset and unmodified managed files only; no init or GitHub provisioning.
 EOF
 }
 
@@ -764,6 +765,11 @@ fi
 
 WORKDIR="$(pwd)"
 
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "ERROR: python3 is required for preset registry and managed-file validation." >&2
+  exit 1
+fi
+
 if [[ -z "$LOCAL_PATH" ]]; then
   TMP_CLONE="$WORKDIR/.nimbus/bootstrap-source-$$"
   trap 'rm -rf "$TMP_CLONE"' EXIT
@@ -790,7 +796,6 @@ if [[ "$BOOTSTRAP_MODE" == "refresh" && -z "$REPO_TYPE" ]]; then
     esac
   fi
 fi
-
 resolve_repo_type
 SELECTED_PRESET="$(preset_for_repo_type "$REPO_TYPE")"
 
@@ -879,8 +884,17 @@ PRESET_REINSTALLED="false"
 PRESET_REFRESH_SNAPSHOT_DIR=""
 
 if [[ "$BOOTSTRAP_MODE" == "refresh" ]]; then
+  if [[ ! -f "$WORKDIR/.specify/presets/.registry" ]]; then
+    echo "ERROR: Refresh requires an initialized repository and preset registry." >&2
+    exit 1
+  fi
+  python3 "$LOCAL_PATH/scripts/sync-bundle-artifacts.py" \
+    --bundle "$LOCAL_PATH" --target "$WORKDIR" --preset "$SELECTED_PRESET" --check
+fi
+
+if [[ "$BOOTSTRAP_MODE" == "refresh" ]]; then
   PRESET_REFRESH_SNAPSHOT_DIR="$(snapshot_installed_project_root_templates "$WORKDIR" "$SELECTED_PRESET")"
-  if component_is_installed preset "$SELECTED_PRESET"; then
+  if [[ -n "$INSTALLED_PRESET_VERSION" ]] || component_is_installed preset "$SELECTED_PRESET"; then
     echo "  Refresh mode requested - reinstalling preset $SELECTED_PRESET from source."
     specify preset remove "$SELECTED_PRESET"
   fi
@@ -905,7 +919,7 @@ fi
 install_component preset "$SELECTED_PRESET" "preset $SELECTED_PRESET" \
   specify preset add --dev "$LOCAL_PATH/presets/$SELECTED_PRESET" --priority 5
 
-if [[ "$REPO_TYPE" == "dev_standards" ]]; then
+if [[ "$BOOTSTRAP_MODE" != "refresh" && "$REPO_TYPE" == "dev_standards" ]]; then
   echo "-> Installing extension nimbus-code-backlog-sync..."
   install_component extension nimbus-code-backlog-sync "extension nimbus-code-backlog-sync" \
     specify extension add --dev "$LOCAL_PATH/extensions/nimbus-code-backlog-sync"
@@ -923,7 +937,7 @@ if [[ "$REPO_TYPE" == "dev_standards" ]]; then
     specify extension add assess
 fi
 
-if [[ "$REPO_TYPE" == "dev_standards" ]]; then
+if [[ "$BOOTSTRAP_MODE" != "refresh" && "$REPO_TYPE" == "dev_standards" ]]; then
   echo "-> Installing workflow nimbus-code-full-cycle..."
   install_component workflow nimbus-code-full-cycle "workflow nimbus-code-full-cycle" \
     specify workflow add "$LOCAL_PATH/workflows/nimbus-code-full-cycle"
@@ -963,17 +977,6 @@ if [[ -f "$ADD_TO_REPO_PROJECT_SRC" ]]; then
   echo "  INFO: prefers NIMBUS_APP_ID/NIMBUS_APP_PRIVATE_KEY; falls back to VPNDEV_PROJECT_TOKEN during rollout."
 else
   echo "  WARN: missing template $ADD_TO_REPO_PROJECT_SRC"
-fi
-
-echo
-echo "-> Installing DEVSTATS workflow..."
-DEVSTATS_WORKFLOW_SRC="$LOCAL_PATH/templates/workflows/devstats-corporate-integration.yml"
-if [[ -f "$DEVSTATS_WORKFLOW_SRC" ]]; then
-  mkdir -p "$WORKDIR/.github/workflows"
-  cp "$DEVSTATS_WORKFLOW_SRC" "$WORKDIR/.github/workflows/devstats-corporate-integration.yml"
-  echo "  OK: .github/workflows/devstats-corporate-integration.yml installed."
-else
-  echo "  WARN: missing template $DEVSTATS_WORKFLOW_SRC"
 fi
 
 echo
@@ -1117,14 +1120,18 @@ if [[ -z "$BUNDLE_VERSION" ]]; then
   exit 1
 fi
 persist_bootstrap_metadata "$BUNDLE_ID" "$BUNDLE_VERSION" "$NIMBUS_REF"
+python3 "$LOCAL_PATH/scripts/sync-bundle-artifacts.py" \
+  --bundle "$LOCAL_PATH" --target "$WORKDIR" --preset "$SELECTED_PRESET" --initialize
 echo
 echo "OK: bundle $BUNDLE_ID v${BUNDLE_VERSION} applied."
 echo "OK: preset installed: $SELECTED_PRESET (repository type: $REPO_TYPE)"
-echo "OK: repository classified as $DETECTED_CONTEXT (reason: $CONTEXT_INDICATOR)"
-if [[ "${DETECTED_CONTEXT:-}" == "greenfield" ]]; then
-  echo "OK: topology decision recorded: $DELIVERY_MODEL (owner: $DECISION_OWNER)"
-  if [[ "$DELIVERY_MODEL" == "multirepo" ]]; then
-    echo "OK: suggested satellite domains: ${SATELLITE_DOMAINS:-FRONT,BACK,DESIGN,DATA,JOBS}"
+if [[ "$BOOTSTRAP_MODE" != "refresh" ]]; then
+  echo "OK: repository classified as $DETECTED_CONTEXT (reason: $CONTEXT_INDICATOR)"
+  if [[ "${DETECTED_CONTEXT:-}" == "greenfield" ]]; then
+    echo "OK: topology decision recorded: $DELIVERY_MODEL (owner: $DECISION_OWNER)"
+    if [[ "$DELIVERY_MODEL" == "multirepo" ]]; then
+      echo "OK: suggested satellite domains: ${SATELLITE_DOMAINS:-FRONT,BACK,DESIGN,DATA,JOBS}"
+    fi
   fi
 fi
 
@@ -1189,7 +1196,7 @@ fi
 
 echo
 if [[ "$BOOTSTRAP_MODE" == "refresh" ]]; then
-  echo "✅ Preset refresh complete!"
+  echo "OK: preset refresh complete."
   echo ""
   echo "Next steps:"
   echo "  1. Revise os arquivos atualizados e os avisos de customizações preservadas."

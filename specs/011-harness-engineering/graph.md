@@ -1,4 +1,4 @@
-# graph.md — Feature 010: Harness Engineering — Aprendizado Organizacional com Erros
+# graph.md — Feature 011: Harness Engineering — Aprendizado Organizacional com Erros
 
 > Gerado a partir de `graph.yaml` — manter os dois em sincronia após cada mudança de módulo.
 
@@ -116,3 +116,24 @@ flowchart TD
 | `.github/copilot-instructions.md` | **Estendido** | + instrução de consulta obrigatória |
 | `scripts/setup-github-labels.sh` | **Estendido** | + labels `harness:*` |
 | `presets/nimbus-code-standards/templates/tasks-template.md` | **Estendido** | + passo de catalogação no checklist de fechamento |
+
+## Remediação S3 — 2026-09-20 (issue #431)
+
+```mermaid
+flowchart LR
+  tests["tests/scripts/harness-search.bats"] --> cli["scripts/harness-search.sh"]
+  tests --> preset["preset/project-root/scripts/harness-search.sh"]
+  preset -. "paridade de distribuição" .-> cli
+  cli --> catalog["docs/harness/harness-catalog.yaml"]
+  preset --> catalog
+```
+
+```mermaid
+flowchart LR
+  query["Agente consulta tag/contexto literal"] --> search["Busca local sem dependência de yq"]
+  search --> matches["Todas as entradas correspondentes com prevenção"]
+  matches --> gate["Informar Harness Gate; aprovação humana não é automatizada"]
+```
+
+A remediação altera somente a busca e sua cópia distribuída, com teste offline.
+Não altera labels, bootstrap, políticas de aprovação ou integrações externas.

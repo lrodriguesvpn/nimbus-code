@@ -1,5 +1,21 @@
 # Implementation Plan: Harness Engineering — Aprendizado Organizacional com Erros
 
+## Remediação aprovada — 2026-09-20
+
+- Escopo S3 autorizado: corrigir a busca literal do catálogo e a cópia distribuída,
+  adicionar `tests/scripts/harness-search.bats`, manter o grafo atualizado.
+- Issue existente: #431. O fallback descartava IDs YAML sem aspas e encontrava
+  somente a primeira entrada. A remediação usa um leitor `awk` do schema do
+  catálogo, sem dependência de `yq`, e compara substrings literais, sem distinguir
+  maiúsculas/minúsculas, exclusivamente em cada tag e em `bounded_context`.
+- Formatos cobertos: IDs/scalars com ou sem aspas, tags em lista block/flow,
+  `error_pattern`/`prevention` simples ou multiline (`>`/`|`). Não é um parser
+  YAML genérico (anchors, aliases e objetos arbitrários não são suportados).
+- Validação: Bats offline, incluindo paridade byte a byte da cópia distribuída,
+  múltiplos resultados, termos com metacaracteres/backslashes e erros de CLI.
+- A autorização desta remediação não encerra as revisões #453/#437 nem aprova
+  adoção institucional, labels ou métricas operacionais.
+
 **Branch**: `feature/011-harness-engineering` | **Date**: 2026-08-20 | **Spec**: [spec.md](./spec.md)
 
 **Input**: Feature specification from `/specs/011-harness-engineering/spec.md`
@@ -20,12 +36,14 @@ de falhas entre projetos e agentes. Os componentes entregues são:
 
 **Language/Version**: YAML (catálogo), Markdown (docs/templates), Bash (script de busca)
 
-**Primary Dependencies**: `grep`, `yq` (opcional — fallback para `grep`/`awk`)
+**Primary Dependencies**: Bash e `awk` para a busca; `yq` não é necessário.
+O leitor suporta o schema do catálogo descrito na remediação acima.
 
 **Storage**: `docs/harness/harness-catalog.yaml` (arquivo estático versionado no repo)
 
-**Testing**: Validação manual — leitura dos artefatos, execução do script de busca,
-verificação dos labels via `gh label list`
+**Testing**: `tests/scripts/harness-search.bats` — regressão offline da busca
+e paridade das cópias. Revisão manual dos artefatos e verificação de labels
+são atividades distintas, não cobertas pela suíte local.
 
 **Target Platform**: GitHub Enterprise Cloud (`venha-pra-nuvem.ghe.com`); os artefatos
 são agnósticos de plataforma (YAML/Markdown/Bash)
@@ -44,7 +62,7 @@ parsing de PRs nesta fase (ver "Fora de Escopo" na spec)
 | Gate | Status | Observação |
 |---|---|---|
 | Backup & DR | N/A | Nenhum datastore de produção — `harness-catalog.yaml` é versionado no Git |
-| Segredos no código | ✅ | Sem credenciais — scripts usam `grep`/`yq` localmente, sem autenticação |
+| Segredos no código | ✅ | Sem credenciais — busca usa `awk` localmente, sem autenticação |
 | Branch/merge protegido | ✅ | PR obrigatório conforme regras da org |
 | Isolamento de ambiente | ✅ | Artefatos estáticos, sem acesso cross-repo automático |
 | Observabilidade | N/A | Scripts CLI sem SLO; output via `echo` |
@@ -159,7 +177,7 @@ não afetam seções existentes. Deploy direto é adequado e proporcionado ao ri
 | `harness-search.sh` | < 5s (execução local) | 0% (somente leitura, sem side-effect) | — | N/A | N/A |
 
 **SLOs não definidos:** Todos os demais componentes são arquivos estáticos (YAML/Markdown)
-sem SLO mensurável. O `harness-catalog.yaml` é lido via `grep`/`yq` localmente —
+sem SLO mensurável. O `harness-catalog.yaml` é lido via `awk` localmente —
 sem dependência de serviço externo.
 
 ---
@@ -169,7 +187,7 @@ sem dependência de serviço externo.
 | Domínio | Controles aplicáveis | Escapável via ADL? | Status | Observações |
 |---|---|---|---|---|
 | Backup & DR | N/A — catálogo versionado no Git | — | ✅ N/A | Git é o mecanismo de versionamento e recuperação |
-| Segredos no código | Scripts usam somente `grep`/`yq`/`awk` — sem credenciais | Não — bloqueante | ✅ | Verificado: nenhum secret em texto plano |
+| Segredos no código | Busca usa `awk` local — sem credenciais | Não — bloqueante | ✅ | Verificado: nenhum secret em texto plano |
 | Branch/merge protegido | PR obrigatório | Não — bloqueante | ✅ | |
 | Isolamento de ambiente | Artefatos estáticos, sem acesso automático cross-repo | Não — bloqueante | ✅ | |
 | Observabilidade | N/A — scripts CLI locais | Sim, com justificativa | ✅ N/A | |
@@ -200,7 +218,7 @@ no `source_pr`, o guia instrui a deixar o campo vazio (`""`).
 
 | Decisão | Alternativas consideradas | Opção escolhida | Trade-off assumido | Justificativa do desvio | Aprovado por |
 |---|---|---|---|---|---|
-| Formato do catálogo | JSON vs YAML vs banco de dados | YAML estático versionado no Git | Sem query semântica; busca via `grep`/`yq` | Consistente com `reuse-catalog.yaml` — mesma convenção, zero dependências novas, diff legível no PR | — |
+| Formato do catálogo | JSON vs YAML vs banco de dados | YAML estático versionado no Git | Sem query semântica; busca literal via `awk` após remediação #431 | Consistente com `reuse-catalog.yaml` — mesma convenção, zero dependências novas, diff legível no PR | — |
 | Localização do catálogo | `docs/` vs `specs/` vs raiz | `docs/harness/` | Separado do reuse-catalog para semântica clara (erros ≠ soluções) | Evita confusão entre os dois catálogos; facilita busca por path | — |
 | Automação de preenchimento | Parser automático de PRs vs manual curatorial | Manual curatorial nesta fase | Menor coverage; depende de disciplina do time | Automação de parser requer análise de diff — complexidade S4 fora do escopo desta feature; catálogo de qualidade > catálogo volumoso | — |
 | Deploy | `flag` vs `direct` | `direct` | Sem rollout incremental | Tooling/docs sem serviço online; mudanças aditivas | — |

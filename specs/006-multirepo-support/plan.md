@@ -93,7 +93,7 @@ scripts/
 | ID AC | Critério (resumo) | Tipo de teste | Módulo | Justificativa de ausência |
 |---|---|---|---|---|
 | AC-1 | Schema `bounded-contexts.yaml` validado pelos scripts | Manual | `setup-github-project.sh` | GHE API real necessária |
-| AC-2 | Agente rejeita slug não cadastrado | Manual (sessão com slug inválido) | `docs/copilot-instructions.md` | Comportamento de agente não automatizável em CI |
+| AC-2 | Agente rejeita slug não cadastrado | Manual (sessão com slug inválido) | `.github/skills/speckit-specify/SKILL.md` | Caminho corrigido em 2026-09-20; a instrução existe no skill. Inspeção documental não comprova execução pelo agente; ver limites em `quickstart.md`. |
 | AC-3 | `autonomous_ok: false` → label `agent:needs-human` | Manual (inspeção da issue) | `taskstoissues` | GHE API real necessária |
 | AC-4 | `--bounded-contexts` persiste em `feature.json` com repos resolvidos | Manual + inspeção JSON | `create-new-feature.sh` | Candidato a teste unitário bash (bats) em fase futura |
 | AC-5 | Campo ausente = comportamento single-repo | Manual | `create-new-feature.sh` | GHE API real necessária |

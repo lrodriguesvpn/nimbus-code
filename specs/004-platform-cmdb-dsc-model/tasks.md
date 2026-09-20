@@ -6,6 +6,33 @@
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
+## Estado verificável — 2026-09-20
+
+Os 80 marcadores concluídos abaixo são preservados como registro histórico,
+não como comprovação de prontidão de produção. A implementação encontrada é
+JavaScript/CommonJS: os caminhos `.ts` foram corrigidos para arquivos `.js`
+existentes, e a CLI e os grafos apontam para suas localizações reais.
+
+- **Verificado:** 16/16 testes de contrato, integração, e2e e performance passaram
+  com `node --test` nos respectivos diretórios de `platform-governance/tests/`.
+  O harness usa fixtures; esse resultado não demonstra integração cloud/IdP real.
+- **Limites concretos:** `platform-governance/src/discovery/azure-discovery.js`
+  usa `createFixtureDiscoveryAdapter`; em
+  `platform-governance/src/runtime/platform-governance.js`, `createSsoClient`
+  valida campos do contexto, `createGovernanceRepository` mantém dados em memória
+  e `createRefreshScheduler` avalia atraso, sem executar coletas periódicas.
+  O teste `platform-governance/tests/performance/governance-benchmarks.test.js`
+  verifica timestamps de freshness, não latência nem execução operacional por 24h.
+- **Entrega não localizada:** T005 permanece marcada no histórico, mas
+  `platform-governance/.env.example` não existe no checkout auditado.
+- **Lacunas de evidência:** SSO real, descoberta cloud real, persistência durável,
+  atualização operacional em 24h e aprovação S4 não foram comprovados. A issue
+  [#458](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/458)
+  foi criada em 2026-09-20 para acompanhar a prontidão operacional e os gates S4,
+  após a auditoria inicial não identificar issue aberta para essas lacunas.
+  O fechamento da feature #147 não comprova prontidão operacional. As lacunas
+  não foram implementadas nem tiveram gates aprovados durante o saneamento documental.
+
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
@@ -36,20 +63,20 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [X] T010 [P] Define shared execution context and identity model in `platform-governance/src/shared/models/execution-context.ts`
-- [X] T011 [P] Define shared CMDB asset primitives in `platform-governance/src/shared/models/cmdb-record.ts`
-- [X] T012 [P] Define shared compliance finding primitives in `platform-governance/src/shared/models/compliance-finding.ts`
-- [X] T013 [P] Create SSO session bootstrap client in `platform-governance/src/shared/auth/sso-client.ts`
-- [X] T014 [P] Create tenant/provider discovery interfaces in `platform-governance/src/shared/discovery/provider-registry.ts`
-- [X] T015 [P] Create audit logging helper with correlation metadata in `platform-governance/src/shared/observability/audit-logger.ts`
-- [X] T016 [P] Create shared error taxonomy for auth, discovery, baseline, and DSC flows in `platform-governance/src/shared/errors/index.ts`
+- [X] T010 [P] Define shared execution context and identity model in `platform-governance/src/shared/models/execution-context.js`
+- [X] T011 [P] Define shared CMDB asset primitives in `platform-governance/src/shared/models/cmdb-record.js`
+- [X] T012 [P] Define shared compliance finding primitives in `platform-governance/src/shared/models/compliance-finding.js`
+- [X] T013 [P] Create SSO session bootstrap client in `platform-governance/src/shared/auth/sso-client.js`
+- [X] T014 [P] Create tenant/provider discovery interfaces in `platform-governance/src/shared/discovery/provider-registry.js`
+- [X] T015 [P] Create audit logging helper with correlation metadata in `platform-governance/src/shared/observability/audit-logger.js`
+- [X] T016 [P] Create shared error taxonomy for auth, discovery, baseline, and DSC flows in `platform-governance/src/shared/errors/index.js`
 - [X] T017 Create persistence schema and migration set for executions, assets, findings, exceptions, and DSC profiles in `platform-governance/db/migrations/001_initial.sql`
-- [X] T018 [P] Create data access layer for CMDB and baseline records in `platform-governance/src/shared/storage/governance-repository.ts`
-- [X] T019 [P] Create validation utilities for scope, freshness, and versioning rules in `platform-governance/src/shared/validation/governance-rules.ts`
-- [X] T020 Create API server scaffold and health endpoint in `platform-governance/src/api/server.ts`
-- [X] T021 [P] Create API middleware stack for auth, request validation, and structured errors in `platform-governance/src/api/middleware/index.ts`
-- [X] T022 [P] Create CLI scaffold for operational validation commands in `platform-governance/cli/main.ts`
-- [X] T023 Create contract test harness and shared fixtures in `platform-governance/tests/setup.ts`
+- [X] T018 [P] Create data access layer for CMDB and baseline records in `platform-governance/src/shared/storage/governance-repository.js`
+- [X] T019 [P] Create validation utilities for scope, freshness, and versioning rules in `platform-governance/src/shared/validation/governance-rules.js`
+- [X] T020 Create API server scaffold and health endpoint in `platform-governance/src/api/server.js`
+- [X] T021 [P] Create API middleware stack for auth, request validation, and structured errors in `platform-governance/src/api/middleware/index.js`
+- [X] T022 [P] Create CLI scaffold for operational validation commands in `platform-governance/src/cli/main.js`
+- [X] T023 Create contract test harness and shared fixtures in `platform-governance/tests/setup.js`
 - [X] T024 [P] Create sample tenant/provider fixture set for Azure, AWS, GCP, and M365 in `platform-governance/tests/fixtures/`
 
 **Checkpoint**: Foundation ready - all user stories can now proceed independently.
@@ -64,20 +91,20 @@
 
 ### Tests for User Story 1 (OPTIONAL - included because acceptance criteria require verification)
 
-- [X] T025 [P] [US1] Contract test for SSO session bootstrap in `platform-governance/tests/contract/auth-session.contract.test.ts`
-- [X] T026 [P] [US1] Integration test for execution creation and scope persistence in `platform-governance/tests/integration/execution-scope.test.ts`
-- [X] T027 [P] [US1] End-to-end test for authentication failure and authorization rejection in `platform-governance/tests/e2e/auth-rejection.test.ts`
+- [X] T025 [P] [US1] Contract test for SSO session bootstrap in `platform-governance/tests/contract/auth-session.contract.test.js`
+- [X] T026 [P] [US1] Integration test for execution creation and scope persistence in `platform-governance/tests/integration/execution-scope.test.js`
+- [X] T027 [P] [US1] End-to-end test for authentication failure and authorization rejection in `platform-governance/tests/e2e/auth-rejection.test.js`
 
 ### Implementation for User Story 1
 
-- [X] T028 [P] [US1] Implement execution creation endpoint in `platform-governance/src/api/routes/executions.ts`
-- [X] T029 [P] [US1] Implement SSO session validation endpoint in `platform-governance/src/api/routes/auth.ts`
-- [X] T030 [P] [US1] Implement platform selection and scope persistence in `platform-governance/src/domain/execution-service.ts`
-- [X] T031 [US1] Implement authorization enforcement for selected platforms in `platform-governance/src/domain/authorization-service.ts`
-- [X] T032 [P] [US1] Implement audit trail writes for authentication and scope selection in `platform-governance/src/shared/observability/audit-trail.ts`
-- [X] T033 [P] [US1] Add user-facing error messages for invalid identity and insufficient scope in `platform-governance/src/api/errors/auth-errors.ts`
-- [X] T034 [US1] Wire UI/CLI prompt flow for platform selection and SSO handoff in `platform-governance/src/cli/commands/start-execution.ts`
-- [X] T035 [P] [US1] Add telemetry for onboarding completion and rejection events in `platform-governance/src/shared/observability/metrics.ts`
+- [X] T028 [P] [US1] Implement execution creation endpoint in `platform-governance/src/api/routes/executions.js`
+- [X] T029 [P] [US1] Implement SSO session validation endpoint in `platform-governance/src/api/routes/auth.js`
+- [X] T030 [P] [US1] Implement platform selection and scope persistence in `platform-governance/src/domain/execution-service.js`
+- [X] T031 [US1] Implement authorization enforcement for selected platforms in `platform-governance/src/domain/authorization-service.js`
+- [X] T032 [P] [US1] Implement audit trail writes for authentication and scope selection in `platform-governance/src/shared/observability/audit-trail.js`
+- [X] T033 [P] [US1] Add user-facing error messages for invalid identity and insufficient scope in `platform-governance/src/api/errors/auth-errors.js`
+- [X] T034 [US1] Wire UI/CLI prompt flow for platform selection and SSO handoff in `platform-governance/src/cli/commands/start-execution.js`
+- [X] T035 [P] [US1] Add telemetry for onboarding completion and rejection events in `platform-governance/src/shared/observability/metrics.js`
 
 **Checkpoint**: User Story 1 should now be independently functional.
 
@@ -91,23 +118,23 @@
 
 ### Tests for User Story 2
 
-- [X] T036 [P] [US2] Contract test for CMDB record retrieval in `platform-governance/tests/contract/cmdb.contract.test.ts`
-- [X] T037 [P] [US2] Integration test for multicloud ingestion and normalization in `platform-governance/tests/integration/cmdb-ingestion.test.ts`
-- [X] T038 [P] [US2] End-to-end test for repeat collection preserving history in `platform-governance/tests/e2e/cmdb-history.test.ts`
+- [X] T036 [P] [US2] Contract test for CMDB record retrieval in `platform-governance/tests/contract/cmdb.contract.test.js`
+- [X] T037 [P] [US2] Integration test for multicloud ingestion and normalization in `platform-governance/tests/integration/cmdb-ingestion.test.js`
+- [X] T038 [P] [US2] End-to-end test for repeat collection preserving history in `platform-governance/tests/e2e/cmdb-history.test.js`
 
 ### Implementation for User Story 2
 
-- [X] T039 [P] [US2] Implement Azure discovery adapter in `platform-governance/src/discovery/azure-discovery.ts`
-- [X] T040 [P] [US2] Implement AWS discovery adapter in `platform-governance/src/discovery/aws-discovery.ts`
-- [X] T041 [P] [US2] Implement GCP discovery adapter in `platform-governance/src/discovery/gcp-discovery.ts`
-- [X] T042 [P] [US2] Implement discovery orchestrator for parallel provider collection in `platform-governance/src/domain/discovery-orchestrator.ts`
-- [X] T043 [US2] Implement CMDB consolidation service and normalization rules in `platform-governance/src/domain/cmdb-consolidation-service.ts`
-- [X] T044 [P] [US2] Implement asset relationship inference and confidence scoring in `platform-governance/src/domain/asset-relationship-service.ts`
-- [X] T045 [P] [US2] Implement evidence ingestion and provenance tracking in `platform-governance/src/domain/evidence-service.ts`
-- [X] T046 [US2] Implement CMDB query API for IA/governance consumers in `platform-governance/src/api/routes/cmdb.ts`
-- [X] T047 [P] [US2] Implement freshness and completeness checks for CMDB records in `platform-governance/src/shared/validation/cmdb-freshness.ts`
+- [X] T039 [P] [US2] Implement Azure discovery adapter in `platform-governance/src/discovery/azure-discovery.js`
+- [X] T040 [P] [US2] Implement AWS discovery adapter in `platform-governance/src/discovery/aws-discovery.js`
+- [X] T041 [P] [US2] Implement GCP discovery adapter in `platform-governance/src/discovery/gcp-discovery.js`
+- [X] T042 [P] [US2] Implement discovery orchestrator for parallel provider collection in `platform-governance/src/domain/discovery-orchestrator.js`
+- [X] T043 [US2] Implement CMDB consolidation service and normalization rules in `platform-governance/src/domain/cmdb-consolidation-service.js`
+- [X] T044 [P] [US2] Implement asset relationship inference and confidence scoring in `platform-governance/src/domain/asset-relationship-service.js`
+- [X] T045 [P] [US2] Implement evidence ingestion and provenance tracking in `platform-governance/src/domain/evidence-service.js`
+- [X] T046 [US2] Implement CMDB query API for IA/governance consumers in `platform-governance/src/api/routes/cmdb.js`
+- [X] T047 [P] [US2] Implement freshness and completeness checks for CMDB records in `platform-governance/src/shared/validation/cmdb-freshness.js`
 - [X] T048 [P] [US2] Add storage indexing for provider, criticality, and scope queries in `platform-governance/db/migrations/002_cmdb_indexes.sql`
-- [X] T049 [US2] Add inventory export support for governance reports in `platform-governance/src/domain/export/cmdb-export-service.ts`
+- [X] T049 [US2] Add inventory export support for governance reports in `platform-governance/src/domain/export/cmdb-export-service.js`
 
 **Checkpoint**: User Story 2 should now be independently functional.
 
@@ -121,19 +148,19 @@
 
 ### Tests for User Story 3
 
-- [X] T050 [P] [US3] Contract test for baseline comparison output in `platform-governance/tests/contract/baseline.contract.test.ts`
-- [X] T051 [P] [US3] Integration test for M365 policy comparison in `platform-governance/tests/integration/m365-baseline.test.ts`
-- [X] T052 [P] [US3] End-to-end test for customization classification and reporting in `platform-governance/tests/e2e/customization-report.test.ts`
+- [X] T050 [P] [US3] Contract test for baseline comparison output in `platform-governance/tests/contract/baseline.contract.test.js`
+- [X] T051 [P] [US3] Integration test for M365 policy comparison in `platform-governance/tests/integration/m365-baseline.test.js`
+- [X] T052 [P] [US3] End-to-end test for customization classification and reporting in `platform-governance/tests/e2e/customization-report.test.js`
 
 ### Implementation for User Story 3
 
-- [X] T053 [P] [US3] Implement M365 baseline import service in `platform-governance/src/baseline/m365-baseline-importer.ts`
-- [X] T054 [P] [US3] Implement policy state collector for tenant controls in `platform-governance/src/baseline/policy-state-collector.ts`
-- [X] T055 [P] [US3] Implement baseline comparison engine by domain and control in `platform-governance/src/baseline/baseline-comparison-engine.ts`
-- [X] T056 [US3] Implement customization classification service with approval status in `platform-governance/src/baseline/customization-classifier.ts`
-- [X] T057 [P] [US3] Implement compliance finding generator with severity ranking in `platform-governance/src/baseline/compliance-finding-generator.ts`
-- [X] T058 [P] [US3] Implement compliance reporting API in `platform-governance/src/api/routes/compliance.ts`
-- [X] T059 [US3] Add evidence links from baseline findings to CMDB records in `platform-governance/src/baseline/baseline-evidence-linker.ts`
+- [X] T053 [P] [US3] Implement M365 baseline import service in `platform-governance/src/baseline/m365-baseline-importer.js`
+- [X] T054 [P] [US3] Implement policy state collector for tenant controls in `platform-governance/src/baseline/policy-state-collector.js`
+- [X] T055 [P] [US3] Implement baseline comparison engine by domain and control in `platform-governance/src/baseline/baseline-comparison-engine.js`
+- [X] T056 [US3] Implement customization classification service with approval status in `platform-governance/src/baseline/customization-classifier.js`
+- [X] T057 [P] [US3] Implement compliance finding generator with severity ranking in `platform-governance/src/baseline/compliance-finding-generator.js`
+- [X] T058 [P] [US3] Implement compliance reporting API in `platform-governance/src/api/routes/compliance.js`
+- [X] T059 [US3] Add evidence links from baseline findings to CMDB records in `platform-governance/src/baseline/baseline-evidence-linker.js`
 - [X] T060 [P] [US3] Add storage tables/indexes for baselines, applied states, and findings in `platform-governance/db/migrations/003_baseline_tables.sql`
 
 **Checkpoint**: User Story 3 should now be independently functional.
@@ -148,20 +175,20 @@
 
 ### Tests for User Story 4
 
-- [X] T061 [P] [US4] Contract test for DSC profile schema validation in `platform-governance/tests/contract/dsc-profile.contract.test.ts`
-- [X] T062 [P] [US4] Integration test for DSC profile generation and versioning in `platform-governance/tests/integration/dsc-profile-generation.test.ts`
-- [X] T063 [P] [US4] End-to-end test for advisory Terraform validation in `platform-governance/tests/e2e/terraform-advisory.test.ts`
+- [X] T061 [P] [US4] Contract test for DSC profile schema validation in `platform-governance/tests/contract/dsc-profile.contract.test.js`
+- [X] T062 [P] [US4] Integration test for DSC profile generation and versioning in `platform-governance/tests/integration/dsc-profile-generation.test.js`
+- [X] T063 [P] [US4] End-to-end test for advisory Terraform validation in `platform-governance/tests/e2e/terraform-advisory.test.js`
 
 ### Implementation for User Story 4
 
-- [X] T064 [P] [US4] Implement DSC profile composer from CMDB and baseline inputs in `platform-governance/src/dsc/dsc-profile-composer.ts`
-- [X] T065 [P] [US4] Implement DSC versioning and monotonic history checks in `platform-governance/src/dsc/dsc-version-service.ts`
-- [X] T066 [P] [US4] Implement desired-control rendering for security/compliance domains in `platform-governance/src/dsc/dsc-control-renderer.ts`
-- [X] T067 [US4] Implement advisory Terraform validation adapter in `platform-governance/src/governance/terraform-advisory-validator.ts`
-- [X] T068 [P] [US4] Implement advisory validation report API in `platform-governance/src/api/routes/terraform-validation.ts`
-- [X] T069 [P] [US4] Implement 24h refresh scheduler for CMDB and DSC in `platform-governance/src/scheduler/refresh-scheduler.ts`
+- [X] T064 [P] [US4] Implement DSC profile composer from CMDB and baseline inputs in `platform-governance/src/dsc/dsc-profile-composer.js`
+- [X] T065 [P] [US4] Implement DSC versioning and monotonic history checks in `platform-governance/src/dsc/dsc-version-service.js`
+- [X] T066 [P] [US4] Implement desired-control rendering for security/compliance domains in `platform-governance/src/dsc/dsc-control-renderer.js`
+- [X] T067 [US4] Implement advisory Terraform validation adapter in `platform-governance/src/governance/terraform-advisory-validator.js`
+- [X] T068 [P] [US4] Implement advisory validation report API in `platform-governance/src/api/routes/terraform-validation.js`
+- [X] T069 [P] [US4] Implement 24h refresh scheduler for CMDB and DSC in `platform-governance/src/scheduler/refresh-scheduler.js`
 - [X] T070 [US4] Persist DSC profile versions and delta summaries in `platform-governance/db/migrations/004_dsc_profiles.sql`
-- [X] T071 [P] [US4] Add freshness alerting for environments that miss the 24h refresh window in `platform-governance/src/observability/freshness-alerts.ts`
+- [X] T071 [P] [US4] Add freshness alerting for environments that miss the 24h refresh window in `platform-governance/src/observability/freshness-alerts.js`
 
 **Checkpoint**: All user stories should now be independently functional.
 
@@ -177,9 +204,9 @@
 - [X] T075 [P] Add observability dashboards and alert thresholds in `platform-governance/ops/observability/dashboards/`
 - [X] T076 [P] Add release and rollback guide for canary rollout in `platform-governance/docs/RELEASE.md`
 - [X] T077 [P] Add example quickstart scenarios to match `quickstart.md` in `platform-governance/docs/QUICKSTART.md`
-- [X] T078 [P] Add end-to-end smoke test covering auth → CMDB → baseline → DSC flow in `platform-governance/tests/e2e/smoke-test.test.ts`
-- [X] T079 [P] Add performance benchmark for 24h freshness window and query latency in `platform-governance/tests/performance/governance-benchmarks.test.ts`
-- [X] T080 [P] Update graph and impact artifacts after implementation in `platform-governance/specs/004-platform-cmdb-dsc-model/{graph.yaml,graph.md,impact-map.md}`
+- [X] T078 [P] Add end-to-end smoke test covering auth → CMDB → baseline → DSC flow in `platform-governance/tests/e2e/smoke-test.test.js`
+- [X] T079 [P] Add performance benchmark for 24h freshness window and query latency in `platform-governance/tests/performance/governance-benchmarks.test.js`
+- [X] T080 [P] Update graph and impact artifacts after implementation in `specs/004-platform-cmdb-dsc-model/{graph.yaml,graph.md,impact-map.md}` (caminho corrigido em 2026-09-20; presença dos arquivos não comprova aprovação nem atualização do grafo de runtime)
 
 ---
 
@@ -220,10 +247,10 @@
 
 ```bash
 # Discovery adapters can be built in parallel
-Task: "Implement Azure discovery adapter in platform-governance/src/discovery/azure-discovery.ts"
-Task: "Implement AWS discovery adapter in platform-governance/src/discovery/aws-discovery.ts"
-Task: "Implement GCP discovery adapter in platform-governance/src/discovery/gcp-discovery.ts"
-Task: "Implement discovery orchestrator for parallel provider collection in platform-governance/src/domain/discovery-orchestrator.ts"
+Task: "Implement Azure discovery adapter in platform-governance/src/discovery/azure-discovery.js"
+Task: "Implement AWS discovery adapter in platform-governance/src/discovery/aws-discovery.js"
+Task: "Implement GCP discovery adapter in platform-governance/src/discovery/gcp-discovery.js"
+Task: "Implement discovery orchestrator for parallel provider collection in platform-governance/src/domain/discovery-orchestrator.js"
 ```
 
 ---
@@ -251,5 +278,4 @@ Task: "Implement discovery orchestrator for parallel provider collection in plat
 - Each story has at least one contract/integration/e2e test
 - Story completion is independent and demonstrable
 - Advisory Terraform validation stays non-blocking in MVP
-- 24h refresh window is enforced and benchmarked
-
+- Historical target: enforce and benchmark the 24h refresh window. The 2026-09-20 verification covers only freshness evaluation with fixtures; operational refresh and latency remain unverified.

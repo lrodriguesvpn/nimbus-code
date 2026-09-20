@@ -6,6 +6,15 @@
 
 **Organization**: Tasks agrupadas por User Story (P1, P1, P2, P2) para entrega incremental e teste independente, conforme `spec.md`.
 
+**Estado auditado em 2026-09-20**: revisão #439 aberta; T009/#222 e T015/#223
+continuam bloqueadas por decisão humana. O runner/workflow existem em modo
+relatório, mas configuração de branch protection e execução real de PR não
+foram verificadas. T014 permanece parcial, agora aberta; T027 foi reaberta por
+ausência de medições. O checklist `checklists/requirements-quality.md` citado
+em #439 não existe neste checkout; o existente é `checklists/requirements.md`
+(21 itens), não comprovação dos 12 itens alegados. O teste documental local
+teve 17/17 checks aprovados na auditoria, não a suíte completa relatada na issue.
+
 **Tests**: Não solicitados explicitamente no `spec.md` além dos próprios testes de conteúdo da política (`tests/docs/testing-policy.test.sh`) — incluídos como parte da implementação de cada User Story, não como fase separada de TDD.
 
 ---
@@ -49,7 +58,7 @@
 - [x] T011 [US2] Garantir que a saída de `scripts/run-tests.sh` identifica explicitamente qual segmento (`bootstrap`, `docs`, `scripts`, `workflows`) falhou primeiro, sem exigir inspeção de múltiplos arquivos de log (AC-3, FR-011 — test ref `test_AC3_gate_obrigatorio_em_pr`)
 - [x] T012 [P] [US2] Criar `.github/workflows/test-suite.yml` que faz checkout, instala `bats`/dependências (via `scripts/setup-dev-environment.sh` ou passo equivalente) e invoca `scripts/run-tests.sh` em todo `pull_request` contra `main` — configurar em **modo relatório** (sem marcar como required check ainda), conforme Estratégia de Release do `plan.md`
 - [x] T013 [US2] Adicionar seção "Gate Obrigatório de PR" a `docs/testing-policy.md` documentando o funcionamento de `test-suite.yml`, o estado atual (modo relatório) e o critério de promoção para "required" (FR-007)
-- [x] T014 [US2] **PARCIAL** — `test-suite.yml` roda em `pull_request` contra `main`, então a própria PR de implementação desta feature aciona a execução real do workflow (sem necessidade de repositório de sandbox). Validado localmente (`scripts/run-tests.sh` executa os 11 arquivos com sucesso, ver seção 8 de `docs/testing-policy.md`); a confirmação de que o check aparece como informativo (não bloqueante) na UI da PR depende da execução real do Actions após o push — verificar ao abrir a PR.
+- [ ] T014 [US2] **PARCIAL — evidência externa pendente**: `test-suite.yml` está configurado para `pull_request` contra `main`. O registro histórico de execução local não comprova que o check executou ou apareceu como informativo na UI da PR; anexar evidência da execução real, sem promover o gate automaticamente.
 - [ ] T015 [US2] **[Humano]** Após o período de observação definido no PR de implementação, decidir e executar a promoção de `test-suite.yml` para "required status check" na proteção de branch de `main` — ver contrato de task executável abaixo (T015) _(pendente: `test-suite.yml` está deliberadamente em modo relatório nesta entrega; promoção exige decisão humana após período de observação)_
 
 **Checkpoint**: A suíte existente já roda de forma consolidada em toda PR (mesmo que ainda em modo relatório) — segundo incremento de valor entregável.
@@ -93,7 +102,7 @@
 - [x] T024 [P] Confirmar que `graph.yaml`/`graph.md` continuam refletindo a implementação real (nenhum módulo novo criado fora do já mapeado) — Graph Guard valida automaticamente na PR
 - [x] T025 Avaliar se o padrão de "gate único de suíte existente" resultante é reutilizável por outros repositórios do bundle; se sim, adicionar entrada a `docs/reuse-catalog.yaml` (`tag`, `bounded_context: "spec-kit-workflow"`, `description`, `source: "specs/013-governanca-testes-pr/plan.md"`) conforme FR-004
 - [x] T026 Abrir Issue recomendando entrada formal em `docs/harness/harness-catalog.yaml` para o padrão de risco "código diz X, produção nunca recebeu X" identificado no Harness Gate do `plan.md` (fora do escopo direto desta feature, mas registrado como acompanhamento)
-- [x] T027 Preencher a tabela "Estimativa vs. Consumo Real de Tokens e Horas Humanas" no fechamento desta feature, comparando com a Classificação de Complexidade do `plan.md` _(estrutura da tabela preenchida; números reais de tokens/horas dependem de Copilot Usage da organização e do campo "Horas Humanas" do GitHub Project — preencher após o PR ser revisado)_
+- [ ] T027 Preencher a tabela "Estimativa vs. Consumo Real de Tokens e Horas Humanas" com dados reais do Copilot Usage e do GitHub Project — estrutura disponível, medições ainda indisponíveis; não inferir valores da estimativa.
 
 ---
 
@@ -262,8 +271,8 @@ Humano: sim
 
 | Métrica | Estimado (`plan.md`) | Real | Variância | Fonte da medição |
 |---|---|---|---|---|
-| Tokens (input+output) | ~40–70 mil | [preencher ao fechar] | — | Copilot Usage da organização |
-| Horas humanas | ~3–6 horas | [total lançado no GitHub Project] | — | GitHub Project — campo "Horas Humanas" |
+| Tokens (input+output) | ~40–70 mil | Não disponível — T027 pendente | Não calculável | A obter do Copilot Usage da organização |
+| Horas humanas | ~3–6 horas | Não disponível — T027 pendente | Não calculável | A confirmar no GitHub Project — campo "Horas Humanas" |
 
 ## Nimbus-Code — Checklist de Qualidade para Tarefas de Infraestrutura/Deploy
 
@@ -275,5 +284,5 @@ Humano: sim
 - [x] Permissões do workflow seguem least privilege (sem `permissions: write-all` sem justificativa) — `permissions: contents: read`
 - [x] N/A — sem health checks/readiness aplicável (workflow de CI, não serviço long-running)
 - [x] N/A — sem build de container nesta feature
-- [x] Testado em modo relatório antes de qualquer promoção a "required" (T014) — `test-suite.yml` não está na lista de required status checks
+- [ ] Execução real em modo relatório comprovada (T014); estado live de required status checks não verificado nesta auditoria
 - [ ] `docs/testing-policy.md` atualizado se o comportamento do gate mudar após o merge inicial

@@ -50,6 +50,11 @@ else
             echo "Materialized composed plan template to $IMPL_PLAN"
         fi
     else
+        template_status=$?
+        if [[ "$template_status" -ne 1 ]]; then
+            echo "ERROR: Could not compose plan template; plan was not created" >&2
+            exit "$template_status"
+        fi
         if $JSON_MODE; then
             echo "Warning: Plan template not found" >&2
         else
