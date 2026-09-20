@@ -553,6 +553,47 @@ O comando:
 > já existentes pelo ID `T00N` (não pelo título) e não cria duplicatas.
 > Vínculos ausentes são criados sem duplicar a issue.
 
+#### Quando usar (e quando pular) o `/speckit-taskstoissues`
+
+- **Use quando** o trabalho vai ser **orquestrado entre várias pessoas e/ou
+  agentes** — handoff de tarefas, execução paralela por devs/agentes
+  diferentes, acompanhamento de portfólio/PMO, correlação com métricas DORA,
+  ou quando você quer aproveitar o auto-assign autônomo do Copilot coding
+  agent (que depende do label `agent:autonomous-ok` estar presente na issue —
+  ver seção 5). É esse comando que efetivamente **aplica** os labels de
+  governança (`priority:*`, `complexity:*`, `agent:*`, `type:*`) nas issues —
+  ver "De onde vêm os labels nas issues" logo abaixo.
+- **Pode pular quando** a execução é **solo e imediata**: uma única pessoa vai
+  rodar `/speckit.implement` direto em cima do `tasks.md` na mesma sessão, sem
+  necessidade de rastrear cada task como issue separada no GHE. Nesse caso o
+  próprio `tasks.md` já é o tracker de execução — criar a hierarquia de issues
+  é um custo extra sem benefício.
+- **Não é um loop autônomo**: é um comando/skill invocado manualmente
+  (`/speckit-taskstoissues`), idempotente por design (dedup por `T00N`), sem
+  gatilho de schedule/webhook. Ele só executa quando alguém (humano ou agente)
+  o chama explicitamente — nunca dispara sozinho em background.
+
+##### De onde vêm os labels nas issues (evitando o engano "os labels não estão sendo criados")
+
+Vale distinguir **criar a taxonomia de labels no repositório** de **aplicar um
+label numa issue** — são coisas diferentes e só um desses mecanismos aplica
+labels automaticamente:
+
+| Mecanismo | O que faz | Aplica label em issue? |
+|---|---|---|
+| `scripts/setup-github-labels.sh` | Cria/atualiza as *definições* de label (nome/cor/descrição) no repositório via `gh label create --force` | ❌ Não — só garante que o label existe como opção, nunca toca em issues |
+| `.github/workflows/agent-auto-assign.yml` | Dispara em `issues: labeled` — **reage** a um label (`agent:autonomous-ok`) que já foi aplicado, para atribuir o Copilot coding agent | ❌ Não — consome o label, não o cria |
+| `.github/workflows/sync-priority-field.yml` | Lê o label `priority:*` já existente na issue e espelha no campo nativo do Project | ❌ Não — só leitura/espelhamento |
+| `/speckit-taskstoissues` (via `.specify/scripts/bash/create-github-issue-hierarchy.sh`) | Cria as issues de Feature/User Story/Task **e aplica** `priority:*`, `complexity:*`, `agent:autonomous-ok`/`agent:needs-human`, `type:*` no momento da criação (e reaplica os que faltarem em reexecuções) | ✅ **É o único mecanismo do bundle que aplica esses labels automaticamente** |
+
+Se a equipe cria issues manualmente (pela UI do GHE, `gh issue create` avulso,
+ou qualquer fluxo que não passe por `/speckit-taskstoissues`), é esperado que
+elas fiquem sem `priority:*`/`complexity:*`/`agent:*` — nenhum outro workflow
+deste bundle aplica esses labels de forma automática. Para uma issue nessa
+situação ganhar labels, rode `/speckit-taskstoissues` (ele detecta issues já
+existentes por `T00N` e aplica os labels de governança ausentes sem duplicar
+nada) ou aplique os labels manualmente.
+
 #### Passo 5 — Verificar no board
 
 Abra o GitHub Project V2. Na view **"Board de Epics"**, cada Epic mostra o
@@ -631,6 +672,7 @@ visual por tipo fica menos rica.
 | `/speckit.plan` | Depois da spec aprovada — stack e arquitetura | Sim |
 | `/speckit.checklist` | Validar completude da própria spec antes de detalhar tarefas | Opcional |
 | `/speckit.tasks` | Gera `tasks.md` a partir do plano | Sim |
+| `/speckit-taskstoissues` | Espelha o `tasks.md` como hierarquia Epic→Feature→US→Task no GHE — só necessário quando o trabalho será orquestrado entre várias pessoas/agentes (handoff, execução paralela, PMO, auto-assign do Copilot). Dispensável em execução solo (ver seção 4.3) | Opcional |
 | `/speckit.analyze` | Checagem cruzada spec/plan/tasks antes de implementar | Recomendado |
 | `/speckit.implement` | Executa as tarefas | Sim |
 | `/speckit.converge` | Depois do implement — garante que nada ficou faltando vs. spec/plan/tasks | Recomendado, essencial em brownfield |

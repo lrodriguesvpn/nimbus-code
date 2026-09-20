@@ -42,17 +42,20 @@ jobs:
         id: resolve-token
         run: |
           if [ -n "${{ steps.app-token.outputs.token }}" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
             echo "token=${{ steps.app-token.outputs.token }}" >> "$GITHUB_OUTPUT"
             echo "::notice::Autenticado via GitHub App (instalação de curta duração)."
           elif [ "${{ vars.NIMBUS_AUTH_MIGRATION_MODE }}" = "pat" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
             echo "token=${{ secrets.ADD_TO_PROJECT_PAT }}" >> "$GITHUB_OUTPUT"
             echo "::warning::Modo de migração PAT explicitamente habilitado; owner, prazo, ambiente e auditoria são obrigatórios."
           else
-            echo "::error::GitHub App não configurado; etapa cross-repo bloqueada. Defina NIMBUS_APP_ID/NIMBUS_APP_PRIVATE_KEY."
-            exit 1
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::GitHub App não configurado (NIMBUS_APP_ID/NIMBUS_APP_PRIVATE_KEY ausentes); sincronização do campo Priority pulada."
           fi
 
       - name: Sincronizar campo Priority nos projects do item
+        if: steps.resolve-token.outputs.configured == 'true'
         uses: actions/github-script@v7
         with:
           github-token: ${{ steps.resolve-token.outputs.token }}
