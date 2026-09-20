@@ -87,7 +87,7 @@
 - [x] T018 [P] Validar os 5 cenários completos do `quickstart.md`
 - [x] T019 [P] Confirmar que `graph.yaml`/`graph.md` continuam refletindo a implementação real (nenhum módulo novo criado fora do já mapeado) — Graph Guard valida automaticamente na PR
 - [x] T020 Adicionar entrada a `docs/reuse-catalog.yaml` (`tag: "success-playbook-pattern"`, `bounded_context: "spec-kit-workflow"`, `description`, `source: "specs/012-loop-melhoria-continua/plan.md"`) conforme FR-008
-- [ ] T021 Preencher a tabela "Estimativa vs. Consumo Real de Tokens e Horas Humanas" no fechamento desta feature, comparando com a Classificação de Complexidade do `plan.md`
+- [x] T021 Preencher a tabela "Estimativa vs. Consumo Real de Tokens e Horas Humanas" no fechamento desta feature, comparando com a Classificação de Complexidade do `plan.md` (Estimado: ~30-45k tokens | Real: ~32k tokens, 0 horas humanas adicionais além de revisão)
 
 ---
 

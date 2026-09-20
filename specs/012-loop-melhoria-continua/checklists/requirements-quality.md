@@ -8,27 +8,27 @@
 
 ## Requirement Completeness
 
-- [ ] CHK001 Are the required fields of `success-catalog.yaml` fully defined and intentionally aligned with, or distinct from, `harness-catalog.yaml`? [Completeness, Spec ?FR-001, Spec ?Key Entities]
-- [ ] CHK002 Does the closure-checklist requirement define exactly when a success signal is strong enough to propose a playbook entry? [Completeness, Spec ?FR-002, Spec ?AC-1]
-- [ ] CHK003 Are the DORA review records required to capture owner, target, period, and improvement action in a structured way? [Completeness, Spec ?FR-004, Spec ?AC-3]
+- [x] CHK001 Are the required fields of `success-catalog.yaml` fully defined and intentionally aligned with, or distinct from, `harness-catalog.yaml`? [Completeness, Spec §FR-001, Spec §Key Entities]
+- [x] CHK002 Does the closure-checklist requirement define exactly when a success signal is strong enough to propose a playbook entry? [Completeness, Spec §FR-002, Spec §AC-1]
+- [x] CHK003 Are the DORA review records required to capture owner, target, period, and improvement action in a structured way? [Completeness, Spec §FR-004, Spec §AC-3]
 
 ## Requirement Clarity
 
-- [ ] CHK004 Is the method for calculating each DORA indicator from `dora:*` labels and dates explicit enough to avoid divergent interpretations? [Clarity, Spec ?FR-003, Spec ?AC-2]
-- [ ] CHK005 Is the cadence variable `N` clear enough at spec level, or is too much critical behavior deferred to the plan without a starting constraint? [Ambiguity, Spec ?AC-4, Spec ?Assumptions]
-- [ ] CHK006 Is the distinction between Harness Engineering and this success-playbook feature clear enough to prevent duplicated or conflicting catalog entries? [Clarity, Spec ?Edge Cases, Spec ?FR-006]
+- [x] CHK004 Is the method for calculating each DORA indicator from `dora:*` labels and dates explicit enough to avoid divergent interpretations? [Clarity, Spec §FR-003, Spec §AC-2]
+- [x] CHK005 Is the cadence variable `N` clear enough at spec level, or is too much critical behavior deferred to the plan without a starting constraint? [Ambiguity, Spec §AC-4, Spec §Assumptions]
+- [x] CHK006 Is the distinction between Harness Engineering and this success-playbook feature clear enough to prevent duplicated or conflicting catalog entries? [Clarity, Spec §Edge Cases, Spec §FR-006]
 
 ## Consistency & Coverage
 
-- [ ] CHK007 Are the never-blank rules consistent between the new Playbook de Sucesso Gate and the earlier Harness Gate pattern it mirrors? [Consistency, Spec ?FR-006, Spec ?AC-5]
-- [ ] CHK008 Do the edge cases define requirement-level outcomes for nothing relevant to record, insufficient DORA data, and retrospective backlog delay? [Coverage, Spec ?Edge Cases]
-- [ ] CHK009 Is the hybrid-collaboration rule consistent across acceptance criteria, FR-007, and the role table about what the agent may draft versus what humans must approve? [Consistency, Spec ?Hybrid Collaboration Model, Spec ?FR-007]
+- [x] CHK007 Are the never-blank rules consistent between the new Playbook de Sucesso Gate and the earlier Harness Gate pattern it mirrors? [Consistency, Spec §FR-006, Spec §AC-5]
+- [x] CHK008 Do the edge cases define requirement-level outcomes for nothing relevant to record, insufficient DORA data, and retrospective backlog delay? [Coverage, Spec §Edge Cases]
+- [x] CHK009 Is the hybrid-collaboration rule consistent across acceptance criteria, FR-007, and the role table about what the agent may draft versus what humans must approve? [Consistency, Spec §Hybrid Collaboration Model, Spec §FR-007]
 
 ## Non-Functional & Assumptions
 
-- [ ] CHK010 Are the 10-second calculation target and no-external-observability-tool scope sufficient to make the reporting requirement objectively testable? [Measurability, Spec ?SLO Alvo, Spec ?SC-002]
-- [ ] CHK011 Is the new reuse-catalog entry requirement explicit enough about what future features should search for and how it is kept current? [Clarity, Spec ?FR-008]
-- [ ] CHK012 Are assumptions about pre-existing DORA labels, manual curation, and no external observability treated as external dependencies needing validation? [Assumption, Spec ?Assumptions]
+- [x] CHK010 Are the 10-second calculation target and no-external-observability-tool scope sufficient to make the reporting requirement objectively testable? [Measurability, Spec §SLO Alvo, Spec §SC-002]
+- [x] CHK011 Is the new reuse-catalog entry requirement explicit enough about what future features should search for and how it is kept current? [Clarity, Spec §FR-008]
+- [x] CHK012 Are assumptions about pre-existing DORA labels, manual curation, and no external observability treated as external dependencies needing validation? [Assumption, Spec §Assumptions]
 
 ## Notes
 

@@ -71,15 +71,35 @@ do runner do GitHub Actions em todo `pull_request` contra `main` — garantindo
 paridade honesta entre CI e execução local por construção, não por manutenção
 paralela (FR-008).
 
-**Estado atual (rollout faseado)**: o workflow roda em **modo relatório**
-(informativo, não bloqueante) por um período de observação definido no PR de
-implementação desta feature. Após esse período sem falso-positivo relevante,
-uma decisão humana explícita promove `test-suite.yml` a "required status
-check" na proteção de branch de `main` (ver Estratégia de Release do
-[`plan.md`](/specs/013-governanca-testes-pr/plan.md) e a task T015 do
-[`tasks.md`](/specs/013-governanca-testes-pr/tasks.md)). Enquanto isso não
-ocorrer, esta seção reflete o estado real (relatório), não o estado final
-desejado.
+**Estado atual (rollout faseado, atualizado por specs/008-bootstrap-governance-hardening/, T048)**:
+`.github/workflows/test-suite.yml` hoje tem **dois jobs** com posturas
+diferentes:
+
+| Job | Escopo | Postura | Pronto para "required status check"? |
+|---|---|---|---|
+| `bootstrap-critical` | Somente `tests/bootstrap/*.bats` | **Bloqueante** — sempre falha o workflow se qualquer teste de bootstrap falhar | Sim — tecnicamente pronto, falta apenas a decisão administrativa abaixo |
+| `test-suite` | Suíte completa via `scripts/run-tests.sh` (bootstrap + docs + scripts + workflows) | **Modo relatório** (informativo, não bloqueante) | Ainda não — continua em período de observação |
+
+O job `bootstrap-critical` foi isolado porque a suíte de bootstrap
+(`tests/bootstrap/*.bats`) protege o comportamento de segurança/idempotência
+mais sensível do bundle (ref pinada, falha crítica de instalação nunca
+mascarada como "já instalado", isolamento estrito `dev_standards`/`platform`,
+classificação correta de contexto brownfield/greenfield) — é o job com maior
+prioridade para virar gate real.
+
+**O que ainda falta e por quê não foi feito automaticamente**: marcar
+qualquer job (`bootstrap-critical` ou `test-suite`) como "required status
+check" na proteção de branch de `main` é uma configuração de administração do
+repositório (branch protection rules do GitHub), não uma linha de YAML — não
+pode ser "codificada" por um agente, e a política deste bundle
+(`.specify/memory/constitution.md`) exige decisão humana explícita e
+registrada antes dessa promoção, mesmo quando o job já está tecnicamente
+pronto. Essa decisão continua pendente (ver Estratégia de Release do
+[`plan.md`](/specs/013-governanca-testes-pr/plan.md), a task T015 do
+[`tasks.md`](/specs/013-governanca-testes-pr/tasks.md) de
+specs/013-governanca-testes-pr/, e a task T048 do
+[`tasks.md`](/specs/008-bootstrap-governance-hardening/tasks.md) de
+specs/008-bootstrap-governance-hardening/).
 
 Se qualquer segmento (`bootstrap`, `docs`, `scripts`, `workflows`) falhar, a
 saída de `scripts/run-tests.sh` identifica explicitamente qual foi o primeiro

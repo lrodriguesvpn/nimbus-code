@@ -1,0 +1,81 @@
+# platform-profile.yaml — perfil base do cliente/tenant observado por este repositório.
+#
+# Este arquivo pertence ao Evidence Plane: ele descreve QUEM é o cliente,
+# QUAIS provedores/ambientes fazem parte do escopo e QUAL é a política de
+# execução permitida. Ele não autoriza apply automático nem escrita direta.
+#
+# Preencha todos os placeholders antes de usar em produção.
+
+schema_version: "1.0"
+profile_id: "cliente-frontier" # slug estável do cliente/tenant representado neste repositório.
+
+tenant:
+  nome_exibicao: "Cliente Frontier"
+  codigo_interno: "CLI-FRONTIER"
+  tipo: "cliente" # cliente | tenant-interno | subsidiaria | parceiro
+  owners:
+    executivo:
+      nome: "Nome do Sponsor"
+      email: "sponsor@cliente.exemplo"
+    plataforma:
+      nome: "Nome do Owner de Plataforma"
+      email: "plataforma@cliente.exemplo"
+    seguranca:
+      nome: "Nome do Owner de Segurança"
+      email: "seguranca@cliente.exemplo"
+  criticidade: "alta" # baixa | media | alta | critica
+
+provedores:
+  # Marque enabled=true apenas para provedores realmente presentes no cliente.
+  azure:
+    enabled: true
+    tenant_id: "00000000-0000-0000-0000-000000000000"
+    management_group_raiz: "mg-cliente-frontier"
+  aws:
+    enabled: false
+    organizacao_id: "o-exemplo"
+  gcp:
+    enabled: false
+    organization_id: "123456789012"
+  gws:
+    enabled: false
+    customer_id: "C0123abcd"
+  m365:
+    enabled: true
+    tenant_id: "00000000-0000-0000-0000-000000000000"
+  d365:
+    enabled: false
+    environment_url: "https://org.crm.dynamics.com"
+
+environments:
+  # Liste somente ambientes reais. Cada ambiente pode apontar para múltiplas
+  # plataformas em platform-graph.yaml.
+  - id: "prod"
+    descricao: "Produção do cliente"
+    change_window: "sab 22:00-23:59 BRT"
+    workload_tier: "mission-critical"
+  - id: "hml"
+    descricao: "Homologação integrada"
+    change_window: "dias úteis 19:00-22:00 BRT"
+    workload_tier: "business-critical"
+  - id: "dev"
+    descricao: "Sandbox / desenvolvimento"
+    change_window: "livre com auditoria"
+    workload_tier: "non-production"
+
+data_residency:
+  regiao_primaria: "Brazil South"
+  pais_residencia: "BR"
+  estrategia_backup: "mesma jurisdição"
+  lgpd_classificacao: "dados pessoais e logs técnicos"
+  excecoes_aprovadas: [] # Preencha somente com exceções aprovadas e vigentes.
+
+execution_policy:
+  modo: "advisory-only"
+  allow_direct_cloud_write: false
+  allow_delivery_plane_apply: false
+  policy_ref: ".nimbus/execution-policy.yaml"
+  observacoes: >-
+    Discovery, inventário, import e drift neste repositório são sempre
+    somente-leitura. Mudança real nasce em workflow protegido do Delivery Plane,
+    com aprovação humana explícita e identidade dedicada.

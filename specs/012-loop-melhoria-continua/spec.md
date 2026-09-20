@@ -127,7 +127,7 @@ errado".
 
 > **AC-4**
 > **Given** que N features foram concluídas desde a última retrospectiva
-> (N definido no `plan.md` desta feature),
+> (valor padrão N=5, configurável em `docs/playbooks/retro-cadence-state.yaml`),
 > **When** o contador atinge N,
 > **Then** o agente sinaliza proativamente que uma retrospectiva está devida —
 > sem esperar por uma divergência de plano ou incidente para isso acontecer.
@@ -285,6 +285,7 @@ sem nenhuma divergência de plano registrada.
   obrigatória registrada quando a meta não é atingida.
 - **FR-005**: O processo DEVE sinalizar proativamente quando uma
   retrospectiva estiver devida por cadência de número de features concluídas
+  (valor padrão N=5 features, configurado em `docs/playbooks/retro-cadence-state.yaml`)
   — não apenas de forma reativa a divergências (comportamento já existente,
   reaproveitado do `retro-template.md`/checklist do `tasks-template.md`).
 - **FR-006**: O `plan-template.md` DEVE incluir uma seção "Playbook de Sucesso

@@ -1,0 +1,217 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://venha-pra-nuvem.ghe.com/nimbus/schemas/execution-log.schema.json",
+  "title": "Nimbus Agent Execution Log",
+  "description": "Schema dos eventos auditáveis do plano de controle multiagente Nimbus-Code.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "timestamp",
+    "actor",
+    "run_id",
+    "phase",
+    "action",
+    "scope",
+    "artifacts_produced",
+    "decision",
+    "retry_count",
+    "approval",
+    "final_result"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "enum": [
+            "NC-Intake",
+            "NC-Spec",
+            "NC-Critic",
+            "NC-Governor",
+            "NC-Arch",
+            "NC-Shield",
+            "NC-QA",
+            "NC-Builder",
+            "NC-Telemetry"
+          ]
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "agent",
+            "human"
+          ]
+        },
+        "session_id": {
+          "type": "string"
+        }
+      }
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "phase": {
+      "type": "string",
+      "enum": [
+        "NC-Intake",
+        "NC-Spec",
+        "NC-Critic",
+        "NC-Governor",
+        "NC-Arch",
+        "NC-Shield",
+        "NC-QA",
+        "NC-Builder",
+        "NC-Telemetry"
+      ]
+    },
+    "action": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "files",
+        "directories"
+      ],
+      "properties": {
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "directories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "lock_id": {
+          "type": "string"
+        }
+      }
+    },
+    "artifacts_produced": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "kind"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "document",
+              "code",
+              "test",
+              "log",
+              "handoff",
+              "evidence"
+            ]
+          },
+          "checksum": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "approved",
+        "rejected",
+        "pending"
+      ]
+    },
+    "retry_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "required"
+      ],
+      "properties": {
+        "required": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "not_required",
+            "pending",
+            "approved",
+            "rejected",
+            "missing"
+          ]
+        },
+        "approved_by": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "approved_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "gate_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "final_result": {
+      "type": "string",
+      "enum": [
+        "success",
+        "failure",
+        "partial"
+      ]
+    },
+    "failure_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "notes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

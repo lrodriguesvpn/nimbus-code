@@ -2,7 +2,7 @@
 
 **Feature Branch**: `020-satellite-repo-governance`
 **Created**: 2026-08-24
-**Status**: Draft
+**Status**: Documentação concluída — aguardando Go/No-Go humano
 **Input**: Solicitação formalizada do usuário: "Formalizar a governança de repositórios satélite no processo Nimbus Code, mantendo a correção do bootstrap como bugfix separado. Para novos projetos greenfield, o bootstrap deve identificar automaticamente se o repositório é brownfield ou greenfield com base na presença de código, perguntar se a topologia desejada é monorepo ou multirepo, registrar a justificativa da decisão e, no caso multirepo, orientar a criação de repositórios satélite por domínio após a primeira spec, sugerindo como ponto de partida os domínios FRONT, BACK, DESIGN, DATA e JOBS, sem impedir variações aprovadas pelo time."
 
 ## Nimbus-Code — Cabeçalho Obrigatório da Spec
@@ -17,13 +17,17 @@
 
 > S0 = doc · S1 = função isolada · S2 = módulo · S3 = múltiplos módulos · S4 = arquitetura, segurança, dados ou integração crítica
 
-## Nimbus-Code — SLO Alvo desta Feature
+## Nimbus-Code — Métricas Operacionais desta Feature
 
-| Componente | Latência p99 (ms) | Taxa de erro máx. (%) | Disponibilidade alvo | RTO | RPO |
-|---|---|---|---|---|---|
-| Decisão greenfield vs brownfield no bootstrap | 3000 | 1,0% | 99,9% | 30 min | 5 min |
-| Intake de topologia mono vs multirepo | 4000 | 1,0% | 99,9% | 30 min | 5 min |
-| Governança central → satélites | 5000 | 1,0% | 99,9% | 60 min | 15 min |
+| Componente | Indicador operacional | Meta inicial | Evidência |
+|---|---|---:|---|
+| Decisão greenfield vs brownfield no bootstrap | Classificações registradas antes da próxima etapa | 100% | `.specify/feature.json` e logs do bootstrap |
+| Intake de topologia mono vs multirepo | Decisões greenfield com justificativa e owner | 100% | `.specify/feature.json` |
+| Governança central → satélites | Atualizações realizadas por PR revisado | 100% | Histórico de PRs e workflow oficial |
+
+> Esta feature não define SLOs de runtime, latência p99, disponibilidade, RTO ou RPO.
+> As metas acima são indicadores operacionais de adoção e conformidade; a
+> metodologia de coleta deve ser definida no plano de adoção pós-release.
 
 ## Nimbus-Code — Objetivo e Contexto
 
@@ -215,7 +219,7 @@ Como Digital Engineering, quero que os satélites usem o mesmo mecanismo oficial
 - **SC-002**: 100% dos projetos greenfield registram a decisão mono vs multirepo com justificativa legível no primeiro ciclo da feature estrutural.
 - **SC-003**: Pelo menos 90% dos projetos greenfield multirepo conseguem definir a topologia inicial de domínios na primeira spec sem necessidade de documentação paralela fora do fluxo Nimbus Code.
 - **SC-004**: 100% da documentação operacional multi-repo passa a indicar o repo central como única fonte de verdade para specs.
-- **SC-005**: O número de variações manuais não rastreadas na criação de satélites é reduzido em pelo menos 80% nas próximas ativações greenfield do processo.
+- **SC-005**: Como resultado pós-release, o número de variações manuais não rastreadas na criação de satélites é reduzido em pelo menos 80%, medido contra uma baseline registrada nas ativações anteriores e em uma janela de adoção definida pelo owner da governança.
 
 ## Assumptions
 

@@ -206,6 +206,74 @@ semanalmente pelo Dev responsável.
 
 ---
 
+## 7A. Protocolo Multiagente (Esquadrão NC-*)
+
+Quando a feature exigir mais de um agente do esquadrão **NC-***, a execução deve
+seguir um protocolo único para garantir isolamento, baton-pass rastreável e
+recuperação consistente.
+
+### Ownership de arquivos por sessão
+
+- Cada sessão continua responsável por um **conjunto fechado de arquivos**.
+- O ownership é concedido por padrão ao primeiro agente que receber o escopo no
+  handoff aprovado; os demais agentes só podem ler esse material até receberem o
+  bastão formal.
+- Um arquivo só muda de ownership quando o agente atual concluir o handoff ou a
+  sessão for explicitamente cancelada.
+
+### Locks e reserva de escopo
+
+- Antes de escrever, o agente deve registrar um **lock de escopo** no handoff ou
+  no log de execução (`run_id`, agente, arquivos/diretórios reservados).
+- Locks são exclusivos por arquivo; sobreposição parcial já conta como conflito.
+- Conflito de lock entre dois agentes do esquadrão **NC-*** encerra a execução
+  imediatamente (`scope violation`) e devolve a decisão ao Dev.
+
+### Dependências entre agentes do esquadrão NC-*
+
+A ordem padrão é sempre a abaixo, salvo exceção formal no `plan.md`:
+
+1. `NC-Intake` → coleta e valida os 4 blocos obrigatórios.
+2. `NC-Spec` → produz `spec.md` e contratos derivados.
+3. `NC-Critic` → audita ambiguidades, lacunas e inconsistências.
+4. `NC-Governor` → registra rastreabilidade, classificação S0–S4 e gate humano.
+5. `NC-Arch` → atualiza plano, ADRs e grafos.
+6. `NC-Shield` → verifica os controles não-negociáveis.
+7. `NC-QA` → prepara critérios e suítes de teste.
+8. `NC-Builder` → implementa somente após gates aprovados.
+9. `NC-Telemetry` → consolida custo, qualidade e evidências finais.
+
+### Baton-pass obrigatório
+
+- Toda passagem de bastão deve usar o contrato
+  `.nimbus/contracts/delivery-handoff.contract.yaml`.
+- O handoff mínimo inclui: resumo do resultado, evidências de qualidade,
+  evidências de aceite, tokens consumidos, tempo de execução, horas humanas,
+  retrabalho, pendências e decisão final.
+- Exemplos obrigatórios de baton-pass:
+  - `NC-Spec → NC-Critic`: entrega `spec.md` + pontos ambíguos observados.
+  - `NC-Critic → NC-Governor`: entrega findings + classificação proposta.
+  - `NC-QA → NC-Builder`: entrega estratégia de testes aprovada.
+
+### Cancelamento de execução
+
+- O Dev pode cancelar a sessão a qualquer momento; o agente deve parar de
+  escrever, registrar o estado parcial e liberar seus locks.
+- Cancelamentos automáticos ocorrem em caso de: violação de escopo, segredo
+  detectado, comando destrutivo inesperado, gate humano ausente ou retry budget
+  esgotado.
+- Execução cancelada nunca passa o bastão implicitamente ao próximo agente.
+
+### Recuperação após falha
+
+- A retomada sempre começa do **último handoff válido**, nunca de memória implícita.
+- Antes de retomar, o novo agente deve revalidar locks, dependências e gate
+  humano conforme a classificação S0–S4 registrada pelo `NC-Governor`.
+- Se a falha tiver produzido artefato parcial, ele deve ser tratado como
+  evidência e não como fonte definitiva até nova aprovação humana.
+
+---
+
 ## 8. Fluxo Resumido de uma Iteração
 
 ```

@@ -1,0 +1,40 @@
+{
+  "event_id": "evt-retry-001",
+  "timestamp": "2026-09-20T18:05:00Z",
+  "actor": {
+    "id": "NC-QA",
+    "type": "agent",
+    "session_id": "sess-002"
+  },
+  "run_id": "run-retry-001",
+  "phase": "NC-QA",
+  "action": "rerun_test_suite",
+  "scope": {
+    "files": [
+      "tests/example.test.sh"
+    ],
+    "directories": [
+      "tests"
+    ],
+    "lock_id": "lock-qa-001"
+  },
+  "artifacts_produced": [
+    {
+      "path": "tests/example.test.sh",
+      "kind": "test",
+      "checksum": "def456"
+    }
+  ],
+  "decision": "rejected",
+  "retry_count": 2,
+  "approval": {
+    "required": false,
+    "status": "not_required",
+    "approved_by": null,
+    "approved_at": null,
+    "gate_id": null
+  },
+  "final_result": "failure",
+  "failure_reason": "retry_budget_exhausted",
+  "notes": "retry esgotado"
+}

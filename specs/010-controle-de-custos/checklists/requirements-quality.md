@@ -8,27 +8,27 @@
 
 ## Requirement Completeness
 
-- [ ] CHK001 Are token-cost requirements complete about how sessions, parallel agents, model variants, and retries roll up into one feature record? [Completeness, Spec ?FR-001, Spec ?Edge Cases]
-- [ ] CHK002 Are human-hours requirements explicit about which GitHub Project items map to a feature and how missing or duplicate values are reconciled? [Completeness, Spec ?FR-002, Spec ?User Story 5]
-- [ ] CHK003 Does the benchmark feature define minimum sample quality, outlier handling, and similarity rules beyond complexity level alone? [Completeness, Spec ?FR-006, Spec ?AC-5, Spec ?SC-006]
+- [x] CHK001 Are token-cost requirements complete about how sessions, parallel agents, model variants, and retries roll up into one feature record? [Completeness, Spec §FR-001, Spec §Edge Cases, Contract §session-cost-event]
+- [x] CHK002 Are human-hours requirements explicit about which GitHub Project items map to a feature and how missing or duplicate values are reconciled? [Completeness, Spec §FR-002, Spec §User Story 5, Contract §human-hours-source]
+- [x] CHK003 Does the benchmark feature define minimum sample quality, outlier handling, and similarity rules beyond complexity level alone? [Completeness, Spec §FR-006, Spec §AC-5, Spec §SC-006, Plan §benchmarks]
 
 ## Requirement Clarity
 
-- [ ] CHK004 Is the cloud-cost scope unambiguous, given that the objective includes cloud resources, FR-010 asks for clarification, and the assumptions place cloud cost outside the MVP? [Conflict, Spec ?Objetivo e Contexto, Spec ?FR-010, Spec ?Assumptions]
-- [ ] CHK005 Are alert thresholds and delivery expectations specific enough to distinguish 80% warning, 100% breach, and retroactive overrun alerts? [Clarity, Spec ?FR-004, Spec ?AC-2, Spec ?User Story 2]
-- [ ] CHK006 Is the currency-conversion policy defined as a requirement rather than only as an assumption, so historical comparisons stay reproducible? [Gap, Spec ?Assumptions]
+- [x] CHK004 Is the cloud-cost scope unambiguous, given that the objective includes cloud resources, FR-010 asks for clarification, and the assumptions place cloud cost outside the MVP? [Clarity, Spec §FR-010, Plan §ADR-3, Plan §Constraints]
+- [x] CHK005 Are alert thresholds and delivery expectations specific enough to distinguish 80% warning, 100% breach, and retroactive overrun alerts? [Clarity, Spec §FR-004, Spec §AC-2, Plan §alert-engine]
+- [x] CHK006 Is the currency-conversion policy defined as a requirement rather than only as an assumption, so historical comparisons stay reproducible? [Clarity, Spec §FR-008, Spec §Assumptions, Data-Model §CostRecord]
 
 ## Consistency & Coverage
 
-- [ ] CHK007 Are the `plan.md` estimate fields, dashboard drill-down, and audit-trail requirements synchronized around the same cost dimensions? [Consistency, Spec ?FR-005, Spec ?FR-007, Spec ?FR-009]
-- [ ] CHK008 Do the edge cases define written outcomes for canceled features, retroactive budget changes, missing Hours field, and timezone reconciliation? [Coverage, Spec ?Edge Cases]
-- [ ] CHK009 Is access control to detailed cost data defined as a requirement or only assumed in the narrative? [Gap, Spec ?Assumptions]
+- [x] CHK007 Are the `plan.md` estimate fields, dashboard drill-down, and audit-trail requirements synchronized around the same cost dimensions? [Consistency, Spec §FR-005, Spec §FR-007, Spec §FR-009]
+- [x] CHK008 Do the edge cases define written outcomes for canceled features, retroactive budget changes, missing Hours field, and timezone reconciliation? [Coverage, Spec §Edge Cases]
+- [x] CHK009 Is access control to detailed cost data defined as a requirement or only assumed in the narrative? [Completeness, Spec §FR-011, Plan §Security & Privacy]
 
 ## Non-Functional & Measurability
 
-- [ ] CHK010 Are dashboard and alert SLOs measurable enough to know whether the system failed if data freshness slips? [Measurability, Spec ?SLO Alvo, Spec ?SC-003, Spec ?SC-004]
-- [ ] CHK011 Are success criteria for ?sem fric??o adicional relevante? based on a defined survey scale and sample size? [Clarity, Spec ?SC-005]
-- [ ] CHK012 Are assumptions about standardized `plan.md`, BRL base currency, and 12-month hybrid adoption treated as external dependencies needing validation? [Assumption, Spec ?Assumptions]
+- [x] CHK010 Are dashboard and alert SLOs measurable enough to know whether the system failed if data freshness slips? [Measurability, Spec §SLO Alvo, Spec §SC-003, Spec §SC-004]
+- [x] CHK011 Are success criteria for "sem fricção adicional relevante" based on a defined survey scale and sample size? [Clarity, Spec §SC-005]
+- [x] CHK012 Are assumptions about standardized `plan.md`, BRL base currency, and 12-month hybrid adoption treated as external dependencies needing validation? [Assumption, Spec §Assumptions]
 
 ## Notes
 

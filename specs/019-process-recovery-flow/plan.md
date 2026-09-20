@@ -20,9 +20,12 @@ normativa para Dev, BA e agente.
 **Primary Dependencies**:
 - [docs/developer-guide.md](../../docs/developer-guide.md)
 - [.specify/memory/constitution.md](../../.specify/memory/constitution.md)
+- [presets/nimbus-code-standards/templates/constitution-template.md](../../presets/nimbus-code-standards/templates/constitution-template.md)
+- [presets/nimbus-code-platform-standards/templates/constitution-template.md](../../presets/nimbus-code-platform-standards/templates/constitution-template.md)
+- [presets/nimbus-code-standards/templates/project-root/copilot-instructions.md](../../presets/nimbus-code-standards/templates/project-root/copilot-instructions.md)
 - [specs/017-nimbus-digital-engineer-platform/](../017-nimbus-digital-engineer-platform/)
 
-**Storage**: `specs/019-process-recovery-flow/`, [docs/developer-guide.md](../../docs/developer-guide.md), [.specify/memory/constitution.md](../../.specify/memory/constitution.md)
+**Storage**: `specs/019-process-recovery-flow/`, [docs/developer-guide.md](../../docs/developer-guide.md), constituições e templates dos presets aplicáveis
 
 **Testing**: revisão documental guiada por checklist + validação manual dos fluxos Mermaid, FAQ e rastreabilidade AC/FR/SC
 
@@ -37,6 +40,8 @@ normativa para Dev, BA e agente.
 - a feature não altera runtime, CI/CD ou integrações externas
 - a política de idioma deve ser normativa e única na constituição
 - o fluxo deve ser compreensível por BA, Dev e agente sem depender de contexto oral
+- alterações normativas devem manter paridade entre constituição local, templates e cópias espelho
+- nenhuma publicação ocorre sem aprovação do Architecture Board
 
 **Scale/Scope**: org `venha-pra-nuvem`, todos os projetos que usam o preset Nimbus-Code
 
@@ -70,6 +75,7 @@ specs/019-process-recovery-flow/
 ├── graph.md
 ├── contracts/
 │   └── process-correction-decision.contract.md
+├── impact-map.md
 └── checklists/
     └── requirements.md
 ```
@@ -82,12 +88,14 @@ docs/
 
 .specify/memory/
 └── constitution.md                   # política de idioma para código e documentação
-```
 
-### Arquivos não aplicáveis
+presets/
+├── nimbus-code-standards/templates/constitution-template.md
+├── nimbus-code-platform-standards/templates/constitution-template.md
+└── (cópias espelho em `.specify/presets/`)
 
-```text
-impact-map.md     # N/A — feature S2 sem mudança em runtime nem rollout
+presets/*/templates/project-root/
+└── copilot-instructions.md
 ```
 
 ---
@@ -96,10 +104,10 @@ impact-map.md     # N/A — feature S2 sem mudança em runtime nem rollout
 
 | Campo | Valor |
 |---|---|
-| **Nível** | **S2** |
-| **Justificativa** | Atualiza um módulo documental central (developer guide), a constituição organizacional e os artefatos de design da própria feature, sem runtime novo nem integração entre serviços |
+| **Nível** | **S3** |
+| **Justificativa** | Altera uma política organizacional distribuída entre constituição local, presets, cópias espelho e instruções de agentes, exigindo análise transversal e aprovação humana |
 | **Modelo de IA** | Auto |
-| **Revisão humana obrigatória** | Não (S0–S3), mas recomendada por alterar política organizacional |
+| **Revisão humana obrigatória** | Sim — Architecture Board antes do Go/No-Go |
 | **Padrão reutilizado encontrado?** | Sim (tag: `hybrid-dev-templates`) |
 | **Estimativa de tokens (input+output)** | ~10–16 mil tokens |
 
@@ -144,7 +152,7 @@ impact-map.md     # N/A — feature S2 sem mudança em runtime nem rollout
 - [x] `graph.md` criado/atualizado com diagrama por código e por business
 - [x] Nenhum módulo novo ficou fora do grafo
 - [x] Dependências externas/referenciais declaradas no grafo
-- [x] `impact-map.md` não se aplica (feature S2)
+- [x] `impact-map.md` criado e atualizado para os módulos locais e artefatos distribuídos
 
 ### Grafo do Contexto (Multi-Repo Brownfield)
 
@@ -152,7 +160,7 @@ impact-map.md     # N/A — feature S2 sem mudança em runtime nem rollout
 |---|---|
 | **Bounded context** | `spec-kit-workflow` |
 | **Grafo do contexto** | [graph.yaml](./graph.yaml) / [graph.md](./graph.md) |
-| **Dependências relevantes para esta feature** | `docs/developer-guide.md`, `.specify/memory/constitution.md`, `specs/017-nimbus-digital-engineer-platform/` |
+| **Dependências relevantes para esta feature** | `docs/developer-guide.md`, `.specify/memory/constitution.md`, presets/cópias espelho, `specs/017-nimbus-digital-engineer-platform/` |
 | **Padrões de harvest aplicáveis** | `brownfield-multirepo-context-graph` |
 
 ## Nimbus-Code — Estratégia de Release
@@ -176,14 +184,17 @@ impact-map.md     # N/A — feature S2 sem mudança em runtime nem rollout
 | **Método de acompanhamento** | revisão documental do plano + registro de horas humanas no GitHub Project da feature |
 | **Teto de orçamento (opcional)** | N/A |
 
-## Nimbus-Code — SLO Gate
+## Nimbus-Code — Documentation & Adoption Metrics Gate
 
-| Componente | Latência p99 | Taxa de erro máx. | Disponibilidade | RTO | RPO |
-|---|---|---|---|---|---|
-| Documentação operacional do processo | — | — | — | — | — |
+| Métrica | Meta | Evidência | Owner | Janela |
+|---|---|---|---|---|
+| Cenários documentados com ação inequívoca | 100% | Walkthrough registrado no quickstart | Platform Standards | Antes do Go/No-Go |
+| Respostas corretas sobre `converge` vs `spec.md` | ≥90% | Baseline + questionário padronizado | Governança Nimbus Code | 30–90 dias pós-publicação |
+| Paridade entre constituição e templates | 100% | Relatório de comparação sem divergências | Platform Standards | Antes do Go/No-Go |
 
-**SLOs não definidos nesta feature e justificativa:**
-- Não há serviço ou componente operacional novo; o resultado é governança documental.
+**Gate humano:** o Architecture Board deve aprovar a política, o mapa de impacto, a evidência de paridade e o resultado do walkthrough antes do Go/No-Go.
+Não há SLO de runtime nesta feature; as métricas acima substituem a tabela de
+latência/disponibilidade porque o resultado é governança documental.
 
 ## Nimbus-Code — Security & DevSecOps Gate
 
@@ -203,6 +214,15 @@ impact-map.md     # N/A — feature S2 sem mudança em runtime nem rollout
 
 **Riscos identificados e decisão:**
 - Risco principal: ambiguidade residual na distinção entre “mesma spec” e “nova spec”. Mitigação: matriz de decisão + FAQ + contrato explícito.
+- Risco transversal: divergência entre constituição local e artefatos distribuídos. Mitigação: `impact-map.md`, paridade no mesmo PR e aprovação do Architecture Board.
+
+## Architecture Decision Log
+
+| Decisão | Alternativas consideradas | Motivo | Aprovador |
+|---|---|---|---|
+| Reclassificar a feature para S3 | Manter S2 | A política é distribuída entre repositórios consumidores e presets | Architecture Board — pendente |
+| Constituição local como fonte normativa única | Permitir regras concorrentes em templates e prompts | Evita divergência sem impedir distribuição automatizada | Architecture Board — pendente |
+| Teste de recorte de valor com três dimensões | Decisão ad hoc por esforço técnico | Torna “mesma feature vs nova spec” reproduzível | Architecture Board — pendente |
 
 ## Phase 0 — Research Output
 
@@ -231,4 +251,5 @@ Artefatos gerados nesta fase:
 | Harness consultado | ✓ Aprovado | HRN-0001/0002/0003 declarados |
 | Idioma dos artefatos | ✓ Aprovado | Documentação em português; contratos/processo explicitados em docs versionados |
 
-**Gate final: APROVADO**
+**Gate final: PENDENTE** — depende da paridade dos templates, evidência do
+walkthrough e aprovação do Architecture Board.

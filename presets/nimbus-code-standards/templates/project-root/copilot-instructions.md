@@ -13,6 +13,15 @@
 - **Nimbus Code workflow:** `nimbus-code-full-cycle` (specify → plan → tasks → implement)
 - **Plano ativo:** `specs/<feature-slug>/plan.md` (atualizar este link na feature em andamento)
 
+## Política de Idioma e Distribuição
+
+- Código, identificadores, schemas, contratos e mensagens estruturais devem
+  usar inglês como idioma padrão.
+- Documentação, specs, runbooks, FAQs e checklists devem usar português,
+  preservando termos técnicos canônicos em inglês quando necessário.
+- A constituição local é a fonte normativa única; este arquivo e os presets
+  apenas distribuem a regra e devem permanecer em paridade.
+
 ---
 
 ## Modelo de Entrevista de Descoberta (antes do Specify)

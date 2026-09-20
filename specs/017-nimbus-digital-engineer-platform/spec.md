@@ -25,6 +25,37 @@
 
 ---
 
+## Nimbus-Code — Orquestração Multi-Agente (Esquadrão NC-*)
+
+A SPEC 017 orquestra as **Camadas 2 e 3 (Engenharia, Segurança, Testes, Construção e Telemetria)** da Plataforma Digital Engineer:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│               CAMADAS 2 E 3: ARQUITETURA, CONSTRUÇÃO & OPERAÇÃO (SPEC 017)             │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ 🟡 CAMADA 2: ARQUITETURA, SEGURANÇA & QUALIDADE                                        │
+│                                                                                        │
+│   [NC-Arch]             →      [NC-Shield]           →      [NC-QA]                    │
+│   (Arquitetura Técnica,        (DevSecOps, Cofre,           (Estratégia TDD,           │
+│    ADRs & Catálogo Reuso)       TLS & 6 Não-Negociáveis)     BATS & E2E Tests)         │
+│                                                                                        │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ 🟢 CAMADA 3: CONSTRUÇÃO AUTÔNOMA & OBSERVABILIDADE                                     │
+│                                                                                        │
+│   [NC-Builder]                                 →      [NC-Telemetry]                   │
+│   (Sessão Isolada, 1 Branch por Fase,                 (Métricas DORA, Logs JSON/OTel   │
+│    Implementação & Converge)                           e Rastreamento de Custo Total)  │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+- **`NC-Arch` (Nimbus Solution Architect)**: Mapeia o `plan.md`, registra decisões no Architecture Decision Log (ADL), consulta o catálogo de reuso (`reuse-catalog.yaml`) e atualiza os grafos de dependência (`graph.yaml` / `graph.md`).
+- **`NC-Shield` (Nimbus DevSecOps Guardian)**: Audita rigorosamente os 6 itens Não-Negociáveis (TLS, cofre de segredos, backup & DR, isolamento de ambiente, branch protection e mínimo privilégio).
+- **`NC-QA` (Nimbus Test Strategist)**: Gera suítes de testes automatizados e critérios de qualidade que devem ser validados antes do merge.
+- **`NC-Builder` (Nimbus Autonomous Builder)**: Executa a codificação das tarefas sob isolamento de sessão estrito (1 branch, sem merge direto, PR com `Closes #N`).
+- **`NC-Telemetry` (Nimbus Observability & SRE)**: Garante logs estruturados, telemetria OpenTelemetry, apuração de métricas DORA e consolidação do custo real (tokens + horas humanas).
+
+---
+
 ## Nimbus-Code — SLO Alvo desta Feature
 
 | Componente | Latência p99 (ms) | Taxa de erro máx. (%) | Disponibilidade alvo | RTO | RPO |
@@ -186,15 +217,18 @@ Como **cliente interno/externo**, quero receber entrega com resultado, qualidade
 
 ### Functional Requirements
 
-- **FR-001**: O sistema MUST aceitar intake proveniente de fonte M365 e de fonte GitHub, com normalização de metadados essenciais da demanda.
-- **FR-002**: O sistema MUST classificar cada demanda em modo autônomo, semi-autônomo ou manual com aprovação, registrando justificativa da decisão.
+- **FR-001**: O sistema MUST aceitar intake proveniente de fonte M365 e de fonte GitHub, com normalização de metadados essenciais da demanda integrando-se à camada de Descoberta (**NC-Intake** / **NC-Spec** da SPEC 018).
+- **FR-002**: O sistema MUST classificar cada demanda em modo autônomo, semi-autônomo ou manual com aprovação, registrando justificativa da decisão via governança (**NC-Governor**).
 - **FR-003**: O sistema MUST aplicar gates de aprovação humana configuráveis por tipo de demanda e por nível de risco.
 - **FR-004**: O sistema MUST registrar trilha auditável de decisões, responsável por etapa e estado de aprovação conforme RACI da feature.
 - **FR-005**: O sistema MUST gerar pacote de handoff de entrega para cliente contendo resultado, evidências de aceite, pendências e próximos passos.
-- **FR-006**: O sistema MUST calcular e apresentar custo operacional por demanda considerando consumo de IA e participação humana.
+- **FR-006**: O sistema MUST calcular e apresentar custo operacional por demanda considerando consumo de IA e participação humana (telemetria e custos com **NC-Telemetry**).
 - **FR-007**: O sistema MUST suportar contexto multi-repo entre `nimbus-agent` e repositórios satélite, preservando rastreabilidade entre artefatos de planejamento e execução.
 - **FR-008**: O sistema MUST definir estrutura de badges por domínio de conhecimento de Digital Engineering com critérios de avaliação explícitos.
 - **FR-009**: O sistema MUST adotar OpenFeature como abstração padrão para toggles de rollout dos modos operacionais.
+- **FR-010**: O agente **NC-Arch** MUST validar a consistência arquitetural e os grafos de dependência antes de liberar tarefas para implementação.
+- **FR-011**: O agente **NC-Shield** MUST bloquear qualquer plano que viole os 6 itens Não-Negociáveis de segurança e compliance.
+- **FR-012**: O agente **NC-QA** MUST exigir que a estratégia de testes e mocks esteja definida antes do ciclo de codificação pelo **NC-Builder**.
 
 ### Key Entities *(include if feature involves data)*
 

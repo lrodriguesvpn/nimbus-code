@@ -1,9 +1,9 @@
-# Feature Specification: AgentRC Brownfield Evaluation
+# Feature Specification: Avaliação de Viabilidade do AgentRC para Análise Brownfield
 
 **Feature Branch**: `[015-agentrc-brownfield-eval]`
 **Created**: 2026-08-23
-**Status**: Draft
-**Input**: User description: "Validar Se teremos ganho incorporando o AgentRC do Microsoft Lab (Projeto dentro do GIT oficiald a Microsoft) para analise de codigo BROWNFIEL, avaliar se nao tem conflito com nada que ja fazemos!"
+**Status**: Backlog — pesquisa de mercado pendente; sem piloto ou adoção nesta fase
+**Input**: User description: "Avaliar o ganho técnico e a aderência da ferramenta AgentRC (Microsoft) para análise arquitetural e governança de repositórios legados (brownfield), mapeando eventuais sobreposições ou sinergias com o fluxo nativo do Nimbus Code."
 
 ## Nimbus-Code — Cabeçalho Obrigatório da Spec
 
@@ -29,7 +29,7 @@
 
 **Motivação:** o repositório já possui fluxo próprio de governança para brownfield, incluindo grafo de contexto, catálogo de reuso, validações de versão e templates de planejamento. Antes de adotar um agente externo, é preciso saber se ele complementa o que já existe ou apenas repete capacidades já cobertas.
 
-**Critério de done (alto nível):** a análise termina com uma recomendação clara — adotar, adotar com restrições ou rejeitar — acompanhada de uma matriz de compatibilidade e um resumo objetivo de conflitos com o fluxo atual.
+**Critério de done (alto nível):** a avaliação futura deverá terminar com uma recomendação clara — adotar, adotar com restrições ou rejeitar — acompanhada de uma matriz de compatibilidade, evidências públicas de maturidade/adoção e um resumo objetivo de conflitos com o fluxo atual. Até essa retomada, nenhum piloto ou integração será executado.
 
 ## Nimbus-Code — Hybrid Collaboration Model
 

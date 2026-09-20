@@ -1,6 +1,7 @@
 # Impact Map: Bootstrap Governance & Repo Provisioning Hardening
 
-**Complexidade**: S3 (revisão humana obrigatória por natureza de segurança — ver `plan.md`)
+**Complexidade**: S4 (revisão humana obrigatória por release de governança,
+autenticação cross-repo e piloto controlado — ver `plan.md`)
 
 ## Componentes Impactados
 
@@ -11,6 +12,10 @@
 | `presets/nimbus-code-platform-standards/.github/ISSUE_TEMPLATE/` | Novo (hoje ausente) | Baixo — apenas adiciona template ausente |
 | `scripts/validate-issue-template-parity.sh` | Novo | Baixo — script de validação, sem efeito colateral em produção |
 | `docs/skills-distribution-guide.md` | Novo | Baixo — documentação |
+| `bundles/*/bundle.yml`, `presets/*/preset.yml` | Modificado (bump de versão) | Alto — define a ref consumida por novos repositórios |
+| `v1.19.0-rc.1` e `v1.19.0` | Novo (release/tag) | Alto — tag errada pode reproduzir artefatos incompletos |
+| Perfil Platform (CMDB, zero-diff, baselines, lifecycle) | Ampliado | Alto — risco de induzir apply cloud fora de escopo |
+| Perfil Dev Standards (gates, custo, harness/playbook, agentes) | Ampliado | Médio — risco de excesso de governança ou custo operacional |
 
 ## Failure Modes
 
@@ -32,9 +37,9 @@ faltante e os valores aceitos.
 **Impacto**: Workflow crítico (ex.: `ensure-github-project.yml`) para de
 funcionar num repositório específico.
 
-**Mitigação**: Fallback automático para PAT (ADL-2 do `plan.md`) durante o
-período de rollout; aviso explícito no log quando em modo fallback, permitindo
-detecção rápida.
+**Mitigação**: Falha fechada antes da operação ampliada; aviso explícito com
+instrução de configuração do App. Um fallback PAT só pode ser habilitado
+explicitamente em modo de migração opt-in, com owner, prazo e auditoria.
 
 ### FM-3: Divergência entre os dois templates de issue não detectada a tempo
 
@@ -58,15 +63,21 @@ em caso de divergência.
       PR de teste com divergência proposital
 - [ ] **Gate 4**: Revisão humana explícita de segurança aprovada (obrigatória
       por esta feature alterar mecanismo de autenticação em produção)
+- [ ] **Gate 5**: `v1.19.0-rc.1` publicado a partir de commit em `main` e
+      consumido pelos dois cenários do projeto piloto
+- [ ] **Gate 6**: sete dias de evidência do piloto sem falha crítica; somente
+      então promover `v1.19.0`
 
 ## Plano de Rollback
 
 1. Reverter o PR desta feature via `git revert` — `bootstrap.sh` volta ao
    comportamento anterior (sem pergunta de tipo de repositório).
-2. Workflows migrados: remover apenas o step de emissão de token do GitHub App;
-   o fallback para PAT já presente no código torna esse rollback imediato, sem
-   precisar reverter o PR inteiro.
+2. Workflows migrados: desativar o rollout via OpenFeature e bloquear a etapa
+   cross-repo até correção. Não habilitar PAT automaticamente; se o modo de
+   migração estiver autorizado, sua ativação deve continuar explícita e auditada.
 3. Nenhuma migração de dado — rollback é puramente reversão de código/config.
+4. Se a RC falhar, não criar `v1.19.0`; manter o tag candidato como evidência,
+   corrigir em novo commit e publicar `v1.19.0-rc.2`.
 
 ## SLOs (referência para o Observability Gate)
 

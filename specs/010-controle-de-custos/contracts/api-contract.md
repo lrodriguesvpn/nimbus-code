@@ -12,7 +12,11 @@
 /api/v1
 ```
 
-Autenticação: ****** (GitHub OAuth). Acesso restrito a Tech Leads, gestores e diretores por papel organizacional. Devs veem apenas features próprias.
+Autenticação: GitHub OAuth/OIDC corporativo, com sessão validada pelo gateway.
+Tokens não são aceitos em query string nem persistidos em respostas. RBAC:
+Tech Leads e gestores consultam o próprio escopo; diretores consultam todos os
+escopos; devs consultam apenas as próprias features. Exportação exige o mesmo
+escopo e é auditada.
 
 ---
 
@@ -63,13 +67,15 @@ Retorna resumo de custo real vs. estimado para um escopo específico.
   "data_quality": {
     "tokens_complete": true,
     "human_hours_complete": true,
-    "missing_dimensions": []
+    "missing_dimensions": [],
+    "statuses": []
   }
 }
 ```
 
 **Response 404**: escopo não encontrado  
 **Response 422**: parâmetros inválidos (ex.: `scope` sem valor válido)
+**Response 503**: fonte de custo indisponível; a resposta não deve parecer sucesso
 
 **SLA**: p99 < 800ms
 
@@ -207,6 +213,6 @@ feature_id,dimension,amount,currency,period,model,session_id,created_at
 
 | Header | Direction | Description |
 |---|---|---|
-| `Authorization: ****** | Request | GitHub OAuth token |
+| `Authorization: Bearer <gateway-session>` | Request | Sessão validada pelo gateway |
 | `X-Correlation-Id` | Request + Response | Propagado de serviço em serviço; gerado se ausente |
 | `X-Response-Time` | Response | Tempo de resposta em ms (para monitoramento de SLA) |

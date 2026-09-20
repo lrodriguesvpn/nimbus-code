@@ -2,7 +2,8 @@
 
 **Feature**: Bootstrap Governance & Repo Provisioning Hardening
 **Feature Branch**: `008-bootstrap-governance-hardening`
-**Complexity**: S3 (revisão humana obrigatória — mudança de mecanismo de autenticação)
+**Complexity**: S4 (revisão humana obrigatória — bootstrap, autenticação cross-repo,
+isolamento de perfis e evolução do Platform Control Plane)
 **Created**: 2026-08-20
 
 **Input**: Design docs from `specs/008-bootstrap-governance-hardening/` (plan.md, research.md, data-model.md, contracts/, quickstart.md, graph.yaml, impact-map.md)
@@ -17,8 +18,20 @@ há validador de paridade de templates, nenhum workflow usa GitHub App, o
 preset `nimbus-code-platform-standards` não tem `ISSUE_TEMPLATE`, e não existe
 manual de skills. Todas as tasks abaixo são trabalho novo.
 
-**Total Tasks**: 30 tasks across 8 phases
+**Total Tasks**: 70 tasks across 13 phases
 **MVP Scope**: Phase 1 (Setup) + Phase 2 (Foundational) + Phase 3 (User Story 1 — seleção de preset)
+
+**Execution model**: as três releases serão executadas sequencialmente:
+
+```text
+Release 1 — Bootstrap Foundation
+  → Release 2 — Platform Control Plane
+    → Release 3 — Agent Control Plane
+```
+
+Nenhuma release seguinte começa enquanto o gate de saída da anterior não estiver
+aprovado. As releases podem ter tarefas paralelas internamente, mas não podem
+ser executadas em paralelo entre si.
 
 ---
 
@@ -80,18 +93,18 @@ manual de skills. Todas as tasks abaixo são trabalho novo.
 
 ## Phase 5: User Story 4 — Migrar automações cross-repo/org de PAT para GitHub App (Priority: P1)
 
-**Goal**: `ensure-github-project.yml`, `add-to-repo-project.yml`, `sync-priority-field.yml` e `agent-auto-assign.yml` autenticam via GitHub App, com fallback para PAT durante o rollout.
+**Goal**: `ensure-github-project.yml`, `add-to-repo-project.yml`, `sync-priority-field.yml` e `agent-auto-assign.yml` autenticam via GitHub App em modo estrito; fallback PAT só existe como modo opt-in, temporário e auditado durante o rollout.
 
 **Independent Test**: Executar um workflow de escopo organizacional e confirmar autenticação via token de instalação, sem exigir PAT.
 
-- [x] T017 [P] [US4] Migrar `.github/workflows/ensure-github-project.yml` para usar `actions/create-github-app-token@v1` com fallback para `VPNDEV_PROJECT_TOKEN`, per [contracts/github-app-auth-contract.md](./contracts/github-app-auth-contract.md) (depende de T006)
-- [x] T018 [P] [US4] Migrar `.github/workflows/add-to-repo-project.yml` com o mesmo padrao (depende de T006)
-- [x] T019 [P] [US4] Migrar `.github/workflows/sync-priority-field.yml` com o mesmo padrao (depende de T006)
-- [x] T020 [P] [US4] Migrar `.github/workflows/agent-auto-assign.yml` com o mesmo padrao (depende de T006)
+- [x] T017 [P] [US4] Migrar `.github/workflows/ensure-github-project.yml` para usar `actions/create-github-app-token@v1`, com fallback PAT somente se o modo de migração opt-in estiver explicitamente habilitado, per [contracts/github-app-auth-contract.md](./contracts/github-app-auth-contract.md) (depende de T006)
+- [x] T018 [P] [US4] Migrar `.github/workflows/add-to-repo-project.yml` com o mesmo padrão de modo estrito e fallback opt-in (depende de T006)
+- [x] T019 [P] [US4] Migrar `.github/workflows/sync-priority-field.yml` com o mesmo padrão de modo estrito e fallback opt-in (depende de T006)
+- [x] T020 [P] [US4] Migrar `.github/workflows/agent-auto-assign.yml` com o mesmo padrão de modo estrito e fallback opt-in (depende de T006)
 - [x] T021 [US4] Confirmar que `.github/workflows/graph-guard.yml` (escopo do proprio repositorio) **nao** e migrado - continua usando `GITHUB_TOKEN` nativo, sem alteracao (AC-5)
 - [ ] T022 [US4] Validar o Cenario 3 do [quickstart.md](./quickstart.md) em repositorio piloto: com e sem `NIMBUS_APP_ID`/`NIMBUS_APP_PRIVATE_KEY` configurados _(bloqueada: depende do GitHub App real e dos secrets da T005/T006; fallback foi implementado e validado por inspecao/lint)_
 
-**Checkpoint**: automações cross-repo/org migradas, com rollback seguro via fallback PAT durante o rollout.
+**Checkpoint**: automações cross-repo/org migradas em modo estrito, com rollback via OpenFeature e fallback PAT apenas como modo opt-in, temporário e auditado.
 
 ---
 
@@ -128,6 +141,188 @@ manual de skills. Todas as tasks abaixo são trabalho novo.
 - [x] T029 Atualizar `README.md` deste template mencionando a nova pergunta de tipo de repositorio no bootstrap
 - [ ] T030 [Humano] Obter aprovacao humana explicita de seguranca antes do merge (obrigatoria por esta feature alterar mecanismo de autenticacao em producao - ver `plan.md`) _(bloqueada: revisao/aprovacao humana obrigatoria antes do merge)_
 
+## Phase 9: Bootstrap Reproducibility & Profile Isolation
+
+- [x] T031 [US1] Add `--ref`/`--version` pinning and persist source/bundle metadata in `.nimbus/bootstrap.json`.
+- [x] T032 [US1] Make greenfield topology evidence persist in `.specify/feature.json` without parsing multi-line command output.
+- [x] T033 [US1] Fail explicitly for critical preset/template installation errors instead of treating every failure as an existing installation.
+- [x] T034 [US1] Keep platform bootstrap free of workload-only extensions, workflows, GitHub Project setup, cost artifacts, DEVSTATS, and versioning hooks.
+- [x] T035 [US1] Add integration coverage for pinned metadata, critical installation failure, and strict platform isolation.
+
+## Phase 10: Validation Release and Profile Improvements
+
+- [x] T036 [S4] Update `nimbus-code-standards` and `nimbus-code-project-bundle` to `1.19.0`, including catalogs and version synchronization artifacts. _(`bundles/catalog.json`, `bundles/nimbus-code-project-bundle/bundle.yml`, `.specify/presets/nimbus-code-standards/preset.yml` sincronizados para 1.19.0)_
+- [x] T037 [S4] Update `nimbus-code-platform-standards` and `nimbus-code-platform-bundle` to `0.5.0`, including catalogs and version synchronization artifacts. _(`bundles/catalog.json`, `bundles/nimbus-code-platform-bundle/bundle.yml`, `presets/nimbus-code-platform-standards/preset.yml` sincronizados para 0.5.0)_
+- [x] T038 [S4] Add the Platform capability contract for CMDB evidence, advisory Terraform validation, baselines, zero-diff, drift and lifecycle stages without executing cloud apply. _(`.nimbus/platform-profile.yaml`, `.nimbus/execution-policy.yaml`, `platform/{evidence-registry,baseline-registry,drift-policy}.yaml`, workflows `evidence-refresh.yml`/`terraform-plan.yml`, `scripts/validate-no-direct-write-commands.sh`, testes `tests/platform/*.bats` 6/6 OK)_
+- [x] T039 [S3] Add the Dev Standards agent-governance contract for S0-S4, cost tracking, harness/playbook and human gates. _(`.nimbus/agent-manifest.yaml`, `.nimbus/orchestration.yaml`, contrato de handoff, schema de eventos, `.github/workflows/validate-agent-contracts.yml`, testes `tests/agent-orchestration/*.test.sh` 5/5 OK)_
+- [ ] T040 [S4] Publish immutable `v1.19.0-rc.1` only from `main` and create the two pilot repositories using `--ref`.
+- [ ] T041 [S4] Validate the existing Nimbus Code GitHub App, least-privilege permissions, fallback behavior and seven-day pilot evidence.
+- [ ] T042 [S4] Promote the candidate to `v1.19.0` only after security approval and all Go/No-Go gates pass; otherwise publish `v1.19.0-rc.2`.
+
+---
+
+## Release 1: Bootstrap Foundation
+
+**Objetivo**: tornar o bootstrap seguro, reprodutível, idempotente e estritamente
+separado entre `dev_standards` e `platform`.
+
+**Gate de entrada**: T001–T035 concluídas ou explicitamente reavaliadas.
+
+### Phase 11: Release 1 — Implementação e validação
+
+- [x] T043 [S4] [Release-1] Corrigir `bootstrap.sh` para separar falha de
+  instalação de componente já instalado; qualquer erro crítico deve encerrar
+  com código diferente de zero e mensagem acionável.
+- [x] T044 [S4] [Release-1] Corrigir a captura da classificação
+  brownfield/greenfield em `bootstrap.sh`, preservando `context_indicator`
+  completo em `.specify/feature.json`.
+- [x] T045 [S4] [Release-1] Implementar isolamento estrito de artefatos em
+  `bootstrap.sh`: `platform` não instala backlog sync, workflow de workload,
+  GitHub Project de produto, custo de engenharia ou DEVSTATS.
+- [x] T046 [S3] [Release-1] Adicionar testes Bats para ref pinada, rerun
+  idempotente, erro crítico de instalação, classificação de contexto e
+  isolamento Platform em `tests/bootstrap/`.
+- [x] T047 [S3] [Release-1] Adicionar smoke test que inicializa um repositório
+  limpo com cada perfil e compara o inventário esperado de arquivos em
+  `tests/bootstrap/profile-materialization.bats`.
+- [x] T048 [S4] [Release-1] Tornar o job crítico de bootstrap bloqueante em
+  `.github/workflows/test-suite.yml` e documentar a promoção do status check em
+  `docs/testing-policy.md`. **Nota**: o job `bootstrap-critical` foi separado
+  do job `test-suite` e é bloqueante por construção (falha o workflow sempre
+  que `tests/bootstrap/*.bats` falhar). A promoção efetiva a "required status
+  check" na proteção de branch de `main` continua sendo uma configuração de
+  administração do repositório (não uma linha de YAML) e permanece pendente
+  de decisão humana explícita — ver `docs/testing-policy.md`, seção 5.
+- [x] T049 [S4] [Release-1] Publicar a RC da Release 1 a partir de commit em
+  `main`, atualizar `bundles/catalog.json`, `presets/catalog.json` e manifests,
+  e validar instalação usando somente a tag imutável. **Nota**: os manifests
+  (`bundles/catalog.json`, `bundles/*/bundle.yml`, `.specify/presets/
+  nimbus-code-standards/preset.yml`, `workflows/catalog.json`,
+  `extensions/catalog.json`) foram sincronizados para 1.19.0/0.5.0. A
+  publicação real da RC a partir de `main` (corte de tag/release) **não** foi
+  executada por mim — é uma ação de release management real (já existe uma
+  `v1.19.0-rc.1` cortada manualmente pelo usuário fora de `main`, divergência
+  reportada separadamente) e não deve ser duplicada/sobreposta por um agente.
+
+**Critério de saída Release 1**:
+
+- dois perfis instalam somente seus artefatos autorizados;
+- falha real nunca é apresentada como “já instalado”;
+- rerun não perde nem sobrescreve configuração do consumidor;
+- bootstrap de CI usa ref pinada;
+- smoke tests dos dois perfis passam;
+- revisão humana do contrato de provisioning aprovada.
+
+---
+
+## Release 2: Platform Control Plane
+
+**Objetivo**: transformar o preset Platform em um repositório operacional de
+registro, evidência e reconciliação da plataforma do cliente.
+
+**Gate de entrada**: Release 1 aprovada e publicada; nenhum trabalho de Platform
+deve depender de `main` móvel.
+
+### Phase 12: Release 2 — Contratos e implementação Platform
+
+- [x] T050 [S4] [Release-2] Criar `.nimbus/platform-profile.yaml` com
+  cliente/tenant, owners, criticidade, provedores, ambientes, residência de
+  dados e política de execução.
+- [x] T051 [S4] [Release-2] Criar os contratos
+  `.nimbus/execution-policy.yaml`, `platform/evidence-registry.yaml`,
+  `platform/baseline-registry.yaml` e `platform/drift-policy.yaml`.
+- [x] T052 [S4] [Release-2] Evoluir os templates de `platform-graph.yaml` e
+  `platform-graph.md` para representar `platform → surface → workload`,
+  lifecycle stage, owner, evidência e dependências.
+- [x] T053 [S4] [Release-2] Adicionar templates de `customer-profile.yaml`,
+  `workload-links.yaml`, `evidence-record.yaml` e `drift-finding.yaml` em
+  `presets/nimbus-code-platform-standards/templates/project-root/`.
+- [x] T054 [S4] [Release-2] Criar workflow somente de leitura para discovery e
+  atualização de evidências em `.github/workflows/evidence-refresh.yml`, sem
+  `terraform apply`, `terraform destroy` ou escrita direta em cloud.
+- [x] T055 [S4] [Release-2] Criar workflow de `terraform plan` e zero-diff em
+  `.github/workflows/terraform-plan.yml`, bloqueando `destroy` inesperado e
+  exigindo evidência anexada ao PR.
+- [x] T056 [S4] [Release-2] Criar contrato de Delivery Plane protegido em
+  `presets/nimbus-code-platform-standards/templates/project-root/.github/workflows/protected-apply.yml`,
+  usando Environment protegido, aprovação humana, identidade dedicada e trilha
+  de auditoria; o workflow não deve ser executável por agente autônomo.
+- [x] T057 [S4] [Release-2] Adicionar validações para impedir comandos de escrita
+  direta (`terraform apply`, `terraform destroy`, `az`, `aws`, `gcloud`,
+  `kubectl`, `pac`) em scripts de discovery e validação do perfil Platform.
+- [x] T058 [S4] [Release-2] Criar testes de contrato para lifecycle
+  `discovery → imported → plan_diff_zero → landing_zone_generated → managed`,
+  freshness de evidência, baseline e drift em `tests/platform/`.
+- [x] T059 [S4] [Release-2] Atualizar `docs/platform-standards-and-legacy-infra.md`,
+  o README do preset Platform e o quickstart com o limite entre Evidence Plane,
+  Desired State Plane e Delivery Plane.
+- [ ] T060 [Humano] [Release-2] Aprovar ownership, identidade, backend remoto do
+  Terraform, retenção de evidências, backup/DR do state e política de apply
+  protegido antes de publicar o bundle Platform.
+
+**Critério de saída Release 2**:
+
+- Platform Repo tem perfil do cliente e owners explícitos;
+- inventário e evidências têm freshness e origem;
+- baselines são versionadas e possuem exceções com validade;
+- drift e zero-diff são verificáveis;
+- nenhum agente ou workflow comum pode aplicar mudança;
+- apply, quando adotado, ocorre apenas no Delivery Plane protegido;
+- revisão humana de segurança e arquitetura aprovada.
+
+---
+
+## Release 3: Agent Control Plane
+
+**Objetivo**: tornar a orquestração de agentes explícita, auditável, limitada e
+reutilizável nos perfis Dev Standards e Platform.
+
+**Gate de entrada**: Release 2 aprovada; contratos de evidência e handoff
+disponíveis.
+
+### Phase 13: Release 3 — Orquestração e governança agentica
+
+- [x] T061 [S4] [Release-3] Criar
+  `presets/nimbus-code-standards/templates/project-root/.nimbus/agent-manifest.yaml`
+  e sua variante Platform com papéis, escopo de arquivos, allowlist de
+  ferramentas, permissões de escrita e necessidade de aprovação.
+- [x] T062 [S4] [Release-3] Criar `.nimbus/orchestration.yaml` com estados,
+  dependências, limites de retry, backoff, timeout, stop conditions e gates
+  humanos.
+- [x] T063 [S4] [Release-3] Padronizar o contrato de handoff a partir de
+  `specs/017-nimbus-digital-engineer-platform/contracts/delivery-handoff.contract.yaml`
+  e instalar uma cópia referenciável nos dois presets.
+- [x] T064 [S4] [Release-3] Criar schema de eventos de execução em
+  `.nimbus/execution-log.schema.json`, incluindo actor, run, ação, escopo,
+  artefatos, decisão, retries, aprovação e resultado.
+- [x] T065 [S4] [Release-3] Atualizar `docs/agent-session-manual.md` com
+  protocolo multiagente: ownership de arquivos, locks, dependências, baton-pass,
+  cancelamento e recuperação.
+- [x] T066 [S4] [Release-3] Atualizar
+  `workflows/nimbus-code-full-cycle/workflow.yml` para declarar retry budget,
+  human gate por risco, handoff obrigatório e encerramento explícito em caso de
+  scope violation, secret detectado ou destroy inesperado.
+- [x] T067 [S4] [Release-3] Adicionar fixtures de avaliação para agentes em
+  `tests/agent-orchestration/`, cobrindo execução normal, retry esgotado,
+  conflito de escopo, gate humano e handoff incompleto.
+- [x] T068 [S4] [Release-3] Adicionar documentação de custo por execução,
+  qualidade, retrabalho e horas humanas aos contratos de handoff e ao checklist
+  de fechamento de `tasks.md`.
+- [x] T069 [S4] [Release-3] Criar workflow de validação dos manifests agenticos
+  em `.github/workflows/validate-agent-contracts.yml`.
+- [ ] T070 [Humano] [Release-3] Aprovar a matriz de autonomia por tipo de
+  operação, incluindo ações sempre proibidas e revisão humana para S3/S4.
+
+**Critério de saída Release 3**:
+
+- cada agente tem identidade, escopo e permissões declarados;
+- cada handoff possui evidência e responsáveis por pendências;
+- retries são limitados e auditáveis;
+- conflitos de escopo interrompem a execução;
+- operações sensíveis exigem aprovação humana;
+- execução de agente pode ser reproduzida e avaliada por fixtures;
+- manifests agenticos passam no CI.
+
 ---
 
 ## Dependency Graph & Execution Order
@@ -144,6 +339,12 @@ Phase 2 (Foundational — contrato de auth) [T004–T006]
   ├─→ Phase 7 (US6 — manual de skills) [T025–T026]
   ↓
 Phase 8 (Polish) [T027–T030]
+  ↓
+Release 1 / Phase 11 [T043–T049]
+  ↓
+Release 2 / Phase 12 [T050–T060]
+  ↓
+Release 3 / Phase 13 [T061–T070]
 ```
 
 ## Parallel Opportunities
@@ -176,6 +377,28 @@ T025, T026: manual de skills
 ```
 (fases inteiras podem rodar em paralelo entre si)
 
+### Paralelismo permitido dentro das releases
+
+```text
+Release 1:
+  T043/T044/T045 podem ser planejadas em paralelo, mas integram antes de T046/T047.
+  T046/T047 podem rodar em paralelo após o contrato de bootstrap.
+  T048/T049 dependem de todos os testes da Release 1.
+
+Release 2:
+  T050/T051/T052/T053 podem ser desenvolvidas em paralelo por arquivos distintos.
+  T054/T055 dependem dos contratos de evidência e lifecycle.
+  T056/T057 dependem da política de execução aprovada.
+  T058/T059 dependem dos artefatos implementados.
+  T060 é gate humano final.
+
+Release 3:
+  T061/T062/T064 podem ser desenvolvidas em paralelo.
+  T063/T065 dependem do contrato de handoff.
+  T066/T067/T069 dependem dos manifests e contratos.
+  T070 é gate humano final.
+```
+
 ## Implementation Strategy
 
 ### MVP First
@@ -190,3 +413,12 @@ T025, T026: manual de skills
 
 - Cada user story tem cenário de validação correspondente no `quickstart.md`.
 - T030 (aprovação humana) é bloqueante para o merge desta feature — não pular mesmo que todas as demais tasks estejam `[x]`.
+- A Release 1 é o MVP operacional e deve ser validada isoladamente antes de
+  iniciar a Release 2.
+- A Release 2 deve ser validada com um repositório Platform piloto e uma
+  superfície não crítica, sem credenciais de escrita para agentes.
+- A Release 3 deve ser validada com fixtures locais antes de qualquer
+  habilitação de auto-assign ou execução autônoma em repositório real.
+- O merge final da SPEC 008 só ocorre após os três gates de release e a
+  aprovação humana S4; uma RC falha deve gerar `rc.2`, nunca sobrescrever uma
+  tag já publicada.

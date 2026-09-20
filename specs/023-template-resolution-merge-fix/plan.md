@@ -159,7 +159,7 @@ specs/023-template-resolution-merge-fix/
 - [x] Para S3/S4: `impact-map.md` — **N/A, feature é S2**
 - [x] Nenhum módulo/serviço novo criado nesta feature está faltando no grafo
 - [x] Dependências externas (third-party, cloud) declaradas em `externals` no `graph.yaml` — `specify_cli` citado como referência de paridade, não como dependência de execução
-- [ ] Grafo será atualizado novamente após `/nimbus-code-implement` se a implementação divergir do plano
+- [x] Grafo foi revisado após a implementação; nenhuma divergência de módulo foi identificada
 
 ### Grafo do Contexto (Multi-Repo Brownfield)
 

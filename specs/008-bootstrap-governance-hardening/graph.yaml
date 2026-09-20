@@ -42,6 +42,18 @@ nodes:
     type: "documentation"
     description: "Manual de skills locais (.github/skills/) vs. remotas (VPN-SKILLS)"
 
+  - name: "validation-release-v1.19.0-rc.1"
+    type: "release"
+    description: "Ref imutável para o piloto; promove para v1.19.0 após os gates"
+
+  - name: "platform-capability-profile"
+    type: "governance-contract"
+    description: "CMDB/evidência, zero-diff, drift, baselines, lifecycle e Landing Zone/CAF"
+
+  - name: "dev-standards-agent-guardrails"
+    type: "governance-contract"
+    description: "Complexidade S0-S4, artefatos, custo, harness/playbook e gates humanos"
+
 externals:
   - name: "github-app-nimbus-bootstrap"
     type: "identity-provider"
@@ -52,6 +64,11 @@ externals:
     type: "external-tool"
     description: "Fonte oficial pública do Spec Kit CLI (github.com/github/spec-kit) — única exceção ao domínio GHE-only"
     criticality: "medium"
+
+  - name: "cmdb-and-cloud-inventory"
+    type: "platform-evidence"
+    description: "Fonte de evidências para inventário, validação advisory e reconciliação"
+    criticality: "high"
 
 dependencies:
   - from: "bootstrap.sh"
@@ -113,3 +130,21 @@ dependencies:
     pattern: "self-contained"
     authentication: "github-token-native"
     priority: "medium"
+
+  - from: "validation-release-v1.19.0-rc.1"
+    to: "nimbus-code-project-bundle"
+    pattern: "pins"
+    protocol: "git-tag"
+    priority: "critical"
+
+  - from: "validation-release-v1.19.0-rc.1"
+    to: "nimbus-code-platform-bundle"
+    pattern: "pins"
+    protocol: "git-tag"
+    priority: "critical"
+
+  - from: "nimbus-code-platform-standards"
+    to: "cmdb-and-cloud-inventory"
+    pattern: "advisory-evidence"
+    protocol: "read-only"
+    priority: "high"

@@ -1,12 +1,16 @@
-# Feature Specification: Controle de Custos
+# Feature Specification: Controle de Custos Híbrido (Tokens IA + Horas Humanas)
 
 **Feature Branch**: `010-controle-de-custos`
 
 **Created**: 2026-08-18
 
-**Status**: Draft
+**Status**: Backlog — não será executada agora
 
-**Input**: User description: "Controle de Custos"
+> Os artefatos desta spec permanecem como referência de planejamento. A
+> implementação está adiada e não deve ser iniciada por `/speckit-implement`
+> até nova priorização explícita.
+
+**Input**: User description: "Implementar o modelo de controle financeiro e orçamentário híbrido no ciclo SDD do Nimbus Code, consolidando o consumo real de tokens por fase com o registro de horas humanas investidas em revisão e refinamento via GitHub Projects."
 
 ## Nimbus-Code — Cabeçalho Obrigatório da Spec
 
@@ -217,7 +221,7 @@ sistema de controle de custos reflete o valor sem intervenção manual adicional
 - **FR-007**: O template de `plan.md` MUST incluir campos obrigatórios de estimativa de custo (tokens + horas humanas) que se integrem ao sistema de coleta.
 - **FR-008**: O sistema MUST suportar filtros por período, projeto, squad e complexidade no dashboard e nos relatórios exportáveis.
 - **FR-009**: O sistema MUST registrar, por feature, a variação entre estimativa e consumo real, tornando o dado disponível para auditoria e melhoria de processo.
-- **FR-010**: O sistema MUST [NEEDS CLARIFICATION: definir se o custo de recursos de nuvem (compute, storage) entra no escopo desta fase ou é uma fase futura].
+- **FR-010**: O MVP MUST exclude direct collection and aggregation of cloud resource costs (compute, storage, and provider billing APIs). The data model MAY reserve a future cloud-cost dimension, but the MVP MUST label it as out of scope and MUST NOT present it as collected cost.
 
 ### Key Entities *(include if feature involves data)*
 

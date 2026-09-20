@@ -1,0 +1,29 @@
+# customer-profile.yaml — cadastro organizacional do cliente/tenant.
+#
+# Use este arquivo para registrar contexto de negócio, governança e janelas de
+# decisão. Não misture aqui evidência técnica de discovery.
+
+schema_version: "1.0"
+customer_id: "cliente-frontier"
+legal_name: "Cliente Frontier S.A."
+short_name: "Frontier"
+segment: "enterprise"
+criticality: "alta" # baixa | media | alta | critica
+
+contacts:
+  executive_owner:
+    nome: "Nome do Sponsor"
+    email: "sponsor@cliente.exemplo"
+  platform_owner:
+    nome: "Nome do Owner de Plataforma"
+    email: "plataforma@cliente.exemplo"
+  security_owner:
+    nome: "Nome do Owner de Segurança"
+    email: "seguranca@cliente.exemplo"
+
+governance:
+  data_residency_country: "BR"
+  primary_timezone: "America/Sao_Paulo"
+  approved_change_windows:
+    - "sab 22:00-23:59 BRT"
+  escalation_policy_ref: "docs/runbooks/escalation.md"

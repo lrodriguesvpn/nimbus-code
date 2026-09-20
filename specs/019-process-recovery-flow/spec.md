@@ -2,15 +2,15 @@
 
 **Branch da feature**: `019-process-recovery-flow`
 **Criado em**: 2026-08-24
-**Status**: Rascunho
-**Entrada**: Descrição do usuário: "Formalizar o tratamento operacional de features Nimbus Code quando a implementacao apresentar erros funcionais ou de arquitetura apos a spec ja existir: definir quando usar clarify, quando atualizar a mesma spec/plan/tasks, quando usar converge, quando abrir uma nova spec e como documentar isso no developer guide, FAQ e constituicao, com fluxo ilustrado para BA, Dev e agente."
+**Status**: Rascunho — aguardando remediação e Go/No-Go humano
+**Entrada**: Descrição do usuário: "Formalizar o tratamento operacional de features Nimbus Code quando a implementação apresentar erros funcionais ou de arquitetura após a spec já existir: definir quando usar clarify, quando atualizar a mesma spec/plan/tasks, quando usar converge, quando abrir uma nova spec e como documentar isso no developer guide, FAQ e constituição, com fluxo ilustrado para BA, Dev e agente."
 
 ## Nimbus-Code — Cabeçalho Obrigatório da Spec
 
 | Campo | Valor |
 |---|---|
 | **Feature slug** | `019-process-recovery-flow` |
-| **Complexidade estimada** | S2 |
+| **Complexidade estimada** | S3 |
 | **Bounded Context** | `spec-kit-workflow` |
 | **PR de referência / Issue** | novo |
 | **Data alvo de entrega** | sem data |
@@ -32,13 +32,22 @@
 
 **Critério de done (alto nível):** o time consegue decidir de forma repetível quando corrigir código, quando atualizar a mesma spec, quando atualizar o mesmo plano e quando criar uma nova spec, com documentação operacional clara para Dev, BA e agente.
 
+## Clarifications
+
+### Session 2026-09-20
+
+- Q: A SPEC 019 deve ser reclassificada para S3, com `impact-map.md`, sincronização obrigatória dos templates/presets e aprovação humana antes do fechamento? → A: Sim; S3 com `impact-map.md`, paridade local/presets no mesmo PR e gate humano explícito.
+
+**Aplicação da decisão:** como a feature altera uma política organizacional distribuída, a remediação deve incluir o mapa de impacto, a atualização dos templates/presets aplicáveis e aprovação humana antes do Go/No-Go.
+
 ## Nimbus-Code — Hybrid Collaboration Model
 
 | Papel | Responsabilidades | Critério de repasse | Escalação |
 |---|---|---|---|
-| Agente | Propor fluxo de correção, atualizar documentação operacional e manter rastreabilidade entre comandos do processo | Encaminha para revisão humana quando a regra impactar governança organizacional | Comitê de arquitetura |
+| Agente | Propor fluxo de correção, atualizar documentação operacional e manter rastreabilidade entre comandos do processo | Encaminha para revisão humana quando a regra impactar governança organizacional | Architecture Board |
 | Dev | Validar consistência do processo, aplicar a regra correta em features reais e revisar mudanças na constituição | Devolve ao agente se houver lacuna documental ou ambiguidade | Tech lead |
 | Business Analyst | Confirmar que o fluxo preserva entendimento de negócio e que “nova spec vs mesma spec” está claro | Escala quando houver dúvida de escopo/valor | Product owner |
+| Platform Standards | Atualizar os presets/templates aplicáveis e produzir evidência de paridade entre a constituição local e os artefatos distribuídos | Submete o pacote ao Architecture Board antes do Go/No-Go | Architecture Board |
 
 ## Nimbus-Code — Critérios de Aceitação (formato BDD)
 
@@ -148,6 +157,8 @@ Como Business Analyst, quero saber quando um problema virou nova feature para n�
 1. **Dado** um desdobramento independente do problema original, **Quando** o time consulta a documentação, **Então** ele encontra critérios objetivos para abrir nova spec.
 2. **Dado** uma correção ainda pertencente ao mesmo recorte de valor, **Quando** o time consulta a documentação, **Então** ele encontra orientação para manter a mesma spec.
 
+**Regra de recorte de valor:** a correção permanece na mesma feature quando preserva simultaneamente o mesmo resultado de negócio, os mesmos atores/usuários e a mesma fronteira de entrega. Se qualquer uma dessas três dimensões mudar de forma independente, o processo DEVE abrir uma nova spec e registrar a decisão.
+
 ### Edge Cases
 
 - O erro foi descoberto antes de existir `plan.md`: o processo deve orientar atualização da mesma `spec.md` e só depois o planejamento.
@@ -162,10 +173,11 @@ Como Business Analyst, quero saber quando um problema virou nova feature para n�
 - **FR-002**: O processo DEVE estabelecer que `converge` não altera `spec.md` nem `plan.md`, apenas anexa tarefas em `tasks.md`.
 - **FR-003**: O processo DEVE estabelecer que ambiguidades na intenção da feature são tratadas na mesma `spec.md`, com `clarify` apenas quando necessário.
 - **FR-004**: O processo DEVE estabelecer que falhas arquiteturais com o mesmo objetivo de negócio são tratadas no mesmo `plan.md`.
-- **FR-005**: O processo DEVE definir critérios objetivos para abertura de nova spec.
+- **FR-005**: O processo DEVE definir critérios objetivos para abertura de nova spec usando o teste de recorte de valor: mudança independente no resultado de negócio, nos atores/usuários ou na fronteira de entrega exige nova spec; mudanças técnicas e refinamentos de aceite do mesmo recorte permanecem na feature atual.
 - **FR-006**: A documentação DEVE incluir um FAQ operacional cobrindo o cenário de correção de rota.
 - **FR-007**: A documentação DEVE incluir fluxos visuais para os cenários principais de decisão.
 - **FR-008**: A constituição DEVE registrar a política organizacional de idioma para artefatos de código e documentação.
+- **FR-009**: Qualquer alteração normativa na constituição ou nas instruções distribuídas pelo template DEVE ser replicada, no mesmo PR, nos templates e cópias espelho dos presets aplicáveis, com evidência de paridade; o Architecture Board DEVE aprovar o pacote antes do Go/No-Go.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -180,9 +192,9 @@ Como Business Analyst, quero saber quando um problema virou nova feature para n�
 ### Measurable Outcomes
 
 - **SC-001**: Em revisão interna, 100% dos cenários documentados devem indicar claramente se a ação correta é clarificar, replanejar, convergir ou abrir nova spec.
-- **SC-002**: Pelo menos 90% dos devs/analistas que lerem o guia devem conseguir responder corretamente a pergunta “o converge altera a spec?” sem consulta adicional.
+- **SC-002**: Como resultado pós-release, pelo menos 90% dos Devs/BAs da amostra de adoção devem responder corretamente à pergunta “o converge altera a spec?” sem consulta adicional, usando questionário padronizado, baseline registrado antes da adoção, medição entre 30 e 90 dias após a publicação e owner de governança responsável pelo registro do resultado.
 - **SC-003**: O guia deve cobrir ao menos três cenários visuais distintos: erro de implementação, erro de especificação e erro de arquitetura.
-- **SC-004**: A política de idioma deve ficar explícita em um único ponto normativo da constituição, sem depender de instrução informal em prompts.
+- **SC-004**: A política de idioma deve ficar explícita na constituição local como o único ponto normativo de cada repositório consumidor, sem depender de instrução informal em prompts; presets/templates são artefatos de distribuição versionados e devem permanecer em paridade, sem criar regras concorrentes.
 
 ## Assumptions
 

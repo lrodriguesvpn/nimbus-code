@@ -1,4 +1,4 @@
-# Feature Specification: Camada de Governanca IA Corporativa M365
+# Feature Specification: Camada de Governança de IA Corporativa M365
 
 **Feature Branch**: `002-camada-governanca-ia-corporativa-m365`
 
@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "Iniciar nova SPEC para incluir uma camada de governança para qualquer agente criado no M365 da empresa, para Microsoft 365 Copilot e M365 Copilot CoWork. A feature é documental e deve manter coerência com a constituição, com uma única constituição da empresa para toda IA. Se possível, criar um documento de como usar a mesma constituição no Claude Enterprise e ChatGPT para usuários que ainda usem essas ferramentas, deixando claro que a ferramenta oficial de IA é Microsoft Copilot e GitHub Enterprise Copilot. Incluir também aliases para usar Nimbus no Spec Kit sem alterar os comandos originais: constitution -> nimbus.constitution, specify -> nimbus.discovery, clarify -> nimbus.refinement, plan -> nimbus.plan, tasks -> nimbus.backlog, implement -> nimbus.build, analyze -> nimbus.validate, converge -> nimbus.release."
+**Input**: User description: "Estabelecer uma camada de governança centralizada para agentes criados no Microsoft 365 (Microsoft 365 Copilot e CoWork), mantendo alinhamento com uma constituição corporativa única para toda IA. Padronizar diretrizes para ferramentas legadas (Claude Enterprise e ChatGPT), ratificando Microsoft Copilot e GitHub Enterprise Copilot como ferramentas oficiais, e disponibilizar a camada de aliases Nimbus no Spec Kit."
 
 ## User Scenarios & Testing *(mandatory)*
 

@@ -47,7 +47,9 @@ pelo workflow
 
 Além disso, o gate
 [release-readiness-gate.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/release-readiness-gate.yml)
-bloqueia PR para `develop` sem classificação correta de `release:*`.
+bloqueia PR para `develop` sem classificação correta de `release:*`, mas
+auto-rotula `release:skip` para mudanças só de documentação de release e
+`release:patch` quando a PR já altera arquivos versionados + `catalog.json`.
 
 ## O PR `develop` -> `main` pode ser automático com aprovador?
 
