@@ -58,8 +58,9 @@ jobs:
             echo "token=${{ secrets.VPNDEV_PROJECT_TOKEN }}" >> "$GITHUB_OUTPUT"
             echo "::warning::Modo de migração PAT explicitamente habilitado; owner, prazo, ambiente e auditoria são obrigatórios."
           else
-            echo "::error::GitHub App não configurado; etapa cross-repo bloqueada."
-            exit 1
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "token=" >> "$GITHUB_OUTPUT"
+            echo "::warning::Nenhuma credencial de Projects configurada; automação ignorada neste repositório até definir GitHub App ou fallback PAT."
           fi
 
       - name: Descobrir URL da board deste repositório
