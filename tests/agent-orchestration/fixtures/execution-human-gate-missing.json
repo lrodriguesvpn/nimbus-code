@@ -1,0 +1,40 @@
+{
+  "event_id": "evt-gate-001",
+  "timestamp": "2026-09-20T18:15:00Z",
+  "actor": {
+    "id": "NC-Builder",
+    "type": "agent",
+    "session_id": "sess-005"
+  },
+  "run_id": "run-gate-001",
+  "phase": "NC-Builder",
+  "action": "write_s4_change_without_gate",
+  "scope": {
+    "files": [
+      "src/critical.ts"
+    ],
+    "directories": [
+      "src"
+    ],
+    "lock_id": "lock-build-002"
+  },
+  "artifacts_produced": [
+    {
+      "path": "src/critical.ts",
+      "kind": "code",
+      "checksum": "ghi789"
+    }
+  ],
+  "decision": "pending",
+  "retry_count": 0,
+  "approval": {
+    "required": true,
+    "status": "missing",
+    "approved_by": null,
+    "approved_at": null,
+    "gate_id": "security-and-build-gate"
+  },
+  "final_result": "failure",
+  "failure_reason": "missing_human_approval",
+  "notes": "S4 sem gate"
+}

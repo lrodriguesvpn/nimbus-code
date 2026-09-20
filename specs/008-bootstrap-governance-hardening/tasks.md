@@ -151,10 +151,10 @@ ser executadas em paralelo entre si.
 
 ## Phase 10: Validation Release and Profile Improvements
 
-- [ ] T036 [S4] Update `nimbus-code-standards` and `nimbus-code-project-bundle` to `1.19.0`, including catalogs and version synchronization artifacts.
-- [ ] T037 [S4] Update `nimbus-code-platform-standards` and `nimbus-code-platform-bundle` to `0.5.0`, including catalogs and version synchronization artifacts.
-- [ ] T038 [S4] Add the Platform capability contract for CMDB evidence, advisory Terraform validation, baselines, zero-diff, drift and lifecycle stages without executing cloud apply.
-- [ ] T039 [S3] Add the Dev Standards agent-governance contract for S0-S4, cost tracking, harness/playbook and human gates.
+- [x] T036 [S4] Update `nimbus-code-standards` and `nimbus-code-project-bundle` to `1.19.0`, including catalogs and version synchronization artifacts. _(`bundles/catalog.json`, `bundles/nimbus-code-project-bundle/bundle.yml`, `.specify/presets/nimbus-code-standards/preset.yml` sincronizados para 1.19.0)_
+- [x] T037 [S4] Update `nimbus-code-platform-standards` and `nimbus-code-platform-bundle` to `0.5.0`, including catalogs and version synchronization artifacts. _(`bundles/catalog.json`, `bundles/nimbus-code-platform-bundle/bundle.yml`, `presets/nimbus-code-platform-standards/preset.yml` sincronizados para 0.5.0)_
+- [x] T038 [S4] Add the Platform capability contract for CMDB evidence, advisory Terraform validation, baselines, zero-diff, drift and lifecycle stages without executing cloud apply. _(`.nimbus/platform-profile.yaml`, `.nimbus/execution-policy.yaml`, `platform/{evidence-registry,baseline-registry,drift-policy}.yaml`, workflows `evidence-refresh.yml`/`terraform-plan.yml`, `scripts/validate-no-direct-write-commands.sh`, testes `tests/platform/*.bats` 6/6 OK)_
+- [x] T039 [S3] Add the Dev Standards agent-governance contract for S0-S4, cost tracking, harness/playbook and human gates. _(`.nimbus/agent-manifest.yaml`, `.nimbus/orchestration.yaml`, contrato de handoff, schema de eventos, `.github/workflows/validate-agent-contracts.yml`, testes `tests/agent-orchestration/*.test.sh` 5/5 OK)_
 - [ ] T040 [S4] Publish immutable `v1.19.0-rc.1` only from `main` and create the two pilot repositories using `--ref`.
 - [ ] T041 [S4] Validate the existing Nimbus Code GitHub App, least-privilege permissions, fallback behavior and seven-day pilot evidence.
 - [ ] T042 [S4] Promote the candidate to `v1.19.0` only after security approval and all Go/No-Go gates pass; otherwise publish `v1.19.0-rc.2`.
@@ -225,35 +225,35 @@ deve depender de `main` móvel.
 
 ### Phase 12: Release 2 — Contratos e implementação Platform
 
-- [ ] T050 [S4] [Release-2] Criar `.nimbus/platform-profile.yaml` com
+- [x] T050 [S4] [Release-2] Criar `.nimbus/platform-profile.yaml` com
   cliente/tenant, owners, criticidade, provedores, ambientes, residência de
   dados e política de execução.
-- [ ] T051 [S4] [Release-2] Criar os contratos
+- [x] T051 [S4] [Release-2] Criar os contratos
   `.nimbus/execution-policy.yaml`, `platform/evidence-registry.yaml`,
   `platform/baseline-registry.yaml` e `platform/drift-policy.yaml`.
-- [ ] T052 [S4] [Release-2] Evoluir os templates de `platform-graph.yaml` e
+- [x] T052 [S4] [Release-2] Evoluir os templates de `platform-graph.yaml` e
   `platform-graph.md` para representar `platform → surface → workload`,
   lifecycle stage, owner, evidência e dependências.
-- [ ] T053 [S4] [Release-2] Adicionar templates de `customer-profile.yaml`,
+- [x] T053 [S4] [Release-2] Adicionar templates de `customer-profile.yaml`,
   `workload-links.yaml`, `evidence-record.yaml` e `drift-finding.yaml` em
   `presets/nimbus-code-platform-standards/templates/project-root/`.
-- [ ] T054 [S4] [Release-2] Criar workflow somente de leitura para discovery e
+- [x] T054 [S4] [Release-2] Criar workflow somente de leitura para discovery e
   atualização de evidências em `.github/workflows/evidence-refresh.yml`, sem
   `terraform apply`, `terraform destroy` ou escrita direta em cloud.
-- [ ] T055 [S4] [Release-2] Criar workflow de `terraform plan` e zero-diff em
+- [x] T055 [S4] [Release-2] Criar workflow de `terraform plan` e zero-diff em
   `.github/workflows/terraform-plan.yml`, bloqueando `destroy` inesperado e
   exigindo evidência anexada ao PR.
-- [ ] T056 [S4] [Release-2] Criar contrato de Delivery Plane protegido em
+- [x] T056 [S4] [Release-2] Criar contrato de Delivery Plane protegido em
   `presets/nimbus-code-platform-standards/templates/project-root/.github/workflows/protected-apply.yml`,
   usando Environment protegido, aprovação humana, identidade dedicada e trilha
   de auditoria; o workflow não deve ser executável por agente autônomo.
-- [ ] T057 [S4] [Release-2] Adicionar validações para impedir comandos de escrita
+- [x] T057 [S4] [Release-2] Adicionar validações para impedir comandos de escrita
   direta (`terraform apply`, `terraform destroy`, `az`, `aws`, `gcloud`,
   `kubectl`, `pac`) em scripts de discovery e validação do perfil Platform.
-- [ ] T058 [S4] [Release-2] Criar testes de contrato para lifecycle
+- [x] T058 [S4] [Release-2] Criar testes de contrato para lifecycle
   `discovery → imported → plan_diff_zero → landing_zone_generated → managed`,
   freshness de evidência, baseline e drift em `tests/platform/`.
-- [ ] T059 [S4] [Release-2] Atualizar `docs/platform-standards-and-legacy-infra.md`,
+- [x] T059 [S4] [Release-2] Atualizar `docs/platform-standards-and-legacy-infra.md`,
   o README do preset Platform e o quickstart com o limite entre Evidence Plane,
   Desired State Plane e Delivery Plane.
 - [ ] T060 [Humano] [Release-2] Aprovar ownership, identidade, backend remoto do
@@ -282,33 +282,33 @@ disponíveis.
 
 ### Phase 13: Release 3 — Orquestração e governança agentica
 
-- [ ] T061 [S4] [Release-3] Criar
+- [x] T061 [S4] [Release-3] Criar
   `presets/nimbus-code-standards/templates/project-root/.nimbus/agent-manifest.yaml`
   e sua variante Platform com papéis, escopo de arquivos, allowlist de
   ferramentas, permissões de escrita e necessidade de aprovação.
-- [ ] T062 [S4] [Release-3] Criar `.nimbus/orchestration.yaml` com estados,
+- [x] T062 [S4] [Release-3] Criar `.nimbus/orchestration.yaml` com estados,
   dependências, limites de retry, backoff, timeout, stop conditions e gates
   humanos.
-- [ ] T063 [S4] [Release-3] Padronizar o contrato de handoff a partir de
+- [x] T063 [S4] [Release-3] Padronizar o contrato de handoff a partir de
   `specs/017-nimbus-digital-engineer-platform/contracts/delivery-handoff.contract.yaml`
   e instalar uma cópia referenciável nos dois presets.
-- [ ] T064 [S4] [Release-3] Criar schema de eventos de execução em
+- [x] T064 [S4] [Release-3] Criar schema de eventos de execução em
   `.nimbus/execution-log.schema.json`, incluindo actor, run, ação, escopo,
   artefatos, decisão, retries, aprovação e resultado.
-- [ ] T065 [S4] [Release-3] Atualizar `docs/agent-session-manual.md` com
+- [x] T065 [S4] [Release-3] Atualizar `docs/agent-session-manual.md` com
   protocolo multiagente: ownership de arquivos, locks, dependências, baton-pass,
   cancelamento e recuperação.
-- [ ] T066 [S4] [Release-3] Atualizar
+- [x] T066 [S4] [Release-3] Atualizar
   `workflows/nimbus-code-full-cycle/workflow.yml` para declarar retry budget,
   human gate por risco, handoff obrigatório e encerramento explícito em caso de
   scope violation, secret detectado ou destroy inesperado.
-- [ ] T067 [S4] [Release-3] Adicionar fixtures de avaliação para agentes em
+- [x] T067 [S4] [Release-3] Adicionar fixtures de avaliação para agentes em
   `tests/agent-orchestration/`, cobrindo execução normal, retry esgotado,
   conflito de escopo, gate humano e handoff incompleto.
-- [ ] T068 [S4] [Release-3] Adicionar documentação de custo por execução,
+- [x] T068 [S4] [Release-3] Adicionar documentação de custo por execução,
   qualidade, retrabalho e horas humanas aos contratos de handoff e ao checklist
   de fechamento de `tasks.md`.
-- [ ] T069 [S4] [Release-3] Criar workflow de validação dos manifests agenticos
+- [x] T069 [S4] [Release-3] Criar workflow de validação dos manifests agenticos
   em `.github/workflows/validate-agent-contracts.yml`.
 - [ ] T070 [Humano] [Release-3] Aprovar a matriz de autonomia por tipo de
   operação, incluindo ações sempre proibidas e revisão humana para S3/S4.

@@ -1,0 +1,119 @@
+schema_version: "1.0"
+manifest:
+  id: "nimbus-agent-control-plane"
+  profile: "platform"
+  description: >
+    Manifesto de identidade, escopo e autonomia do esquadrão NC-* para
+    repositórios que usam o preset nimbus-code-platform-standards.
+  source_of_truth:
+    - "specs/017-nimbus-digital-engineer-platform/spec.md"
+    - "specs/018-nimbus-agent-intake/spec.md"
+    - "docs/agent-session-manual.md"
+    - ".specify/memory/constitution.md"
+  approval_matrix_by_complexity:
+    S0:
+      human_approval_before_action: false
+      rationale: "Documentação operacional pode seguir sem gate prévio."
+    S1:
+      human_approval_before_action: false
+      rationale: "Leituras e ajustes locais de baixo risco seguem autônomos."
+    S2:
+      human_approval_before_action: true
+      rationale: "Mudanças em ativos de plataforma exigem validação humana prévia."
+    S3:
+      human_approval_before_action: true
+      rationale: "Integrações e reconciliações de plataforma nunca avançam sem gate."
+    S4:
+      human_approval_before_action: true
+      rationale: "Mudanças críticas de arquitetura, segurança ou legado exigem gate obrigatório."
+  stop_conditions:
+    - "scope_violation"
+    - "secret_detected"
+    - "unexpected_destroy_command"
+    - "missing_human_approval"
+    - "conflicting_scope_lock"
+  platform_guardrails:
+    write_mode: "observation-first"
+    destructive_commands_forbidden: ["terraform apply", "terraform destroy", "az", "aws", "gcloud", "kubectl", "pac"]
+  roles:
+    - id: "NC-Intake"
+      name: "Nimbus Intake Specialist"
+      layer: "discovery"
+      write_permission: "read-write"
+      allowed_file_scope: ["specs/*/interview.md", "specs/*/checklists/*.md", "docs/platform-*.md"]
+      tool_allowlist: ["view", "rg", "glob", "bash", "sql", "skill:nc-intake"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S2"
+    - id: "NC-Spec"
+      name: "Nimbus Spec Architect"
+      layer: "discovery"
+      write_permission: "read-write"
+      allowed_file_scope: ["specs/*/spec.md", "specs/*/contracts/**", "specs/*/quickstart.md", "specs/*/data-model.md"]
+      tool_allowlist: ["view", "rg", "glob", "bash", "apply_patch", "skill:nc-spec"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S2"
+    - id: "NC-Critic"
+      name: "Nimbus Spec Auditor"
+      layer: "discovery"
+      write_permission: "read-write"
+      allowed_file_scope: ["specs/*/spec.md", "specs/*/checklists/*.md", "specs/*/clarifications.md"]
+      tool_allowlist: ["view", "rg", "glob", "bash", "apply_patch", "skill:nc-critic"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S2"
+    - id: "NC-Governor"
+      name: "Nimbus Governance Gate"
+      layer: "governance"
+      write_permission: "read-write"
+      allowed_file_scope: ["specs/*/plan.md", "specs/*/tasks.md", "specs/*/graph.yaml", "specs/*/graph.md", "specs/*/impact-map.md", "specs/*/retro.md"]
+      tool_allowlist: ["view", "rg", "glob", "bash", "sql", "apply_patch", "skill:nc-governor"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S2"
+    - id: "NC-Arch"
+      name: "Nimbus Solution Architect"
+      layer: "architecture"
+      write_permission: "read-write"
+      allowed_file_scope: ["specs/*/plan.md", "specs/*/graph.yaml", "specs/*/graph.md", "specs/*/impact-map.md", "docs/platform-standards-and-legacy-infra.md", "landing-zone/**"]
+      tool_allowlist: ["view", "rg", "glob", "bash", "apply_patch", "skill:nc-arch"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S2"
+    - id: "NC-Shield"
+      name: "Nimbus DevSecOps Guardian"
+      layer: "security"
+      write_permission: "read-write"
+      allowed_file_scope: ["docs/security-*.md", "docs/platform-standards-and-legacy-infra.md", ".github/workflows/**", "workflows/**", "infrastructure/**", "policy-baselines/**"]
+      tool_allowlist: ["view", "rg", "glob", "bash", "apply_patch", "skill:nc-shield"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S2"
+    - id: "NC-QA"
+      name: "Nimbus Test Strategist"
+      layer: "quality"
+      write_permission: "read-write"
+      allowed_file_scope: ["tests/platform/**", "tests/agent-orchestration/**", "specs/*/tasks.md", "specs/*/quickstart.md", "specs/*/contracts/**"]
+      tool_allowlist: ["view", "rg", "glob", "bash", "apply_patch", "skill:nc-qa"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S2"
+    - id: "NC-Builder"
+      name: "Nimbus Autonomous Builder"
+      layer: "delivery"
+      write_permission: "read-write"
+      allowed_file_scope: ["landing-zone/**", "docs/platform-standards-and-legacy-infra.md", "platform/**", "scripts/**", "tests/platform/**", "specs/*/tasks.md"]
+      tool_allowlist: ["view", "rg", "glob", "bash", "apply_patch", "skill:nc-builder"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S2"
+    - id: "NC-Telemetry"
+      name: "Nimbus Observability & SRE"
+      layer: "telemetry"
+      write_permission: "read-write"
+      allowed_file_scope: ["docs/ai-code-quality-and-observability.md", "docs/playbooks/**", "docs/harness/**", "tests/platform/**", "scripts/process-metrics-report.sh"]
+      tool_allowlist: ["view", "rg", "glob", "bash", "apply_patch", "skill:nc-telemetry"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S2"

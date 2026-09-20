@@ -1,100 +1,88 @@
-# platform-graph.yaml — Grafo de Plataforma (nível 1 do grafo de 2 níveis)
+# platform-graph.yaml — grafo estruturado de plataforma/superfície/workload.
 #
-# OBRIGATÓRIO neste repositório de plataforma/cliente. Diferente do
-# graph.yaml de um repositório de workload (que modela módulos de código),
-# este arquivo modela PLATAFORMAS e suas SUPERFÍCIES: contas/assinaturas
-# cloud, tenants, redes hub, políticas compartilhadas, ambientes D365 — e
-# quais repositórios de workload dependem de cada uma.
+# Fonte de verdade do relacionamento entre:
+#   plataforma -> superfície compartilhada -> workload consumidor
 #
-# Estrutura:
-#   client         — cliente/tenant que este repositório representa
-#   version        — incrementar a cada atualização estrutural
-#   platforms[]    — plataformas do cliente (uma por conta/assinatura/tenant)
-#     platform_id           — slug único dentro deste repositório
-#     cloud                 — azure | aws | gcp | gws | m365 | d365
-#     account_ref           — subscription_id / account_id / project_id / tenant_id
-#     environment           — prod | hml | dev
-#     iac_lifecycle_stage   — discovery | imported | plan_diff_zero | landing_zone_generated | managed
-#       discovery              : Nimbus Discovery executado, grafo gerado, nenhum IaC ainda
-#       imported               : aztfexport/terraformer rodou, código gerado, plan ainda tem diff
-#       plan_diff_zero         : terraform plan reportou 0/0/0 entre código e ambiente real
-#       landing_zone_generated : Landing Zone + CAF gerado/atualizado para esta plataforma
-#       managed                : gestão contínua com drift-check ativo
-#     discovery_report_ref  — caminho para nimbus-discovery-report.md desta plataforma
-#     landing_zone_ref      — caminho para landing-zone/<platform-id>/design.md
-#     surfaces[]    — superfícies de plataforma dentro desta plataforma
-#       iac_status  — nao_iniciado | parcial | completo (completo == zero-diff confirmado)
+# Campos mínimos obrigatórios por plataforma:
+#   - platform_id
+#   - lifecycle_stage
+#   - owner
+#   - evidence
+#   - surfaces[]
+#   - workloads[]
 #
-# IMPORTANTE: iac_lifecycle_stage é do CONJUNTO da plataforma; iac_status é
-# por superfície individual. Uma plataforma só avança de fase quando TODAS as
-# superfícies críticas atingirem o critério de saída da fase atual.
+# Lifecycle oficial:
+#   discovery -> imported -> plan_diff_zero -> landing_zone_generated -> managed
 
-client: "<nome-do-cliente-ou-tenant>"   # ex.: Venha Pra Nuvem (piloto interno)
-version: 2
+schema_version: "1.0"
+client:
+  id: "cliente-frontier"
+  display_name: "Cliente Frontier"
+  primary_owner: "plataforma@cliente.exemplo"
+  execution_policy_ref: ".nimbus/execution-policy.yaml"
 updated_at: "YYYY-MM-DD"
 
 platforms:
   - platform_id: "azure-prod"
-    cloud: "azure"                        # azure | aws | gcp | gws | m365 | d365
-    account_ref:
-      subscription_id: "<subscription-id>"
-      tenant_id: "<tenant-id>"
-    environment: "prod"                   # prod | hml | dev
-    iac_lifecycle_stage: "discovery"      # discovery | imported | plan_diff_zero | landing_zone_generated | managed
-    discovery_report_ref: "specs/<feature-slug>/nimbus-discovery-report.md"   # preencher após fase discovery
-    landing_zone_ref: "landing-zone/azure-prod/design.md"                     # preencher após fase landing_zone_generated
-    description: "Assinatura Azure de produção do cliente"
-
+    display_name: "Azure Produção"
+    provider: "azure" # azure | aws | gcp | gws | m365 | d365
+    environment: "prod"
+    lifecycle_stage: "discovery"
+    owner:
+      team: "plataforma"
+      contact: "plataforma@cliente.exemplo"
+    evidence:
+      latest_ref: "platform/evidence-registry.yaml#ev-azure-prod-plan-2026-09-20"
+      freshness_hours: 24
+      discovery_report_ref: "specs/<feature-slug>/nimbus-discovery-report.md"
+    depends_on: []
     surfaces:
-      - id: "azure-hub-network"
-        type: "network"                   # network | identity | policy | database | tenant-config | environment
-        resource_ref: "<subscription-id>/<resource-group>/<nome>"
-        iac_status: "parcial"             # nao_iniciado | parcial | completo
-        reconciliation:
-          tool: "terraform plan"
-          last_checked: "YYYY-MM-DD"
-          diff_zero: false
-        criticality: "high"               # high | medium | low
-        dependents: ["workload-repo-a", "workload-repo-b"]
-        description: "VNet hub compartilhada, DNS privado e firewall central"
-
-      # Remover os exemplos acima e adicionar as superfícies reais desta plataforma
+      - surface_id: "azure-hub-network"
+        display_name: "Hub Network"
+        type: "network"
+        owner:
+          team: "network"
+          contact: "network@cliente.exemplo"
+        evidence:
+          latest_ref: "platform/evidence-registry.yaml#ev-azure-prod-plan-2026-09-20"
+          baseline_ref: "platform/baseline-registry.yaml#bl-azure-hub-network"
+        depends_on: []
+    workloads:
+      - workload_id: "repo-aplicacao-a"
+        repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/repo-aplicacao-a"
+        owner: "time-aplicacao-a@cliente.exemplo"
+        depends_on:
+          - surface_id: "azure-hub-network"
+            reason: "egresso e DNS privado"
 
   - platform_id: "m365-tenant-prod"
-    cloud: "m365"
-    account_ref:
-      tenant_id: "<tenant-id>"
+    display_name: "M365 Produção"
+    provider: "m365"
     environment: "prod"
-    iac_lifecycle_stage: "discovery"
-    discovery_report_ref: null
-    landing_zone_ref: "landing-zone/m365-tenant-prod/design.md"
-    description: "Tenant Microsoft 365 de produção do cliente"
-
+    lifecycle_stage: "imported"
+    owner:
+      team: "workplace"
+      contact: "workplace@cliente.exemplo"
+    evidence:
+      latest_ref: "platform/evidence-registry.yaml#ev-m365-baseline-2026-09-20"
+      freshness_hours: 24
+      discovery_report_ref: "specs/<feature-slug>/nimbus-discovery-report.md"
+    depends_on: []
     surfaces:
-      - id: "m365-conditional-access-baseline"
+      - surface_id: "m365-conditional-access-baseline"
+        display_name: "Conditional Access Baseline"
         type: "policy"
-        resource_ref: "tenant:<tenant-id>/conditional-access"
-        iac_status: "nao_iniciado"
-        reconciliation:
-          tool: "Test-M365DSCConfiguration"
-          last_checked: null
-          diff_zero: false
-        criticality: "high"
-        dependents: []
-        description: "Baseline de Conditional Access do tenant M365 — ainda não capturado como config-as-code"
-
-      # Remover os exemplos acima e adicionar as superfícies reais desta plataforma
-
-  # Adicionar mais plataformas conforme descobertas (AWS, GCP, GWS, D365 etc.)
-  # Um cliente pode ter múltiplas plataformas — cada uma é uma entrada aqui.
-
-legacy_systems:
-  - id: "<sistema-legado-exemplo>"
-    platform_id: "azure-prod"            # referência à plataforma onde reside
-    environment: "prod"
-    has_terraform: false
-    schema_registry_ref: "db-schema-registry.md#<sistema>"
-    owning_workload_repo: null            # preencher quando um projeto nascer para mexer nele
-    notes: "Aguardando aztfexport + validação de zero-diff antes de classificar iac_status"
-
-  # Remover o exemplo acima e adicionar os sistemas legados reais (ou deixar vazio: [])
+        owner:
+          team: "identity"
+          contact: "identity@cliente.exemplo"
+        evidence:
+          latest_ref: "platform/evidence-registry.yaml#ev-m365-baseline-2026-09-20"
+          baseline_ref: "platform/baseline-registry.yaml#bl-m365-ca"
+        depends_on: []
+    workloads:
+      - workload_id: "repo-colaboracao"
+        repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/repo-colaboracao"
+        owner: "time-colaboracao@cliente.exemplo"
+        depends_on:
+          - surface_id: "m365-conditional-access-baseline"
+            reason: "políticas de acesso e identidade"

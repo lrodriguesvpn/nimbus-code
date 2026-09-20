@@ -1,0 +1,138 @@
+name: Terraform Plan Zero Diff
+
+on:
+  pull_request:
+    paths:
+      - "**/*.tf"
+      - "**/*.tfvars"
+      - ".nimbus/**"
+      - "platform/**"
+      - ".github/workflows/terraform-plan.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  terraform-plan:
+    name: Validar zero-diff e evidência de plan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Validar guardrail de somente-leitura
+        run: |
+          bash scripts/validate-no-direct-write-commands.sh \
+            .github/workflows/terraform-plan.yml \
+            .github/workflows/evidence-refresh.yml \
+            scripts/validate-no-direct-write-commands.sh
+
+      - name: Preparar diretório de evidência
+        run: mkdir -p artifacts/terraform-plan
+
+      - name: Executar terraform plan (opcional)
+        id: plan
+        shell: bash
+        env:
+          NIMBUS_TERRAFORM_DIR: "."
+        run: |
+          set -euo pipefail
+          if ! find "$NIMBUS_TERRAFORM_DIR" -maxdepth 2 -name '*.tf' | grep -q .; then
+            echo "plan_exit_code=0" >> "$GITHUB_OUTPUT"
+            echo "destroy_count=0" >> "$GITHUB_OUTPUT"
+            echo "has_config=false" >> "$GITHUB_OUTPUT"
+            echo "Nenhum arquivo Terraform encontrado no diretório configurado." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          pushd "$NIMBUS_TERRAFORM_DIR" >/dev/null
+          terraform init -input=false
+          plan_exit=0
+          terraform plan -lock=false -input=false -no-color -out=nimbus.tfplan || plan_exit=$?
+          if [ "$plan_exit" -ne 0 ] && [ "$plan_exit" -ne 2 ]; then
+            exit "$plan_exit"
+          fi
+          terraform show -json nimbus.tfplan > "$GITHUB_WORKSPACE/artifacts/terraform-plan/tfplan.json"
+          terraform show -no-color nimbus.tfplan > "$GITHUB_WORKSPACE/artifacts/terraform-plan/tfplan.txt"
+          popd >/dev/null
+
+          python3 - <<'PY' > artifacts/terraform-plan/summary.json
+          import json
+          from pathlib import Path
+          plan = json.loads(Path('artifacts/terraform-plan/tfplan.json').read_text())
+          changes = plan.get('resource_changes', [])
+          destroys = []
+          for change in changes:
+              actions = change.get('change', {}).get('actions', [])
+              if 'delete' in actions:
+                  destroys.append({'address': change.get('address'), 'actions': actions})
+          summary = {
+              'resource_change_count': len(changes),
+              'destroy_count': len(destroys),
+              'destroys': destroys,
+          }
+          print(json.dumps(summary, indent=2))
+          PY
+          destroy_count=$(python3 - <<'PY'
+          import json
+          from pathlib import Path
+          summary = json.loads(Path('artifacts/terraform-plan/summary.json').read_text())
+          print(summary['destroy_count'])
+          PY
+          )
+          echo "plan_exit_code=$plan_exit" >> "$GITHUB_OUTPUT"
+          echo "destroy_count=$destroy_count" >> "$GITHUB_OUTPUT"
+          echo "has_config=true" >> "$GITHUB_OUTPUT"
+
+      - name: Resumir resultado do plan
+        if: steps.plan.outputs.has_config == 'true'
+        run: |
+          echo "## Resultado do terraform plan" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Exit code: ${{ steps.plan.outputs.plan_exit_code }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Destroys detectados: ${{ steps.plan.outputs.destroy_count }}" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ steps.plan.outputs.plan_exit_code }}" = "0" ]; then
+            echo "- Zero-diff confirmado." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- Zero-diff NÃO confirmado; revisar evidência anexada." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Anexar evidência do plan
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan-evidence
+          path: artifacts/terraform-plan
+          if-no-files-found: warn
+
+      - name: Comentar evidência no PR
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr comment "${{ github.event.pull_request.number }}" --body-file - <<'EOF'
+          ## Terraform plan — evidência anexada
+          - Artifact: `terraform-plan-evidence`
+          - Zero-diff: `${{ steps.plan.outputs.plan_exit_code == '0' && 'sim' || 'não' }}`
+          - Destroys detectados: `${{ steps.plan.outputs.destroy_count }}`
+
+          Este workflow é somente de validação. Mudança real não pode nascer aqui.
+          EOF
+
+      - name: Bloquear destroy inesperado
+        if: steps.plan.outputs.destroy_count != '0'
+        run: |
+          echo "Foram detectados destroys no plan. O PR está bloqueado até revisão e correção." >&2
+          exit 1
+
+      - name: Exigir zero-diff
+        if: steps.plan.outputs.has_config == 'true' && steps.plan.outputs.plan_exit_code != '0'
+        run: |
+          echo "O plan apresentou diferenças. Zero-diff é obrigatório antes de avançar o lifecycle." >&2
+          exit 1
