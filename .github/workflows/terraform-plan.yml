@@ -116,7 +116,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh pr comment "${{ github.event.pull_request.number }}" --body-file - <<'EOF'
+          export GH_HOST="${GITHUB_SERVER_URL#https://}"
+          export GH_HOST="${GH_HOST#http://}"
+          gh pr comment "${{ github.event.pull_request.number }}" --repo "${GITHUB_REPOSITORY}" --body-file - <<'EOF'
           ## Terraform plan — evidência anexada
           - Artifact: `terraform-plan-evidence`
           - Zero-diff: `${{ steps.plan.outputs.plan_exit_code == '0' && 'sim' || 'não' }}`
