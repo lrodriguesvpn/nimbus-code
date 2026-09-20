@@ -48,7 +48,8 @@ jobs:
     name: Emitir payload para DEVSTATS
     runs-on: ubuntu-latest
     steps:
-      - name: Verificar habilitação da integração
+      - name: Verificar habilitação e configuração da integração
+        id: gate
         run: |
           ENABLED="${{ vars.DEVSTATS_ENABLED }}"
           if [ -z "$ENABLED" ]; then
@@ -59,19 +60,12 @@ jobs:
             echo "skip=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-        id: gate
-
-      - name: Validar configuração obrigatória
-        if: steps.gate.outputs.skip != 'true'
-        run: |
-          if [ -z "${{ vars.DEVSTATS_ENDPOINT }}" ]; then
-            echo "::error::Variable DEVSTATS_ENDPOINT não configurada no nível organizacional."
-            exit 1
+          if [ -z "${{ vars.DEVSTATS_ENDPOINT }}" ] || [ -z "${{ secrets.DEVSTATS_TOKEN }}" ]; then
+            echo "::warning::DEVSTATS_ENDPOINT ou DEVSTATS_TOKEN não configurados no nível organizacional. Integração opcional desabilitada — pulando emissão de forma segura."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
-          if [ -z "${{ secrets.DEVSTATS_TOKEN }}" ]; then
-            echo "::error::Secret DEVSTATS_TOKEN não configurado no nível organizacional."
-            exit 1
-          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
 
       - name: Montar payload canônico
         if: steps.gate.outputs.skip != 'true'
