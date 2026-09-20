@@ -2,11 +2,8 @@
 
 **Feature Branch**: `018-nimbus-agent-intake`
 **Created**: 2026-08-24
-**Status**: Backlog — não será executada agora
+**Status**: Ready for Implementation (Planejada para Release v1.19 / RC1)
 
-> Os artefatos desta spec permanecem como referência de planejamento. A
-> implementação está adiada e não deve ser iniciada por `/speckit-implement`
-> até nova priorização explícita.
 **Input**: User description: "Definir a especificação do Nimbus Agent para atuar como assistente de dúvidas operacionais do processo Nimbus Code e gerador de intake direto de novos projetos a partir de transcrições e reuniões de descoberta, estruturando a cadeia agêntica de descoberta (NC-Intake, NC-Spec, NC-Critic, NC-Governor) integrada à plataforma de engenharia digital."
 
 ## Nimbus-Code — Cabeçalho Obrigatório da Spec

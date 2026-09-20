@@ -1,9 +1,6 @@
 # Implementation Plan: Nimbus Agent Process Q&A and Direct Intake
 
-> **Backlog:** este plano está preservado para referência, mas a implementação
-> da SPEC 018 está adiada e não deve ser iniciada neste ciclo.
-
-**Branch**: `018-nimbus-agent-intake` | **Date**: 2026-09-20 | **Spec**: [spec.md](./spec.md)
+**Branch**: `018-nimbus-agent-intake` | **Date**: 2026-09-20 | **Spec**: [spec.md](./spec.md) | **Status**: Active (Ready for Execution in v1.19 / RC1)
 
 ## Summary
 

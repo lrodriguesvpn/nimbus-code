@@ -1,7 +1,8 @@
 # Tasks: Nimbus Agent Process Q&A and Direct Intake
 
-> **Backlog:** estas tarefas não serão executadas agora. Retomar somente após
-> nova priorização e revisão dos achados documentais.
+**Input**: Design docs from `specs/018-nimbus-agent-intake/`  
+**Prerequisites**: `plan.md` ✅, `spec.md` ✅, `research.md` ✅, `data-model.md` ✅, `contracts/` ✅, `quickstart.md` ✅, `graph.yaml` ✅, `graph.md` ✅, `impact-map.md` ✅  
+**Status**: Ready for Implementation (Release v1.19 / RC1)
 
 ## Phase 1: Foundation
 
