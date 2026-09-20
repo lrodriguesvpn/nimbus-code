@@ -71,6 +71,7 @@
 
 - [x] T017 [P] [US3] Atualizar `bootstrap.sh` para fazer o handoff explícito do fluxo multirepo para a definição de domínios após a primeira spec estrutural
 - [x] T018 [US3] Implementar em `docs/developer-guide.md` a sugestão da baseline FRONT/BACK/DESIGN/DATA/JOBS na orientação pós-primeira-spec, exigindo justificativa e ownership explícitos em domínios adaptados
+- [x] T019 [P] [US3] Atualizar `docs/bounded-contexts.yaml` para registrar a baseline adaptável e a exigência de ownership por domínio
 - [x] T020 [P] [US3] Atualizar `README.md` com a recomendação de baseline de domínios satélite e o momento correto de aplicação em projetos greenfield multirepo
 - [x] T021 [US3] Sincronizar `specs/020-satellite-repo-governance/research.md`, `specs/020-satellite-repo-governance/data-model.md` e `specs/020-satellite-repo-governance/contracts/topology-intake.contract.md` com a regra final de baseline adaptável, formato mínimo de justificativa e definição de ownership
 - [x] T022 [US3] Validar US3 contra AC-4, AC-5, FR-004, FR-005, FR-006 e SC-003 em `specs/020-satellite-repo-governance/quickstart.md`
@@ -87,7 +88,7 @@
 - [x] T024 [US4] Atualizar `docs/bounded-contexts.yaml` com a formulação final da política “specs só no repo central”
 - [x] T025 [P] [US4] Atualizar `README.md` para refletir o papel do repo central versus satélites no onboarding greenfield
 - [x] T026 [US4] Atualizar `templates/BROWNFIELD-SETUP-CHECKLIST.md` para evitar que o fluxo brownfield sugira `specs/` locais em satélites
-- [x] T027 [US4] Validar US4 contra AC-6, FR-007 e FR-008 em `specs/020-satellite-repo-governance/quickstart.md`
+- [ ] T027 [US4] Obter aprovação humana da regra “specs só no repo central” contra AC-6, FR-007 e FR-008 em `specs/020-satellite-repo-governance/quickstart.md`
 
 ---
 
@@ -111,7 +112,8 @@
 - [x] T032 [P] Consolidar a consistência terminológica e a separação FR-011 entre governança permanente e bugfix operacional em `bootstrap.sh`, `README.md`, `docs/developer-guide.md`, `docs/bounded-contexts.yaml` e `templates/BROWNFIELD-SETUP-CHECKLIST.md`
 - [x] T033 [P] Atualizar `specs/020-satellite-repo-governance/plan.md`, `specs/020-satellite-repo-governance/graph.yaml`, `specs/020-satellite-repo-governance/graph.md` e `specs/020-satellite-repo-governance/impact-map.md` para refletir a implementação final
 - [x] T034 Adicionar entrada reutilizável de governança greenfield multi-repo em `docs/reuse-catalog.yaml`
-- [x] T035 Executar a validação final dos cenários AC-1 a AC-7 e da separação FR-011 em `specs/020-satellite-repo-governance/quickstart.md`
+- [ ] T035 Obter Go/No-Go humano para os cenários AC-1 a AC-7 e a separação FR-011 em `specs/020-satellite-repo-governance/quickstart.md`
+- [ ] T045 Definir o plano de adoção pós-release do SC-005, incluindo baseline histórica, janela de medição, owner, fonte de evidência e cálculo da redução de 80% em `specs/020-satellite-repo-governance/quickstart.md`
 
 ---
 
@@ -251,18 +253,18 @@ Humano: sim
 
 ---
 
-## PHASE 2: Bootstrap Detection & Satellite Monitoring Automation
+## ROADMAP — Phase 2: Bootstrap Detection & Satellite Monitoring Automation
 
-*Status*: Complete ✅  
+*Status*: Backlog — não executar nesta fase
 **Estimated Duration**: 1–2 weeks  
 **Parallelizable with**: SPEC 022 implementation  
-**Complexity**: S2 (build-time scripts, no new service)  
+**Complexity**: S2 (build-time scripts, no new service)
 
 ### Phase 2 Overview
 
-Phase 1 established the governance model and applied it manually to 31 repos.
-Phase 2 automates the ongoing validation and monitoring so satellite repos 
-stay synchronized with the central preset version without manual intervention.
+Phase 1 establishes the governance model and applies it through the documented
+workflow. This roadmap item may later automate validation and monitoring so
+satellite repos stay synchronized with the central preset version.
 
 ### User Stories & Tasks
 
@@ -271,17 +273,17 @@ stay synchronized with the central preset version without manual intervention.
 **Description**: Implement automated detection of mismatched preset versions 
 and provide tooling to validate bootstraps.
 
-- [x] **T-043**: Implement `detect_preset_version_mismatch()` in bootstrap.sh
+- [ ] **T036**: Implement `detect_preset_version_mismatch()` in bootstrap.sh
   - Compare `.specify/presets/.registry` version with `preset.yml` source version
   - Return exit code 0 if matched, 1 if diverged
   - Output JSON report of mismatches (file, expected, actual)
 
-- [x] **T-044**: Add GitHub Actions workflow `validate-bootstrap.yml`
+- [ ] **T037**: Add GitHub Actions workflow `validate-bootstrap.yml`
   - Trigger on: PR to any satellite repo touching `.specify/`
   - Run detection logic, fail if version drift detected
   - Comment on PR with version mismatch details
 
-- [x] **T-045**: Add test coverage for detection logic
+- [ ] **T038**: Add test coverage for detection logic
   - Test: exact version match → pass
   - Test: missing .specify/ directory → error
   - Test: stale registry version → detection
@@ -292,19 +294,19 @@ and provide tooling to validate bootstraps.
 **Description**: Extend org-wide audit to run on schedule and report preset 
 version drift across all satellite repos.
 
-- [x] **T-046**: Extend `scripts/scan-org-rename-references.sh`
+- [ ] **T039**: Extend `scripts/scan-org-rename-references.sh`
   - Add mode: `--mode satellite-preset-audit`
   - Check each repo's `.specify/presets/.registry` vs central v1.16.0
   - Output: CSV report (repo, current version, drift status, last updated)
 
-- [x] **T-047**: Create CI job `.github/workflows/satellite-preset-audit.yml`
+- [ ] **T040**: Create CI job `.github/workflows/satellite-preset-audit.yml`
   - Trigger: Weekly (Monday 09:00 UTC)
   - Run extended audit script
   - Create issue if >0 repos are drifted: 
     "Satellite repos out of sync with v1.16.0: N repos need upgrade"
   - Attach report as artifact
 
-- [x] **T-048**: Implement auto-PR creation for drifted repos
+- [ ] **T041**: Implement auto-PR creation for drifted repos
   - On audit detection of drift, automatically:
     - Fork branch: `fix/preset-sync-to-vX.Y.Z`
     - Run `bootstrap.sh --refresh-preset`
@@ -316,19 +318,18 @@ version drift across all satellite repos.
 
 **Description**: Update quickstart and docs to reflect Phase 2 automation.
 
-- [x] **T-049**: Update `specs/020-satellite-repo-governance/quickstart.md`
+- [ ] **T042**: Update `specs/020-satellite-repo-governance/quickstart.md`
   - Document: "After Phase 1, satellite repos receive automated preset sync"
   - Include: Weekly audit schedule, auto-PR flow, manual override steps
 
-- [x] **T-050**: Add section to `docs/developer-guide.md`
+- [ ] **T043**: Add section to `docs/developer-guide.md`
   - Title: "Automated Preset Synchronization (Phase 2)"
   - Explain: How weekly audit works, how auto-PRs are created, how to disable
 
-- [x] **T-051**: Document in `docs/label-taxonomy-and-autonomous-dev.md`
+- [ ] **T044**: Document in `docs/label-taxonomy-and-autonomous-dev.md`
   - Add label: `sync:preset-version` (auto-applied by audit-generated PRs)
   - Add: How to override auto-sync, coordination with feature work
 
 ---
 
-**End of Phase 2 scope. Estimated completion: 1–2 weeks.**
-
+**End of roadmap scope. Estimated future effort: 1–2 weeks.**

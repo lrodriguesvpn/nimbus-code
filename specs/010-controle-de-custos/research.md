@@ -132,9 +132,9 @@ query GetHumanHours($projectId: ID!, $after: String) {
 | Questão | Impacto | Decisão tomada |
 |---|---|---|
 | Provider OpenFeature em GA (Flagsmith vs. LaunchDarkly vs. outro) | Baixo (detalhes de implementação) | A ser decidido no `/speckit-tasks`; bootstrap usa env-var |
-| UI do dashboard: GitHub Projects v2 nativo vs. web app dedicado | Médio (esforço de implementação) | A ser decidido no `/speckit-tasks`; contrato de API é o mesmo |
+| UI do dashboard: GitHub Projects v2 nativo vs. web app dedicado | Médio (esforço de implementação) | MVP usa GitHub Projects v2; UI dedicada fica fora do primeiro incremento |
 | Frequência do job batch do cost-aggregator | Baixo | Padrão: diário; configurável via cron |
-| Política de retenção de dados além de 24 meses | Baixo | Pode ser arquivado em cold storage; decisão pós-GA |
+| Política de retenção de dados além de 12 meses | Baixo | MVP retém 12 meses; extensão posterior exige nova decisão de governança |
 
 ---
 

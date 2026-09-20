@@ -16,6 +16,15 @@ escrita — **pare e sinalize**: essa mudança pertence a um repositório de
 projeto (workload), não a este. Isso vale mesmo quando o ambiente é da
 própria VPN (Venha Pra Nuvem) — não existe exceção "porque é a gente".
 
+## Política de Idioma e Distribuição
+
+- Código, identificadores, schemas, contratos e mensagens estruturais devem
+  usar inglês como idioma padrão.
+- Documentação, specs, runbooks, FAQs e checklists devem usar português,
+  preservando termos técnicos canônicos em inglês quando necessário.
+- A constituição local é a fonte normativa única; este arquivo e os presets
+  apenas distribuem a regra e devem permanecer em paridade.
+
 ## O Que Este Repositório Faz
 
 - Mantém o **inventário as-is** (`legacy-inventory.md`) de tudo que existe

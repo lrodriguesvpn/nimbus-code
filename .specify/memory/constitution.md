@@ -258,6 +258,9 @@ Sync Impact Report
 - Misturar português e inglês sem critério no mesmo artefato é violação de
   consistência. Se houver necessidade de exceção, ela deve ser justificada no
   `plan.md` ou em ADR quando tiver impacto duradouro.
+- Esta constituição local é o único ponto normativo do repositório consumidor.
+  Presets, templates e cópias espelho são artefatos de distribuição e devem
+  permanecer em paridade, sem criar regras concorrentes.
 
 ## Modo de Operação do Agente por Complexidade (S0–S4)
 

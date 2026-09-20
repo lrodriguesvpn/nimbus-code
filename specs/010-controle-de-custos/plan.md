@@ -4,7 +4,10 @@
 
 **Created**: 2026-08-18
 
-**Status**: Phase 1 Design Complete ✓
+**Status**: Backlog — design documental preservado; implementação adiada
+
+> Este plano não está autorizado para execução neste ciclo. As decisões e
+> contratos servem como referência até a retomada formal da SPEC.
 
 **Spec**: [spec.md](./spec.md)
 
@@ -23,7 +26,8 @@ A feature envolve **quatro camadas de implementação** interdependentes:
 1. **Camada de Coleta** (`cost-collector`): integração com fontes de dados (eventos de sessão de agente para tokens; GitHub Project API para horas humanas)
 2. **Camada de Armazenamento** (`cost-store`): persistência de `CostRecord`, `CostEstimate`, `Budget` e `CostAlert` com histórico auditável
 3. **Camada de Agregação** (`cost-aggregator`): jobs batch que produzem `CostBenchmark` por complexidade e consolidam view por feature/sprint/squad
-4. **Camada de Apresentação** (`cost-dashboard`): dashboard consolidado com drill-down, filtros e exportação; painel de alertas
+4. **Camada de Apresentação** (`cost-dashboard`): API REST interna e GitHub
+   Projects v2 como superfície inicial; UI web dedicada fica fora do MVP
 
 **Fluxo principal:**
 ```
@@ -47,9 +51,10 @@ GitHub Project → cost-collector (horas) → cost-store
 
 ### Technology Choices
 
-- **Backend / Coleta**: linguagem a definir por projeto consumidor; interface declarada via contratos YAML
+- **Backend / Coleta**: implementação livre por projeto consumidor; interface
+  normativa declarada via contratos Markdown/YAML
 - **Storage**: banco relacional (PostgreSQL recomendado); schema versionado via migrations
-- **Dashboard**: web app (React/Next.js) ou integração com GitHub Projects v2 como camada de visualização — a ser decidido no `/speckit-tasks`
+- **Dashboard**: API REST interna + GitHub Projects v2 no MVP; UI web dedicada é posterior
 - **Alertas**: webhook + notificação via GitHub Issues/Slack (provider configurável)
 - **Feature toggle**: OpenFeature SDK com env-var provider no bootstrap; migração para provider dedicado em GA
 
@@ -60,6 +65,9 @@ GitHub Project → cost-collector (horas) → cost-store
 **Performance Goals**: dashboard p99 < 800ms; alertas em < 30 min do trigger  
 **Constraints**: custo de nuvem fora do MVP (ver FR-010 em spec.md); sem PII em registros de custo  
 **Scale/Scope**: ~100 features ativas simultaneamente; ~500 registros/dia estimados
+
+**Retention/Privacy**: 12 meses; acesso por papel; histórico append-only; sem
+conteúdo de prompt ou PII.
 
 ---
 
@@ -91,6 +99,12 @@ Recurso de custo de nuvem marcado como `NEEDS CLARIFICATION` na spec. Decisão: 
 | **Revisão humana obrigatória** | Não (S3) — porém recomendada pelo impacto em governança financeira |
 | **Padrão reutilizado encontrado?** | Não — `docs/reuse-catalog.yaml` consultado; nenhuma entrada com match. Adicionar ao catálogo após conclusão (tag: `cost-control-hybrid`) |
 | **Estimativa de tokens (input+output)** | ~50–70 mil tokens — multiplicador S3 sobre base de 12kt; inclui pesquisa Phase 0, design Phase 1, geração de todos os artefatos |
+
+## Cost Reference
+
+Estimated delivery is 50–70k agent tokens and 8–16 human hours. Record actual
+tokens in the session ledger and human time in the GitHub Project field
+`Horas Humanas`; compare both at feature closure.
 
 ---
 

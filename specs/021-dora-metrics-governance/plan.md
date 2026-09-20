@@ -37,7 +37,7 @@ coleta DORA.
 
 **Project Type**: governança de processo + extensão de tooling de scripting já existente (não é um serviço novo)
 
-**Performance Goals**: consolidação semanal (squads) e mensal (portfólio/PMO) sem exigir intervenção manual além da revisão explícita já prevista (ver SLO Gate abaixo)
+**Performance Goals**: consolidação semanal (squads) e mensal (portfólio/PMO) sem exigir intervenção manual além da revisão explícita já prevista. Os SLOs são metas de adoção pós-release; a medição real exige protocolo e execução contra um repositório operacional.
 
 **Constraints**:
 - Não recriar `scripts/process-metrics-report.sh` — estender o script existente
@@ -208,8 +208,8 @@ tests/scripts/                                   # novos testes de integração 
 
 > Valores herdados diretamente do cabeçalho "SLO Alvo desta Feature" do `spec.md` — não redefinidos aqui.
 
-**SLOs não definidos nesta feature e justificativa:**
-Nenhum — todos os componentes desta feature têm SLO mensurável definido acima.
+**Status da medição dos SLOs:**
+Os alvos estão definidos no `spec.md`, mas não são medidos por mocks locais. A medição real é um gate de adoção pós-release e requer o protocolo de T026, seguido de execução contra um repositório operacional.
 
 ## Nimbus-Code — Security & DevSecOps Gate
 
@@ -225,7 +225,7 @@ Nenhum — todos os componentes desta feature têm SLO mensurável definido acim
 | IaC — provider(s) usado(s) | N/A — não provisiona infraestrutura | — | ✅ N/A | |
 | Banco de dados | N/A — sem banco de dados novo | — | ✅ N/A | |
 | Firewall / Segmentação de rede | N/A — sem componente de rede novo | — | ✅ N/A | |
-| Observabilidade | Logs/registro de auditoria mínimos definidos (trilha de quem mediu/ajustou/aprovou) | Sim, com justificativa no ADL | ✅ PASS | Coberto por FR-012 (trilha de auditoria) |
+| Observabilidade | Logs/registro de auditoria mínimos definidos (trilha de quem mediu/ajustou/aprovou) | Sim, com justificativa no ADL | ✅ PASS | Coberto por FR-012 (trilha de auditoria); a medição dos SLOs fica no gate de adoção pós-release |
 
 **Riscos identificados e decisão:**
 Nenhum risco de segurança relevante identificado — esta feature é puramente governança de processo sobre dados já públicos internamente (issues/PRs/labels do próprio GHE).

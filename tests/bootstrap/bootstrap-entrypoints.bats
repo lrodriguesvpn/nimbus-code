@@ -122,3 +122,77 @@ prepare_consumer_repo() {
 
   rm -rf "$workspace"
 }
+
+@test "bootstrap persists context evidence and pinned source metadata" {
+  local workspace repo fake_bin
+  workspace="$(mktemp -d)"
+  repo="$workspace/consumer-metadata"
+  fake_bin="$workspace/bin"
+
+  prepare_consumer_repo "$repo"
+  make_fake_toolchain "$fake_bin"
+
+  run bash -lc 'set -euo pipefail; cd "$1"; PATH="$2:$PATH" bash "$3/bootstrap.sh" --local "$3" --ref v1.18.0 --repo-type dev_standards --delivery-model monorepo --decision-reason "baseline repo" --decision-owner "platform"' _ "$repo" "$fake_bin" "$REPO_ROOT"
+  [ "$status" -eq 0 ]
+  [ "$(jq -r '.topology_decision.context_indicator' "$repo/.specify/feature.json")" = "No relevant application code found; only README, LICENSE, workflows, setup scripts, or minimal templates" ]
+  [ "$(jq -r '.source_ref' "$repo/.nimbus/bootstrap.json")" = "v1.18.0" ]
+  [ "$(jq -r '.bundle' "$repo/.nimbus/bootstrap.json")" = "nimbus-code-project-bundle" ]
+
+  rm -rf "$workspace"
+}
+
+@test "bootstrap fails when a critical component installation fails" {
+  local workspace repo fake_bin
+  workspace="$(mktemp -d)"
+  repo="$workspace/consumer-failure"
+  fake_bin="$workspace/bin"
+
+  prepare_consumer_repo "$repo"
+  mkdir -p "$fake_bin"
+  cat > "$fake_bin/specify" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+if [[ "${1:-}" == "init" ]]; then
+  mkdir -p .specify
+  printf '{"feature_directory":"."}\n' > .specify/feature.json
+  exit 0
+fi
+if [[ "${1:-}" == "preset" ]]; then
+  exit 42
+fi
+exit 0
+EOF
+  chmod +x "$fake_bin/specify"
+
+  run bash -lc 'set -euo pipefail; cd "$1"; PATH="$2:$PATH" bash "$3/bootstrap.sh" --local "$3" --repo-type dev_standards --delivery-model monorepo --decision-reason "baseline repo" --decision-owner "platform"' _ "$repo" "$fake_bin" "$REPO_ROOT"
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"failed to install preset nimbus-code-standards"* ]]
+
+  rm -rf "$workspace"
+}
+
+@test "platform bootstrap does not install workload automation or project governance" {
+  local workspace repo fake_bin
+  workspace="$(mktemp -d)"
+  repo="$workspace/consumer-platform"
+  fake_bin="$workspace/bin"
+
+  prepare_consumer_repo "$repo"
+  make_fake_toolchain "$fake_bin"
+
+  run bash -lc 'set -euo pipefail; cd "$1"; PATH="$2:$PATH" bash "$3/bootstrap.sh" --local "$3" --repo-type platform --delivery-model monorepo --decision-reason "platform baseline" --decision-owner "platform"' _ "$repo" "$fake_bin" "$REPO_ROOT"
+  [ "$status" -eq 0 ]
+  [ -f "$repo/.github/copilot-instructions.md" ]
+  [ -f "$repo/.github/ISSUE_TEMPLATE/nimbus-code-task.md" ]
+  [ ! -e "$repo/.github/workflows/update-speckit-and-bundle.yml" ]
+  [ ! -e "$repo/.github/workflows/ensure-github-project.yml" ]
+  [ ! -e "$repo/.github/workflows/add-to-repo-project.yml" ]
+  [ ! -e "$repo/.github/workflows/devstats-corporate-integration.yml" ]
+  [ ! -e "$repo/docs/cost-profiles-and-rates.md" ]
+  [ ! -e "$repo/docs/reuse-catalog.yaml" ]
+  [ ! -e "$repo/docs/agent-session-manual.md" ]
+  [ ! -e "$repo/.git/hooks/pre-commit" ]
+  [ "$(jq -r '.bundle' "$repo/.nimbus/bootstrap.json")" = "nimbus-code-platform-bundle" ]
+
+  rm -rf "$workspace"
+}

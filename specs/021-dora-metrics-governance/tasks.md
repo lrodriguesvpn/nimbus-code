@@ -32,7 +32,7 @@
 
 **Purpose**: infraestrutura de validação compartilhada por US3 e US4 — nenhuma delas pode ser implementada corretamente sem esta checagem.
 
-- [x] T002 Adicionar em `scripts/process-metrics-report.sh` uma função de validação de entrada de `docs/playbooks/dora-manual-adjustments-log.yaml` que rejeita qualquer entrada sem os 5 campos obrigatórios (`justification`, `author`, `timestamp`, `evidence_link`, `exception_category`) preenchidos (FR-004, AC-3, ver `contracts/dora-quality-and-audit.contract.md`)
+- [x] T002 Adicionar em `scripts/process-metrics-report.sh` uma função de validação de entrada de `docs/playbooks/dora-manual-adjustments-log.yaml` que rejeita qualquer entrada sem os 7 campos obrigatórios (`justification`, `author`, `timestamp`, `evidence_link`, `exception_category`, `approved_by`, `review_cycle_period`), categoria controlada, URL HTTPS e período `YYYY-MM`/`YYYY-WNN` (FR-004, FR-012, AC-3, ver `contracts/dora-quality-and-audit.contract.md`)
 - [x] T003 [P] Criar `tests/scripts/process-metrics-report.audit-trail.test.sh`: fixture cobrindo (a) ajuste manual completo aceito, (b) ajuste manual incompleto rejeitado com mensagem clara, (c) categoria de exceção registrada corretamente (test ref `test_AC3_manual_adjustment_audit_trail`)
 
 **Checkpoint**: a validação de trilha de auditoria é determinística e testável antes de qualquer story consumi-la.
@@ -108,6 +108,18 @@
 - [x] T022 Adicionar entrada a `docs/reuse-catalog.yaml` (tag: `dora-governance-hybrid-collection`, bounded_context: `spec-kit-workflow`, description explicando a extensão de `scripts/process-metrics-report.sh` com qualidade de dados + auditoria + gate de fechamento, source: `specs/021-dora-metrics-governance/plan.md`)
 - [x] T023 Preencher a tabela "Nimbus-Code — Estimativa vs. Consumo Real de Tokens e Horas Humanas" abaixo no fechamento desta feature, comparando com a Classificação de Complexidade do `plan.md`
 
+## Phase 8: Remediation & Adoption Gates
+
+**Purpose**: fechar as lacunas identificadas na análise cross-artifact sem misturar evidência de adoção pós-release com implementação local.
+
+- [x] T024 [US3] Estender `tests/scripts/process-metrics-report.audit-trail.test.sh` e a documentação do contrato para provar que `approved_by` é obrigatório, que autoaprovação só ocorre sob regra explícita e que o gate de fechamento rejeita entradas sem aprovação em `scripts/process-metrics-report.sh` e `specs/021-dora-metrics-governance/contracts/dora-quality-and-audit.contract.md`
+- [x] T025 [US4] Documentar em `docs/playbooks/README.md` a cadeia única `combined_conclusion` → gatilho objetivo → `Improvement Action` → `owner`/`priority`/`review_deadline` → reavaliação, mantendo a conversão de degradação dentro da US4 e sem criar US5
+- [ ] T026 [P] Definir em `specs/021-dora-metrics-governance/quickstart.md` o protocolo de medição pós-release dos três componentes SLO (`automatic ingestion`, `manual audit registration`, `weekly/monthly consolidation`), incluindo fonte, janela, responsável e critério de conformidade
+- [ ] T027 [P] Definir em `specs/021-dora-metrics-governance/quickstart.md` o protocolo de medição pós-adoção de SC-001, SC-002 e SC-003, incluindo população, período de observação, responsável e evidência esperada
+- [x] T028 [US3] Definir o vocabulário controlado de `exception_category`, o período afetado, a precedência automático/manual e a preservação de registros substituídos em `specs/021-dora-metrics-governance/spec.md`, `data-model.md`, `contracts/dora-quality-and-audit.contract.md` e `scripts/process-metrics-report.sh`
+- [x] T029 [US4] Definir limiares objetivos de degradação, baseline relativo, estados de `Review Cycle` e regra de não geração de ação com dados insuficientes em `specs/021-dora-metrics-governance/spec.md`, `docs/playbooks/README.md` e `contracts/dora-quality-and-audit.contract.md`
+- [x] T030 [US4] Documentar deduplicação de `Improvement Action`, referência ao ciclo de origem e reavaliação por `review_deadline` em `docs/playbooks/README.md` e `data-model.md`
+
 ---
 
 ## Dependencies & Execution Order
@@ -166,7 +178,7 @@
 - [USN] = rastreabilidade da tarefa à User Story do `spec.md`
 - Nenhum arquivo/script existente é removido nesta feature — apenas estendido (Estratégia de Release do `plan.md`: `direct`, sem toggle)
 - Commits granulares recomendados: um por User Story completa
-- Toda entrada em `docs/playbooks/dora-manual-adjustments-log.yaml` exige os 5 campos obrigatórios preenchidos — nunca gravada parcialmente (FR-004)
+- Toda entrada em `docs/playbooks/dora-manual-adjustments-log.yaml` exige os 7 campos obrigatórios preenchidos, incluindo `approved_by` e `review_cycle_period` — nunca gravada parcialmente (FR-004, FR-012)
 
 ---
 

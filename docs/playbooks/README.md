@@ -156,12 +156,17 @@ scripts/process-metrics-report.sh --record-manual-adjustment \
   --author <handle> \
   --evidence-link <url> \
   --exception-category <categoria> \
-  [--approved-by <handle>] \
-  [--review-cycle-period <periodo>]
+  --approved-by <handle> \
+  --review-cycle-period <periodo>
 ```
 
-O script **rejeita** o ajuste se `justification`, `author`, `evidence_link`
-ou `exception_category` estiverem ausentes — nenhum ajuste parcial é aceito.
+O script **rejeita** o ajuste se `justification`, `author`, `evidence_link`,
+`exception_category` ou `approved_by` estiverem ausentes — nenhum ajuste
+parcial é aceito. A categoria deve ser `fonte_indisponivel`,
+`evento_duplicado`, `correcao_retroativa` ou `outro_justificado`. O período
+afetado também é obrigatório. Autoaprovação só é válida quando uma regra explícita da
+governança permitir; mesmo nesse caso, o próprio autor deve ser informado em
+`approved_by`.
 Todo ajuste fica registrado em
 [`docs/playbooks/dora-manual-adjustments-log.yaml`](./dora-manual-adjustments-log.yaml),
 com autor, timestamp, evidência e categoria (fonte para rastrear "quem
@@ -173,6 +178,22 @@ rode:
 ```bash
 scripts/process-metrics-report.sh --check-review-cycle-closure --review-cycle-period <periodo>
 ```
+
+### Cadeia de Degradação para Ação de Backlog (FR-008, FR-009)
+
+Uma degradação só gera ação depois que a revisão registra `combined_conclusion`
+considerando os quatro indicadores. A cadeia obrigatória é:
+
+1. atingir um gatilho objetivo: um indicador cruza sua meta por um ciclo
+   completo, ou dois indicadores pioram pelo menos 20% contra o baseline da
+   própria squad no mesmo ciclo;
+2. abrir ou atualizar uma Issue de `Improvement Action`;
+3. registrar `owner`, prioridade inicial e `review_deadline`;
+4. reavaliar a ação na data definida e atualizar seu estado na Issue.
+
+Dados insuficientes não geram ação automática. Não é permitido registrar
+degradação sem ação correspondente nem criar ação baseada exclusivamente em
+um indicador isolado.
 
 Se retornar `CLOSURE_BLOCKED`, a revisão **não pode** ser fechada até que o(s)
 ajuste(s) listado(s) tenham todos os campos obrigatórios preenchidos — isso
@@ -193,6 +214,18 @@ ver o sinal:
 2. Preencher `owner` (responsável pela ação), `priority` inicial e prazo de
    reavaliação — nenhuma ação de melhoria fica sem essas 3 informações.
 3. Vincular a Issue à revisão que a originou.
+
+Uma Issue existente para o mesmo `source_review_cycle` e `trigger_rule` deve
+ser atualizada em vez de duplicada. O estado da ação deve ser reavaliado no
+`review_deadline`.
+
+### Estados do ciclo e reconciliação
+
+Uma revisão segue os estados `open` → `data_insufficient` ou
+`reconciliation_pending` → `approved` → `closed`. Fonte indisponível,
+duplicidade ou conflito entre registros impede o fechamento até a reconciliação.
+O registro automático permanece vigente até que um ajuste aprovado o substitua;
+o registro anterior nunca é apagado.
 
 ### Comparabilidade entre Squads de Maturidade Diferente (AC-6)
 

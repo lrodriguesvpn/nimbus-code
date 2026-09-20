@@ -46,20 +46,20 @@ jobs:
           permission-repository-projects: write
           permission-organization-projects: write
 
-      - name: Resolve auth token (App or PAT fallback)
+      - name: Resolve auth token (App or explicit migration fallback)
         id: resolve-token
         run: |
           if [ -n "${{ steps.app-token.outputs.token }}" ]; then
             echo "configured=true" >> "$GITHUB_OUTPUT"
             echo "token=${{ steps.app-token.outputs.token }}" >> "$GITHUB_OUTPUT"
             echo "::notice::Autenticado via GitHub App (instalação de curta duração)."
-          elif [ -n "${{ secrets.VPNDEV_PROJECT_TOKEN }}" ]; then
+          elif [ "${{ vars.NIMBUS_AUTH_MIGRATION_MODE }}" = "pat" ]; then
             echo "configured=true" >> "$GITHUB_OUTPUT"
             echo "token=${{ secrets.VPNDEV_PROJECT_TOKEN }}" >> "$GITHUB_OUTPUT"
-            echo "::warning::GitHub App não configurado — usando PAT de fallback (rollout em andamento; ver docs/github-app-auth-snippet.md)."
+            echo "::warning::Modo de migração PAT explicitamente habilitado; owner, prazo, ambiente e auditoria são obrigatórios."
           else
-            echo "configured=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::Nenhuma credencial configurada (NIMBUS_APP_* ou VPNDEV_PROJECT_TOKEN). Pulando adição automática à board deste repositório."
+            echo "::error::GitHub App não configurado; etapa cross-repo bloqueada."
+            exit 1
           fi
 
       - name: Descobrir URL da board deste repositório

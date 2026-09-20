@@ -38,17 +38,17 @@ jobs:
           permission-repository-projects: write
           permission-organization-projects: write
 
-      - name: Resolve auth token (App or PAT fallback)
+      - name: Resolve auth token (App or explicit migration fallback)
         id: resolve-token
         run: |
           if [ -n "${{ steps.app-token.outputs.token }}" ]; then
             echo "token=${{ steps.app-token.outputs.token }}" >> "$GITHUB_OUTPUT"
             echo "::notice::Autenticado via GitHub App (instalação de curta duração)."
-          elif [ -n "${{ secrets.ADD_TO_PROJECT_PAT }}" ]; then
+          elif [ "${{ vars.NIMBUS_AUTH_MIGRATION_MODE }}" = "pat" ]; then
             echo "token=${{ secrets.ADD_TO_PROJECT_PAT }}" >> "$GITHUB_OUTPUT"
-            echo "::warning::GitHub App não configurado — usando PAT de fallback (rollout em andamento; ver docs/github-app-auth-snippet.md)."
+            echo "::warning::Modo de migração PAT explicitamente habilitado; owner, prazo, ambiente e auditoria são obrigatórios."
           else
-            echo "::error::Nenhuma credencial configurada. Defina NIMBUS_APP_ID/NIMBUS_APP_PRIVATE_KEY ou ADD_TO_PROJECT_PAT."
+            echo "::error::GitHub App não configurado; etapa cross-repo bloqueada. Defina NIMBUS_APP_ID/NIMBUS_APP_PRIVATE_KEY."
             exit 1
           fi
 

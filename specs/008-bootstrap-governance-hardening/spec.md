@@ -43,11 +43,11 @@
 
 ## Nimbus-Code — Objetivo e Contexto
 
-**Objetivo:** endurecer o processo de bootstrap de repositórios Nimbus-Code para que ele (1) pergunte explicitamente o tipo de repositório e instale o preset correto, (2) garanta paridade estrutural entre as issues geradas pelos dois presets de governança, (3) identifique repositórios de Produto/Frontend/Backend e consolide o board de issues no Project V2 do repositório de Produto, (4) elimine o uso de PAT clássico em automações de escopo organizacional/cross-repo em favor de um GitHub App instalado na organização, (5) garanta que o Spec Kit CLI seja sempre obtido da fonte oficial pública do GitHub e que todo conteúdo próprio da Venha Pra Nuvem referencie exclusivamente o GitHub Enterprise da organização, e (6) documente com clareza a diferença entre skills locais e remotas (VPN-SKILLS), incluindo o estado atual de transição.
+**Objetivo:** endurecer o processo de bootstrap de repositórios Nimbus-Code para que ele (1) pergunte explicitamente o tipo de repositório e instale o preset correto, (2) garanta paridade estrutural entre as issues geradas pelos dois presets de governança, (3) elimine o uso de PAT clássico em automações de escopo organizacional/cross-repo em favor de um GitHub App instalado na organização, (4) garanta que o Spec Kit CLI seja sempre obtido da fonte oficial pública do GitHub e que todo conteúdo próprio da Venha Pra Nuvem referencie exclusivamente o GitHub Enterprise da organização, e (5) documente com clareza a diferença entre skills locais e remotas (VPN-SKILLS), incluindo o estado atual de transição.
 
 **Motivação:** hoje o bootstrap sempre instala o preset `nimbus-code-standards` sem perguntar, os dois presets de governança têm templates de issue divergentes (um preset não tem `ISSUE_TEMPLATE` nenhum), não existe consolidação de board para produtos com múltiplos repositórios (spec/código separados), quatro segredos do tipo PAT clássico estão em uso hoje para automações que agem fora do escopo do próprio repositório, e o repositório VPN-SKILLS (governança já especificada em `specs/003-vpn-skills-repo-governance/`) ainda não foi implementado — as skills continuam 100% locais em `.github/skills/`, sem nenhum manual explicando a diferença entre uso local e remoto.
 
-**Critério de done (alto nível):** todo novo bootstrap pergunta e aplica o tipo de repositório e o preset correspondente; os dois presets de governança produzem issues estruturalmente idênticas; repositórios Frontend/Backend de um Produto têm suas issues no Project V2 do repositório de Produto; nenhuma automação cross-repo/organização depende de PAT clássico; toda instalação do Spec Kit CLI usa a fonte oficial pública; todo link/URL de conteúdo próprio da Venha Pra Nuvem usa o domínio GitHub Enterprise; e existe um manual publicado explicando uso local vs. remoto de skills.
+**Critério de done (alto nível):** todo novo bootstrap pergunta e aplica o tipo de repositório e o preset correspondente; os dois presets de governança produzem issues estruturalmente idênticas; nenhuma automação cross-repo/organização depende de PAT clássico; toda instalação do Spec Kit CLI usa a fonte oficial pública; todo link/URL de conteúdo próprio da Venha Pra Nuvem usa o domínio GitHub Enterprise; e existe um manual publicado explicando uso local vs. remoto de skills. O roteamento de Tasks entre repositórios é responsabilidade da SPEC 006.
 
 ## Nimbus-Code — Critérios de Aceitação (formato BDD)
 
@@ -204,6 +204,9 @@ Como desenvolvedor ou agente executando uma skill Nimbus-Code, quero um manual q
 ### Edge Cases
 
 - Como o bootstrap se comporta quando o GitHub App organizacional ainda não foi instalado/configurado no momento da execução?
+- Como um workflow que combina operações no próprio repositório e operações
+  organizacionais/cross-repo separa os tokens e falha quando apenas a etapa de
+  escopo ampliado não pode prosseguir?
 - O que acontece se os dois presets divergirem no futuro e ninguém perceber antes de um novo release ser publicado?
 
 > Edge cases sobre categorização Produto/Frontend/Backend e migração de board
@@ -217,15 +220,15 @@ Como desenvolvedor ou agente executando uma skill Nimbus-Code, quero um manual q
 - **FR-002**: O sistema MUST manter estrutura de campos idêntica entre os templates de issue dos dois presets de governança, bloqueando publicação de um preset cujo template de issue divirja estruturalmente do outro.
 - **FR-003**: **REMOVIDO** (2026-08-20) — consolidação de board Produto/Frontend/Backend é escopo de `specs/006-multirepo-support/` (ver AC-1 a AC-15 daquela spec); não reimplementar aqui.
 - **FR-004**: Toda automação de escopo organizacional ou cross-repo (Portfólio PMO, `ensure-github-project`, `add-to-repo-project`, `sync-priority-field`, `agent-auto-assign`) MUST autenticar via token de instalação de um GitHub App da organização, emitido dinamicamente por execução, em vez de um secret do tipo PAT clássico.
-- **FR-005**: Toda automação cujo escopo seja restrito ao próprio repositório onde o workflow roda MUST usar o `GITHUB_TOKEN` nativo do workflow em vez de qualquer PAT ou GitHub App.
+- **FR-005**: Toda automação cujo escopo seja restrito ao próprio repositório onde o workflow roda MUST usar o `GITHUB_TOKEN` nativo do workflow em vez de qualquer PAT ou GitHub App. Workflows com escopo misto MUST separar as operações em etapas explícitas e usar o token correspondente em cada etapa; um token cross-repo/org não pode ser reutilizado em uma etapa local.
 - **FR-006**: O bootstrap MUST obter o Spec Kit CLI exclusivamente da fonte oficial pública do GitHub, nunca de um mirror não oficial ou de uma URL desatualizada.
 - **FR-007**: Todo link/URL gerado ou instalado pelo bootstrap ou pelos presets que referencie conteúdo próprio da Venha Pra Nuvem (templates, docs, VPN-SKILLS, repositórios internos) MUST apontar exclusivamente para o domínio GitHub Enterprise da organização, nunca para `github.com` público.
 - **FR-008**: O sistema MUST disponibilizar um manual documentando a diferença entre skills locais (`.github/skills/`) e skills remotas (VPN-SKILLS), incluindo o estado atual de disponibilidade de cada modalidade por skill.
-- **FR-009**: O bootstrap MUST falhar de forma explícita (nunca silenciosamente) quando um GitHub App organizacional exigido para uma automação não estiver instalado/configurado, apresentando instrução clara de remediação.
+- **FR-009**: O bootstrap MAY materializar artefatos locais quando o GitHub App ainda não estiver configurado, mas MUST registrar a capacidade cross-repo/org como `blocked` e apresentar instrução clara de remediação. Qualquer workflow que dependa dessa capacidade MUST falhar fechado antes da primeira operação ampliada. Fallback para PAT clássico não pode ser ativado apenas pela ausência dos secrets; só pode existir em modo de migração opt-in, com owner, prazo, ambiente permitido e auditoria.
 
 ### Key Entities *(include if feature involves data)*
 
-- **Repo Provisioning Profile**: conjunto de respostas coletadas no bootstrap (tipo de preset, papel no produto — Produto/Frontend/Backend, repositório de Produto vinculado quando aplicável).
+- **Repo Provisioning Profile**: conjunto de respostas coletadas no bootstrap (tipo de preset, ref da fonte, classificação greenfield/brownfield e modo de execução).
 - **GitHub App Credential Policy**: regra que determina, por automação, se ela usa token de instalação de GitHub App (escopo org/cross-repo) ou `GITHUB_TOKEN` nativo (escopo do próprio repositório).
 - **Source-of-Truth Registry**: lista das fontes canônicas de URL permitidas (Spec Kit oficial público; todo o restante do conteúdo VPN via GitHub Enterprise).
 - **Skill Distribution Manual**: documento que descreve, por skill, se ela é local ou remota, e como invocá-la em cada modalidade.
@@ -237,9 +240,9 @@ Como desenvolvedor ou agente executando uma skill Nimbus-Code, quero um manual q
 - **SC-001**: 100% dos novos bootstraps resultam na instalação do preset correto já na primeira execução, validado contra o tipo de repositório declarado.
 - **SC-002**: Zero diferenças estruturais entre os templates de issue dos dois presets de governança em qualquer momento, verificado por validação automatizada.
 - **SC-003**: **REMOVIDO** (2026-08-20) — critério de consolidação de board é escopo de `specs/006-multirepo-support/`.
-- **SC-004**: 100% das automações de escopo organizacional/cross-repo operam sem nenhum secret do tipo PAT clássico configurado.
-- **SC-005**: Zero ocorrências de URL pública `github.com` em documentação/workflows gerados para conteúdo próprio da Venha Pra Nuvem, exceto a fonte oficial do Spec Kit CLI.
-- **SC-006**: Um desenvolvedor ou agente consegue determinar, em até 2 minutos de leitura do manual, se uma skill específica deve ser usada localmente ou remotamente.
+- **SC-004**: No commit candidato de release, 100% dos workflows cross-repo/org dos bundles, scripts referenciados pelo bootstrap e workflows dos repositórios piloto operam sem PAT clássico, exceto fixtures explicitamente marcadas como migração e não executáveis.
+- **SC-005**: No commit candidato de release, a auditoria de `docs/`, `presets/`, `bundles/`, `.github/workflows/`, scripts referenciados pelo bootstrap e artefatos materializados nos repositórios piloto encontra zero URLs `github.com` para conteúdo próprio da Venha Pra Nuvem; a única exceção é `https://github.com/github/spec-kit`, registrada no Source-of-Truth Registry.
+- **SC-006**: Em uma avaliação com cinco desenvolvedores ou agentes, cada participante consegue, em até 2 minutos e consultando somente `docs/skills-distribution-guide.md`, identificar para uma skill sorteada sua modalidade (local/remota), localização, comando de invocação e disponibilidade atual; o critério passa com pelo menos quatro respostas completas.
 
 ## Assumptions
 
@@ -262,4 +265,6 @@ removido/ajustado e por quê, para que o histórico de decisão não se perca.*
 | Demais User Stories (1, 2, 5, 6 — seleção de preset, paridade de issue templates, fonte oficial do Spec Kit + domínio GHE, manual de skills) | Nenhuma spec existente | **Mantidas integralmente** — conteúdo único desta feature |
 
 - Repositórios que hoje já têm board própria (Frontend/Backend de um Produto) serão migrados para o board consolidado por um processo de rollout controlado, não instantâneo — tratado em `specs/006-multirepo-support/`, fora do escopo desta spec.
-- A pergunta de tipo de repositório (Produto/Frontend/Backend) é opcional para repositórios que não fazem parte de nenhum produto multi-repositório — nesse caso, o repositório mantém seu próprio Project V2, como já ocorre hoje. Tratado em `specs/006-multirepo-support/`.
+- O bootstrap não pergunta nem persiste papéis Produto/Frontend/Backend. Quando
+  o fluxo de uma feature precisar rotear Tasks, os bounded contexts e
+  repositórios são resolvidos por `specs/006-multirepo-support/`.

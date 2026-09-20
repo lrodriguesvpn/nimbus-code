@@ -246,7 +246,11 @@ bats tests/bootstrap/bootstrap-entrypoints.bats
 
 ---
 
-## Phase 2: Automated Preset Synchronization
+## Roadmap: Phase 2 — Automated Preset Synchronization
+
+> Esta fase está em backlog e não deve ser executada como parte do Go/No-Go
+> atual da SPEC 020. Os cenários abaixo preservam o desenho para futura
+> priorização.
 
 **Phase 2 Overview**: After Phase 1 establishes the governance model, Phase 2 automates 
 ongoing validation and synchronization so satellite repos stay aligned with the central 
@@ -277,9 +281,9 @@ the central `preset.yml` version due to delayed PR merges or administrative over
 **Assertion**: Weekly audit runs automatically and creates actionable issue if drift detected.
 
 **Files involved**:
-- `.github/workflows/satellite-preset-audit.yml` (T-047)
-- `scripts/scan-org-rename-references.sh` (T-046, satellite-preset-audit mode)
-- `.specify/scripts/bash/detect-preset-version-mismatch.sh` (T-043)
+- `.github/workflows/satellite-preset-audit.yml` (T040)
+- `scripts/scan-org-rename-references.sh` (T039, satellite-preset-audit mode)
+- `.specify/scripts/bash/detect-preset-version-mismatch.sh` (T036)
 
 ### V9: Auto-PR Flow for Drifted Repos (Phase 2)
 
@@ -310,9 +314,9 @@ automatically if the repo is not in active development.
 and creates linked PRs for drifted repos.
 
 **Files involved**:
-- `.github/workflows/auto-sync-preset.yml` (T-048)
+- `.github/workflows/auto-sync-preset.yml` (T041)
 - `bootstrap.sh` (extended with `--refresh-preset` support)
-- `.specify/scripts/bash/detect-preset-version-mismatch.sh` (T-043)
+- `.specify/scripts/bash/detect-preset-version-mismatch.sh` (T036)
 
 ### V10: Preset Detection in Validation Workflow (Phase 2)
 
@@ -338,8 +342,8 @@ The validation workflow should detect if preset version drift exists.
 **Assertion**: PR validation catches preset drift early and provides guidance to fix it.
 
 **Files involved**:
-- `.github/workflows/validate-bootstrap.yml` (T-044)
-- `.specify/scripts/bash/detect-preset-version-mismatch.sh` (T-043)
+- `.github/workflows/validate-bootstrap.yml` (T037)
+- `.specify/scripts/bash/detect-preset-version-mismatch.sh` (T036)
 
 ### V11: Test Coverage for Detection Logic (Phase 2)
 
@@ -363,14 +367,14 @@ The validation workflow should detect if preset version drift exists.
 **Assertion**: Detection function is thoroughly tested for matching, drift, and error cases.
 
 **Files involved**:
-- `tests/bootstrap/bootstrap-preset-detection.bats` (T-045)
-- `.specify/scripts/bash/detect-preset-version-mismatch.sh` (T-043)
+- `tests/bootstrap/bootstrap-preset-detection.bats` (T038)
+- `.specify/scripts/bash/detect-preset-version-mismatch.sh` (T036)
 
 ---
 
 ## Phase 1 + Phase 2 Integration
 
-After Phase 2 implementation, the full governance model is:
+After a future Phase 2 implementation, the full governance model would be:
 
 1. **Phase 1 (Manual)**: Bootstrap classifies greenfield/brownfield, records topology decision, suggests baseline domains, enforces central repo as source of specs, documents central → satélite update flow.
 

@@ -92,7 +92,7 @@
 | **US2** | Garantir coleta automática como padrão | Reduz erro humano e esforço operacional |
 | **US3** | Controlar exceções manuais com auditoria | Preserva confiança dos dados |
 | **US4** | Instituir interpretação executiva e técnica combinada | Melhora decisão de priorização |
-| **US5** | Converter degradação em ações de backlog rastreáveis | Fecha loop de melhoria contínua |
+| **US4** | Interpretar os indicadores e converter degradação em ações de backlog rastreáveis | Fecha loop de melhoria contínua; não existe uma US5 separada |
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -163,6 +163,13 @@ Como PMO, quero uma cadência semanal/mensal de leitura combinada de DORA para o
 - Como impedir ganho aparente de um indicador que cause piora relevante em outro no mesmo período?
 - Como lidar com squads recém-criadas sem histórico suficiente para comparação mensal?
 
+**Regras para esses casos:** indisponibilidade da fonte coloca o ciclo em
+`data_insufficient` e exige reconciliação no próximo ciclo; o registro
+automático prevalece até que um ajuste manual aprovado seja vinculado ao mesmo
+evento; eventos corrigidos preservam o registro original e criam nova
+evidência; e squads sem um ciclo completo ficam fora de comparações relativas
+até formar um baseline.
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
@@ -170,15 +177,17 @@ Como PMO, quero uma cadência semanal/mensal de leitura combinada de DORA para o
 - **FR-001**: O padrão DORA MUST definir explicitamente os quatro indicadores com fórmula textual, evento de origem, início/fim da janela e regra de inclusão/exclusão.
 - **FR-002**: O processo MUST adotar coleta automática como caminho padrão para todos os eventos elegíveis.
 - **FR-003**: O processo MUST registrar a origem de cada métrica coletada para permitir rastreabilidade.
-- **FR-004**: Ajustes manuais MUST ser permitidos apenas como exceção controlada com justificativa, autor, horário e evidência vinculada.
-- **FR-005**: O modelo MUST classificar ajustes manuais por tipo de exceção para análise posterior de qualidade operacional.
-- **FR-006**: O fluxo MUST impedir fechamento de revisão periódica quando houver ajustes manuais sem justificativa completa.
+- **FR-004**: Ajustes manuais MUST ser permitidos apenas como exceção controlada com justificativa, autor, horário, evidência vinculada e `approved_by`.
+- **FR-005**: O modelo MUST classificar ajustes manuais por uma categoria pertencente ao vocabulário controlado `fonte_indisponivel`, `evento_duplicado`, `correcao_retroativa` ou `outro_justificado`.
+- **FR-006**: O fluxo MUST impedir fechamento de revisão periódica quando houver ajustes manuais sem justificativa completa, aprovação, ou reconciliação de fonte indisponível.
 - **FR-007**: O processo de análise MUST exigir leitura combinada dos quatro indicadores e registrar conclusão de causa e impacto.
-- **FR-008**: O modelo MUST definir gatilhos objetivos para abertura de ações corretivas no backlog quando houver degradação relevante.
+- **FR-008**: O modelo MUST considerar degradação relevante quando (a) um indicador ultrapassar sua meta inicial por um ciclo completo, ou (b) dois indicadores apresentarem piora relativa de pelo menos 20% contra o baseline da própria squad no mesmo ciclo; dados insuficientes não podem gerar ação automática.
 - **FR-009**: Cada ação corretiva gerada a partir de DORA MUST conter owner, prioridade inicial e prazo de reavaliação.
 - **FR-010**: O padrão MUST definir cadência mínima semanal para squads e mensal para visão de portfólio/PMO.
-- **FR-011**: O processo MUST incluir regras de qualidade de dados (completude, consistência temporal e ausência de duplicidade).
-- **FR-012**: O processo MUST disponibilizar trilha de auditoria para evidenciar quem mediu, quem ajustou, quem aprovou e quando.
+- **FR-011**: O processo MUST incluir regras de qualidade de dados: completude de 100% dos campos obrigatórios, consistência temporal sem eventos fora da janela, e ausência de duplicidade por `indicator` + `evidence_reference` + janela.
+- **FR-012**: O processo MUST disponibilizar trilha de auditoria para evidenciar quem mediu, quem ajustou, quem aprovou e quando, preservando registros substituídos e a referência ao ciclo afetado.
+
+> **Regra de composição da US4:** a conversão de degradação em `Improvement Action` faz parte da US4 e deve seguir uma única cadeia normativa: conclusão combinada dos quatro indicadores → gatilho objetivo → Issue criada/atualizada → `owner`, `priority` e `review_deadline` → reavaliação. Não há uma User Story 5 independente.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -188,13 +197,18 @@ Como PMO, quero uma cadência semanal/mensal de leitura combinada de DORA para o
 - **Review Cycle**: representa rodada semanal ou mensal de análise, com conclusões combinadas dos indicadores e decisões tomadas.
 - **Improvement Action**: representa item de backlog aberto por degradação de métrica, com owner, prioridade e data de revisão.
 
+`Review Cycle` MUST usar os estados `open`, `data_insufficient`,
+`reconciliation_pending`, `approved` e `closed`. Apenas `approved` pode
+transicionar para `closed`; estados de dados insuficientes exigem recuperação
+antes do fechamento.
+
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
 - **SC-001**: 100% das squads participantes passam a reportar os quatro indicadores com a mesma definição oficial em até 2 ciclos mensais após adoção.
 - **SC-002**: Pelo menos 85% dos registros de eventos elegíveis são capturados automaticamente já no primeiro ciclo mensal completo.
-- **SC-003**: 100% dos ajustes manuais realizados no período possuem justificativa, responsável e evidência auditável.
+- **SC-003**: 100% dos ajustes manuais realizados no período possuem justificativa, responsável, evidência e aprovação auditáveis.
 - **SC-004**: 100% das revisões mensais de DORA resultam em conclusão documentada sobre tendência e impacto cruzado entre os indicadores.
 - **SC-005**: Toda degradação classificada como relevante gera ação formal no backlog em até 5 dias úteis após a revisão.
 

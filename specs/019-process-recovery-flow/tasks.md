@@ -27,11 +27,24 @@
 
 **Objetivo**: Estabelecer as regras normativas das quais todas as user stories dependem antes de refinar a orientação por cenário.
 
-- [X] T004 Update `.specify/memory/constitution.md` with the final policy wording for code-in-English and docs-in-Portuguese
-- [X] T005 Refresh `specs/019-process-recovery-flow/graph.yaml` and `specs/019-process-recovery-flow/graph.md` if any design artifact names or dependencies changed during implementation
+- [ ] T004 Update `.specify/memory/constitution.md` with the final policy wording for code-in-English and docs-in-Portuguese, replicate it to the applicable presets/copies, and obtain Architecture Board approval
+- [X] T005 Refresh `specs/019-process-recovery-flow/graph.yaml`, `specs/019-process-recovery-flow/graph.md` and `specs/019-process-recovery-flow/impact-map.md` with distributed-template dependencies
 - [X] T006 Build the final AC/FR/SC traceability notes for manual validation in `specs/019-process-recovery-flow/quickstart.md`
 
 **Checkpoint**: Regra constitucional, grafo e baseline de validação prontos para todas as user stories.
+
+## Phase 2A: S3 Remediation — Impact, Parity and Human Gate
+
+**Objetivo**: Fechar os gates transversais introduzidos pela reclassificação S3
+antes de considerar a documentação pronta para publicação.
+
+- [X] T027 [P] Create `specs/019-process-recovery-flow/impact-map.md` with affected modules, risks, owners, rollback and Go/No-Go criteria
+- [X] T028 [P] Update `specs/019-process-recovery-flow/plan.md` from S2 to S3, including the Architecture Board approval gate and adoption metrics
+- [ ] T029 [P] Compare `.specify/memory/constitution.md` with the applicable constitution templates and record any intentional scope difference in the ADL
+- [X] T030 [P] Synchronize `presets/nimbus-code-standards/templates/constitution-template.md`, `presets/nimbus-code-platform-standards/templates/constitution-template.md` and mirror copies when the normative rule applies
+- [X] T031 [P] Synchronize applicable `presets/*/templates/project-root/copilot-instructions.md` copies without creating a competing normative rule
+- [ ] T032 Validate template parity and attach the comparison evidence to the PR
+- [ ] T033 Record Architecture Board approval and Go/No-Go decision in the plan and PR evidence
 
 ---
 
@@ -95,17 +108,21 @@
 - [X] T024 [P] Refresh references, links and edge-case coverage in `docs/developer-guide.md` and `specs/019-process-recovery-flow/quickstart.md`
 - [X] T025 Consolidate final implementation notes and executive-ready summary in `specs/019-process-recovery-flow/plan.md`
 - [X] T026 Add reusable-pattern entry for this process decision model in `docs/reuse-catalog.yaml`
+- [X] T034 Define the standardized post-release questionnaire, baseline, sample and owner for SC-002 in `specs/019-process-recovery-flow/quickstart.md`
+- [X] T035 Add the three-dimensional value-slice test (business outcome, actors/users, delivery boundary) to the contract, data model and decision matrix
+- [ ] T036 Validate all recovery and post-merge edge cases, including wrong-artifact work, rollback and cross-repository impact
 
 ---
 
 ## Dependencies & Execution Order
 
-1. **Phase 1** → required before all later work  
-2. **Phase 2** → blocks all user stories (shared constitutional and graph baseline)  
-3. **US1 (Phase 3)** and **US2 (Phase 4)** can run in parallel after Phase 2  
-4. **US3 (Phase 5)** depends on the vocabulary stabilized in US1/US2  
-5. **US4 (Phase 6)** depends on the decision model consolidated in US1–US3  
-6. **Phase 7** depends on completion of all story phases
+1. **Phase 1** → required before all later work
+2. **Phase 2** → blocks all user stories (shared constitutional and graph baseline)
+3. **Phase 2A** → blocks Go/No-Go and publication because it closes the S3 impact/parity/human gates
+4. **US1 (Phase 3)** and **US2 (Phase 4)** can run in parallel after Phase 2A
+5. **US3 (Phase 5)** depends on the vocabulary stabilized in US1/US2
+6. **US4 (Phase 6)** depends on the decision model consolidated in US1–US3
+7. **Phase 7** depends on completion of all story phases and Phase 2A
 
 ---
 

@@ -2,7 +2,11 @@
 
 **Feature Branch**: `018-nimbus-agent-intake`
 **Created**: 2026-08-24
-**Status**: Draft
+**Status**: Backlog — não será executada agora
+
+> Os artefatos desta spec permanecem como referência de planejamento. A
+> implementação está adiada e não deve ser iniciada por `/speckit-implement`
+> até nova priorização explícita.
 **Input**: User description: "inciiar nova SPEC para NIMBUS AGENT REPO https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-agent.git mas a SPEC fica aqui, para que o NIMBUS seja capaz de responder perguntas sobre como o processo NIMBUS CODE funciona. E junto com a SPEC 017 fazer o INTAKE direto pro projeto."
 
 ## Nimbus-Code — Cabeçalho Obrigatório da Spec

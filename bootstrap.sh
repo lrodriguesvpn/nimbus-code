@@ -4,6 +4,7 @@ set -euo pipefail
 
 STANDARDS_REPO="https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
 LOCAL_PATH=""
+NIMBUS_REF="${NIMBUS_REF:-main}"
 INTEGRATION="${SPECKIT_INTEGRATION_DEFAULT:-copilot}"
 REPO_TYPE=""
 SELECTED_PRESET=""
@@ -23,7 +24,7 @@ IGNORED_TOP_LEVEL_ARTIFACTS=(
 print_usage() {
   cat <<'EOF'
 Usage:
-  ./bootstrap.sh [--local <path>] [--integration <copilot|claude|gemini>] [--repo-type <platform|dev_standards>] [--delivery-model <monorepo|multirepo>] [--decision-reason <text>] [--decision-owner <team|role>] [--satellite-domains <CSV>] [--custom-domain-justification <text>] [--custom-domain-ownership <text>]
+  ./bootstrap.sh [--local <path>] [--ref <tag|branch>] [--integration <copilot|claude|gemini>] [--repo-type <platform|dev_standards>] [--delivery-model <monorepo|multirepo>] [--decision-reason <text>] [--decision-owner <team|role>] [--satellite-domains <CSV>] [--custom-domain-justification <text>] [--custom-domain-ownership <text>]
 EOF
 }
 
@@ -242,15 +243,9 @@ persist_topology_decision() {
 select_template_file() {
   local relative_path="$1"
   local preferred="$LOCAL_PATH/presets/$SELECTED_PRESET/templates/$relative_path"
-  local fallback="$LOCAL_PATH/presets/nimbus-code-standards/templates/$relative_path"
 
   if [[ -f "$preferred" ]]; then
     echo "$preferred"
-    return 0
-  fi
-
-  if [[ -f "$fallback" ]]; then
-    echo "$fallback"
     return 0
   fi
 
@@ -323,24 +318,25 @@ detect_has_relevant_application_code() {
 }
 
 classify_repository_context() {
-  local classification="greenfield"
-  local indicator_list=""
-
   if detect_has_relevant_application_code; then
-    classification="brownfield"
-    indicator_list="Relevant application code detected in source directories, build manifests, or application tests"
+    DETECTED_CONTEXT="brownfield"
+    CONTEXT_INDICATOR="Relevant application code detected in source directories, build manifests, or application tests"
   else
-    indicator_list="No relevant application code found; only README, LICENSE, workflows, setup scripts, or minimal templates"
+    DETECTED_CONTEXT="greenfield"
+    CONTEXT_INDICATOR="No relevant application code found; only README, LICENSE, workflows, setup scripts, or minimal templates"
   fi
-
-  echo "$classification"
-  echo "$indicator_list"
 }
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --local)
+      [[ $# -ge 2 && -n "$2" ]] || { echo "ERROR: --local requires a path." >&2; exit 1; }
       LOCAL_PATH="$2"
+      shift 2
+      ;;
+    --ref|--version)
+      [[ $# -ge 2 && -n "$2" ]] || { echo "ERROR: $1 requires a tag or branch." >&2; exit 1; }
+      NIMBUS_REF="$2"
       shift 2
       ;;
     --integration)
@@ -397,16 +393,19 @@ WORKDIR="$(pwd)"
 if [[ -z "$LOCAL_PATH" ]]; then
   TMP_CLONE="$(mktemp -d)"
   trap 'rm -rf "$TMP_CLONE"' EXIT
-  echo "-> Cloning $STANDARDS_REPO..."
-  git clone --depth 1 "$STANDARDS_REPO" "$TMP_CLONE" >/dev/null
+  echo "-> Cloning $STANDARDS_REPO at ref $NIMBUS_REF..."
+  git clone --depth 1 --branch "$NIMBUS_REF" "$STANDARDS_REPO" "$TMP_CLONE" >/dev/null
   LOCAL_PATH="$TMP_CLONE"
+elif [[ ! -d "$LOCAL_PATH" ]]; then
+  echo "ERROR: local template path does not exist: $LOCAL_PATH" >&2
+  exit 1
 fi
 
 resolve_repo_type
 SELECTED_PRESET="$(preset_for_repo_type "$REPO_TYPE")"
 
 echo "-> Classifying repository context (greenfield vs brownfield)..."
-read -r DETECTED_CONTEXT CONTEXT_INDICATOR <<< "$(classify_repository_context)"
+classify_repository_context
 echo "  Detected context: $DETECTED_CONTEXT"
 if [[ "$DETECTED_CONTEXT" == "brownfield" ]]; then
   echo "  Interpretation: relevant application code is present, so the repo follows the brownfield path."
@@ -419,6 +418,63 @@ resolve_greenfield_topology_decision
 echo "-> Initializing Nimbus Code in $WORKDIR (integration: $INTEGRATION)..."
 specify init --here --integration "$INTEGRATION" --force
 persist_topology_decision
+
+persist_bootstrap_metadata() {
+  local metadata_file="$WORKDIR/.nimbus/bootstrap.json"
+  local bundle_id="$1"
+  local bundle_version="$2"
+  local source_ref="$3"
+
+  mkdir -p "$(dirname "$metadata_file")"
+  jq -n \
+    --arg bundle "$bundle_id" \
+    --arg version "$bundle_version" \
+    --arg ref "$source_ref" \
+    --arg preset "$SELECTED_PRESET" \
+    --arg repo_type "$REPO_TYPE" \
+    '{
+      schema_version: "1.0",
+      bundle: $bundle,
+      bundle_version: $version,
+      source_ref: $ref,
+      preset: $preset,
+      repository_type: $repo_type,
+      recorded_at: (now | strftime("%Y-%m-%dT%H:%M:%SZ"))
+    }' > "$metadata_file"
+  echo "  OK: bootstrap metadata recorded at .nimbus/bootstrap.json."
+}
+
+component_is_installed() {
+  local kind="$1"
+  local component_id="$2"
+
+  case "$kind" in
+    preset) [[ -d "$WORKDIR/.specify/presets/$component_id" ]] ;;
+    extension) [[ -d "$WORKDIR/.specify/extensions/$component_id" ]] ;;
+    workflow) [[ -d "$WORKDIR/.specify/workflows/$component_id" ]] ;;
+    *) return 1 ;;
+  esac
+}
+
+install_component() {
+  local kind="$1"
+  local component_id="$2"
+  local description="$3"
+  shift 3
+
+  if "$@"; then
+    return 0
+  fi
+
+  if component_is_installed "$kind" "$component_id"; then
+    echo "  INFO: $description already installed; leaving existing installation unchanged."
+    return 0
+  fi
+
+  echo "ERROR: failed to install $description." >&2
+  echo "       Command: $*" >&2
+  exit 1
+}
 
 echo "-> Installing preset $SELECTED_PRESET..."
 # Detect a stale already-installed preset and upgrade it automatically.
@@ -445,23 +501,31 @@ except Exception:
 fi
 if [[ -n "$INSTALLED_PRESET_VERSION" && -n "$SOURCE_PRESET_VERSION" && "$INSTALLED_PRESET_VERSION" != "$SOURCE_PRESET_VERSION" ]]; then
   echo "  Installed preset version ($INSTALLED_PRESET_VERSION) differs from source ($SOURCE_PRESET_VERSION) - upgrading..."
-  specify preset remove "$SELECTED_PRESET" || echo "  WARN: could not remove existing preset $SELECTED_PRESET before upgrade"
+  if ! specify preset remove "$SELECTED_PRESET"; then
+    echo "ERROR: could not remove existing preset $SELECTED_PRESET before upgrade." >&2
+    exit 1
+  fi
 fi
-specify preset add --dev "$LOCAL_PATH/presets/$SELECTED_PRESET" --priority 5   || echo "  (preset already installed - skipped; use 'specify preset remove $SELECTED_PRESET' before reinstalling)"
+install_component preset "$SELECTED_PRESET" "preset $SELECTED_PRESET" \
+  specify preset add --dev "$LOCAL_PATH/presets/$SELECTED_PRESET" --priority 5
 
-echo "-> Installing extension nimbus-code-backlog-sync..."
-specify extension add --dev "$LOCAL_PATH/extensions/nimbus-code-backlog-sync"   || echo "  (extension already installed - skipped; use 'specify extension remove nimbus-code-backlog-sync' before reinstalling)"
+if [[ "$REPO_TYPE" == "dev_standards" ]]; then
+  echo "-> Installing extension nimbus-code-backlog-sync..."
+  install_component extension nimbus-code-backlog-sync "extension nimbus-code-backlog-sync" \
+    specify extension add --dev "$LOCAL_PATH/extensions/nimbus-code-backlog-sync"
 
-echo "-> Installing extension cost (spec-kit-cost)..."
-if command -v specify >/dev/null 2>&1; then
-  specify extension install cost --version ">=1.0.0" >/dev/null 2>&1 || echo "  INFO: cost extension requires 'specify extension install cost' (network install from GitHub)"
-else
-  echo "  WARN: specify CLI not available for cost extension installation"
+  echo "-> Installing extension cost (spec-kit-cost)..."
+  install_component extension cost "extension cost (spec-kit-cost)" \
+    specify extension install cost --version ">=1.0.0"
 fi
 
-echo "-> Installing workflow nimbus-code-full-cycle..."
-specify workflow add "$LOCAL_PATH/workflows/nimbus-code-full-cycle"   || echo "  (workflow already installed - skipped; use 'specify workflow remove nimbus-code-full-cycle' before reinstalling)"
+if [[ "$REPO_TYPE" == "dev_standards" ]]; then
+  echo "-> Installing workflow nimbus-code-full-cycle..."
+  install_component workflow nimbus-code-full-cycle "workflow nimbus-code-full-cycle" \
+    specify workflow add "$LOCAL_PATH/workflows/nimbus-code-full-cycle"
+fi
 
+if [[ "$REPO_TYPE" == "dev_standards" ]]; then
 echo "-> Installing update check workflow..."
 UPDATE_CHECK_SRC="$LOCAL_PATH/templates/workflows/update-speckit-and-bundle.yml"
 if [[ -f "$UPDATE_CHECK_SRC" ]]; then
@@ -544,6 +608,8 @@ else
   echo "  WARN: missing reuse catalog template"
 fi
 
+fi
+
 echo
 echo "-> Installing Copilot instructions..."
 COPILOT_INSTRUCTIONS_SRC="$(select_template_file 'project-root/copilot-instructions.md' || true)"
@@ -559,6 +625,7 @@ else
   echo "  WARN: missing Copilot instructions template"
 fi
 
+if [[ "$REPO_TYPE" == "dev_standards" ]]; then
 echo
 echo "-> Installing agent session manual..."
 AGENT_SESSION_MANUAL_SRC="$(select_template_file 'agent-session-manual.md' || true)"
@@ -573,6 +640,7 @@ if [[ -n "$AGENT_SESSION_MANUAL_SRC" && -f "$AGENT_SESSION_MANUAL_SRC" ]]; then
 else
   echo "  WARN: missing agent session manual template"
 fi
+fi
 
 # Generic delivery for every remaining file the preset declares under
 # templates/project-root/ (workflows, ISSUE_TEMPLATE, Harness Engineering,
@@ -586,7 +654,8 @@ echo
 echo "-> Installing remaining preset project-root files..."
 PRESET_ROOT_DIR="$LOCAL_PATH/presets/$SELECTED_PRESET/templates/project-root"
 if [[ ! -d "$PRESET_ROOT_DIR" ]]; then
-  PRESET_ROOT_DIR="$LOCAL_PATH/presets/nimbus-code-standards/templates/project-root"
+  echo "ERROR: project-root templates directory not found for preset $SELECTED_PRESET." >&2
+  exit 1
 fi
 
 if [[ -d "$PRESET_ROOT_DIR" ]]; then
@@ -618,12 +687,27 @@ if [[ -d "$PRESET_ROOT_DIR" ]]; then
     echo "  OK: $dest_rel installed."
   done < <(find "$PRESET_ROOT_DIR" -type f -print0)
 else
-  echo "  WARN: preset project-root templates directory not found - skipped."
+  echo "ERROR: preset project-root templates directory not found - skipped." >&2
+  exit 1
 fi
 
-BUNDLE_VERSION="$(grep -A4 '^bundle:' "$LOCAL_PATH/bundles/nimbus-code-project-bundle/bundle.yml" | grep -E '^\s*version:' | head -1 | sed -E 's/.*"([0-9.]+)".*/\1/')"
+BUNDLE_ID="nimbus-code-project-bundle"
+if [[ "$REPO_TYPE" == "platform" ]]; then
+  BUNDLE_ID="nimbus-code-platform-bundle"
+fi
+BUNDLE_MANIFEST="$LOCAL_PATH/bundles/$BUNDLE_ID/bundle.yml"
+if [[ ! -f "$BUNDLE_MANIFEST" ]]; then
+  echo "ERROR: bundle manifest not found for $REPO_TYPE: $BUNDLE_MANIFEST" >&2
+  exit 1
+fi
+BUNDLE_VERSION="$(grep -A4 '^bundle:' "$BUNDLE_MANIFEST" | grep -E '^[[:space:]]*version:' | head -1 | sed -E 's/.*"([0-9.]+)".*/\1/')"
+if [[ -z "$BUNDLE_VERSION" ]]; then
+  echo "ERROR: could not determine version for bundle $BUNDLE_ID." >&2
+  exit 1
+fi
+persist_bootstrap_metadata "$BUNDLE_ID" "$BUNDLE_VERSION" "$NIMBUS_REF"
 echo
-echo "OK: bundle nimbus-code-project-bundle v${BUNDLE_VERSION} applied."
+echo "OK: bundle $BUNDLE_ID v${BUNDLE_VERSION} applied."
 echo "OK: preset installed: $SELECTED_PRESET (repository type: $REPO_TYPE)"
 echo "OK: repository classified as $DETECTED_CONTEXT (reason: $CONTEXT_INDICATOR)"
 if [[ "${DETECTED_CONTEXT:-}" == "greenfield" ]]; then
@@ -637,7 +721,7 @@ auto_assign_hint() {
   echo "  INFO: to enable auto-assign, configure NIMBUS_APP_ID/NIMBUS_APP_PRIVATE_KEY; COPILOT_AGENT_ASSIGN_TOKEN remains a temporary fallback during rollout."
 }
 
-if command -v gh >/dev/null 2>&1; then
+if [[ "$REPO_TYPE" == "dev_standards" ]] && command -v gh >/dev/null 2>&1; then
   echo
   echo "-> Configuring GitHub Project V2 and labels..."
   if GIT_REMOTE=$(git config --get remote.origin.url 2>/dev/null); then
@@ -673,21 +757,23 @@ if command -v gh >/dev/null 2>&1; then
   else
     echo "  WARN: remote.origin.url is not configured"
   fi
-else
+elif [[ "$REPO_TYPE" == "dev_standards" ]]; then
   echo "  WARN: gh CLI not found - skipping GitHub Project and label setup"
 fi
 
 # Install version synchronization hooks
-echo
-echo "-> Installing git hooks for version synchronization..."
-HOOKS_SCRIPT="$LOCAL_PATH/scripts/install-hooks.sh"
-if [[ -f "$HOOKS_SCRIPT" ]]; then
-  bash "$HOOKS_SCRIPT" || {
-    echo "  WARN: could not install hooks automatically."
-    echo "  Run manually: bash $HOOKS_SCRIPT"
-  }
-else
-  echo "  WARN: install-hooks.sh not found"
+if [[ "$REPO_TYPE" == "dev_standards" ]]; then
+  echo
+  echo "-> Installing git hooks for version synchronization..."
+  HOOKS_SCRIPT="$LOCAL_PATH/scripts/install-hooks.sh"
+  if [[ -f "$HOOKS_SCRIPT" ]]; then
+    bash "$HOOKS_SCRIPT" || {
+      echo "  WARN: could not install hooks automatically."
+      echo "  Run manually: bash $HOOKS_SCRIPT"
+    }
+  else
+    echo "  WARN: install-hooks.sh not found"
+  fi
 fi
 
 echo

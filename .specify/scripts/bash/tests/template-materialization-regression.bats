@@ -1,8 +1,8 @@
 #!/usr/bin/env bats
 
-COMMON_SH="/tmp/nimbus-023-remote/.specify/scripts/bash/common.sh"
-
 setup() {
+    REPO_ROOT="$(cd "$BATS_TEST_DIRNAME/../../../.." && pwd)"
+    COMMON_SH="$REPO_ROOT/.specify/scripts/bash/common.sh"
     FIXTURE_DIR="$(mktemp -d)"
     mkdir -p "$FIXTURE_DIR/.specify/templates" "$FIXTURE_DIR/.specify/presets" "$FIXTURE_DIR/lib"
     cat > "$FIXTURE_DIR/lib/yaml.py" <<'PY'
@@ -55,7 +55,7 @@ materialize_content() {
 
 @test "plan-template regression matches the merged block preserved in specs/021" {
     write_core_template "plan-template" "CORE-PLAN"
-    write_manual_merge_template "plan-template" "$(awk '/^## Nimbus-Code — Classificação de Complexidade/{flag=1} flag' /tmp/nimbus-023-remote/specs/021-dora-metrics-governance/plan.md)"
+    write_manual_merge_template "plan-template" "$(awk '/^## Nimbus-Code — Classificação de Complexidade/{flag=1} flag' "$REPO_ROOT/specs/021-dora-metrics-governance/plan.md")"
     write_registry
 
     resolve_content "plan-template"
@@ -67,7 +67,7 @@ materialize_content() {
 
 @test "tasks-template regression keeps the returned file path and composed body" {
     write_core_template "tasks-template" "CORE-TASKS"
-    write_manual_merge_template "tasks-template" "$(awk '/^## Nimbus-Code — Contrato de Task Executável no GHE/{flag=1} flag' /tmp/nimbus-023-remote/specs/022-nimbuscode-harvest-gateway/tasks.md)"
+    write_manual_merge_template "tasks-template" "$(awk '/^## Nimbus-Code — Contrato de Task Executável no GHE/{flag=1} flag' "$REPO_ROOT/specs/022-nimbuscode-harvest-gateway/tasks.md")"
     write_registry
     OUT_FILE="$FIXTURE_DIR/materialized-tasks-template.md"
 

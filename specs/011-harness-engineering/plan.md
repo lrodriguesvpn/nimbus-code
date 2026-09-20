@@ -101,17 +101,19 @@ scripts/
 
 ---
 
-## Nimbus-Code — Rastreabilidade AC → Teste → Módulo
+## Nimbus-Code — Rastreabilidade FR / AC → Teste → Módulo
 
-| ID AC | Critério (resumo) | Tipo de teste planejado | Arquivo/módulo do teste | Justificativa de ausência |
+| ID FR / AC | Critério / Requisito (resumo) | Tipo de teste planejado | Arquivo/módulo do teste | Justificativa de ausência |
 |---|---|---|---|---|
-| AC-1 | `copilot-instructions.md` instrui consulta ao harness antes do plan | Manual (leitura e verificação do arquivo) | `.github/copilot-instructions.md` | — |
-| AC-2 | `plan.md` tem seção "Harness Gate" quando há match | Manual (verificar template e esta spec) | `presets/nimbus-code-standards/templates/plan-template.md` | — |
-| AC-3 | Checklist de fechamento inclui passo `harness:pending` | Manual (verificar tasks-template.md e tasks.md) | `presets/nimbus-code-standards/templates/tasks-template.md` | — |
-| AC-4 | Busca no catálogo responde em < 5s | Manual (`time grep` ou `time ./scripts/harness-search.sh`) | `scripts/harness-search.sh` | — |
-| AC-5 | Labels `harness:*` criados pelo script | Manual (`gh label list` após execução) | `scripts/setup-github-labels.sh` | — |
-| AC-6 | Template de incidente tem estrutura completa | Manual (leitura do template) | `docs/harness/incident-template.md` | — |
-| AC-7 | Harness Gate sem match declara explicitamente "Nenhum padrão encontrado" | Manual (verificar instrução no plan-template e copilot-instructions) | `presets/nimbus-code-standards/templates/plan-template.md` | — |
+| FR-001 / AC-1 | Schema e estrutura do catálogo `harness-catalog.yaml` | Validação de sintaxe YAML (`python3 -c "import yaml; yaml.safe_load(open('docs/harness/harness-catalog.yaml'))"`) | `docs/harness/harness-catalog.yaml` | — |
+| FR-002 / AC-1 | `copilot-instructions.md` instrui consulta ao harness antes do plan | Validação de texto (leitura e verificação do arquivo) | `.github/copilot-instructions.md` | — |
+| FR-003 / AC-2 / AC-7 | `plan.md` tem seção "Harness Gate" (match, sem match, catálogo vazio) | Validação de template e conformidade de estados | `presets/nimbus-code-standards/templates/plan-template.md` | — |
+| FR-004 / AC-3 | Checklist de fechamento inclui passo `harness:pending` (>20% retrabalho) | Validação de template | `presets/nimbus-code-standards/templates/tasks-template.md` | — |
+| FR-005 / AC-5 | Governança de `harness:blocking` e permissão exclusiva Tech Lead | Validação documental e governança de labels | `docs/harness/harness-guide.md` | — |
+| FR-006 | Sanitização e anonimização de dados PII/segredos | Validação de compliance estático | `docs/harness/harness-guide.md` | — |
+| FR-007 / AC-4 | Busca no catálogo via CLI responde em < 5s com fallback grep/awk | Execução de benchmark (`time ./scripts/harness-search.sh <tag>`) | `scripts/harness-search.sh` | — |
+| FR-008 / AC-6 | Template de incidente com timeline, 5-Whys e checklist | Validação de integridade de template | `docs/harness/incident-template.md` | — |
+| AC-5 / SC-004 | Labels `harness:*` criados pelo script de forma idempotente | Teste de execução CLI (`./scripts/setup-github-labels.sh`) | `scripts/setup-github-labels.sh` | — |
 
 ---
 

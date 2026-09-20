@@ -1,13 +1,13 @@
-# Implementation Plan: Bootstrap Governance & Repo Provisioning Hardening
+# Implementation Plan: Bootstrap Governance, Platform Profile & Validation Release
 
-**Branch**: `008-bootstrap-governance-hardening` | **Date**: 2026-08-20 | **Spec**: [spec.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/vpn-skills-repo-governance-specs/specs/008-bootstrap-governance-hardening/spec.md)
+**Branch**: `008-bootstrap-governance-hardening` | **Date**: 2026-09-20 | **Spec**: [spec.md](./spec.md)
 
 **Input**: Feature specification from `specs/008-bootstrap-governance-hardening/spec.md`
 
 ## Summary
 
-Endurecer o `bootstrap.sh` e os dois presets de governança (`nimbus-code-standards`,
-`nimbus-code-platform-standards`) para que: (1) o operador seja explicitamente
+Endurecer o `bootstrap.sh` e preparar uma release candidate dos dois perfis
+(`dev_standards` e `platform`) para que: (1) o operador seja explicitamente
 questionado sobre o tipo de repositório antes de qualquer preset ser instalado;
 (2) os templates de issue dos dois presets tenham paridade estrutural garantida por
 validação automatizada; (3) toda automação cross-repo/organização migre de PAT
@@ -131,12 +131,82 @@ seu workflow de CI correspondente.
 
 | Campo | Valor |
 |---|---|
-| **Nível** | **S3** — cruza `bootstrap.sh`, 2 presets de governança, 4 workflows de automação existentes e um novo validador de CI |
+| **Nível** | **S4** — release de plataforma e governança com autenticação cross-repo, dois perfis e piloto controlado |
 | **Justificativa** | Múltiplos módulos interdependentes (script de bootstrap, presets, workflows de automação, novo script de validação); mudança de mecanismo de autenticação com impacto em repositórios já provisionados |
 | **Modelo de IA** | Reasoning (Claude Sonnet 4.6+ / GPT-5.4+) — decisões de segurança e compatibilidade retroativa |
 | **Revisão humana obrigatória** | **Sim** — não pelo nível S3 em si (S3 não exige por padrão), mas porque a feature altera mecanismo de autenticação de automações já em produção; tratado como decisão de segurança que exige aprovação explícita antes do merge, registrado no ADL abaixo |
 | **Padrão reutilizado encontrado?** | Não — `docs/reuse-catalog.yaml` consultado; padrão de GitHub App para automação org-wide já existe como precedente em `docs/adr/0008-github-app-para-varredura-de-seguranca-org-wide.md` (feature 007), mas não como entrada de catálogo reutilizável ainda. Será adicionada entrada ao final desta feature (tag: `bootstrap-github-app-auth`) |
-| **Estimativa de tokens (input+output)** | ~35–50 mil tokens — pesquisa de `actions/create-github-app-token`, design do validador de paridade, migração de 4 workflows, e documentação do manual de skills |
+| **Estimativa de tokens (input+output)** | ~45–65 mil tokens — revisão de release/versionamento, isolamento dos perfis, melhorias de plataforma/Dev Standards, piloto e validação de autenticação |
+
+## Nimbus-Code — Escopo da Release Candidate
+
+### Decisão de versionamento
+
+Esta mudança altera comportamento publicado do bootstrap e adiciona capacidades
+de governança aos dois perfis. Portanto, **não é `release:patch` nem
+`release:skip`**:
+
+| Componente | Versão atual | Versão proposta | Justificativa |
+|---|---:|---:|---|
+| `nimbus-code-standards` | `1.18.0` | `1.19.0` | Nova capacidade compatível no bootstrap e melhorias de Dev Standards |
+| `nimbus-code-project-bundle` | `1.18.0` | `1.19.0` | Bundle aponta para o preset atualizado |
+| `nimbus-code-platform-standards` | `0.4.0` | `0.5.0` | Nova capacidade compatível de profile isolation e governança de plataforma |
+| `nimbus-code-platform-bundle` | `0.4.0` | `0.5.0` | Bundle aponta para o preset de plataforma atualizado |
+| `nimbus-code-backlog-sync` | `1.2.0` | sem bump | Sem mudança planejada na extensão |
+| `nimbus-code-full-cycle` | `1.4.0` | sem bump | Sem mudança planejada no workflow |
+
+O bump é MINOR porque as mudanças são compatíveis, mas alteram o contrato de
+provisionamento e adicionam artefatos. O tag de piloto será
+`v1.19.0-rc.1`, criado somente após o commit promovido à `main`; o tag final
+será `v1.19.0` após os gates do piloto. A release publica os dois bundles no
+mesmo commit, respeitando o workflow existente de release.
+
+### Melhorias incluídas na nova versão
+
+**Dev Standards (`1.19.0`)**
+
+- bootstrap reproduzível por `--ref`/`--version`, com `.nimbus/bootstrap.json`;
+- separação explícita `dev_standards` versus `platform`;
+- falhas críticas de instalação não mascaradas;
+- contrato de autenticação por escopo: `GITHUB_TOKEN` para mesmo repositório e
+  GitHub App para cross-repo/org;
+- quality gates executáveis: Bats, scripts `.test.sh`, Graph Guard, retro signal
+  e validação de URLs/fontes;
+- governança de agentes: classificação S0–S4, custo real, harness/playbook,
+  isolamento de sessão e estratégia de rollout;
+- fluxo de release com tag/ref imutável e atualização coordenada de manifests,
+  presets, bundles e catálogos.
+
+**Plataforma (`0.5.0`)**
+
+- bootstrap instala apenas o preset e artefatos de plataforma, sem backlog,
+  custo, DEVSTATS, GitHub Project ou hooks de workload;
+- inventário multi-cloud e CMDB como fonte de evidência para IA e validação
+  advisory de Terraform;
+- baseline de segurança/compliance e políticas/customizações com trilha de
+  exceção;
+- ciclo de vida `discovery → imported → plan_diff_zero →
+  landing_zone_generated → managed`;
+- zero-diff, drift detection e proibição de apply direto em produção;
+- grafo `plataforma → superfície → workload`, registro de schemas legados,
+  Landing Zone/CAF e handoff auditável;
+- runbook de piloto para autenticação, escopo, evidência e rollback.
+
+### Contrato de referência para o piloto
+
+O repositório piloto deve executar exclusivamente:
+
+```bash
+bash bootstrap.sh \
+  --ref v1.19.0-rc.1 \
+  --repo-type platform \
+  --delivery-model monorepo \
+  --decision-reason "validacao do perfil de plataforma" \
+  --decision-owner "luiz-feitosa"
+```
+
+O segundo cenário usa a mesma tag com `--repo-type dev_standards`. O piloto não
+deve consumir `main`, branches móveis ou arquivos copiados manualmente.
 
 ## Nimbus-Code — Rastreabilidade AC → Teste → Módulo
 
@@ -170,7 +240,7 @@ seu workflow de CI correspondente.
 | **Feature flag name** | `bootstrap_github_app_auth_v1` |
 | **Flag provider** | **OpenFeature** (obrigatório como camada de abstração) + provider pluggable por ambiente (bootstrap inicial pode usar fallback simples por variável de ambiente) |
 | **Critério de ativação** | Validar em 1 repositório piloto (não-crítico) com todos os 4 workflows migrados, sem falha por 7 dias, antes de aplicar a todos os repositórios que usam o bundle |
-| **Critério de rollback** | Qualquer workflow migrado falhando por ausência/erro de token de GitHub App reverte automaticamente para o secret PAT (mantido como fallback até o rollout ser considerado estável) |
+| **Critério de rollback** | Desativar o rollout via OpenFeature e bloquear a etapa ampliada até correção; fallback PAT não é automático e só pode ser habilitado em modo de migração opt-in, com owner, prazo, ambiente permitido e auditoria |
 
 **Justificativa para uso de flag**: a mudança de mecanismo de autenticação afeta
 automações já em produção em múltiplos repositórios; um corte abrupto sem
@@ -188,8 +258,8 @@ PAT documentado no `spec.md`.
 | **Default por ambiente** | Repositório piloto = on; demais repositórios = off até validação |
 | **Segmentos de ativação** | `pilot-repo` primeiro, depois `all-bundle-consumers` |
 | **Estratégia de rollout** | Piloto (1 repo, 7 dias sem falha) → aplicar a todos os repositórios do bundle → remover fallback PAT após confirmação |
-| **Kill switch definido?** | Sim — reverter workflow para usar o secret PAT existente (mantido, não removido, até rollout completo) |
-| **Critério de limpeza** | Remover fallback PAT e a flag 30 dias após 100% dos repositórios migrados, com Issue de tracking criada |
+| **Kill switch definido?** | Sim — desativar a flag e impedir a etapa cross-repo até correção; não habilitar PAT automaticamente |
+| **Critério de limpeza** | Remover qualquer modo de migração PAT e a flag 30 dias após 100% dos repositórios migrados, com Issue de tracking e evidência de auditoria |
 
 ## Nimbus-Code — Cost Reference
 
@@ -207,7 +277,7 @@ foram resolvidas com o Dev durante a criação da spec (ex.: GitHub App org-leve
 
 **Research tasks**:
 - [ ] Validar a API `actions/create-github-app-token@v1` (parâmetros, permissões mínimas por workflow, limites de rate)
-- [ ] Confirmar mecanismo de fallback seguro (flag) para reverter a um workflow para PAT sem exigir novo deploy
+- [ ] Confirmar mecanismo de rollout/rollback via OpenFeature; qualquer fallback PAT deve ser opt-in, temporário, auditado e não automático
 - [ ] Validar se o GitHub Enterprise da organização (`venha-pra-nuvem.ghe.com`) suporta GitHub Apps organizacionais na versão atual (mesma validação já necessária para `docs/adr/0008-github-app-para-varredura-de-seguranca-org-wide.md`, reaproveitar achado)
 
 **Expected Output**: `research.md`
@@ -218,7 +288,9 @@ foram resolvidas com o Dev durante a criação da spec (ex.: GitHub App org-leve
 
 ### Data Model (prévia — detalhado em `data-model.md`)
 
-1. **RepoProvisioningProfile** — tipo de preset escolhido, papel no produto (se aplicável, delegado a `specs/006-multirepo-support/`)
+1. **RepoProvisioningProfile** — tipo de preset escolhido, ref da fonte,
+   classificação greenfield/brownfield e modo de execução; o roteamento
+   multi-repositório é delegado a `specs/006-multirepo-support/`
 2. **GitHubAppCredentialPolicy** — regra por automação: GitHub App (cross-repo/org) vs. `GITHUB_TOKEN` (mesmo repo)
 3. **SourceOfTruthRegistry** — lista de URLs permitidas (Spec Kit oficial vs. GHE da organização)
 4. **SkillDistributionManual** — por skill, local vs. remota, e estado atual

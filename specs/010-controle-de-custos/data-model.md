@@ -16,7 +16,7 @@
 |---|---|---|---|
 | `id` | UUID | Identificador único | Obrigatório; gerado na inserção |
 | `feature_id` | string | Identificador da feature (ex.: `010-controle-de-custos`) | Obrigatório |
-| `dimension` | enum | `tokens` \| `human_hours` \| `cloud` | Obrigatório; `cloud` reservado para fase 2 |
+| `dimension` | enum | `tokens` \| `human_hours` | Obrigatório; `cloud` é reservado e rejeitado no MVP |
 | `amount` | float | Quantidade real consumida (tokens ou horas) | Obrigatório; > 0 |
 | `currency` | string | Moeda de referência (`BRL`) | Obrigatório |
 | `usd_amount` | float | Valor original em USD (para tokens) | Opcional; preenchido quando dimension = `tokens` |
@@ -27,6 +27,7 @@
 | `session_id` | string | ID da sessão de agente | Opcional; quando dimension = `tokens` |
 | `correction_ref` | UUID | Referência ao registro corrigido (se este é uma correção) | Opcional; para trilha de auditoria |
 | `created_at` | timestamp | Timestamp de inserção | Obrigatório; imutável |
+| `data_quality` | enum | `complete` \| `human_hours_missing` \| `exchange_rate_missing` | Obrigatório; qualidade observada na coleta |
 
 **Example**:
 ```yaml
@@ -44,6 +45,7 @@ CostRecord:
   session_id: "sess-abc123"
   correction_ref: null
   created_at: "2026-08-18T17:00:00Z"
+  data_quality: "complete"
 ```
 
 **Validation**:
@@ -52,6 +54,8 @@ CostRecord:
 - Se `dimension: tokens` e `usd_amount` ausente → aceitar mas sinalizar como "câmbio não registrado"
 - `correction_ref` → o registro referenciado deve existir; ciclos não permitidos
 - Registro é imutável; atualizações criam novo CostRecord com `correction_ref` apontando ao original
+- Ausência de `Horas Humanas` gera `human_hours_missing`, nunca `amount=0`
+- Para tokens, armazenar `usd_amount`, `exchange_rate` e origem/timestamp do câmbio
 
 ---
 
@@ -141,6 +145,8 @@ Budget:
 | `threshold_pct` | float | % do orçamento que disparou o alerta | Obrigatório |
 | `notified_to` | string | Canal/destinatário efetivamente notificado | Obrigatório |
 | `notification_status` | enum | `sent` \| `failed` \| `retrying` | Obrigatório |
+| `retry_count` | int | Número de tentativas de envio | Obrigatório; ≥ 0 |
+| `last_error_code` | string | Código do último erro observável | Obrigatório quando failed/retrying |
 | `resolved_at` | timestamp | Quando o alerta foi reconhecido pelo owner | Opcional |
 
 **Example**:
