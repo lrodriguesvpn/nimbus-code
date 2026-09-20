@@ -7,7 +7,7 @@
 > Os artefatos desta spec permanecem como referência de planejamento. A
 > implementação está adiada e não deve ser iniciada por `/speckit-implement`
 > até nova priorização explícita.
-**Input**: User description: "Definir a especificação do Nimbus Agent para atuar como assistente de dúvidas operacionais do processo Nimbus Code e gerador de intake direto de novos projetos a partir de transcrições e reuniões de descoberta, integrando-se à plataforma de engenharia digital."
+**Input**: User description: "Definir a especificação do Nimbus Agent para atuar como assistente de dúvidas operacionais do processo Nimbus Code e gerador de intake direto de novos projetos a partir de transcrições e reuniões de descoberta, estruturando a cadeia agêntica de descoberta (NC-Intake, NC-Spec, NC-Critic, NC-Governor) integrada à plataforma de engenharia digital."
 
 ## Nimbus-Code — Cabeçalho Obrigatório da Spec
 
@@ -20,6 +20,36 @@
 | **Data alvo de entrega** | sem data |
 
 > S0 = doc · S1 = função isolada · S2 = módulo · S3 = múltiplos módulos · S4 = arquitetura, segurança, dados ou integração crítica
+
+## Nimbus-Code — Cadeia de Agentes de Descoberta e Governança (NC-*)
+
+A SPEC 018 formaliza a **Camada 1 (Intake, Especificação, Crítica e Governança)** da Fábrica Agêntica Nimbus Code:
+
+```
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│                   CAMADA 1: DESCOBERTA & GOVERNANÇA (SPEC 018)                   │
+├──────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│   [NC-Intake]          →      [NC-Spec]           →      [NC-Critic]             │
+│   (Entrevista 4 Blocos:       (Engenheiro de             (Auditor de             │
+│    Negócio/Infra/Sec/LGPD)     Requisitos & BDD)          Ambiguidade & Gaps)    │
+│                                                                  │               │
+│                                                  ▼               ▼               │
+│                                         [NC-Governor]                            │
+│                                         (Rastreabilidade, Hashes SHA-256         │
+│                                          e Gate de Aprovação RACI)               │
+│                                                  │                               │
+│                                                  ▼                               │
+│                          [Handoff para SPEC 017: NC-Arch & Squad]                │
+└──────────────────────────────────────────────────────────────────────────────────┘
+```
+
+1. **`NC-Intake` (Nimbus Intake Specialist)**: Conduz e transcreve a entrevista de descoberta cobrindo 4 blocos obrigatórios (Negócio, Infraestrutura, Segurança e LGPD), gerando `interview.md`.
+2. **`NC-Spec` (Nimbus Spec Architect)**: Processa o `interview.md` e produz uma especificação funcional SMART com User Stories e cenários de aceitação em formato BDD (`spec.md`).
+3. **`NC-Critic` (Nimbus Spec Auditor)**: Analisa criticamente a spec buscando contradições, ambiguidades, lacunas de requisitos e termos vagos (`clarifications.md` e `[NEEDS CLARIFICATION]`).
+4. **`NC-Governor` (Nimbus Governance Gate)**: Registra hash de integridade da spec, classifica a complexidade (S0–S4) e impõe os gates de aprovação humana e rastreabilidade no GitHub Projects.
+
+---
 
 ## Nimbus-Code — SLO Alvo desta Feature
 
@@ -184,17 +214,20 @@ Como Business Analyst, quero que o Nimbus conduza a entrevista de descoberta de 
 - **FR-008**: Falhas de integração no intake MUST ser explícitas e observáveis, sem mascaramento de erro.
 - **FR-009**: A feature MUST declarar OpenFeature como padrão de abstração para toggles de rollout de intake direto.
 - **FR-010**: A solução MUST permitir auditoria de quem iniciou o intake, qual modo foi definido e qual decisão de aprovação foi tomada.
-- **FR-011** *(Roadmap — US5)*: Quando a condução de entrevista via Teams estiver implementada, o Nimbus MUST validar a cobertura dos 4 blocos obrigatórios do modelo de entrevista (`interview-template.md`: Negócio, Infraestrutura, Segurança, LGPD) antes de encaminhar a demanda para intake.
-- **FR-012** *(Roadmap — US5)*: Bloco obrigatório ausente no transcript MUST ser sinalizado explicitamente como pendência — o Nimbus MUST NOT inferir ou inventar resposta de Segurança, Infraestrutura ou LGPD para preencher uma lacuna.
+- **FR-011** *(Roadmap — US5)*: Quando a condução de entrevista via Teams estiver implementada, o agente **NC-Intake** MUST validar a cobertura dos 4 blocos obrigatórios do modelo de entrevista (`interview-template.md`: Negócio, Infraestrutura, Segurança, LGPD) antes de encaminhar a demanda para intake.
+- **FR-012** *(Roadmap — US5)*: Bloco obrigatório ausente no transcript MUST ser sinalizado explicitamente como pendência pelo **NC-Critic** — o sistema MUST NOT inferir ou inventar resposta de Segurança, Infraestrutura ou LGPD para preencher uma lacuna.
+- **FR-013**: O agente **NC-Spec** MUST estruturar o `spec.md` garantindo critérios de aceitação BDD testáveis e livres de premissas implícitas.
+- **FR-014**: O agente **NC-Governor** MUST registrar a rastreabilidade, classificação de complexidade (S0–S4) e aprovação formal antes do handoff para a Camada de Arquitetura da SPEC 017.
 
 ### Key Entities *(include if feature involves data)*
 
 - **Process Question**: pergunta operacional sobre o fluxo Nimbus Code feita por BA, ADE ou engenharia.
 - **Intake Demand**: demanda criada no repositório satélite com metadados mínimos para triagem.
 - **Project Item**: representação da demanda no projeto central para gestão de backlog.
-- **Mode Decision**: decisão de modo (autônomo, semi-autônomo, manual) com justificativa.
+- **Mode Decision**: decisão de modo (autônomo, semi-autônomo, manual) com justificativa gerenciada pelo **NC-Governor**.
 - **Approval Decision**: decisão humana Go/No-Go quando o gate de aprovação é obrigatório.
-- **Discovery Interview**: registro estruturado (`interview.md`) da entrevista de descoberta conduzida — manualmente hoje, via Teams no roadmap — cobrindo os 4 blocos do modelo padrão de entrevista (`interview-template.md`).
+- **Discovery Interview**: registro estruturado (`interview.md`) da entrevista de descoberta conduzida pelo **NC-Intake** cobrindo os 4 blocos do modelo padrão de entrevista (`interview-template.md`).
+- **Specification Artifact**: documento `spec.md` gerado pelo **NC-Spec** e auditado pelo **NC-Critic**.
 
 ## Success Criteria *(mandatory)*
 

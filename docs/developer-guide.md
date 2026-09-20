@@ -13,18 +13,19 @@ Este é o manual **central e objetivo** de como todo desenvolvedor e engenheiro 
 
 ## ⚡ Tabela Rápida de Comandos e Ciclo de Vida
 
-| Fase | Comando / Skill | Objetivo | Saída Principal |
-|---|---|---|---|
-| **0. Entrevista** | `/speckit-interview` | Descoberta guiada com o cliente (Negócio, Infra, Segurança, LGPD) | `specs/<slug>/interview.md` |
-| **1. Especificar** | `/speckit-specify` | Definir o **quê** e o **porquê** (requisitos SMART e User Stories) | `specs/<slug>/spec.md` |
-| **2. Clarificar** | `/speckit-clarify` | Eliminar ambiguidades antes do desenho técnico | `spec.md` atualizado |
-| **3. Planejar** | `/speckit-plan` | Desenhar arquitetura técnica, verificar gates e grafo | `specs/<slug>/plan.md` |
-| **4. Checklist** | `/speckit-checklist` | Validar completude e qualidade dos requisitos | `checklists/requirements-quality.md` |
-| **5. Tarefas** | `/speckit-tasks` | Decompor em tarefas ordenadas por dependência com labels | `specs/<slug>/tasks.md` |
-| **6. Analisar** | `/speckit-analyze` | Checagem cruzada de consistência (spec ↔ plan ↔ tasks) | Relatório de consistência |
-| **7. Issues** | `/speckit-taskstoissues` | Criar hierarquia Agile de issues no GHE (Epic → Feature → US → Task) | Issues no GitHub Project |
-| **8. Implementar**| `/speckit-implement` | Executar as tarefas respeitando isolamento de sessão | Código, testes e docs |
-| **9. Convergir** | `/speckit-converge` | Auditar código real vs artefatos e fechar gaps remanescentes | Tasks adicionais até `✅ Converged` |
+O Nimbus Code opera como uma **Fábrica de Software Agêntica** estruturada pelo esquadrão de 9 agentes especializados (`NC-*`):
+
+| Fase | Agente Responsável | Comando / Skill | Objetivo | Saída Principal |
+|---|---|---|---|---|
+| **0. Entrevista** | **`NC-Intake`** | `/speckit-interview` | Descoberta guiada com o cliente (Negócio, Infra, Segurança, LGPD) | `specs/<slug>/interview.md` |
+| **1. Especificar** | **`NC-Spec`** | `/speckit-specify` | Definir o **quê** e o **porquê** (requisitos SMART e User Stories BDD) | `specs/<slug>/spec.md` |
+| **2. Clarificar & Auditar** | **`NC-Critic`** | `/speckit-clarify` / `/speckit-checklist` | Eliminar ambiguidades e auditar qualidade antes do desenho técnico | `spec.md` polido / Checklist |
+| **3. Governança & Rastreabilidade** | **`NC-Governor`** | Issue Hierarchy / RACI Gate | Registrar hash SHA-256 da spec, complexidade S0–S4 e aprovação humana | Issues no Project V2 |
+| **4. Planejar Arquitetura** | **`NC-Arch`** | `/speckit-plan` | Desenhar arquitetura técnica, verificar reuso e atualizar grafos | `plan.md`, `graph.yaml` |
+| **5. DevSecOps & Compliance** | **`NC-Shield`** | Security Gate / `/security-review` | Validar os 6 itens Não-Negociáveis (TLS, cofre, segredos, backup, etc.) | Parecer de Segurança |
+| **6. Estratégia de Testes** | **`NC-QA`** | `/speckit-checklist` + TDD suíte | Elaborar a suíte de testes (TDD/E2E/BATS) antes da codificação | Testes pré-implementação |
+| **7. Implementar** | **`NC-Builder`** | `/speckit-implement` / `/speckit-converge` | Executar as tarefas sob isolamento estrito de sessão (1 branch/fase) | Código, testes e PR (`Closes #N`) |
+| **8. Observabilidade & DORA** | **`NC-Telemetry`** | `process-metrics-report.sh` | Instrumentar logs JSON/OTel, apurar métricas DORA e custo total | Métricas DORA + Custo Real |
 
 ### 🐛 Fluxo Dedicado de Bugs (assess → fix → test)
 *Instalado por padrão via extensão `bug`:*
