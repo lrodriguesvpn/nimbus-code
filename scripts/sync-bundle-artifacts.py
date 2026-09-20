@@ -35,13 +35,14 @@ def delivery_files(bundle, preset):
     ):
         relative = ".specify/scripts/bash/" + name
         files[relative] = bundle / relative
-    for name in (
-        "update-speckit-and-bundle.yml", "ensure-github-project.yml",
-        "add-to-repo-project.yml", "agent-auto-assign.yml",
-    ):
-        source = bundle / "templates/workflows" / name
-        if source.is_file():
-            files[".github/workflows/" + name] = source
+    if preset == "nimbus-code-standards":
+        for name in (
+            "update-speckit-and-bundle.yml", "ensure-github-project.yml",
+            "add-to-repo-project.yml", "agent-auto-assign.yml",
+        ):
+            source = bundle / "templates/workflows" / name
+            if source.is_file():
+                files[".github/workflows/" + name] = source
     for relative in (
         ".github/workflows/validate-bootstrap.yml",
         "docs/version-synchronization.md",

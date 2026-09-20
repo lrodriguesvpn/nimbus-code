@@ -17,6 +17,10 @@ graph TD
     AutoAssign["agent-auto-assign.yml"] -->|token de instalação| GHApp
 
     GraphGuard["graph-guard.yml"] -->|GITHUB_TOKEN nativo, sem GitHub App| GraphGuard
+    Release["v1.19.0-rc.1"] -->|ref imutável| ProjectBundle["nimbus-code-project-bundle 1.19.0"]
+    Release -->|ref imutável| PlatformBundle["nimbus-code-platform-bundle 0.5.0"]
+    Platform["nimbus-code-platform-standards 0.5.0"] -->|evidência advisory| CMDB["CMDB / inventário cloud"]
+    DevGuard["Dev Standards agent guardrails"] -->|governa| Bootstrap
 
     style GHApp fill:#f9f,stroke:#333
     style SpecKit fill:#bbf,stroke:#333
@@ -35,6 +39,8 @@ graph LR
 
     DoisPresets --> GovernancaModel
     AutenticacaoCrossRepo --> GovernancaModel
+    Release -->|piloto| Pilot["Projeto de validação"]
+    Pilot -->|promove após gates| Final["v1.19.0"]
 ```
 
 ## Critical Paths

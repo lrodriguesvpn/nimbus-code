@@ -1,4 +1,4 @@
-# impact-map.md — Feature 010: Harness Engineering — Aprendizado Organizacional com Erros
+# impact-map.md — Feature 011: Harness Engineering — Aprendizado Organizacional com Erros
 
 > Obrigatório para S3/S4. Atualizar se a implementação divergir do plano.
 

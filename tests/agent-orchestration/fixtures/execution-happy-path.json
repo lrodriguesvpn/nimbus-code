@@ -1,0 +1,40 @@
+{
+  "event_id": "evt-happy-001",
+  "timestamp": "2026-09-20T18:00:00Z",
+  "actor": {
+    "id": "NC-Builder",
+    "type": "agent",
+    "session_id": "sess-001"
+  },
+  "run_id": "run-happy-001",
+  "phase": "NC-Builder",
+  "action": "apply_changes_in_scope",
+  "scope": {
+    "files": [
+      "src/example.ts"
+    ],
+    "directories": [
+      "src"
+    ],
+    "lock_id": "lock-build-001"
+  },
+  "artifacts_produced": [
+    {
+      "path": "src/example.ts",
+      "kind": "code",
+      "checksum": "abc123"
+    }
+  ],
+  "decision": "approved",
+  "retry_count": 0,
+  "approval": {
+    "required": false,
+    "status": "not_required",
+    "approved_by": null,
+    "approved_at": null,
+    "gate_id": null
+  },
+  "final_result": "success",
+  "failure_reason": null,
+  "notes": "happy path"
+}

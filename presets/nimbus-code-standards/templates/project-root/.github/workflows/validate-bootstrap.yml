@@ -1,0 +1,164 @@
+name: Validate Bootstrap & Preset Version
+
+on:
+  pull_request:
+    paths:
+      - '.specify/**'
+      - 'bootstrap.sh'
+      - '.github/workflows/validate-bootstrap.yml'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  CENTRAL_PRESET_REPOSITORY: venha-pra-nuvem/nimbus-code-spec-kit-template
+  CENTRAL_PRESET_REF: main
+
+jobs:
+  validate-bootstrap:
+    name: Detect Preset Drift in PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout satellite repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate GitHub App installation token
+        id: app-token
+        if: ${{ secrets.NIMBUS_APP_ID != '' && secrets.NIMBUS_APP_PRIVATE_KEY != '' }}
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.NIMBUS_APP_ID }}
+          private-key: ${{ secrets.NIMBUS_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          github-api-url: ${{ github.api_url }}
+          permission-metadata: read
+          permission-contents: read
+
+      - name: Resolve token for central preset checkout
+        id: resolve-token
+        run: |
+          if [ -n "${{ steps.app-token.outputs.token }}" ]; then
+            echo "token=${{ steps.app-token.outputs.token }}" >> "$GITHUB_OUTPUT"
+            echo "::notice::Autenticado via GitHub App para consultar o preset central."
+          elif [ -n "${{ secrets.VPNDEV_STANDARDS_READ_TOKEN }}" ]; then
+            echo "token=${{ secrets.VPNDEV_STANDARDS_READ_TOKEN }}" >> "$GITHUB_OUTPUT"
+            echo "::warning::GitHub App indisponível — usando VPNDEV_STANDARDS_READ_TOKEN como fallback de leitura."
+          else
+            echo "token=${{ github.token }}" >> "$GITHUB_OUTPUT"
+            echo "::warning::Usando GITHUB_TOKEN. Se a leitura cross-repo falhar, configure NIMBUS_APP_* ou VPNDEV_STANDARDS_READ_TOKEN."
+          fi
+
+      - name: Checkout central preset source
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.CENTRAL_PRESET_REPOSITORY }}
+          ref: ${{ env.CENTRAL_PRESET_REF }}
+          path: central-source
+          fetch-depth: 1
+          token: ${{ steps.resolve-token.outputs.token }}
+
+      - name: Run preset drift detection
+        id: detect
+        run: |
+          set +e
+          ./.specify/scripts/bash/detect-preset-version-mismatch.sh \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --source-root "$GITHUB_WORKSPACE/central-source" \
+            --json | tee detect-report.json
+          detect_exit=${PIPESTATUS[0]}
+          set -e
+
+          status=$(jq -r '.status // "error"' detect-report.json)
+          echo "exit_code=$detect_exit" >> "$GITHUB_OUTPUT"
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+
+      - name: Comment on pull request when drift is detected
+        if: ${{ steps.detect.outputs.status == 'mismatch' || steps.detect.outputs.status == 'error' || steps.detect.outputs.status == 'warn' }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- nimbus-preset-drift-report -->';
+            const report = JSON.parse(fs.readFileSync('detect-report.json', 'utf8'));
+            const mismatchLines = (report.mismatches || []).map((item) => `- \`${item.file}\` → esperado **${item.expected}**, atual **${item.actual}**`);
+            const warningLines = (report.warnings || []).map((item) => `- \`${item.file}\` → esperado **${item.expected}**, atual **${item.actual}** (${item.message})`);
+
+            let heading = '✅ Preset sincronizado';
+            let body = `${marker}\n${heading}\n\nNenhum drift foi detectado.`;
+
+            if (report.status === 'mismatch') {
+              heading = '⚠️ Preset desatualizado detectado';
+              body = [
+                marker,
+                heading,
+                '',
+                `O PR alterou arquivos em \`.specify/\` e o preset instalado está atrás da origem central.`,
+                '',
+                '### Mismatches',
+                ...mismatchLines,
+                '',
+                '### Como corrigir',
+                '1. Rode `bootstrap.sh --refresh-preset` no repositório satélite.',
+                '2. Revise os arquivos atualizados.',
+                '3. Reenvie o PR com a sincronização do preset incluída.'
+              ].join('\n');
+            } else if (report.status === 'warn') {
+              heading = 'ℹ️ Preset local está à frente da origem central';
+              body = [
+                marker,
+                heading,
+                '',
+                'O PR não será bloqueado porque a versão registrada no satélite é mais nova que a origem consultada.',
+                '',
+                '### Avisos',
+                ...warningLines,
+                '',
+                'Valide se o repositório central já recebeu o bump correspondente antes de seguir com o merge.'
+              ].join('\n');
+            } else {
+              heading = '❌ Falha ao validar a versão do preset';
+              body = [
+                marker,
+                heading,
+                '',
+                report.details || 'Não foi possível validar a instalação do preset neste PR.',
+                '',
+                'Revise a estrutura de `.specify/` e tente novamente.'
+              ].join('\n');
+            }
+
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number,
+              per_page: 100,
+            });
+            const existing = comments.find((comment) => comment.body && comment.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body,
+              });
+            }
+
+      - name: Fail when the installed preset is stale
+        if: ${{ steps.detect.outputs.status == 'mismatch' || steps.detect.outputs.status == 'error' }}
+        run: |
+          echo "Falha na validação do preset. Rode bootstrap.sh --refresh-preset e atualize o PR."
+          exit 1

@@ -1,0 +1,35 @@
+# drift-policy.yaml — política de tratamento de drift e exceções.
+#
+# Regras mínimas para o ciclo discovery → imported → plan_diff_zero →
+# landing_zone_generated → managed.
+
+schema_version: "1.0"
+policy_id: "default-drift-policy"
+
+lifecycle:
+  ordered_stages:
+    - "discovery"
+    - "imported"
+    - "plan_diff_zero"
+    - "landing_zone_generated"
+    - "managed"
+
+freshness:
+  maximum_evidence_age_hours: 24
+  warn_after_hours: 12
+  baseline_revalidation_hours: 168
+
+default_actions:
+  missing_evidence: "block-stage-advance"
+  stale_evidence: "raise-finding"
+  unexpected_destroy: "block-pr"
+  drift_detected: "open-finding"
+  approved_exception: "track-until-expiration"
+
+findings:
+  severity_map:
+    low: "registro informativo"
+    medium: "exige owner e prazo"
+    high: "bloqueia avanço para managed"
+    critical: "bloqueia PR e handoff"
+  registry_file: "drift-finding.yaml"

@@ -1,17 +1,31 @@
-# Guia de Adoção do GitHub Codespaces — Nimbus-Code
+# Guia de Adoção e Relatório de Decisão de Ambientes de DEV — Nimbus-Code
 
-> Artefato de decisão da feature [009-codespaces-dev-planning](/specs/009-codespaces-dev-planning/spec.md).
-> Este guia documenta **como adotar** o devcontainer de referência
+> Artefato de decisão e governança da feature [009-codespaces-dev-planning](/specs/009-codespaces-dev-planning/spec.md).
+> Este documento consolida a **avaliação arquitetural comparativa** (GitHub Codespaces vs Google Antigravity / Project IDX vs Devcontainers Locais), o **devcontainer padrão portátil**
 > ([.devcontainer/devcontainer.json](/.devcontainer/devcontainer.json)), a
-> política de governança de custo/ociosidade e o modelo de segurança para
-> sessões remotas de agentes de IA. Não introduz nenhum rollout automático em
-> repositórios de produção — cada repositório decide individualmente se e
-> quando adota.
+> política de governança de custo/ociosidade e o **Relatório de Decisão Go/No-Go** para submissão ao Architecture Board e Platform Lead.
 
-## 1. Devcontainer padrão (FR-001 / AC-1)
+---
+
+## 0. Relatório de Decisão Arquitetural e ROI Operacional (Go / No-Go Framework)
+
+### Contexto da Avaliação
+A organização avaliou a viabilidade de implantar ambientes de desenvolvimento em nuvem (GitHub Codespaces e alternativas como Google Antigravity / Project IDX) visando padronização e aceleração do ciclo de CI/CD.
+
+### Conclusão e Recomendação: **Modelo Híbrido "Local First" Padronizado (No-Go para obrigatoriedade de Codespaces em larga escala)**
+
+| Modelo Avaliado | Veredito | Racional Técnico e Econômico |
+|---|---|---|
+| **Devcontainers Locais (Docker/Colima/Devbox)** | **RECOMENDADO (Padrão Oficial)** | **ROI Imediato:** Custo de nuvem $0, execução 100% offline, performance máxima do hardware local (M-series / x86), e eliminação de "funciona na minha máquina" usando a especificação aberta `devcontainer.json`. |
+| **GitHub Codespaces** | **OPCIONAL / ON-DEMAND (Restrito)** | **Sem ganho comprovado de CI/CD que justifique o TCO amplo:** Prebuilds aceleram o setup do dev, mas não reduzem os tempos de execução do GitHub Actions. Válido apenas sob demanda para onboarding pontual de novos devs ou sessões de suporte sem máquina configurada. |
+| **Google Antigravity / Project IDX** | **NÃO ADOTADO** | Embora traga recursos inovadores de IA e emulação multi-plataforma no ecossistema Google/Nix, introduz fragmentação de stack em relação ao GitHub Enterprise e custos adicionais de gerenciamento GCP. |
+
+---
+
+## 1. Devcontainer padrão portátil (FR-001 / AC-1)
 
 O devcontainer de referência deste template
-([.devcontainer/devcontainer.json](/.devcontainer/devcontainer.json)) cobre:
+([.devcontainer/devcontainer.json](/.devcontainer/devcontainer.json)) é **100% portátil**: funciona identicamente no **VS Code Desktop (Local via Docker/Colima)**, no **GitHub Codespaces** e em ambientes compatíveis com a especificação aberta Open Container:
 
 | Item | Valor |
 |---|---|
@@ -115,10 +129,19 @@ adicional deve primeiro ser adicionada à política de CI/CD do repositório (co
 a devida revisão de segurança) antes de ficar disponível também para sessões
 de agente em Codespace — nunca o caminho inverso.
 
-## 4. Referências
+## 4. Formal Review & Approval Gate (FR-008 / AC-6)
+
+Para que qualquer repositório ou time do Nimbus-Code realize aquisição massiva de quotas ou ative obrigatoriedade de Codespaces, é necessária a aprovação formal do pacote de decisão:
+
+- [ ] **Architecture Board**: Validação da portabilidade `devcontainer.json` e ausência de lock-in tecnológico.
+- [ ] **Platform Lead**: Aprovação do modelo de governança de custo e limites de timeout ocioso (30 min).
+- [ ] **DevSecOps Lead**: Confirmação da paridade de segredos e isolamento de sessões agenticas (FR-005).
+
+## 5. Referências
 
 - [spec.md](/specs/009-codespaces-dev-planning/spec.md)
 - [plan.md](/specs/009-codespaces-dev-planning/plan.md)
+- [research.md](/specs/009-codespaces-dev-planning/research.md)
 - [quickstart.md](/specs/009-codespaces-dev-planning/quickstart.md)
 - [docs/ci-cd-acceleration-map.md](/docs/ci-cd-acceleration-map.md)
 - [docs/agent-session-manual.md](/docs/agent-session-manual.md)

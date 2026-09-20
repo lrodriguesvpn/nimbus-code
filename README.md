@@ -89,6 +89,20 @@ flowchart TD
 O bootstrap agora exige a seleção explícita do tipo de repositório (`platform`
 ou `dev_standards`) antes de instalar qualquer preset. Em CI/automação, use
 `--repo-type` para evitar falha explícita em modo não interativo.
+Use `--ref <tag-ou-branch>` (ou `--version`) para fixar a versão do template;
+quando essa opção não é informada, o bootstrap usa `main`. A versão instalada,
+o preset e a referência de origem ficam registrados em
+`.nimbus/bootstrap.json` para auditoria e upgrades reproduzíveis.
+
+Os perfis são estritos: `dev_standards` instala a extensão de backlog, a
+extensão de custo, o workflow `nimbus-code-full-cycle`, as automações de
+GitHub Project/DEVSTATS, o catálogo de reuso, o manual de sessões e os
+artefatos de custo; `platform` instala somente o preset, o template de issue e
+as instruções específicas de plataforma. Assim, um repositório de plataforma
+não recebe automações de backlog, custo, DEVSTATS, GitHub Project ou hooks de
+versionamento de workload por acidente. O bootstrap falha quando uma
+instalação crítica ou o diretório de templates do preset selecionado não pode
+ser aplicado — erros reais não são tratados como "já instalado".
 
 No fluxo greenfield, o bootstrap também registra a decisão estrutural
 `monorepo` vs `multirepo` com justificativa e owner (`--delivery-model`,
@@ -408,7 +422,10 @@ apontam para esses assets e são atualizados no mesmo PR que muda a versão.
      - `release:major`, `release:minor`, `release:patch` ou `release:skip`.
    - O gate
      [`.github/workflows/release-readiness-gate.yml`](.github/workflows/release-readiness-gate.yml)
-     falha se a PR tocar superfície de release sem exatamente um label `release:*`.
+     auto-rotula `release:skip` para mudanças só de documentação de release e
+     `release:patch` quando a PR já altera arquivos versionados + `catalog.json`;
+     fora desses casos, ele falha se a PR não tiver exatamente um label
+     `release:*`.
 2. **Ao merge em `develop`**
    - O workflow
      [`.github/workflows/release-impact-advisor.yml`](.github/workflows/release-impact-advisor.yml)

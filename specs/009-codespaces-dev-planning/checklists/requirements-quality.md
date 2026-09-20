@@ -8,26 +8,26 @@
 
 ## Requirement Completeness
 
-- [ ] CHK001 Are the required contents of the standard devcontainer profile explicit enough to support different Nimbus-Code stacks without hidden assumptions? [Completeness, Spec ?FR-001, Spec ?Key Entities]
-- [ ] CHK002 Does the plan define how CI and CD steps are selected for pre-PR execution and how equivalence with remote CI is judged? [Completeness, Spec ?FR-002, Spec ?AC-2]
-- [ ] CHK003 Are governance requirements for idle shutdown, cost visibility, and agent-session security complete enough to define owners, thresholds, and escalation paths? [Completeness, Spec ?FR-004, Spec ?FR-005]
+- [x] CHK001 Are the required contents of the standard devcontainer profile explicit enough to support different Nimbus-Code stacks without hidden assumptions? [Completeness, Spec §FR-001, Spec §Key Entities, Contract §devcontainer-reference]
+- [x] CHK002 Does the plan define how CI and CD steps are selected for pre-PR execution and how equivalence with remote CI is judged? [Completeness, Spec §FR-002, Spec §AC-2]
+- [x] CHK003 Are governance requirements for idle shutdown, cost visibility, and agent-session security complete enough to define owners, thresholds, and escalation paths? [Completeness, Spec §FR-004, Spec §FR-005, Contract §idle-governance]
 
 ## Requirement Clarity
 
-- [ ] CHK004 Is this feature consistently framed as planning-only, or do some acceptance criteria read like implementation guarantees that belong to a later rollout spec? [Consistency, Spec ?Objetivo e Contexto, Spec ?AC-1, Spec ?AC-3]
-- [ ] CHK005 Is ?sensivelmente menor? for prebuild startup improvement quantified with a baseline and target? [Ambiguity, Spec ?User Story 2]
-- [ ] CHK006 Are the non-recommended scenarios for Codespaces specific enough to prevent blanket adoption of the pattern? [Clarity, Spec ?FR-006, Spec ?Edge Cases]
+- [x] CHK004 Is this feature consistently framed as planning-only, or do some acceptance criteria read like implementation guarantees that belong to a later rollout spec? [Clarity, Spec §Objetivo e Contexto, Spec §SLO Alvo, Spec §Assumptions]
+- [x] CHK005 Is "sensivelmente menor" for prebuild startup improvement quantified with a baseline and target? [Clarity, Spec §User Story 2, Plan §prebuild-benchmarks]
+- [x] CHK006 Are the non-recommended scenarios for Codespaces specific enough to prevent blanket adoption of the pattern? [Clarity, Spec §FR-006, Spec §Edge Cases, Checklist §dev-environments-and-cicd-tradeoffs]
 
 ## Scenario Coverage
 
-- [ ] CHK007 Do the edge cases fully cover quota exhaustion, custom devcontainers, larger machine classes, provider outage, and documentation-only repositories with requirement-level outcomes? [Coverage, Spec ?Edge Cases]
-- [ ] CHK008 Are fallback expectations for local development defined when Codespaces is unavailable or economically unjustified? [Gap, Spec ?Edge Cases, Spec ?Assumptions]
+- [x] CHK007 Do the edge cases fully cover quota exhaustion, custom devcontainers, larger machine classes, provider outage, and documentation-only repositories with requirement-level outcomes? [Coverage, Spec §Edge Cases]
+- [x] CHK008 Are fallback expectations for local development defined when Codespaces is unavailable or economically unjustified? [Coverage, Spec §Edge Cases, Spec §Assumptions, Spec §AC-5]
 
 ## Acceptance Criteria & Assumptions
 
-- [ ] CHK009 Is the security-parity requirement for agent sessions objective enough to identify which secrets and permissions are allowed or denied? [Measurability, Spec ?AC-4, Spec ?SC-004]
-- [ ] CHK010 Are the future-rollout SLOs tied clearly to planned implementation deliverables rather than being mistaken for current-spec acceptance? [Clarity, Spec ?SLO Alvo, Spec ?Assumptions]
-- [ ] CHK011 Are assumptions about enterprise licensing and existing agent-session usage treated as dependencies that must be proven in the plan? [Assumption, Spec ?Assumptions]
+- [x] CHK009 Is the security-parity requirement for agent sessions objective enough to identify which secrets and permissions are allowed or denied? [Measurability, Spec §AC-4, Spec §SC-004]
+- [x] CHK010 Are the future-rollout SLOs tied clearly to planned implementation deliverables rather than being mistaken for current-spec acceptance? [Clarity, Spec §SLO Alvo, Spec §Assumptions]
+- [x] CHK011 Are assumptions about enterprise licensing and existing agent-session usage treated as dependencies that must be proven in the plan? [Assumption, Spec §Assumptions, Plan §Licensing]
 
 ## Notes
 

@@ -1,76 +1,56 @@
 # Grafo de Plataforma — `<Cliente/Tenant>`
 
-> Gerado/mantido a partir de `platform-graph.yaml`. Não editar os diagramas
-> aqui sem atualizar o `.yaml` correspondente — este arquivo é a versão legível
-> por humanos, o `.yaml` é a fonte de verdade estrutural.
+> Gerado/mantido a partir de `platform-graph.yaml`. O YAML é a fonte de
+> verdade; este documento é a visão legível por humanos.
 >
-> **Estrutura:** cada plataforma (conta/assinatura/tenant) é um nó de primeiro
-> nível. As superfícies (recursos compartilhados) vivem dentro de cada
-> plataforma. O `iac_lifecycle_stage` da plataforma indica em qual fase do
-> pipeline ela se encontra: `discovery → imported → plan_diff_zero →
-> landing_zone_generated → managed`.
+> **Hierarquia oficial:** `platform -> surface -> workload`.
+>
+> **Lifecycle oficial:** `discovery -> imported -> plan_diff_zero ->
+> landing_zone_generated -> managed`.
 
-## Visão por Plataforma e Fase de Ciclo de Vida
+## Visão por Hierarquia
 
 ```mermaid
 flowchart TB
-    subgraph CLIENT["Cliente: &lt;nome-do-cliente&gt;"]
-        subgraph AZ_PROD["azure-prod (Azure · prod)<br/>stage: discovery"]
-            AZ_HUB["azure-hub-network<br/>iac_status: parcial"]
-        end
+    subgraph PLATFORM_A["azure-prod · stage: discovery"]
+        SURFACE_A["surface: azure-hub-network\nowner: network"]
+        WORKLOAD_A["repo-aplicacao-a\nowner: time-aplicacao-a"]
+        SURFACE_A --> WORKLOAD_A
+    end
 
-        subgraph M365_PROD["m365-tenant-prod (M365 · prod)<br/>stage: discovery"]
-            M365_CA["m365-conditional-access-baseline<br/>iac_status: não iniciado"]
-        end
-
-        subgraph AWS_TBD["(adicionar plataformas AWS)"]
-        end
-
-        subgraph GCP_TBD["(adicionar plataformas GCP)"]
-        end
+    subgraph PLATFORM_B["m365-tenant-prod · stage: imported"]
+        SURFACE_B["surface: m365-conditional-access-baseline\nowner: identity"]
+        WORKLOAD_B["repo-colaboracao\nowner: time-colaboracao"]
+        SURFACE_B --> WORKLOAD_B
     end
 ```
 
-## Visão por Dependência (Workload → Superfície de Plataforma)
+## Tabela-resumo de Plataformas
 
-```mermaid
-flowchart LR
-    WA["workload-repo-a"] --> AZ_HUB["azure-hub-network<br/>(azure-prod)"]
-    WB["workload-repo-b"] --> AZ_HUB
-```
+| Plataforma | Provider | Ambiente | Lifecycle stage | Owner | Evidência mais recente | Dependências |
+|---|---|---|---|---|---|---|
+| azure-prod | Azure | prod | `discovery` | plataforma | `platform/evidence-registry.yaml#ev-azure-prod-plan-2026-09-20` | — |
+| m365-tenant-prod | M365 | prod | `imported` | workplace | `platform/evidence-registry.yaml#ev-m365-baseline-2026-09-20` | — |
 
-> Toda seta aqui deve corresponder a um item declarado no `impact-map.md` do
-> repositório de workload correspondente ("Impacto em superfície de
-> plataforma compartilhada"). Se um workload depende de uma superfície e essa
-> dependência não está sinalizada nos dois lados, o grafo está desatualizado.
+## Tabela de Superfícies Compartilhadas
 
-## Status de Plataformas (resumo de fase)
-
-| Plataforma | Nuvem | Ambiente | Fase (`iac_lifecycle_stage`) | Discovery Report | Landing Zone |
+| Plataforma | Superfície | Tipo | Owner | Baseline | Evidência |
 |---|---|---|---|---|---|
-| azure-prod | Azure | prod | `discovery` | — | — |
-| m365-tenant-prod | M365 | prod | `discovery` | — | — |
+| azure-prod | azure-hub-network | network | network | `platform/baseline-registry.yaml#bl-azure-hub-network` | `platform/evidence-registry.yaml#ev-azure-prod-plan-2026-09-20` |
+| m365-tenant-prod | m365-conditional-access-baseline | policy | identity | `platform/baseline-registry.yaml#bl-m365-ca` | `platform/evidence-registry.yaml#ev-m365-baseline-2026-09-20` |
 
-## Status de Superfícies por Plataforma
+## Tabela de Workloads Dependentes
 
-### azure-prod
-
-| Superfície | Tipo | `iac_status` | Ferramenta de reconciliação | Última verificação diff-zero |
+| Workload | Plataforma | Superfície | Owner | Dependência declarada |
 |---|---|---|---|---|
-| azure-hub-network | network | parcial | `terraform plan` | YYYY-MM-DD (diff pendente) |
+| repo-aplicacao-a | azure-prod | azure-hub-network | time-aplicacao-a | egress e DNS privado |
+| repo-colaboracao | m365-tenant-prod | m365-conditional-access-baseline | time-colaboracao | políticas de acesso e identidade |
 
-### m365-tenant-prod
+## Regras de manutenção
 
-| Superfície | Tipo | `iac_status` | Ferramenta de reconciliação | Última verificação diff-zero |
-|---|---|---|---|---|
-| m365-conditional-access-baseline | policy | não iniciado | `Test-M365DSCConfiguration` | — |
-
-## Sistemas Legados (referenciados, ainda sem projeto próprio)
-
-| Sistema | Plataforma | Ambiente | Tem Terraform? | Schema registrado? | Projeto responsável |
-|---|---|---|---|---|---|
-| `<sistema-legado-exemplo>` | azure-prod | prod | Não | Ver `db-schema-registry.md` | Nenhum ainda |
-
-> Quando um sistema legado desta lista precisar de mudança real, **nasce um
-> repositório de projeto novo** para ele — a coluna "Projeto responsável" é
-> atualizada aqui assim que isso acontecer.
+1. Toda plataforma precisa declarar `owner`, `evidence` e `lifecycle_stage`.
+2. Toda superfície compartilhada precisa referenciar uma baseline e uma evidência.
+3. Todo workload dependente precisa aparecer aqui e no `impact-map.md` do
+   repositório de workload correspondente.
+4. `managed` só é permitido com evidência fresh, baseline válida e política de
+   drift ativa.

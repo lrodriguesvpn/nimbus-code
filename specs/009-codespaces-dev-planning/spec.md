@@ -9,9 +9,17 @@
 
 **Created**: 2026-08-20
 
-**Status**: Draft
+**Status**: Em Avaliação e Decisão Arquitetural (Rascunho Aprimorado)
 
-**Input**: User description: "Incluir uma FEATURE para planejamento do uso do CODESPACES para uso de DEV e o que melhoraria nosso CI/CD e demais sessões remotas."
+**Input**: User description: "Incluir uma FEATURE para planejamento do uso do CODESPACES para uso de DEV e o que melhoraria nosso CI/CD e demais sessões remotas. Incluir pesquisa ampla e comparar outros modelos de DEV LOCAL como Antigravity do GOOGLE para decidir implantação ou não com base em ganhos operacionais reais."
+
+## Clarifications
+
+### Session 2026-09-20
+
+- Q: Qual deve ser o escopo da avaliação arquitetural para a SPEC 009? → A: Avaliação Comparativa Abrangente (Codespaces vs Google Antigravity/IDX vs Devcontainer Local) + Framework Go/No-Go de ROI.
+- Q: Qual critério de decisão de ROI operacional e estratégia de adoção deve ser estabelecido no framework Go/No-Go? → A: Exigir ganho mensurável comprovado (ex: redução de lead time/onboarding > 50% OU ganho de CI/CD superior ao custo de computação cloud) para recomendar Go.
+- Q: Como deve ser estruturado o pacote de entrega e o gate de governança desta SPEC 009? → A: Produzir Matriz Comparativa + Arquitetura Devcontainer Portátil (Local & Cloud) + Relatório de Decisão Go/No-Go com aprovação obrigatória do Architecture Board e Platform Lead.
 
 ## Nimbus-Code — Cabeçalho Obrigatório da Spec
 
@@ -39,37 +47,49 @@
 
 ## Nimbus-Code — Objetivo e Contexto
 
-**Objetivo:** planejar o uso de GitHub Codespaces como ambiente padronizado de desenvolvimento para os times Nimbus-Code, avaliando onde ele melhora o ciclo de CI/CD atual (build, test, lint, validação de contratos) e onde pode servir como ambiente de execução para sessões remotas — incluindo sessões de agentes de IA em background — de forma segura e consistente entre repositórios.
+**Objetivo:** planejar e avaliar criticamente a viabilidade de adoção de ambientes de desenvolvimento na nuvem (GitHub Codespaces e alternativas como Google Antigravity / Project IDX) em comparação ao modelo de desenvolvimento padronizado local (VS Code Dev Containers / Colima / Devbox), determinando se existem ganhos operacionais reais e mensuráveis para o ciclo de CI/CD, onboarding e sessões remotas de agentes de IA.
 
-**Motivação:** hoje cada desenvolvedor configura seu próprio ambiente local manualmente (toolchain, versões, dependências), o que gera inconsistência entre máquinas, tempo de onboarding maior que o necessário e divergência entre o que roda localmente e o que roda no CI. Padronizar via Codespaces (com devcontainer versionado) reduz esse atrito e cria uma base comum também para sessões remotas de longa duração.
+**Motivação:** hoje cada desenvolvedor configura seu ambiente local, gerando atrito e divergências com o CI. No entanto, migrar para ambientes cloud (Codespaces ou Google Antigravity/IDX) introduz custos contínuos de computação, dependência de conectividade constante e governança de quotas. Uma avaliação comparativa ampla e quantificada é necessária para decidir se a organização deve implantar Codespaces, adotar soluções alternativas ou manter o foco em Devcontainers locais portáteis sem custo de nuvem.
 
-**Critério de done (alto nível):** existe um plano validado definindo a configuração padrão de devcontainer para repositórios Nimbus-Code, os pontos do pipeline de CI/CD que se beneficiam de prebuilds ou validação prévia em Codespace, a política de governança de custo/ociosidade de Codespaces, e o modelo de uso de Codespaces (ou ambiente equivalente) para sessões remotas de agentes — tudo documentado antes de qualquer rollout de implementação.
+**Critério de done (alto nível):** existe uma Matriz Comparativa detalhada (Codespaces vs Google Antigravity/IDX vs Devcontainer Local), um devcontainer de referência portátil (funcionando tanto local quanto na nuvem), um mapeamento de ganhos reais de CI/CD (prebuilds e validações antecipadas), uma política de governança de custos e um Relatório de Decisão Go/No-Go formalmente submetido à aprovação do Architecture Board e Platform Lead.
 
 ## Nimbus-Code — Critérios de Aceitação (formato BDD)
 
 > **AC-1**
 > **Given** um desenvolvedor entrando em um repositório Nimbus-Code pela primeira vez
-> **When** ele abrir um Codespace usando a configuração padrão de devcontainer
+> **When** ele abrir o ambiente usando a configuração padrão de devcontainer (seja local via Docker/Colima ou em Codespaces)
 > **Then** ele tem um ambiente de desenvolvimento funcional (toolchain, dependências, extensões) sem executar nenhum passo manual de setup
 > **Test ref:** `test_AC1_devcontainer_zero_setup`
 
 > **AC-2**
 > **Given** o pipeline de CI/CD atual de um repositório Nimbus-Code
-> **When** o plano de adoção de Codespaces for aplicado
-> **Then** pelo menos uma etapa do pipeline (build, test ou lint) passa a poder ser validada antecipadamente dentro do Codespace antes de abrir o Pull Request, reduzindo o ciclo de feedback
+> **When** o plano de aceleração for avaliado
+> **Then** os ganhos reais em tempo de build/teste e lead time são quantificados e comparados contra o custo de computação cloud e prebuilds
 > **Test ref:** `test_AC2_pre_pr_pipeline_validation`
 
 > **AC-3**
-> **Given** um Codespace criado por um desenvolvedor ou por uma sessão de agente
+> **Given** um ambiente cloud criado por um desenvolvedor ou por uma sessão de agente
 > **When** ele permanecer ocioso além do limite definido na política de governança
-> **Then** ele é parado automaticamente, sem intervenção manual, e um alerta de custo é registrado quando aplicável
+> **Then** ele é parado automaticamente, sem intervenção manual, e um alerta de custo é registrado
 > **Test ref:** `test_AC3_idle_codespace_governance`
 
 > **AC-4**
 > **Given** uma sessão remota de agente de IA que precisa de um ambiente de execução isolado
-> **When** o modelo de uso de Codespaces para agentes for aplicado
+> **When** o modelo de execução for aplicado
 > **Then** a sessão roda com o mesmo nível de política de segredos/segurança já exigido para o CI/CD do repositório, sem exceção
 > **Test ref:** `test_AC4_agent_session_security_parity`
+
+> **AC-5**
+> **Given** os modelos de desenvolvimento disponíveis no mercado (GitHub Codespaces, Google Antigravity / Project IDX, e Devcontainers Locais com Devbox/Colima)
+> **When** a pesquisa e matriz comparativa for compilada
+> **Then** a matriz avalia dimensões de TCO, latência/performance, suporte offline, segurança/segredos, integração com IA agentica e compatibilidade com o stack Nimbus-Code
+> **Test ref:** `test_AC5_comparative_matrix_evaluation`
+
+> **AC-6**
+> **Given** os resultados da avaliação técnica e financeira
+> **When** o relatório final de decisão for gerado
+> **Then** ele apresenta uma recomendação clara (Go, No-Go ou Híbrido/Devcontainer Local First) com justificativa fundamentada e gate de aprovação do Architecture Board e Platform Lead
+> **Test ref:** `test_AC6_go_no_go_decision_report`
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -128,45 +148,60 @@ Como gestor de plataforma responsável por custo de engenharia, quero uma polít
 
 **Acceptance Scenarios**:
 
-1. **Given** um Codespace sem atividade por mais tempo que o limite definido, **When** o limite for atingido, **Then** o Codespace é parado automaticamente.
-2. **Given** um período de cobrança fechado, **When** o relatório de uso for consultado, **Then** é possível identificar quais repositórios/times geraram o custo de Codespaces.
+### User Story 5 - Avaliar alternativas de DEV local e na nuvem (Google Antigravity/IDX vs Devcontainer Local) (Priority: P1)
+
+Como Arquiteto de Software e Platform Lead, quero uma análise comparativa profunda entre GitHub Codespaces, Google Antigravity / Project IDX e Devcontainers Locais (Docker/Colima/Devbox), para embasar a decisão de implantação com base em ROI real, custos de infraestrutura, autonomia do desenvolvedor e ganhos operacionais de CI/CD.
+
+**Why this priority**: Evita investimentos e custos recorrentes em ferramentas cloud se o ganho de produtividade e CI/CD puder ser obtido com soluções locais gratuitas e portáteis.
+
+**Independent Test**: Compilar a matriz de decisão com notas ponderadas em 6 dimensões (TCO, velocidade de onboarding, suporte offline, segurança, suporte a agentes de IA e facilidade de integração) e calcular o ROI comparativo.
+
+**Acceptance Scenarios**:
+
+1. **Given** os três modelos de ambiente (Codespaces, Google Antigravity/IDX, Devcontainer Local), **When** a matriz for preenchida, **Then** os trade-offs de custo por desenvolvedor/mês, dependência de rede e portabilidade estão explicitados.
+2. **Given** os requisitos de CI/CD, **When** avaliada a aceleração, **Then** o relatório demonstra se o custo de prebuilds em nuvem é superado pela redução de horas de espera de CI do time.
 
 ---
 
 ### Edge Cases
 
-- O que acontece quando um repositório já tem um devcontainer customizado para um propósito diferente do padrão proposto?
-- Como o plano lida com picos de demanda simultânea de Codespaces (ex.: todo o time abrindo ambiente na mesma hora) e possíveis limites de quota da organização?
-- O que acontece quando uma sessão de agente precisa de um tipo de máquina mais robusto (mais CPU/memória) do que o padrão definido?
-- Como o plano se comporta para repositórios que não fazem sentido rodar em Codespaces (ex.: repositórios majoritariamente de documentação)?
-- O que acontece se o provedor de Codespaces ficar indisponível — existe um caminho de fallback para desenvolvimento local?
+- O que acontece quando o desenvolvedor precisa trabalhar offline ou em rede restrita (ex.: voo, cliente com firewall rígido)?
+- Como o plano lida com picos de demanda simultânea de Codespaces (ex.: todo o time abrindo ambiente na mesma hora) e limites de quota da organização?
+- O que acontece quando uma sessão de agente precisa de um tipo de máquina mais robusto (mais CPU/memória) ou modelos locais pesados (Ollama)?
+- Como garantir que a configuração de devcontainer seja 100% agnóstica de provedor e execute tanto no VS Code local quanto no GitHub Codespaces ou Google Project IDX?
+- O que acontece se o provedor cloud sofrer indisponibilidade — existe caminho de fallback documentado para desenvolvimento local imediato?
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: O plano MUST definir uma configuração padrão de devcontainer reutilizável entre repositórios Nimbus-Code, cobrindo toolchain, dependências e extensões mínimas necessárias.
-- **FR-002**: O plano MUST identificar quais etapas do pipeline de CI/CD atual (build, test, lint, validação de contratos) podem ser executadas/validadas antecipadamente dentro de um Codespace antes da abertura do Pull Request.
-- **FR-003**: O plano MUST avaliar o uso de Codespaces prebuilds e documentar o impacto esperado de tempo/custo comparado à linha de base atual.
-- **FR-004**: O plano MUST definir uma política de governança para Codespaces ociosos (parada automática após limite de inatividade) e visibilidade de custo por repositório/time.
-- **FR-005**: O plano MUST definir o modelo de uso de Codespaces (ou ambiente equivalente) para sessões remotas de agentes de IA, garantindo que a política de segredos/segurança aplicada seja equivalente à já exigida para CI/CD.
-- **FR-006**: O plano MUST documentar cenários em que Codespaces não é a escolha recomendada (ex.: repositórios sem necessidade de ambiente de execução), para não impor o padrão fora de contexto.
+- **FR-001**: O plano MUST definir uma configuração padrão de devcontainer reutilizável e portátil entre repositórios Nimbus-Code, executável tanto localmente (VS Code / Colima / Docker) quanto na nuvem (Codespaces / Google Project IDX).
+- **FR-002**: O plano MUST identificar quais etapas do pipeline de CI/CD atual (build, test, lint, validação de contratos) podem ser executadas/validadas antecipadamente dentro de um devcontainer antes da abertura do Pull Request.
+- **FR-003**: O plano MUST avaliar o uso de prebuilds (na nuvem) versus cache local/remoto de CI e documentar o impacto esperado de tempo/custo comparado à linha de base atual.
+- **FR-004**: O plano MUST definir uma política de governança para ambientes cloud ociosos (parada automática após limite de inatividade) e visibilidade de custo por repositório/time.
+- **FR-005**: O plano MUST definir o modelo de uso de ambientes de execução para sessões remotas de agentes de IA, garantindo que a política de segredos/segurança aplicada seja equivalente à já exigida para CI/CD.
+- **FR-006**: O plano MUST documentar cenários em que Cloud Dev (Codespaces / Google IDX) não é recomendado (ex.: repositórios puramente documentais ou sem necessidade de computação remota).
+- **FR-007**: O plano MUST produzir uma Matriz Comparativa formal entre GitHub Codespaces, Google Antigravity / Project IDX e Devcontainers Locais, detalhando prós, contras, modelo de billing e impacto em Developer Experience.
+- **FR-008**: O plano MUST fornecer um Framework de Decisão Go/No-Go com cálculo de ROI operacional para CI/CD e submeter o relatório final à aprovação formal do Architecture Board e Platform Lead.
 
 ### Key Entities *(include if feature involves data)*
 
-- **Standard Devcontainer Profile**: configuração reutilizável de ambiente (toolchain, dependências, extensões) usada como base para Codespaces em repositórios Nimbus-Code.
-- **CI/CD Acceleration Map**: mapeamento das etapas de pipeline que se beneficiam de prebuild ou validação antecipada em Codespace.
-- **Codespace Idle Governance Policy**: regras de parada automática e alertas de custo para Codespaces ociosos.
-- **Remote Agent Session Model**: definição de como sessões de agente usam Codespaces (ou equivalente) respeitando a mesma política de segurança do CI/CD.
+- **Standard Devcontainer Profile**: configuração reutilizável de ambiente (toolchain, dependências, extensões) usada como base portátil para repositórios Nimbus-Code.
+- **CI/CD Acceleration Map**: mapeamento das etapas de pipeline que se beneficiam de prebuild ou validação antecipada em devcontainer.
+- **Dev Environment Comparative Matrix**: avaliação multidimensional de Codespaces vs Google Antigravity/IDX vs Devcontainers Locais.
+- **Idle Governance Policy**: regras de parada automática e alertas de custo para instâncias cloud ociosas.
+- **Remote Agent Session Model**: definição de como sessões de agente usam ambientes isolados respeitando a mesma política de segurança do CI/CD.
+- **Go/No-Go Decision Package**: relatório de recomendação fundamentado e submetido para aprovação executiva/arquitetural.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: Um novo desenvolvedor consegue obter um ambiente de desenvolvimento totalmente funcional via Codespaces em menos de 10 minutos, sem etapas manuais de configuração.
-- **SC-002**: Pelo menos uma etapa de CI/CD tem documentado o impacto esperado de tempo/custo da adoção de Codespaces prebuilds antes de qualquer rollout.
-- **SC-003**: 100% dos Codespaces ociosos além do limite definido são parados automaticamente, sem intervenção manual.
-- **SC-004**: O plano define de forma explícita quais dados/segredos são permitidos dentro de um Codespace usado por agentes, sem ambiguidade.
+- **SC-001**: Um novo desenvolvedor consegue obter um ambiente de desenvolvimento totalmente funcional via devcontainer (local ou cloud) em menos de 10 minutos, sem etapas manuais de configuração.
+- **SC-002**: Pelo menos uma etapa de CI/CD tem documentado o impacto esperado de tempo/custo da adoção de prebuilds/validação antecipada antes de qualquer rollout.
+- **SC-003**: 100% dos ambientes cloud ociosos além do limite definido são parados automaticamente, sem intervenção manual.
+- **SC-004**: O plano define de forma explícita quais dados/segredos são permitidos dentro de um ambiente usado por agentes, sem ambiguidade.
+- **SC-005**: O Framework de Decisão Go/No-Go estabelece uma meta objetiva (redução de lead time > 50% OU ganho financeiro líquido de produtividade superior ao custo cloud) como pré-requisito para recomendação de Go para Codespaces em larga escala.
 
 ## Assumptions
 

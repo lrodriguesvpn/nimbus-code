@@ -21,20 +21,20 @@ tenha sido instalado com escopo mais amplo.
 
 ## Unknown 2: Mecanismo de fallback seguro (PAT) durante o rollout
 
-**Decision**: Cada workflow migrado tenta primeiro emitir o token via GitHub App;
-se as credenciais do App (`secrets.APP_ID`/`secrets.APP_PRIVATE_KEY`) não
-estiverem configuradas no repositório, o workflow cai para o PAT existente
-(`VPNDEV_PROJECT_TOKEN` ou equivalente por workflow), com um aviso explícito no
-log (`::warning::`) informando que está em modo fallback.
+**Decision**: OpenFeature permanece como abstração declarativa do rollout, mas a
+ausência das credenciais do App não ativa PAT automaticamente. O comportamento
+padrão é fail-closed para a etapa cross-repo/org. Um modo de migração PAT só
+pode ser habilitado explicitamente, com owner, prazo de expiração, ambiente
+permitido, aviso estruturado e registro de auditoria.
 
-**Rationale**: Permite rollout gradual repositório-a-repositório sem exigir que
-todos migrem no mesmo dia; nenhum workflow quebra durante a transição.
+**Rationale**: Evita que um secret legado seja usado silenciosamente e preserva
+rollback operacional por desativação do rollout, sem transformar PAT em caminho
+normal de execução.
 
 **Alternatives considered**:
-- Feature flag externa (LaunchDarkly/AppConfig) controlando qual mecanismo usar —
-  rejeitado por complexidade desnecessária; a própria presença/ausência do secret
-  do GitHub App já funciona como o "flag" (consistente com o padrão de bootstrap
-  já usado neste bundle para outros workflows opcionais).
+- Presença/ausência do secret como flag implícita — rejeitada porque transforma
+  uma falha de configuração em fallback silencioso e não oferece owner, prazo ou
+  auditoria.
 
 ## Unknown 3: Suporte a GitHub Apps organizacionais no GHE da organização
 
@@ -48,3 +48,39 @@ indicação de que a versão do GHE em uso tenha mudado desde então.
 
 **Alternatives considered**: N/A — decisão por reaproveitamento direto de
 achado já validado.
+
+## Unknown 4: Estratégia de versão e tag para o piloto
+
+**Decision**: publicar uma release candidate imutável em `v1.19.0-rc.1`,
+mantendo `nimbus-code-project-bundle`/`nimbus-code-standards` em `1.19.0` e
+`nimbus-code-platform-bundle`/`nimbus-code-platform-standards` em `0.5.0`.
+Depois dos gates do piloto, publicar `v1.19.0`.
+
+**Rationale**: o workflow de release usa a versão do bundle de projeto para a
+tag canônica, mas empacota ambos os bundles. O componente de plataforma tem
+semver independente; forçá-lo a `1.19.0` perderia a distinção entre contratos.
+A ref explícita evita que o piloto consuma `main` móvel.
+
+**Alternatives considered**:
+- Manter as versões atuais e usar apenas uma tag operacional — rejeitado,
+  porque o bootstrap muda seu contrato publicado.
+- Usar `v1.19.0` diretamente no piloto — rejeitado até os gates humanos e o
+  piloto validarem a release candidate.
+
+## Unknown 5: Quais melhorias entram nesta release
+
+**Decision**: incluir somente melhorias compatíveis e diretamente relacionadas
+ao provisioning: isolamento estrito dos perfis, bootstrap reproduzível,
+quality gates e governança agentica no perfil Dev Standards; CMDB/evidência,
+zero-diff/drift, baselines, lifecycle e Landing Zone/CAF no perfil Platform.
+
+**Rationale**: evita transformar o piloto em uma migração ampla de workloads,
+mas torna os dois presets úteis para seus bounded contexts reais. As capacidades
+de CMDB/DSC permanecem contratos e scaffolds do preset; coleta real e apply de
+infraestrutura continuam fora do bootstrap.
+
+**Alternatives considered**:
+- Incluir implementação completa do CMDB no bootstrap — rejeitado por risco,
+  escopo e necessidade de credenciais cloud.
+- Fazer apenas a correção do bootstrap — rejeitado porque o piloto não
+  exercitaria as capacidades que diferenciam Platform de Dev Standards.

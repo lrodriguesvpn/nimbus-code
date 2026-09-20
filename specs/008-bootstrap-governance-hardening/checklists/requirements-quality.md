@@ -8,27 +8,27 @@
 
 ## Requirement Completeness
 
-- [ ] CHK001 Are the bootstrap questions and decision paths fully defined for selecting the correct preset before any installation occurs? [Completeness, Spec ?FR-001, Spec ?AC-1]
-- [ ] CHK002 Are issue-template parity requirements explicit about which fields, order, and validation mechanism make two presets structurally identical? [Completeness, Spec ?FR-002, Spec ?AC-2]
-- [ ] CHK003 Are the manual contents for local versus remote skills complete enough to describe current state, future state, and invocation guidance per skill? [Completeness, Spec ?FR-008, Spec ?AC-8]
+- [x] CHK001 Are the bootstrap questions and decision paths fully defined for selecting the correct preset before any installation occurs? [Completeness, Spec §FR-001, Spec §AC-1]
+- [x] CHK002 Are issue-template parity requirements explicit about which fields, order, and validation mechanism make two presets structurally identical? [Completeness, Spec §FR-002, Spec §AC-2]
+- [x] CHK003 Are the manual contents for local versus remote skills complete enough to describe current state, future state, and invocation guidance per skill? [Completeness, Spec §FR-008, Spec §AC-8]
 
 ## Requirement Clarity
 
-- [ ] CHK004 Is the exception that allows the Spec Kit CLI to come from public GitHub while all VPN-owned content must stay on GHE documented clearly enough to avoid misapplication? [Clarity, Spec ?FR-006, Spec ?FR-007, Spec ?Assumptions]
-- [ ] CHK005 Is the boundary between GitHub App authentication and `GITHUB_TOKEN` use precise enough for workflows that partly touch repo scope and partly touch org or project scope? [Clarity, Spec ?FR-004, Spec ?FR-005]
-- [ ] CHK006 Is the failure behavior when the organizational GitHub App is missing specific enough about remediation steps and which bootstrap phases may continue? [Clarity, Spec ?FR-009, Spec ?Edge Cases]
+- [x] CHK004 Is the exception that allows the Spec Kit CLI to come from public GitHub while all VPN-owned content must stay on GHE documented clearly enough to avoid misapplication? [Clarity, Spec §FR-006, Spec §FR-007, Spec §Assumptions]
+- [x] CHK005 Is the boundary between GitHub App authentication and `GITHUB_TOKEN` use precise enough for workflows that partly touch repo scope and partly touch org or project scope? [Clarity, Spec §FR-004, Spec §FR-005]
+- [x] CHK006 Is the failure behavior when the organizational GitHub App is missing specific enough about remediation steps and which bootstrap phases may continue? [Clarity, Spec §FR-009, Spec §Edge Cases]
 
 ## Consistency & Overlap Control
 
-- [ ] CHK007 Are removed multi-repo items consistently excluded from acceptance criteria, requirements, success criteria, and entities, without leftover scope leakage? [Consistency, Spec ?FR-003, Spec ?SC-003, Spec ?Sobreposi??o com Specs Existentes]
-- [ ] CHK008 Is the `Repo Provisioning Profile` entity still referencing Produto or Frontend or Backend roles intentionally, given that this scope was moved to spec 006? [Conflict, Spec ?Key Entities, Spec ?Sobreposi??o com Specs Existentes]
-- [ ] CHK009 Do the references to specs 003, 006, and 007 behave as pointers without silently reintroducing their requirements here? [Consistency, Spec ?Input, Spec ?Sobreposi??o com Specs Existentes]
+- [x] CHK007 Are removed multi-repo items consistently excluded from acceptance criteria, requirements, success criteria, and entities, without leftover scope leakage? [Consistency, Spec §FR-003, Spec §SC-003, Spec §Sobreposição com Specs Existentes]
+- [x] CHK008 Is the `Repo Provisioning Profile` entity still referencing Produto or Frontend or Backend roles intentionally, given that this scope was moved to spec 006? [Conflict resolved, Spec §Key Entities, Spec §Sobreposição com Specs Existentes]
+- [x] CHK009 Do the references to specs 003, 006, and 007 behave as pointers without silently reintroducing their requirements here? [Consistency, Spec §Input, Spec §Sobreposição com Specs Existentes]
 
 ## Acceptance Criteria & Measurability
 
-- [ ] CHK010 Are zero-PAT and zero-public-URL success criteria measurable with an explicit repository and workflow audit scope? [Measurability, Spec ?SC-004, Spec ?SC-005]
-- [ ] CHK011 Is the ?determine local vs remote skill in up to 2 minutes? criterion based on a clear reader task and success threshold? [Measurability, Spec ?SC-006]
-- [ ] CHK012 Are assumptions about future GitHub App installation and the unimplemented VPN-SKILLS repository treated as dependencies that must be validated before rollout? [Assumption, Spec ?Assumptions]
+- [x] CHK010 Are zero-PAT and zero-public-URL success criteria measurable with an explicit repository and workflow audit scope? [Measurability, Spec §SC-004, Spec §SC-005]
+- [x] CHK011 Is the “determine local vs remote skill in up to 2 minutes” criterion based on a clear reader task and success threshold? [Measurability, Spec §SC-006]
+- [x] CHK012 Are assumptions about future GitHub App installation and the unimplemented VPN-SKILLS repository treated as dependencies that must be validated before rollout? [Assumption, Spec §Assumptions]
 
 ## Notes
 
@@ -36,3 +36,16 @@
 - Add comments or findings inline
 - Link to relevant resources or documentation
 - Items are numbered sequentially for easy reference
+
+## Review Resolution
+
+As quatro lacunas foram resolvidas na SPEC, no plano de rollout e no guia de
+validação:
+
+- tokens são separados por etapa em workflows de escopo misto;
+- ausência do App permite materialização local, mas bloqueia a etapa ampliada;
+- auditorias possuem escopo, release ref e exceção única explicitamente definidos;
+- o teste de skills define amostra, tarefa, material permitido e limiar de aprovação.
+
+**Checklist status**: 12 itens passam; nenhuma pendência de qualidade de
+requisitos permanece.

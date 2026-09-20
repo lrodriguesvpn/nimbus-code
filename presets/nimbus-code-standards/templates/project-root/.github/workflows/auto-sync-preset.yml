@@ -1,0 +1,151 @@
+name: Auto-Sync Satellite Preset Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: 'Repositório satélite no formato owner/repo'
+        required: true
+      target_version:
+        description: 'Versão alvo do preset'
+        required: true
+      audit_issue_number:
+        description: 'Issue da auditoria semanal no repositório central'
+        required: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-sync-drifted-repo:
+    name: Create auto-sync PR for one satellite repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout central repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install specify CLI
+        run: uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
+
+      - name: Add uv tools to PATH
+        run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Generate GitHub App installation token
+        id: app-token
+        if: ${{ secrets.NIMBUS_APP_ID != '' && secrets.NIMBUS_APP_PRIVATE_KEY != '' }}
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.NIMBUS_APP_ID }}
+          private-key: ${{ secrets.NIMBUS_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          github-api-url: ${{ github.api_url }}
+          permission-metadata: read
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Resolve write token for satellite repository
+        id: resolve-token
+        run: |
+          if [ -n "${{ steps.app-token.outputs.token }}" ]; then
+            echo "token=${{ steps.app-token.outputs.token }}" >> "$GITHUB_OUTPUT"
+            echo "::notice::Autenticado via GitHub App para sincronizar preset em repositório satélite."
+          elif [ -n "${{ secrets.VPNDEV_STANDARDS_WRITE_TOKEN }}" ]; then
+            echo "token=${{ secrets.VPNDEV_STANDARDS_WRITE_TOKEN }}" >> "$GITHUB_OUTPUT"
+            echo "::warning::GitHub App indisponível — usando VPNDEV_STANDARDS_WRITE_TOKEN como fallback de escrita."
+          else
+            echo "::error::Defina NIMBUS_APP_ID/NIMBUS_APP_PRIVATE_KEY ou VPNDEV_STANDARDS_WRITE_TOKEN para abrir PRs automáticos em repositórios satélite."
+            exit 1
+          fi
+
+      - name: Check if satellite repository already has active development
+        id: active
+        env:
+          GH_TOKEN: ${{ steps.resolve-token.outputs.token }}
+          TARGET_REPO: ${{ inputs.repo }}
+          TARGET_VERSION: ${{ inputs.target_version }}
+        run: |
+          branch="fix/preset-sync-to-v${TARGET_VERSION}"
+          open_prs=$(gh pr list --repo "$TARGET_REPO" --state open --json number,headRefName --jq 'length')
+          existing_sync_pr=$(gh pr list --repo "$TARGET_REPO" --state open --head "$branch" --json number --jq 'length')
+
+          echo "open_prs=$open_prs" >> "$GITHUB_OUTPUT"
+          echo "existing_sync_pr=$existing_sync_pr" >> "$GITHUB_OUTPUT"
+
+          if [ "$existing_sync_pr" -gt 0 ]; then
+            echo "should_sync=false" >> "$GITHUB_OUTPUT"
+            echo "reason=Já existe um PR de sincronização aberto para esta versão." >> "$GITHUB_OUTPUT"
+          elif [ "$open_prs" -gt 0 ]; then
+            echo "should_sync=false" >> "$GITHUB_OUTPUT"
+            echo "reason=O repositório possui PRs abertos e está em desenvolvimento ativo." >> "$GITHUB_OUTPUT"
+          else
+            echo "should_sync=true" >> "$GITHUB_OUTPUT"
+            echo "reason=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Clone satellite repository
+        if: ${{ steps.active.outputs.should_sync == 'true' }}
+        env:
+          GH_TOKEN: ${{ steps.resolve-token.outputs.token }}
+        run: gh repo clone "${{ inputs.repo }}" satellite-repo
+
+      - name: Refresh preset and create pull request
+        if: ${{ steps.active.outputs.should_sync == 'true' }}
+        env:
+          GH_TOKEN: ${{ steps.resolve-token.outputs.token }}
+          TARGET_REPO: ${{ inputs.repo }}
+          TARGET_VERSION: ${{ inputs.target_version }}
+          AUDIT_ISSUE_NUMBER: ${{ inputs.audit_issue_number }}
+        run: |
+          cd satellite-repo
+
+          default_branch=$(gh repo view "$TARGET_REPO" --json defaultBranchRef --jq '.defaultBranchRef.name')
+          branch="fix/preset-sync-to-v${TARGET_VERSION}"
+          pr_title="fix(preset): sync to v${TARGET_VERSION}"
+
+          git checkout -B "$branch"
+          bash "$GITHUB_WORKSPACE/bootstrap.sh" --local "$GITHUB_WORKSPACE" --refresh-preset
+
+          if git diff --quiet; then
+            echo "Nenhuma mudança adicional foi necessária para ${TARGET_REPO}."
+            exit 0
+          fi
+
+          git config user.name "GitHub Actions"
+          server_host="$(echo "${{ github.server_url }}" | sed -E 's#^https?://##')"
+          git config user.email "actions@users.noreply.${server_host}"
+          git add -A
+          git commit -m "$pr_title"
+          git push --set-upstream origin "$branch" --force
+
+          gh label create "sync:preset-version" \
+            --repo "$TARGET_REPO" \
+            --color "1d76db" \
+            --description "PR de sincronização automática do preset Nimbus Code gerado pela auditoria semanal" \
+            --force >/dev/null 2>&1 || true
+
+          pr_body="## Sincronização automática de preset\n\nEste PR foi gerado automaticamente pela auditoria semanal de presets satélite para alinhar o repositório à versão **v${TARGET_VERSION}** do preset central.\n\n- Branch: \`${branch}\`\n- Comando executado: \`bootstrap.sh --refresh-preset\`\n- Label aplicada: \`sync:preset-version\`\n"
+          if [ -n "$AUDIT_ISSUE_NUMBER" ]; then
+            pr_body="${pr_body}\nIssue de auditoria: ${{ github.server_url }}/${{ github.repository }}/issues/${AUDIT_ISSUE_NUMBER}\n"
+          fi
+          pr_body="${pr_body}\nSe este repositório estiver em uma feature ativa, prefira revisar/mergear este PR antes de continuar a branch funcional para evitar drift adicional."
+
+          gh pr create \
+            --repo "$TARGET_REPO" \
+            --base "$default_branch" \
+            --head "$branch" \
+            --title "$pr_title" \
+            --body "$pr_body" \
+            --label "sync:preset-version" \
+            --label "type:chore"
+
+      - name: Report skipped sync
+        if: ${{ steps.active.outputs.should_sync != 'true' }}
+        run: |
+          echo "Sincronização automática ignorada para ${{ inputs.repo }}."
+          echo "Motivo: ${{ steps.active.outputs.reason }}"

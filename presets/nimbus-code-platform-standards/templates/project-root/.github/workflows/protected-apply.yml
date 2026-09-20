@@ -1,0 +1,74 @@
+name: Protected Apply (Delivery Plane)
+
+on:
+  workflow_dispatch:
+    inputs:
+      change_ticket:
+        description: "ID do change/aprovação humana"
+        required: true
+      target_environment:
+        description: "Ambiente de destino"
+        required: true
+        default: "production"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  protected-apply:
+    name: Apply protegido com aprovação humana
+    # ESTE WORKFLOW NÃO É PARA AGENTE AUTÔNOMO.
+    # O gatilho deve partir de humano autorizado e o Environment precisa exigir
+    # Required Reviewers. Nunca remova esta guarda em repositórios de plataforma.
+    if: github.actor != 'copilot-swe-agent[bot]'
+    runs-on: ubuntu-latest
+    environment:
+      name: production-apply
+      url: https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/<org>/<repo>/actions/runs/${{ github.run_id }}
+    steps:
+      - name: Guardrail — origem humana obrigatória
+        run: |
+          echo "Actor: ${{ github.actor }}"
+          echo "Change ticket: ${{ inputs.change_ticket }}"
+          echo "Este workflow existe exclusivamente no Delivery Plane protegido."
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validar identidade dedicada
+        env:
+          NIMBUS_DELIVERY_CLIENT_ID: ${{ secrets.NIMBUS_DELIVERY_CLIENT_ID }}
+          NIMBUS_DELIVERY_TENANT_ID: ${{ secrets.NIMBUS_DELIVERY_TENANT_ID }}
+          NIMBUS_DELIVERY_SUBSCRIPTION_ID: ${{ secrets.NIMBUS_DELIVERY_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          test -n "$NIMBUS_DELIVERY_CLIENT_ID"
+          test -n "$NIMBUS_DELIVERY_TENANT_ID"
+          test -n "$NIMBUS_DELIVERY_SUBSCRIPTION_ID"
+          echo "Identidade dedicada configurada. Nunca reutilize a identidade padrão do agente aqui."
+
+      - name: Trilha de auditoria mínima
+        run: |
+          mkdir -p artifacts/delivery-plane
+          cat <<EOF > artifacts/delivery-plane/audit.txt
+          run_id=${{ github.run_id }}
+          actor=${{ github.actor }}
+          environment=production-apply
+          change_ticket=${{ inputs.change_ticket }}
+          target_environment=${{ inputs.target_environment }}
+          repository=${{ github.repository }}
+          commit=${{ github.sha }}
+          EOF
+          cat artifacts/delivery-plane/audit.txt
+
+      - name: Placeholder do apply protegido
+        run: |
+          echo "Substitua este passo pelo apply real apenas no repositório de delivery correspondente."
+          echo "Nunca reutilize este arquivo para discovery, import ou validação de zero-diff."
+
+      - name: Publicar auditoria
+        uses: actions/upload-artifact@v4
+        with:
+          name: protected-apply-audit
+          path: artifacts/delivery-plane

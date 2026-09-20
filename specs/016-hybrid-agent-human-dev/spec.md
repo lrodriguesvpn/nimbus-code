@@ -1,4 +1,4 @@
-# Feature Specification: Hybrid Agent-Human Delivery Templates
+# Feature Specification: Templates de Entrega para Modelo Híbrido Agente-Humano
 
 **Feature Branch**: `[016-hybrid-agent-human-dev]`
 
@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "queremos ter pra DEV um sistema HIBRIDO entre AGENTES e HUMANOS Codificando pra isso preciso que as TASKS no GHE sejam mais detalhadas e tenham orientacoes para humanos. Mudar os templates. Incluir Tbm no TEMPLATE o SPEC KIT COST (Projeto GITHUB PUBLICO)." + refinamento: "incluir a skill Impeccable como padrao de design para projetos WEB e OpenFeature como padrao de feature toggle."
+**Input**: User description: "Estruturar templates e contratos de entrega para o modelo de desenvolvimento híbrido entre agentes de IA e engenheiros humanos, incluindo detalhamento operacional nas tasks do GitHub Enterprise, integração com spec-kit-cost para apuração de custos, padronização da skill Impeccable para design web e OpenFeature para feature flags."
 
 ## Nimbus-Code — Cabeçalho Obrigatório da Spec
 

@@ -51,7 +51,7 @@ ação de backlog para os 4 indicadores DORA.
 **Scenario**: Um evento não foi capturado automaticamente por indisponibilidade temporária da fonte.
 
 **Validation steps**:
-1. Registrar um ajuste manual em `docs/playbooks/dora-manual-adjustments-log.yaml` com `justification`, `author`, `timestamp`, `evidence_link`, `exception_category`
+1. Registrar um ajuste manual em `docs/playbooks/dora-manual-adjustments-log.yaml` com os 7 campos obrigatórios, incluindo `approved_by` e `review_cycle_period`
 2. Tentar registrar um segundo ajuste **sem** um dos campos obrigatórios
 3. Rodar o teste de integração correspondente (`tests/scripts/process-metrics-report.audit-trail.test.sh`)
 4. **Assertion**: o ajuste completo é aceito; o ajuste incompleto é rejeitado com mensagem clara
@@ -115,8 +115,8 @@ ação de backlog para os 4 indicadores DORA.
 - **Cenário V1 (AC-1)**: validado por inspeção estrutural — `docs/playbooks/README.md` seção "Definições Oficiais dos Indicadores" contém fórmula, evento de origem, janela de medição e regra de inclusão/exclusão para os 4 indicadores.
 - **Cenário V2 (AC-2)**: validado com suíte de integração estendida:
   - `bash tests/scripts/process-metrics-report.detect.test.sh` ✅ (7/7, incluindo os 3 novos casos de qualidade de dados — FR-011)
-- **Cenário V3/V4 (AC-3, FR-006)**: validado com suíte de auditoria nova:
-  - `bash tests/scripts/process-metrics-report.audit-trail.test.sh` ✅ (5/5 — ajuste completo aceito, incompleto rejeitado, IDs sequenciais, gate de fechamento bloqueado/aprovado)
+- **Cenário V3/V4 (AC-3, FR-006)**: validado com suíte de auditoria:
+  - `bash tests/scripts/process-metrics-report.audit-trail.test.sh` ✅ (6/6 — ajuste completo aceito, incompleto rejeitado, aprovação obrigatória, IDs sequenciais, gate de fechamento bloqueado/aprovado)
 - **Cenário V5 (AC-4)**: validado por inspeção estrutural — `docs/playbooks/README.md` seção "Leitura Combinada" exige `combined_conclusion` antes de fechar qualquer revisão.
 - **Cenário V6 (AC-5)**: validado com suíte de degradação nova:
   - `bash tests/scripts/process-metrics-report.degradation-action.test.sh` ✅ (4/4 — sinal de degradação para deployment_frequency/lead_time, ausência de sinal quando saudável, orientação de ação de backlog)
@@ -125,3 +125,19 @@ ação de backlog para os 4 indicadores DORA.
 - **Grafo**: `graph.yaml`/`graph.md` conferidos — 5 módulos desta feature mapeados, nenhum módulo novo fora do grafo.
 
 Total: **20/20 testes de integração passando** (7 detect + 4 retro-cadence + 5 audit-trail + 4 degradation-action).
+
+## Protocolo de medição pós-release
+
+Os resultados abaixo são gates de adoção e devem ser preenchidos após o
+primeiro ciclo real; a execução local dos testes não os substitui.
+
+| Medição | População/janela | Fonte | Responsável | Critério |
+|---|---|---|---|---|
+| Ingestão automática | Todos os eventos DORA de 4 ciclos semanais | Logs/eventos do GHE | Platform owner | ≥99% dos eventos esperados ingeridos |
+| Registro de ajustes | 100% dos ajustes do período | `dora-manual-adjustments-log.yaml` | Quality owner | 100% com 7 campos, categoria válida e aprovação |
+| Consolidação | 4 ciclos semanais ou 1 mensal | Review Cycles versionados | DORA owner | 100% com `combined_conclusion` e estado aprovado antes de fechar |
+
+Para SC-001–SC-003, registrar população, ciclos completos, evidências e
+responsável. SC-001 exige ingestão ≥99%; SC-002 exige zero fechamento com
+pendência; SC-003 exige 100% dos ajustes com aprovação. Ausência da fonte deve
+ser registrada como `data_insufficient`, nunca como sucesso.

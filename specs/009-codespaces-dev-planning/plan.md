@@ -19,49 +19,37 @@ equivalente não comprovam licenciamento, Codespace hospedado ou idle shutdown.
 
 ## Summary
 
-Esta é uma feature de **planejamento** (não de implementação/rollout): produzir
-uma decisão documentada sobre uso de GitHub Codespaces como ambiente padronizado
-de desenvolvimento para os times Nimbus-Code, cobrindo devcontainer padrão,
-aceleração de CI/CD via prebuilds, governança de custo/ociosidade, e modelo de
-uso para sessões remotas de agentes de IA com paridade de segurança do CI.
+Esta é uma feature de **avaliação arquitetural e planejamento estratégico**:
+produzir uma análise comparativa profunda e uma decisão documentada sobre o uso
+de ambientes de desenvolvimento em nuvem (GitHub Codespaces e alternativas como
+Google Antigravity / Project IDX) versus o modelo padronizado de Devcontainers
+Locais (Docker/Colima/Devbox), avaliando o ROI real, custos e ganhos operacionais
+para o ciclo de CI/CD e sessões de agentes de IA.
 
-Abordagem: pesquisa e avaliação (Phase 0), seguida de artefatos de design que
-são, em si, o produto desta feature — um `devcontainer.json` de referência, um
-mapeamento de quais etapas de pipeline se beneficiam de execução antecipada em
-Codespace, e uma política de governança de custo. Não há "implementação de
-produto" tradicional — os artefatos de Phase 1 **são** o entregável.
+Abordagem:
+1. Pesquisa comparativa e matriz multidimensional de ambientes (Phase 0).
+2. Artefatos de configuração de referência: `devcontainer.json` universal e portátil (executável localmente e na nuvem) + mapeamento de aceleração de CI/CD (Phase 1).
+3. Framework e Relatório de Decisão Go/No-Go com cálculo de ROI e gate de aprovação executiva do Architecture Board e Platform Lead (Phase 2).
 
 ## Technical Context
 
-**Language/Version**: JSON (`devcontainer.json`), YAML (workflows de exemplo),
-Markdown (documentação de decisão)
+**Language/Version**: JSON (`devcontainer.json`), YAML (workflows de governança/prebuild), Markdown (pesquisa, matriz comparativa e relatório de decisão)
 
-**Primary Dependencies**: GitHub Codespaces (plataforma), `devcontainer` CLI
-(para validação local do devcontainer de referência), GitHub Actions (para
-qualquer workflow de exemplo de prebuild)
+**Primary Dependencies**: `devcontainer` CLI / spec aberto (para compatibilidade local e nuvem), GitHub Codespaces, Google Project IDX (referência comparativa), GitHub Actions (mapeamento de CI/CD)
 
 **Storage**: N/A
 
-**Testing**: Validação manual do devcontainer de referência (abrir Codespace de
-teste e confirmar toolchain funcional); sem testes automatizados tradicionais,
-já que o produto é um plano/decisão, não código de produção
+**Testing**: Validação estrutural do devcontainer portátil; análise quantitativa de ROI de CI/CD; revisão humana obrigatória do relatório de decisão.
 
-**Target Platform**: GitHub Codespaces (GHE da organização, se suportado —
-validado em Phase 0)
+**Target Platform**: Ambientes locais (macOS/Linux com Docker/Colima) e Cloud Dev (GitHub Codespaces / GHE)
 
-**Project Type**: Documentação de decisão + artefato de configuração de
-referência (devcontainer)
+**Project Type**: Avaliação arquitetural + artefatos de configuração de referência + relatório de decisão Go/No-Go
 
-**Performance Goals**: Ver SLOs no `spec.md` (provisionamento de Codespace <120s
-p99; prebuild <600s p99) — metas para quando o rollout for executado, não para
-esta fase de planejamento
+**Performance Goals**: Onboarding zero-setup < 10 min; paridade de 100% dos testes pré-PR em relação ao CI; meta de redução de lead time > 50% para justificar custos de computação cloud.
 
-**Constraints**: Nenhum rollout real de Codespaces em repositórios de produção
-nesta feature — apenas o plano e o devcontainer de referência validado em
-ambiente de teste
+**Constraints**: Não executar rollout obrigatório ou aquisição de licenças antes da aprovação do relatório de decisão pelo Architecture Board.
 
-**Scale/Scope**: Aplicável a todos os repositórios Nimbus-Code que optarem por
-adotar Codespaces após este plano ser aprovado
+**Scale/Scope**: Aplicável a todos os repositórios e desenvolvedores do ecossistema Nimbus-Code.
 
 ## Constitution Check
 
@@ -124,20 +112,22 @@ documentação de decisão, não altera nenhum sistema em produção.
 | Campo | Valor |
 |---|---|
 | **Nível** | **S3** |
-| **Justificativa** | Cruza múltiplos artefatos (devcontainer, mapeamento de CI/CD, política de governança de custo, modelo de segurança para sessões de agente) que juntos formam uma decisão de plataforma com impacto em todos os repositórios que adotarem o padrão |
-| **Modelo de IA** | Reasoning — decisão de arquitetura de ambiente de desenvolvimento |
-| **Revisão humana obrigatória** | Não (S3 não exige por padrão); recomendada dado o impacto em todos os times, mas não bloqueante como em 008 |
-| **Padrão reutilizado encontrado?** | Não — `docs/reuse-catalog.yaml` consultado; nenhuma entrada para devcontainer/Codespaces padrão |
-| **Estimativa de tokens (input+output)** | ~20–30 mil tokens — pesquisa de Codespaces/devcontainer, design do mapeamento de CI/CD e da política de governança |
+| **Justificativa** | Decisão arquitetural de plataforma com impacto transversal em Developer Experience, orçamento de computação cloud, políticas de segurança para agentes e pipelines de CI/CD de múltiplos repositórios |
+| **Modelo de IA** | Reasoning — avaliação comparativa de arquitetura de ambientes de desenvolvimento |
+| **Revisão humana obrigatória** | **Sim** — Aprovação formal do Architecture Board e Platform Lead necessária para o relatório Go/No-Go |
+| **Padrão reutilizado encontrado?** | Não — `docs/reuse-catalog.yaml` consultado; nenhuma entrada prévia para devcontainer portátil ou avaliação de cloud dev |
+| **Estimativa de tokens (input+output)** | ~25–35 mil tokens |
 
 ## Nimbus-Code — Rastreabilidade AC → Teste → Módulo
 
 | ID AC | Critério (resumo) | Tipo de teste planejado | Arquivo/módulo do teste | Justificativa de ausência (se N/A) |
 |---|---|---|---|---|
-| AC-1 | Devcontainer zero-setup | manual (validação humana) | `.devcontainer/devcontainer.json` | Validação de UX de onboarding não é automatizável de forma significativa |
-| AC-2 | Validação de pipeline pré-PR | manual + documentação | `docs/ci-cd-acceleration-map.md` | Depende de comparação de tempo entre ambientes, melhor validado manualmente na Phase 1 |
-| AC-3 | Governança de Codespace ocioso | integração (workflow de exemplo) | `.github/workflows/codespaces-idle-governance.yml` | — |
-| AC-4 | Paridade de segurança para sessão de agente | manual (revisão de política) | `docs/codespaces-adoption-guide.md` | Política de segurança é validada por revisão humana, não teste automatizado |
+| AC-1 | Devcontainer portátil zero-setup | validação estrutural + manual | `.devcontainer/devcontainer.json` | Validação de UX e teste de build local/cloud |
+| AC-2 | Validação de pipeline pré-PR | quantitativo (tempo/custo) | `docs/ci-cd-acceleration-map.md` | Análise de tempo de CI/CD e taxa de falhas pré-PR |
+| AC-3 | Governança de instâncias ociosas | integração (workflow de exemplo) | `.github/workflows/codespaces-idle-governance.yml` | Validação de timeouts nativos e script de parada |
+| AC-4 | Paridade de segurança para sessão de agente | revisão de política e isolamento | `docs/codespaces-adoption-guide.md` | Verificação de isolamento por worktree e segredos mínimos |
+| AC-5 | Matriz Comparativa (Codespaces vs Google IDX vs Local) | análise técnica e TCO | `specs/009-codespaces-dev-planning/research.md` | Matriz multidimensional com 8 dimensões de avaliação |
+| AC-6 | Relatório de Decisão Go/No-Go | revisão e aprovação executiva | `docs/codespaces-adoption-guide.md` | Gate de aprovação formal com Architecture Board e Platform Lead |
 
 ## Nimbus-Code — Module Dependency Graph
 

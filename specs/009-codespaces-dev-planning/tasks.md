@@ -34,26 +34,18 @@ não autorização para criar o artefato ou marcar itens sem revisão. T001,
 T006 e T014 continuam pendentes; T009 registra execução em ambiente equivalente,
 não teste em Codespace real nem comparação medida de tempo com CI.
 
-**Total Tasks**: 14 tasks across 4 phases
-**MVP Scope**: Phase 1 (Setup) + Phase 2 (US1 — devcontainer padrão)
+**Total Tasks**: 17 tasks across 6 phases
+**MVP Scope**: Phase 1 (Setup) + Phase 2 (US1 — devcontainer padrão) + Phase 6 (US5 — Matriz Comparativa e Decisão Go/No-Go)
 
-### Status de Implementação (sessão de agente — 2026-08-20)
+### Status de Implementação (sessão de agente — 2026-09-20)
 
-**11 de 14 tasks concluídas.** 3 tasks ficam **pendentes de execução/decisão
-humana** por dependerem de infraestrutura real (Codespaces provisionados,
-billing) ou de acesso administrativo ao GHE que esta sessão de agente não
-possui:
-
+**13 de 17 tasks concluídas.** 4 tasks ficam **pendentes de execução/decisão humana**:
 - **T001** — confirmação de licenciamento de Codespaces no GHE da organização (administrativo).
 - **T006** — validação end-to-end do devcontainer em um Codespace real (validado estruturalmente nesta sessão; falta abertura real).
 - **T014** — simulação de Codespace ocioso para confirmar parada automática (requer Codespace real provisionado).
+- **T017** — aprovação formal do relatório de decisão Go/No-Go pelo Architecture Board e Platform Lead.
 
-Todos os artefatos de documentação/configuração (`devcontainer.json`,
-`setup-dev-environment.sh`, `ci-cd-acceleration-map.md`,
-`codespaces-adoption-guide.md`, `codespaces-idle-governance.yml`) foram
-criados e validados estruturalmente (JSON/YAML válidos, scripts com sintaxe
-correta, comandos mapeados executados com sucesso quando aplicável). Ver
-detalhes em cada task abaixo e no PR desta feature.
+Todos os artefatos de documentação, matriz comparativa (`research.md`), configuração (`devcontainer.json`, `setup-dev-environment.sh`), aceleração de CI/CD (`ci-cd-acceleration-map.md`) e guia de governança com relatório de decisão (`codespaces-adoption-guide.md`) foram criados e validados estruturalmente.
 
 ---
 
@@ -132,6 +124,18 @@ Phase 1 (Setup) [T001–T002]
   ├─→ Phase 4 (US3 — sessão de agente) [T010–T011] (independente)
   ├─→ Phase 5 (US4 — governança de custo) [T012–T014] (independente)
 ```
+
+## Phase 6: User Story 5 — Avaliar alternativas de DEV local e na nuvem (Google Antigravity/IDX vs Devcontainer Local) (Priority: P1)
+
+**Goal**: Matriz comparativa, análise de ROI e Relatório de Decisão Go/No-Go com recomendação formal.
+
+**Independent Test**: Compilar a matriz de decisão em 8 dimensões e validar o racional de ROI.
+
+- [x] T015 [US5] Pesquisar e compilar Matriz Comparativa (Codespaces vs Google Antigravity/IDX vs Devcontainers Locais) em `specs/009-codespaces-dev-planning/research.md`
+- [x] T016 [US5] Estruturar Framework de Decisão Go/No-Go e Relatório de Decisão Arquitetural em `docs/codespaces-adoption-guide.md`
+- [ ] T017 [US5] **PENDENTE DE APROVAÇÃO HUMANA** — Submeter o pacote de decisão e a recomendação de "Local First Padronizado (Docker/Colima)" para aprovação do Architecture Board e Platform Lead
+
+---
 
 ## Parallel Opportunities
 

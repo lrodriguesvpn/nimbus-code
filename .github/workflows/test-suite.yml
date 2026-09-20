@@ -1,17 +1,33 @@
-name: Test Suite — Suíte de Testes Mandatória (relatório)
+name: Test Suite — Suíte de Testes Mandatória
 
 # Executa a suíte de testes mandatória deste bundle (scripts/run-tests.sh) em
-# toda PR contra main — feature specs/013-governanca-testes-pr/.
+# toda PR contra main — feature specs/013-governanca-testes-pr/. Também
+# executa, como job dedicado e bloqueante, a suíte crítica de bootstrap
+# (feature specs/008-bootstrap-governance-hardening/, T048).
 #
-# Estado atual: MODO RELATÓRIO (informativo, não bloqueante). Este workflow
-# ainda NÃO está marcado como "required status check" na proteção de branch
-# de main — ver docs/testing-policy.md, seção 5, e tasks.md (T015) para o
-# critério de promoção a obrigatório, que exige decisão humana explícita após
-# um período de observação sem falso-positivo relevante.
+# Job `bootstrap-critical` (BLOQUEANTE, pronto para promoção a "required
+# status check"): valida exclusivamente tests/bootstrap/*.bats — a suíte que
+# protege o comportamento de segurança/idempotência do bootstrap (ref pinada,
+# falha crítica de instalação, isolamento estrito de perfil, classificação de
+# contexto). Este job SEMPRE falha o workflow (exit code não-zero) quando
+# qualquer teste de bootstrap falha; não há modo relatório para ele.
 #
-# Paridade local/CI: este job só invoca scripts/run-tests.sh — a mesma lógica
-# de descoberta/execução usada localmente por um contribuidor (AC-4, FR-008).
-# Nenhuma lógica de descoberta de testes é duplicada aqui.
+# IMPORTANTE — o que este workflow por si só NÃO faz: marcar o job
+# `bootstrap-critical` como "required status check" na proteção de branch de
+# `main` é uma configuração de administração do repositório (branch
+# protection rules), não uma linha de YAML. Essa promoção continua exigindo
+# decisão humana explícita e é feita fora deste arquivo — ver
+# docs/testing-policy.md, seção 5, e specs/008-bootstrap-governance-hardening/
+# tasks.md (T048) e specs/013-governanca-testes-pr/tasks.md (T015).
+#
+# Job `test-suite` (MODO RELATÓRIO, informativo): roda a suíte completa via
+# scripts/run-tests.sh (bootstrap + docs + scripts + workflows). Enquanto não
+# for promovido a "required status check", uma falha aqui não bloqueia
+# automaticamente o merge do PR na interface do GitHub — apenas reporta.
+#
+# Paridade local/CI: ambos os jobs só invocam bats/scripts/run-tests.sh — a
+# mesma lógica de descoberta/execução usada localmente por um contribuidor
+# (AC-4, FR-008). Nenhuma lógica de descoberta de testes é duplicada aqui.
 
 on:
   pull_request:
@@ -22,8 +38,22 @@ permissions:
   contents: read
 
 jobs:
+  bootstrap-critical:
+    name: Bootstrap Crítico (bloqueante)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar bats-core (versão pinada)
+        run: sudo npm install -g bats@1.13.0
+
+      - name: Executar tests/bootstrap/*.bats
+        run: bats tests/bootstrap/*.bats
+
   test-suite:
-    name: Suíte de Testes Mandatória
+    name: Suíte de Testes Mandatória (relatório)
     runs-on: ubuntu-latest
 
     steps:

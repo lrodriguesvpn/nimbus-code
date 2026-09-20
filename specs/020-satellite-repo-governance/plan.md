@@ -282,16 +282,18 @@ a variável interrompe novas execuções de sync; reverter um PR segue revisão.
 | **Tracking method** | tabela "Estimativa vs. Consumo Real" no `tasks.md` + campo "Horas Humanas" no GitHub Project |
 | **Budget ceiling (optional)** | N/A |
 
-## Nimbus-Code — SLO Gate
+## Nimbus-Code — Operational Metrics Gate
 
-| Componente | Latência p99 | Taxa de erro máx. | Disponibilidade | RTO | RPO |
-|---|---|---|---|---|---|
-| Classificação greenfield/brownfield no bootstrap | 3000 ms | 1,0% | 99,9% | 30 min | 5 min |
-| Intake de decisão mono vs multirepo | 4000 ms | 1,0% | 99,9% | 30 min | 5 min |
-| Governança de sincronização central → satélite | — | — | — | 60 min | 15 min |
+| Componente | Indicador operacional | Meta inicial | Evidência |
+|---|---|---:|---|
+| Classificação greenfield/brownfield no bootstrap | Classificações registradas antes da próxima etapa | 100% | `.specify/feature.json` e logs do bootstrap |
+| Intake de decisão mono vs multirepo | Decisões greenfield com justificativa e owner | 100% | `.specify/feature.json` |
+| Governança de sincronização central → satélite | Atualizações realizadas por PR revisado | 100% | Histórico de PRs e workflow oficial |
 
-**SLOs não definidos nesta feature e justificativa:**
-- Governança de sincronização central → satélite é processo operacional/documental apoiado por workflow já existente, sem endpoint de runtime para medir latência contínua.
+**SLOs de runtime não definidos nesta feature:** os componentes são scripts,
+documentação e processos de governança, sem endpoint de runtime para medir
+latência contínua, disponibilidade, RTO ou RPO. A medição de SC-005 fica para a
+adoção pós-release e deve registrar baseline, janela, owner e evidência.
 
 ## Nimbus-Code — Security & DevSecOps Gate
 
@@ -331,8 +333,8 @@ a variável interrompe novas execuções de sync; reverter um PR segue revisão.
 
 | Decisão | Alternativas consideradas | Opção escolhida | Trade-off assumido | Justificativa do desvio (se aplicável) | Aprovado por |
 |---|---|---|---|---|---|
-| Momento de sugerir domínios satélite | Sugerir antes de qualquer spec · sugerir após a primeira spec estrutural · não sugerir baseline | **Sugerir após a primeira spec estrutural, com handoff explícito vindo do bootstrap** | Exige um passo de entendimento prévio, mas evita criar repos cedo demais e mantém o bootstrap focado no intake inicial | N/A — segue objetivo da feature | — |
-| Classificação greenfield vs brownfield | Perguntar sempre manualmente · classificar só por heurística invisível · heurística com explicação e confirmação contextual | **Heurística com explicação contextual e critérios operacionais explícitos** | Um pequeno custo de explicação no bootstrap em troca de menos erro silencioso e mais previsibilidade | N/A | — |
-| Topologia inicial multirepo | Lista fixa obrigatória · lista aberta sem baseline · baseline recomendada com liberdade de adaptação | **Baseline recomendada (FRONT/BACK/DESIGN/DATA/JOBS) com adaptação permitida** | Menos liberdade inicial absoluta, mas mais aceleração e consistência de onboarding | N/A | — |
-| Formato da justificativa e ownership | Texto livre sem padrão · schema rígido demais · formato mínimo legível | **Formato mínimo legível** | Exige um pouco mais de disciplina, mas evita decisões e domínios sem contexto reutilizável | N/A | — |
-| Fonte de verdade de specs | Permitir specs locais em satélites · centralizar no repo central | **Centralizar no repo central** | Exige disciplina operacional, mas elimina drift entre artefatos | N/A | — |
+| Momento de sugerir domínios satélite | Sugerir antes de qualquer spec · sugerir após a primeira spec estrutural · não sugerir baseline | **Sugerir após a primeira spec estrutural, com handoff explícito vindo do bootstrap** | Exige um passo de entendimento prévio, mas evita criar repos cedo demais e mantém o bootstrap focado no intake inicial | N/A — segue objetivo da feature | Eduardo Pereira |
+| Classificação greenfield vs brownfield | Perguntar sempre manualmente · classificar só por heurística invisível · heurística com explicação e confirmação contextual | **Heurística com explicação contextual e critérios operacionais explícitos** | Um pequeno custo de explicação no bootstrap em troca de menos erro silencioso e mais previsibilidade | N/A | Eduardo Pereira |
+| Topologia inicial multirepo | Lista fixa obrigatória · lista aberta sem baseline · baseline recomendada com liberdade de adaptação | **Baseline recomendada (FRONT/BACK/DESIGN/DATA/JOBS) com adaptação permitida** | Menos liberdade inicial absoluta, mas mais aceleração e consistência de onboarding | N/A | Eduardo Pereira |
+| Formato da justificativa e ownership | Texto livre sem padrão · schema rígido demais · formato mínimo legível | **Formato mínimo legível** | Exige um pouco mais de disciplina, mas evita decisões e domínios sem contexto reutilizável | N/A | Eduardo Pereira |
+| Fonte de verdade de specs | Permitir specs locais em satélites · centralizar no repo central | **Centralizar no repo central** | Exige disciplina operacional, mas elimina drift entre artefatos | N/A | Eduardo Pereira |

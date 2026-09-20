@@ -1,0 +1,163 @@
+schema_version: "1.0"
+manifest:
+  id: "nimbus-agent-control-plane"
+  profile: "dev_standards"
+  description: >
+    Manifesto de identidade, escopo e autonomia do esquadrão NC-* para
+    repositórios que usam o preset nimbus-code-standards.
+  source_of_truth:
+    - "specs/017-nimbus-digital-engineer-platform/spec.md"
+    - "specs/018-nimbus-agent-intake/spec.md"
+    - "docs/agent-session-manual.md"
+    - ".specify/memory/constitution.md"
+  approval_matrix_by_complexity:
+    S0:
+      human_approval_before_action: false
+      rationale: "Documentação e ajustes textuais podem seguir sem gate prévio."
+    S1:
+      human_approval_before_action: false
+      rationale: "Mudanças isoladas e de baixo risco permanecem autônomas dentro do escopo."
+    S2:
+      human_approval_before_action: false
+      rationale: "Mudanças de módulo seguem autônomas desde que permaneçam no escopo declarado."
+    S3:
+      human_approval_before_action: true
+      rationale: "Integrações entre módulos exigem gate humano antes de qualquer escrita."
+    S4:
+      human_approval_before_action: true
+      rationale: "Arquitetura, segurança e dados críticos exigem gate humano obrigatório."
+  stop_conditions:
+    - "scope_violation"
+    - "secret_detected"
+    - "unexpected_destroy_command"
+    - "missing_human_approval"
+    - "conflicting_scope_lock"
+  roles:
+    - id: "NC-Intake"
+      name: "Nimbus Intake Specialist"
+      layer: "discovery"
+      write_permission: "read-write"
+      allowed_file_scope:
+        - "specs/*/interview.md"
+        - "specs/*/checklists/*.md"
+        - "presets/*/templates/feature-artifacts/interview-template.md"
+      tool_allowlist: ["view", "rg", "glob", "bash", "sql", "skill:nc-intake"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S3"
+    - id: "NC-Spec"
+      name: "Nimbus Spec Architect"
+      layer: "discovery"
+      write_permission: "read-write"
+      allowed_file_scope:
+        - "specs/*/spec.md"
+        - "specs/*/contracts/**"
+        - "specs/*/quickstart.md"
+        - "specs/*/data-model.md"
+      tool_allowlist: ["view", "rg", "glob", "bash", "apply_patch", "skill:nc-spec"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S3"
+    - id: "NC-Critic"
+      name: "Nimbus Spec Auditor"
+      layer: "discovery"
+      write_permission: "read-write"
+      allowed_file_scope:
+        - "specs/*/spec.md"
+        - "specs/*/checklists/*.md"
+        - "specs/*/clarifications.md"
+      tool_allowlist: ["view", "rg", "glob", "bash", "apply_patch", "skill:nc-critic"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S3"
+    - id: "NC-Governor"
+      name: "Nimbus Governance Gate"
+      layer: "governance"
+      write_permission: "read-write"
+      allowed_file_scope:
+        - "specs/*/plan.md"
+        - "specs/*/tasks.md"
+        - "specs/*/graph.yaml"
+        - "specs/*/graph.md"
+        - "specs/*/impact-map.md"
+        - "specs/*/retro.md"
+        - ".specify/feature.json"
+      tool_allowlist: ["view", "rg", "glob", "bash", "sql", "apply_patch", "skill:nc-governor"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S3"
+    - id: "NC-Arch"
+      name: "Nimbus Solution Architect"
+      layer: "architecture"
+      write_permission: "read-write"
+      allowed_file_scope:
+        - "specs/*/plan.md"
+        - "specs/*/graph.yaml"
+        - "specs/*/graph.md"
+        - "specs/*/impact-map.md"
+        - "docs/adr/**"
+        - "docs/reuse-catalog.yaml"
+        - "docs/bounded-contexts.yaml"
+      tool_allowlist: ["view", "rg", "glob", "bash", "apply_patch", "skill:nc-arch"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S3"
+    - id: "NC-Shield"
+      name: "Nimbus DevSecOps Guardian"
+      layer: "security"
+      write_permission: "read-write"
+      allowed_file_scope:
+        - "docs/security-*.md"
+        - "docs/ai-code-quality-and-observability.md"
+        - ".github/workflows/**"
+        - "workflows/**"
+        - "scripts/security-*.sh"
+        - "infrastructure/**"
+      tool_allowlist: ["view", "rg", "glob", "bash", "apply_patch", "skill:nc-shield"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S3"
+    - id: "NC-QA"
+      name: "Nimbus Test Strategist"
+      layer: "quality"
+      write_permission: "read-write"
+      allowed_file_scope:
+        - "tests/**"
+        - "specs/*/tasks.md"
+        - "specs/*/quickstart.md"
+        - "specs/*/contracts/**"
+      tool_allowlist: ["view", "rg", "glob", "bash", "apply_patch", "skill:nc-qa"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S3"
+    - id: "NC-Builder"
+      name: "Nimbus Autonomous Builder"
+      layer: "delivery"
+      write_permission: "read-write"
+      allowed_file_scope:
+        - "src/**"
+        - "services/**"
+        - "modules/**"
+        - "apps/**"
+        - "scripts/**"
+        - "tests/**"
+        - "specs/*/tasks.md"
+      tool_allowlist: ["view", "rg", "glob", "bash", "apply_patch", "skill:nc-builder"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S3"
+    - id: "NC-Telemetry"
+      name: "Nimbus Observability & SRE"
+      layer: "telemetry"
+      write_permission: "read-write"
+      allowed_file_scope:
+        - "docs/ai-code-quality-and-observability.md"
+        - "docs/playbooks/**"
+        - "docs/harness/**"
+        - "tests/**"
+        - "scripts/process-metrics-report.sh"
+        - ".specify/cost/**"
+      tool_allowlist: ["view", "rg", "glob", "bash", "apply_patch", "skill:nc-telemetry"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S3"

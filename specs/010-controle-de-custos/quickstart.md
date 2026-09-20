@@ -18,6 +18,8 @@ Validar que o sistema de controle de custos funciona corretamente end-to-end, co
 - [ ] GitHub Project de teste com o campo "Horas Humanas" configurado
 - [ ] Variável de ambiente `COST_CONTROL_V1=true` definida
 - [ ] Token GitHub com scope `project:read` configurado no vault / env
+- [ ] Nenhuma credencial contém prompt, PII ou segredo em fixture
+- [ ] OpenFeature habilitado somente no projeto piloto
 
 ---
 
@@ -178,6 +180,19 @@ Validar que o sistema de controle de custos funciona corretamente end-to-end, co
 - [ ] Badge "amostra insuficiente" NÃO aparece (sample_size = 10 ≥ min_sample_for_display)
 
 **Resultado esperado**: Benchmark de S2 disponível com dados plausíveis para uso em estimativas.
+
+## Step 9 — Governança e recuperação
+
+1. Repetir um evento de sessão e confirmar idempotência.
+2. Remover temporariamente o campo `Horas Humanas` e confirmar
+   `human_hours_missing`, sem conversão para zero.
+3. Simular falha de notificação e confirmar `retrying` e erro observável.
+4. Executar backup/restore e verificar retenção de 12 meses.
+5. Confirmar que respostas por papel respeitam o escopo e que exportações não
+   contêm prompt ou PII.
+
+**Resultado esperado**: SLOs, segurança, retenção e recuperação registrados para
+decisão humana de Go/No-Go.
 
 ---
 

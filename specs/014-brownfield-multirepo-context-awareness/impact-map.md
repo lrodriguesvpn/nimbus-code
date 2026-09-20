@@ -62,13 +62,13 @@ rm scripts/tests/harvest-patterns.bats
 ## Critérios Go / No-Go
 
 ### Go (pode fazer merge)
-- [ ] AC-1: `generate-context-graph.sh` gera `graph.yaml` + `graph.md` válidos para bounded context com ≥2 repos
-- [ ] AC-3: `harvest-patterns.sh` produz ≥1 entrada válida para repo Java com interfaces em pacotes de domínio
-- [ ] AC-5: bounded context sem repos → aviso + prossegue (sem exceção não tratada)
-- [ ] AC-6: fallback via `gh api` documentado e testado com mock
-- [ ] AC-governance: `harvest-patterns.sh` não referenciado em nenhum workflow de CI (verificado via `grep`)
-- [ ] Retrocompatibilidade: `/speckit-specify` em projeto sem `bounded-contexts.yaml` ou com contexto não mapeado funciona identicamente ao comportamento atual
-- [ ] Scan de secrets: nenhum secret em texto plano nos arquivos desta feature
+- [x] AC-1: `generate-context-graph.sh` gera `graph.yaml` + `graph.md` válidos para bounded context com ≥2 repos
+- [x] AC-3: `harvest-patterns.sh` produz ≥1 entrada válida para repo Java com interfaces em pacotes de domínio
+- [x] AC-5: bounded context sem repos → aviso + prossegue (sem exceção não tratada)
+- [x] AC-6: fallback via `gh api` documentado e testado com mock
+- [x] AC-governance: `harvest-patterns.sh` não é executado em nenhum workflow de CI (verificação por busca de invocações executáveis)
+- [x] Retrocompatibilidade: `/speckit-specify` em projeto sem `bounded-contexts.yaml` ou com contexto não mapeado funciona identicamente ao comportamento atual
+- [x] Scan de secrets: nenhum secret em texto plano nos arquivos desta feature
 
 ### No-Go (bloqueia merge)
 - Qualquer falha silenciosa nos scripts (exit 0 com output incorreto)

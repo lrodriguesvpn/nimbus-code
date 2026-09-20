@@ -8,26 +8,26 @@
 
 ## Requirement Completeness
 
-- [ ] CHK001 Are the required fields of `harness-catalog.yaml` explicit enough for consistent catalog entries across projects? [Completeness, Spec ?Crit?rio de done, Spec ?Gloss?rio]
-- [ ] CHK002 Is the Harness Gate requirement complete about mandatory fields for match found, no match, and catalog empty states? [Completeness, Spec ?AC-2, Spec ?AC-7]
-- [ ] CHK003 Are label semantics and state transitions for `harness:pending`, `harness:cataloged`, and `harness:blocking` documented beyond mere existence? [Gap, Spec ?AC-3, Spec ?AC-5]
+- [x] CHK001 Are the required fields of `harness-catalog.yaml` explicit enough for consistent catalog entries across projects? [Completeness, Spec §FR-001, Spec §Key Entities]
+- [x] CHK002 Is the Harness Gate requirement complete about mandatory fields for match found, no match, and catalog empty states? [Completeness, Spec §FR-003, Spec §AC-2]
+- [x] CHK003 Are label semantics and state transitions for `harness:pending`, `harness:cataloged`, and `harness:blocking` documented beyond mere existence? [Completeness, Spec §FR-005, Spec §AC-5]
 
 ## Requirement Clarity
 
-- [ ] CHK004 Is the trigger ?retrabalho > 20% do esfor?o estimado ou incidente? precise enough about measurement source and threshold rounding? [Clarity, Spec ?AC-3]
-- [ ] CHK005 Is the definition of a match by `tags` and `bounded_context` explicit enough to avoid different agents interpreting the same catalog differently? [Ambiguity, Spec ?AC-1, Spec ?Gloss?rio]
-- [ ] CHK006 Are confidentiality expectations clear for incident-derived harness entries and example data? [Gap, Spec ?Hybrid Collaboration Model, Spec ?AC-6]
+- [x] CHK004 Is the trigger "retrabalho > 20% do esforço estimado ou incidente" precise enough about measurement source and threshold rounding? [Clarity, Spec §FR-004, Spec §AC-3]
+- [x] CHK005 Is the definition of a match by `tags` and `bounded_context` explicit enough to avoid different agents interpreting the same catalog differently? [Clarity, Spec §FR-001, Spec §AC-1]
+- [x] CHK006 Are confidentiality expectations clear for incident-derived harness entries and example data? [Clarity, Spec §FR-006, Spec §Hybrid Collaboration Model]
 
 ## Consistency & Coverage
 
-- [ ] CHK007 Do the out-of-scope notes stay consistent with the acceptance criteria, especially around CI automation and external incident tools? [Consistency, Spec ?Fora de Escopo, Spec ?AC-4, Spec ?AC-6]
-- [ ] CHK008 Are search requirements consistent between the stated `grep` or script mechanisms and the cross-platform environments implied by the repository? [Consistency, Spec ?AC-4, Spec ?SLO Alvo]
-- [ ] CHK009 Do the requirements cover what should happen when multiple relevant harnesses match the same feature or when no bounded context is known yet? [Gap, Spec ?AC-1, Spec ?AC-7]
+- [x] CHK007 Do the out-of-scope notes stay consistent with the acceptance criteria, especially around CI automation and external incident tools? [Consistency, Spec §Fora de Escopo, Spec §AC-4, Spec §AC-6]
+- [x] CHK008 Are search requirements consistent between the stated `grep` or script mechanisms and the cross-platform environments implied by the repository? [Consistency, Spec §FR-007, Spec §SLO Alvo]
+- [x] CHK009 Do the requirements cover what should happen when multiple relevant harnesses match the same feature or when no bounded context is known yet? [Coverage, Spec §FR-003, Spec §AC-1]
 
 ## Traceability & Assumptions
 
-- [ ] CHK010 Is a formal FR or SC section needed for stronger traceability, or are acceptance criteria, done criteria, and glossary intended to be the sole source of behavior? [Traceability, Gap]
-- [ ] CHK011 Are dependencies on feature 001, template changes, and human validation treated as explicit prerequisites instead of implicit rollout assumptions? [Assumption, Spec ?Depend?ncias, Spec ?Hybrid Collaboration Model]
+- [x] CHK010 Is a formal FR or SC section needed for stronger traceability, or are acceptance criteria, done criteria, and glossary intended to be the sole source of behavior? [Traceability, Spec §FR-001–FR-008]
+- [x] CHK011 Are dependencies on feature 001, template changes, and human validation treated as explicit prerequisites instead of implicit rollout assumptions? [Assumption, Spec §Dependências, Spec §Hybrid Collaboration Model]
 
 ## Notes
 

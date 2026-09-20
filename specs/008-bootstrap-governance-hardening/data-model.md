@@ -9,7 +9,14 @@ repositório novo.
 |---|---|---|---|
 | `repo_type` | enum | `platform` \| `dev_standards` | Obrigatório — pergunta feita antes de instalar qualquer preset |
 | `preset_installed` | string | `nimbus-code-platform-standards` \| `nimbus-code-standards` | Derivado de `repo_type`, nunca assumido por padrão |
-| `product_role` | enum (opcional) | `produto` \| `frontend` \| `backend` \| `n/a` | Delegado a `specs/006-multirepo-support/` — apenas referenciado aqui, não implementado nesta feature |
+| `source_ref` | string | Tag ou versão usada como fonte do bootstrap | Obrigatório em modo não interativo; não pode ser branch móvel |
+| `context_classification` | enum | `greenfield` \| `brownfield` | Derivado da classificação inicial do repositório |
+| `bootstrap_mode` | enum | `interactive` \| `non_interactive` | Deve refletir a forma de execução utilizada |
+
+O roteamento de Produto, Frontend, Backend e demais bounded contexts não faz
+parte deste perfil. Esse relacionamento é responsabilidade da
+`specs/006-multirepo-support/`, por meio de `docs/bounded-contexts.yaml` e dos
+campos `bounded_contexts`/`repos` em `.specify/feature.json`.
 
 ## Entity: GitHubAppCredentialPolicy
 
@@ -58,3 +65,40 @@ Entrada por skill no manual de distribuição local vs. remota.
   que a URL de emissão de token/instalação do App usa o domínio correto.
 - `SkillDistributionManual` → não depende de `RepoProvisioningProfile`; é um
   documento estático consultado independentemente do tipo de repositório.
+
+## Entity: ValidationRelease
+
+Representa a versão imutável usada no projeto piloto e o vínculo entre os
+componentes publicados.
+
+| Campo | Tipo | Descrição | Validação |
+|---|---|---|---|
+| `ref` | string | Tag Git usada pelo piloto, inicialmente `v1.19.0-rc.1` | Deve resolver para commit em `main`; nunca branch móvel |
+| `project_bundle_version` | semver | Versão do bundle de projeto | `1.19.0` |
+| `platform_bundle_version` | semver | Versão do bundle de plataforma | `0.5.0` |
+| `pilot_status` | enum | `planned` \| `running` \| `passed` \| `failed` | Só promove para release final após gates |
+| `evidence` | list[string] | Logs, links e resultados do piloto | Sem secrets ou chaves privadas |
+
+## Entity: PlatformCapabilityProfile
+
+Contrato de capacidades entregues pelo preset de plataforma, sem executar
+coleta cloud ou `terraform apply` durante o bootstrap.
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `evidence_source` | enum | `cloud_inventory` \| `cmdb` \| `terraform_plan` \| `policy_baseline` |
+| `lifecycle_stage` | enum | `discovery` \| `imported` \| `plan_diff_zero` \| `landing_zone_generated` \| `managed` |
+| `drift_policy` | enum | `advisory` \| `blocked` \| `exception` |
+| `production_apply_allowed` | boolean | Deve ser `false` no preset Platform |
+| `workload_dependencies` | list[string] | Workloads ligados à superfície de plataforma |
+
+## Entity: DevStandardsAgentGuardrail
+
+Contrato de governança para agentes instalado somente no perfil Dev Standards.
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `complexity` | enum | `S0` \| `S1` \| `S2` \| `S3` \| `S4` |
+| `required_artifacts` | list[string] | spec, plan, tasks, graph, impact map, retro conforme o nível |
+| `human_gate` | boolean | Obrigatório para S4 e mudanças de segurança |
+| `cost_tracking` | boolean | Registra tokens e horas humanas |
