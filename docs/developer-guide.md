@@ -1,31 +1,32 @@
 # Manual do Dev — Começando com GHE + Nimbus Code na Nimbus-Code
 
-> **TL;DR** (S0/S1 — leitura completa reservada para primeira vez em cada
-> cenário ou dúvida específica): repo novo → `curl ... bootstrap.sh | bash`
-> (seção 1); repo existente sem Nimbus Code/sem Spec Kit → `curl ... bootstrap.sh | bash`
-> no próprio repo (ou `specify init --here` + bootstrap, se quiser separar) e
-> só depois ler o código/Boards antes de especificar (seção 2, brownfield);
-> ponto de partida a partir de um card do ADO/JIRA → prompt de importação pronto
-> (seção 3); ponto de partida a partir de uma entrevista de descoberta com o
-> cliente (ainda sem card/issue) → `/speckit.interview` (seção 3.5).
-> Pré-requisitos (`specify` CLI, `uv`, Copilot) na tabela logo abaixo.
+> **TL;DR (Guia Rápido v1.19)**:
+> - **Repositório de Aplicação/Serviço (Padrão)**: `curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bootstrap.sh | bash`
+> - **Repositório de Infraestrutura/Plataforma**: `curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bootstrap.sh | bash -s -- --repo-type platform`
+> - **Ciclo de Entrega**: `/speckit-interview` → `/speckit-specify` → `/speckit-clarify` → `/speckit-plan` → `/speckit-tasks` → `/speckit-analyze` → `/speckit-implement` → `/speckit-converge`
+> - **Regra de Ouro em PRs**: Toda issue implementada deve ser fechada com `Closes #<n>` ou `Fixes #<n>` no corpo do PR.
+> - **Complexidade S4**: Tarefas S4 (arquitetura crítica, auth, dados sensíveis) exigem aprovação humana formal antes do código.
 
-Este é o manual **central** de como todo dev da Nimbus-Code deve usar o
-[GitHub Spec Kit](https://github.com/github/spec-kit) no dia a dia, com as
-ferramentas da empresa (GHE, Azure DevOps/JIRA, GitHub Copilot). Ele cobre três
-cenários, na ordem em que você provavelmente vai precisar deles:
+Este é o manual **central e objetivo** de como todo desenvolvedor e engenheiro da Nimbus-Code deve operar o **Nimbus Code (v1.19)** no dia a dia com GitHub Enterprise, Azure DevOps/JIRA e GitHub Copilot.
 
-1. [Repositório novo](#1-repositório-novo) — bootstrap padrão em 1 comando.
-2. [Repositório existente sem Nimbus Code](#2-repositório-existente-sem-nimbus-code-brownfield) —
-   como instalar e rodar o Nimbus Code entendendo o contexto pelo **código
-   (brownfield)** e pelos **Boards** (cards já existentes).
-3. [Importar um card do Azure DevOps/JIRA para começar uma feature](#3-importar-um-card-do-azure-devops-ou-jira-para-começar-uma-feature) —
-   o prompt exato para puxar um work item/issue como ponto de partida.
-   - [3.5. Conduzindo uma entrevista de descoberta antes do `/speckit.specify`](#35-conduzindo-uma-entrevista-de-descoberta-antes-do-speckitspecify-speckitinterview) —
-     ponto de partida a partir de uma conversa com o cliente, ao vivo ou por transcript, quando ainda não existe card/issue.
+---
 
-Se algo aqui divergir do que você vê na prática, este arquivo é a fonte da
-verdade — abra um PR corrigindo, não crie um manual paralelo em outro lugar.
+## ⚡ Tabela Rápida de Comandos e Ciclo de Vida
+
+| Fase | Comando / Skill | Objetivo | Saída Principal |
+|---|---|---|---|
+| **0. Entrevista** | `/speckit-interview` | Descoberta guiada com o cliente (Negócio, Infra, Segurança, LGPD) | `specs/<slug>/interview.md` |
+| **1. Especificar** | `/speckit-specify` | Definir o **quê** e o **porquê** (requisitos SMART e User Stories) | `specs/<slug>/spec.md` |
+| **2. Clarificar** | `/speckit-clarify` | Eliminar ambiguidades antes do desenho técnico | `spec.md` atualizado |
+| **3. Planejar** | `/speckit-plan` | Desenhar arquitetura técnica, verificar gates e grafo | `specs/<slug>/plan.md` |
+| **4. Checklist** | `/speckit-checklist` | Validar completude e qualidade dos requisitos | `checklists/requirements-quality.md` |
+| **5. Tarefas** | `/speckit-tasks` | Decompor em tarefas ordenadas por dependência com labels | `specs/<slug>/tasks.md` |
+| **6. Analisar** | `/speckit-analyze` | Checagem cruzada de consistência (spec ↔ plan ↔ tasks) | Relatório de consistência |
+| **7. Issues** | `/speckit-taskstoissues` | Criar hierarquia Agile de issues no GHE (Epic → Feature → US → Task) | Issues no GitHub Project |
+| **8. Implementar**| `/speckit-implement` | Executar as tarefas respeitando isolamento de sessão | Código, testes e docs |
+| **9. Convergir** | `/speckit-converge` | Auditar código real vs artefatos e fechar gaps remanescentes | Tasks adicionais até `✅ Converged` |
+
+---
 
 ## Pré-requisitos (uma vez por máquina)
 
