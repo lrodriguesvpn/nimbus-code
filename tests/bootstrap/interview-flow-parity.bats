@@ -34,3 +34,19 @@ setup() {
     grep -q "/speckit-interview" templates/README-bundle-section.md' _ "$REPO_ROOT"
   [ "$status" -eq 0 ]
 }
+
+@test "readme bundle versions stay aligned with release catalogs" {
+  run bash -lc 'set -euo pipefail; cd "$1"; \
+    bundle_version=$(jq -r ".bundles[\"nimbus-code-project-bundle\"].version" bundles/catalog.json); \
+    preset_version=$(jq -r ".presets[\"nimbus-code-standards\"].version" presets/catalog.json); \
+    extension_version=$(jq -r ".extensions[\"nimbus-code-backlog-sync\"].version" extensions/catalog.json); \
+    workflow_version=$(jq -r ".workflows[\"nimbus-code-full-cycle\"].version" workflows/catalog.json); \
+    grep -Fq "bundle: nimbus-code-project-bundle (v${bundle_version})" README.md; \
+    grep -Fq "preset: nimbus-code-standards (v${preset_version})" README.md; \
+    grep -Fq "| **Bundle \`nimbus-code-project-bundle\`**" templates/README-bundle-section.md; \
+    grep -Fq "| \`$bundle_version\` |" templates/README-bundle-section.md; \
+    grep -Fq "| — preset \`nimbus-code-standards\` | \`$preset_version\` |" templates/README-bundle-section.md; \
+    grep -Fq "| — extensão \`nimbus-code-backlog-sync\` | \`$extension_version\` |" templates/README-bundle-section.md; \
+    grep -Fq "| — workflow \`nimbus-code-full-cycle\` | \`$workflow_version\` |" templates/README-bundle-section.md' _ "$REPO_ROOT"
+  [ "$status" -eq 0 ]
+}
