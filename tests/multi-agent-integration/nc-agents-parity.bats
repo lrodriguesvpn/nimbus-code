@@ -66,7 +66,7 @@ compute_hash() {
 import sys, hashlib, re
 
 content = open(sys.argv[1], 'r', encoding='utf-8').read()
-parts = content.split('---', 2)
+parts = content.split('---', 2) if content.startswith('---') else [content]
 body = parts[2] if len(parts) >= 3 else content
 # Remove integration notes and hints
 body = re.sub(r'When constructing command invocations from hook command names, replace dots.*?\n', '', body)

@@ -3,11 +3,9 @@ set -euo pipefail
 
 # ==============================================================================
 # Script: scripts/sync-nc-agents-to-integrations.sh
-# Purpose: Synchronize NC-* agent skills from .github/skills/ (single source of
-#          truth) to .claude/skills/ and .agents/skills/ with integration-specific
-#          post-processing (Claude argument-hint/flags; Antigravity hook note).
-# Spec: specs/024-multi-agent-integration-claude-antigravity/
-# Contract: specs/024-multi-agent-integration-claude-antigravity/contracts/nc-agent-sync.contract.md
+# Purpose: Synchronize NC-* skills and native agent projections from the
+#          repository's single source of truth.
+# Spec: specs/025-native-nc-agents/
 # ==============================================================================
 
 EXPECTED_AGENTS=(
@@ -54,12 +52,14 @@ Usage: $(basename "$0") [OPTIONS]
 Synchronizes the ${#EXPECTED_AGENTS[@]} NC-* agents from ${SOURCE_DIR}/ to other integrations.
 
 Options:
-  --target <claude|antigravity|agy|all>   Target integration (default: all)
+  --target <vscode|claude|antigravity|agy|all> Target integration (default: all)
+  --check                                 Validate generated outputs without writing
   --help                                  Show this help message and exit
 EOF
 }
 
 TARGET="all"
+MODE="generate"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -75,6 +75,10 @@ while [[ $# -gt 0 ]]; do
       print_help
       exit 0
       ;;
+    --check)
+      MODE="check"
+      shift
+      ;;
     *)
       echo "Error: Unknown option '$1'" >&2
       print_help >&2
@@ -87,8 +91,8 @@ if [[ "$TARGET" == "agy" ]]; then
   TARGET="antigravity"
 fi
 
-if [[ "$TARGET" != "claude" && "$TARGET" != "antigravity" && "$TARGET" != "all" ]]; then
-  echo "Error: Invalid target '$TARGET'. Must be one of: claude, antigravity, agy, all" >&2
+if [[ "$TARGET" != "vscode" && "$TARGET" != "claude" && "$TARGET" != "antigravity" && "$TARGET" != "all" ]]; then
+  echo "Error: Invalid target '$TARGET'. Must be one of: vscode, claude, antigravity, agy, all" >&2
   exit 1
 fi
 
@@ -267,7 +271,7 @@ validate_extra_speckit_source() {
 validate_source
 validate_extra_speckit_source
 
-if [[ "$TARGET" == "claude" || "$TARGET" == "all" ]]; then
+if [[ "$MODE" == "generate" && ( "$TARGET" == "claude" || "$TARGET" == "all" ) ]]; then
   echo "==> Sincronizando agentes para Claude Code (${CLAUDE_DIR}/)..."
   for agent in "${EXPECTED_AGENTS[@]}"; do
     src="${SOURCE_DIR}/${agent}/SKILL.md"
@@ -285,7 +289,7 @@ if [[ "$TARGET" == "claude" || "$TARGET" == "all" ]]; then
   echo "✅ ${#EXTRA_SPECKIT_SKILLS[@]} comandos speckit customizados sincronizados para Claude Code."
 fi
 
-if [[ "$TARGET" == "antigravity" || "$TARGET" == "all" ]]; then
+if [[ "$MODE" == "generate" && ( "$TARGET" == "antigravity" || "$TARGET" == "all" ) ]]; then
   echo "==> Sincronizando agentes para Antigravity (${AGY_DIR}/)..."
   for agent in "${EXPECTED_AGENTS[@]}"; do
     src="${SOURCE_DIR}/${agent}/SKILL.md"
@@ -301,4 +305,18 @@ if [[ "$TARGET" == "antigravity" || "$TARGET" == "all" ]]; then
     process_for_antigravity "$skill" "$src" "$dest"
   done
   echo "✅ ${#EXTRA_SPECKIT_SKILLS[@]} comandos speckit customizados sincronizados para Antigravity."
+fi
+
+NATIVE_TARGET_ARGS=()
+case "$TARGET" in
+  vscode) NATIVE_TARGET_ARGS=(--target vscode) ;;
+  claude) NATIVE_TARGET_ARGS=(--target claude) ;;
+  antigravity) NATIVE_TARGET_ARGS=(--target antigravity) ;;
+  all) NATIVE_TARGET_ARGS=(--target vscode --target claude --target antigravity) ;;
+esac
+
+if [[ "$MODE" == "generate" ]]; then
+  python3 scripts/lib/nc-agent-sync.py --repo-root . generate "${NATIVE_TARGET_ARGS[@]}"
+else
+  python3 scripts/lib/nc-agent-sync.py --repo-root . check "${NATIVE_TARGET_ARGS[@]}"
 fi
