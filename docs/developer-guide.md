@@ -1338,6 +1338,8 @@ Ver também: [FAQ — Como atualizo um projeto criado com uma versão antiga do 
 
 ## Documentos relacionados neste repositório
 
+- [`docs/mkt/nimbus-code-product-and-methodology.md`](mkt/nimbus-code-product-and-methodology.md) —
+  visão de produto, posicionamento executivo (CMO para C-Level), proposta de valor e as 3 fases do método (**Nimbus Discovery**, **Nimbus Build**, **Nimbus Grow & GSN**).
 - [`docs/bundle-architecture.md`](bundle-architecture.md) — diagramas Mermaid
   de como preset + extensão + workflow se compõem no bundle.
 - [`docs/mcp-and-bundles.md`](mcp-and-bundles.md) — o que o Nimbus Code realmente
