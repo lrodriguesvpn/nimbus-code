@@ -23,6 +23,8 @@ cenários, na ordem em que você provavelmente vai precisar deles:
    o prompt exato para puxar um work item/issue como ponto de partida.
    - [3.5. Conduzindo uma entrevista de descoberta antes do `/speckit.specify`](#35-conduzindo-uma-entrevista-de-descoberta-antes-do-speckitspecify-speckitinterview) —
      ponto de partida a partir de uma conversa com o cliente, ao vivo ou por transcript, quando ainda não existe card/issue.
+   - [3.6. Camada 0 — Ciclo de Ideação e Avaliação de Viabilidade (Idea Assessment)](#36-camada-0--ciclo-de-ideação-e-avaliação-de-viabilidade-idea-assessment) —
+     triagem, pesquisa de evidências, modelagem conceitual e gate formal Go/Kill antes da especificação.
 
 Se algo aqui divergir do que você vê na prática, este arquivo é a fonte da
 verdade — abra um PR corrigindo, não crie um manual paralelo em outro lugar.
@@ -460,6 +462,58 @@ não precisa referenciar `interview.md` manualmente.
 Se a demanda for claramente pequena (documentação, ajuste isolado), o Nimbus
 vai propor o modo **Fast-Track** (~9 perguntas essenciais, ~10 min) em vez do
 modo Completo (~20-30 min) — ele sempre confirma com você antes de aplicar.
+
+### 3.6. Camada 0 — Ciclo de Ideação e Avaliação de Viabilidade (Idea Assessment)
+
+Antes de abrir uma especificação formal em `specs/<feature-slug>/` ou iniciar a entrevista de descoberta, projetos inovadores ou demandas complexas podem passar pela **Camada 0 de Ideação** (Idea Assessment). 
+
+O objetivo da Camada 0 é capturar hipóteses embrionárias, pesquisar evidências de mercado e usuários, definir o problema real sem pressa de codificar, modelar opções conceituais e aplicar um **gate formal de viabilidade** (`Go`, `Needs Clarification` ou `Kill`).
+
+Todos os artefatos de ideação ficam isolados no diretório versionado `.specify/assessments/<slug>/`:
+
+```
+.specify/assessments/<slug>/
+├── intake.md      # Captura normalizada da ideia bruta
+├── research.md    # Evidências de mercado, benchmarks e dores de usuários
+├── problem.md     # Definição do problema, público impactado e metas SMART
+├── concept.md     # Opções de solução conceitual, apetite e trade-offs
+└── decision.md    # Gate formal de decisão (Go / Needs Clarification / Kill)
+```
+
+#### As 5 Etapas e Comandos do Ciclo de Ideação
+
+| Etapa | Comando Workflow | Agente Especialista | Artefato Produzido | Finalidade |
+|---|---|---|---|---|
+| **1. Intake** | `/speckit-assess-intake` | `/nc-assess-intake` | `intake.md` | Normaliza ideias brutas (texto livre, URL de repositório, link de artigo ou ticket de backlog). |
+| **2. Research** | `/speckit-assess-research` | `/nc-assess-research` | `research.md` | Reúne evidências, concorrentes, benchmarks e dados reais para embasar ou desafiar a ideia. |
+| **3. Define** | `/speckit-assess-define` | `/nc-assess-define` | `problem.md` | Formaliza o problema, quem sofre a dor, o que não é escopo e metas de sucesso mensuráveis. |
+| **4. Shape** | `/speckit-assess-shape` | `/nc-assess-shape` | `concept.md` | Modela abordagens conceituais de solução, apetite de tempo/recursos e trade-offs (sem design técnico de código). |
+| **5. Decide** | `/speckit-assess-decide` | `/nc-assess-decide` | `decision.md` | Aplica o portão de governança formal. Se aprovado (`Go`), faz o handoff automático para Camada 1 (`/speckit-interview` / `/speckit-specify`). |
+
+#### Exemplos de Uso Prático
+
+1. **Iniciar a triagem de uma ideia nova:**
+   ```text
+   /nc-assess-intake Avaliar criação de um motor unificado de ingestão de telemetria IoT via WebSockets e MQTT.
+   ```
+2. **Pesquisar evidências e concorrência:**
+   ```text
+   /nc-assess-research telemetry-iot-engine
+   ```
+3. **Definir o escopo do problema e métricas SMART:**
+   ```text
+   /nc-assess-define telemetry-iot-engine
+   ```
+4. **Modelar conceitos e opções de arquitetura de alto nível:**
+   ```text
+   /nc-assess-shape telemetry-iot-engine
+   ```
+5. **Aplicar o gate de viabilidade e transição para especificação:**
+   ```text
+   /nc-assess-decide telemetry-iot-engine
+   ```
+
+> 💡 **Handoff Automático**: Ao emitir um parecer `Go`, o `/nc-assess-decide` convida imediatamente o time a executar `/speckit-interview` ou `/nc-spec` para iniciar o ciclo formal SDD em `specs/`, transportando as dores e metas de `problem.md` e `concept.md`.
 
 ## 4. Hierarquia Agile (Epic → Feature → US → Task) no GHE
 
@@ -1284,6 +1338,8 @@ Ver também: [FAQ — Como atualizo um projeto criado com uma versão antiga do 
 
 ## Documentos relacionados neste repositório
 
+- [`docs/mkt/nimbus-code-product-and-methodology.md`](mkt/nimbus-code-product-and-methodology.md) —
+  visão de produto, posicionamento executivo (CMO para C-Level), proposta de valor e as 3 fases do método (**Nimbus Discovery**, **Nimbus Build**, **Nimbus Grow & GSN**).
 - [`docs/bundle-architecture.md`](bundle-architecture.md) — diagramas Mermaid
   de como preset + extensão + workflow se compõem no bundle.
 - [`docs/mcp-and-bundles.md`](mcp-and-bundles.md) — o que o Nimbus Code realmente
