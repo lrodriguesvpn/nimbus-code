@@ -36,6 +36,61 @@ manifest:
     write_mode: "observation-first"
     destructive_commands_forbidden: ["terraform apply", "terraform destroy", "az", "aws", "gcloud", "kubectl", "pac"]
   roles:
+    - id: "NC-Assess-Intake"
+      name: "Nimbus Idea Intake Specialist"
+      layer: "discovery-assessment"
+      write_permission: "read-write"
+      allowed_file_scope:
+        - ".specify/assessments/*/intake.md"
+        - ".specify/assessments/**"
+      tool_allowlist: ["view", "rg", "glob", "bash", "web_fetch", "skill:nc-assess-intake", "skill:speckit-assess-intake"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S2"
+    - id: "NC-Assess-Research"
+      name: "Nimbus Evidence Researcher"
+      layer: "discovery-assessment"
+      write_permission: "read-write"
+      allowed_file_scope:
+        - ".specify/assessments/*/research.md"
+        - ".specify/assessments/**"
+      tool_allowlist: ["view", "rg", "glob", "bash", "web_fetch", "skill:nc-assess-research", "skill:speckit-assess-research"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S2"
+    - id: "NC-Assess-Define"
+      name: "Nimbus Problem Definer"
+      layer: "discovery-assessment"
+      write_permission: "read-write"
+      allowed_file_scope:
+        - ".specify/assessments/*/problem.md"
+        - ".specify/assessments/**"
+      tool_allowlist: ["view", "rg", "glob", "bash", "skill:nc-assess-define", "skill:speckit-assess-define"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S2"
+    - id: "NC-Assess-Shape"
+      name: "Nimbus Concept Shaper"
+      layer: "discovery-assessment"
+      write_permission: "read-write"
+      allowed_file_scope:
+        - ".specify/assessments/*/concept.md"
+        - ".specify/assessments/**"
+      tool_allowlist: ["view", "rg", "glob", "bash", "skill:nc-assess-shape", "skill:speckit-assess-shape"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S2"
+    - id: "NC-Assess-Decide"
+      name: "Nimbus Assessment Decider"
+      layer: "discovery-assessment"
+      write_permission: "read-write"
+      allowed_file_scope:
+        - ".specify/assessments/*/decision.md"
+        - ".specify/assessments/**"
+      tool_allowlist: ["view", "rg", "glob", "bash", "skill:nc-assess-decide", "skill:speckit-assess-decide"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S2"
     - id: "NC-Intake"
       name: "Nimbus Intake Specialist"
       layer: "discovery"

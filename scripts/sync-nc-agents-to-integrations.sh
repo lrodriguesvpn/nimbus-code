@@ -11,6 +11,11 @@ set -euo pipefail
 # ==============================================================================
 
 EXPECTED_AGENTS=(
+  "nc-assess-intake"
+  "nc-assess-research"
+  "nc-assess-define"
+  "nc-assess-shape"
+  "nc-assess-decide"
   "nc-intake"
   "nc-spec"
   "nc-critic"
@@ -28,6 +33,11 @@ EXPECTED_AGENTS=(
 # silently be missing from .claude/skills/ and .agents/skills/ (see
 # harness-catalog.yaml HRN-0006).
 EXTRA_SPECKIT_SKILLS=(
+  "speckit-assess-intake"
+  "speckit-assess-research"
+  "speckit-assess-define"
+  "speckit-assess-shape"
+  "speckit-assess-decide"
   "speckit-interview"
   "speckit-nimbus-code-backlog-sync-sync"
 )
@@ -40,7 +50,7 @@ print_help() {
   cat <<EOF
 Usage: $(basename "$0") [OPTIONS]
 
-Synchronizes the 9 NC-* agents from ${SOURCE_DIR}/ to other integrations.
+Synchronizes the ${#EXPECTED_AGENTS[@]} NC-* agents from ${SOURCE_DIR}/ to other integrations.
 
 Options:
   --target <claude|antigravity|agy|all>   Target integration (default: all)
@@ -140,6 +150,11 @@ content = open(src, 'r', encoding='utf-8').read()
 
 # Default argument hint per NC agent / custom speckit command if not specified
 hints = {
+    'nc-assess-intake': '[raw idea, text, URL, ticket, or codebase pointer]',
+    'nc-assess-research': '[assessment slug or topic to research]',
+    'nc-assess-define': '[assessment slug or problem statement]',
+    'nc-assess-shape': '[assessment slug or concept description]',
+    'nc-assess-decide': '[assessment slug to evaluate]',
     'nc-intake': '[feature description or transcript path]',
     'nc-spec': '[feature description or interview path]',
     'nc-critic': '[spec path or feature slug]',
@@ -149,6 +164,11 @@ hints = {
     'nc-builder': '[tasks path or feature slug]',
     'nc-shield': '[plan path or feature slug]',
     'nc-telemetry': '[phase or feature slug]',
+    'speckit-assess-intake': '[raw idea, text, URL, ticket, or codebase pointer]',
+    'speckit-assess-research': '[assessment slug or topic to research]',
+    'speckit-assess-define': '[assessment slug or problem statement]',
+    'speckit-assess-shape': '[assessment slug or concept description]',
+    'speckit-assess-decide': '[assessment slug to evaluate]',
     'speckit-interview': 'Feature description, live interview, or transcript path',
     'speckit-nimbus-code-backlog-sync-sync': 'Optional feature slug or backlog item reference'
 }
@@ -252,7 +272,7 @@ if [[ "$TARGET" == "claude" || "$TARGET" == "all" ]]; then
     dest="${CLAUDE_DIR}/${agent}/SKILL.md"
     process_for_claude "$agent" "$src" "$dest"
   done
-  echo "✅ 9 agentes sincronizados para Claude Code."
+  echo "✅ ${#EXPECTED_AGENTS[@]} agentes sincronizados para Claude Code."
 
   echo "==> Sincronizando comandos /speckit-* customizados para Claude Code (${CLAUDE_DIR}/)..."
   for skill in "${EXTRA_SPECKIT_SKILLS[@]}"; do
@@ -270,7 +290,7 @@ if [[ "$TARGET" == "antigravity" || "$TARGET" == "all" ]]; then
     dest="${AGY_DIR}/${agent}/SKILL.md"
     process_for_antigravity "$agent" "$src" "$dest"
   done
-  echo "✅ 9 agentes sincronizados para Antigravity."
+  echo "✅ ${#EXPECTED_AGENTS[@]} agentes sincronizados para Antigravity."
 
   echo "==> Sincronizando comandos /speckit-* customizados para Antigravity (${AGY_DIR}/)..."
   for skill in "${EXTRA_SPECKIT_SKILLS[@]}"; do

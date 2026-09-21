@@ -1,4 +1,5 @@
 installed:
+- assess
 - nimbus-code-backlog-sync
 settings:
   auto_execute_hooks: true
@@ -10,7 +11,8 @@ hooks:
     optional: true
     priority: 10
     prompt: Sincronizar esta spec com o backlog (JIRA/Azure DevOps) configurado?
-    description: Cria ou atualiza a hierarquia EPIC/FEATURE/US correspondente no backlog externo
+    description: Cria ou atualiza a hierarquia EPIC/FEATURE/US correspondente no backlog
+      externo
     condition: null
   after_tasks:
   - extension: nimbus-code-backlog-sync
