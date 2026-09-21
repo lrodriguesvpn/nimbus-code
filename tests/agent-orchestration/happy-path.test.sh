@@ -14,7 +14,7 @@ contract = yaml.safe_load((root / '.nimbus/contracts/delivery-handoff.contract.y
 event = json.loads((root / 'tests/agent-orchestration/fixtures/execution-happy-path.json').read_text())
 
 role_ids = {role['id'] for role in manifest['roles']}
-assert len(role_ids) == 9 and 'NC-Builder' in role_ids and 'NC-Telemetry' in role_ids
+assert len(role_ids) == 14 and 'NC-Builder' in role_ids and 'NC-Telemetry' in role_ids and 'NC-Assess-Intake' in role_ids
 assert orchestration['phase_dependencies'][0]['phase'] == 'NC-Intake'
 assert orchestration['phase_dependencies'][-1]['phase'] == 'NC-Telemetry'
 required = set(contract['payload']['required'])

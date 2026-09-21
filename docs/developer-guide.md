@@ -1297,9 +1297,9 @@ Ver também: [FAQ — Como atualizo um projeto criado com uma versão antiga do 
 
 ## Integrações Multi-Agente e Agentes Disponíveis (SPEC 024)
 
-O Nimbus Code suporta três plataformas de execução de agentes com paridade completa nos 12 comandos `/speckit-*` e nos 9 agentes institucionais `/nc-*`:
+O Nimbus Code suporta três plataformas de execução de agentes com paridade completa nos 17 comandos `/speckit-*` e nos 14 agentes institucionais `/nc-*`:
 
-| Plataforma / Agente | Diretório de Instalação | `multi_install_safe` | 12 Comandos `/speckit-*` | 9 Agentes `/nc-*` |
+| Plataforma / Agente | Diretório de Instalação | `multi_install_safe` | 17 Comandos `/speckit-*` | 14 Agentes `/nc-*` |
 |---|---|:---:|:---:|:---:|
 | **GitHub Copilot** | `.github/skills/` | `true` | ✅ Nativo | ✅ Fonte única |
 | **Claude Code** | `.claude/skills/` | `true` | ✅ `specify integration install claude` | ✅ Sincronizado (`scripts/sync-nc-agents-to-integrations.sh --target claude`) |
@@ -1307,29 +1307,39 @@ O Nimbus Code suporta três plataformas de execução de agentes com paridade co
 
 ### Tabela de Agentes e Comandos Disponíveis por Integração
 
-| Identificador | Tipo | Copilot | Claude Code | Antigravity |
-|---|---|:---:|:---:|:---:|
-| `/speckit-constitution` | Workflow | ✅ | ✅ | ✅ |
-| `/speckit-specify` | Workflow | ✅ | ✅ | ✅ |
-| `/speckit-clarify` | Workflow | ✅ | ✅ | ✅ |
-| `/speckit-checklist` | Workflow | ✅ | ✅ | ✅ |
-| `/speckit-plan` | Workflow | ✅ | ✅ | ✅ |
-| `/speckit-tasks` | Workflow | ✅ | ✅ | ✅ |
-| `/speckit-analyze` | Workflow | ✅ | ✅ | ✅ |
-| `/speckit-implement` | Workflow | ✅ | ✅ | ✅ |
-| `/speckit-converge` | Workflow | ✅ | ✅ | ✅ |
-| `/speckit-taskstoissues` | Workflow | ✅ | ✅ | ✅ |
-| `/speckit-interview` | Workflow | ✅ | ✅ | ✅ |
-| `/speckit-nimbus-code-backlog-sync-sync` | Workflow | ✅ | ✅ | ✅ |
-| `/nc-intake` | Agente (Alias `/speckit-interview`) | ✅ | ✅ | ✅ |
-| `/nc-spec` | Agente (Alias `/speckit-specify`) | ✅ | ✅ | ✅ |
-| `/nc-critic` | Agente (Auditoria de Spec) | ✅ | ✅ | ✅ |
-| `/nc-governor` | Agente (Gates & Integridade) | ✅ | ✅ | ✅ |
-| `/nc-arch` | Agente (Solution Architecture) | ✅ | ✅ | ✅ |
-| `/nc-qa` | Agente (Test Strategy) | ✅ | ✅ | ✅ |
-| `/nc-builder` | Agente (Autonomous Builder) | ✅ | ✅ | ✅ |
-| `/nc-shield` | Agente (DevSecOps Guardian) | ✅ | ✅ | ✅ |
-| `/nc-telemetry` | Agente (Observability & SRE) | ✅ | ✅ | ✅ |
+| Identificador | Tipo | Camada / Descrição | Copilot | Claude Code | Antigravity |
+|---|---|---|:---:|:---:|:---:|
+| `/speckit-assess-intake` | Workflow | Discovery (Intake de Ideia Bruta) | ✅ | ✅ | ✅ |
+| `/speckit-assess-research` | Workflow | Discovery (Pesquisa & Evidências) | ✅ | ✅ | ✅ |
+| `/speckit-assess-define` | Workflow | Discovery (Definição de Problema) | ✅ | ✅ | ✅ |
+| `/speckit-assess-shape` | Workflow | Discovery (Modelagem de Conceito) | ✅ | ✅ | ✅ |
+| `/speckit-assess-decide` | Workflow | Discovery (Decisão Go/Clarify/Kill) | ✅ | ✅ | ✅ |
+| `/speckit-constitution` | Workflow | Governança & Princípios | ✅ | ✅ | ✅ |
+| `/speckit-specify` | Workflow | Especificação SDD | ✅ | ✅ | ✅ |
+| `/speckit-clarify` | Workflow | Clarificação de Requisitos | ✅ | ✅ | ✅ |
+| `/speckit-checklist` | Workflow | Geração de Checklists | ✅ | ✅ | ✅ |
+| `/speckit-plan` | Workflow | Planejamento de Arquitetura | ✅ | ✅ | ✅ |
+| `/speckit-tasks` | Workflow | Geração de Tarefas | ✅ | ✅ | ✅ |
+| `/speckit-analyze` | Workflow | Análise de Consistência | ✅ | ✅ | ✅ |
+| `/speckit-implement` | Workflow | Implementação de Código | ✅ | ✅ | ✅ |
+| `/speckit-converge` | Workflow | Fechamento de Lacunas | ✅ | ✅ | ✅ |
+| `/speckit-taskstoissues` | Workflow | Sincronização de Issues GHE | ✅ | ✅ | ✅ |
+| `/speckit-interview` | Workflow | Entrevista de Descoberta 4 Blocos | ✅ | ✅ | ✅ |
+| `/speckit-nimbus-code-backlog-sync-sync` | Workflow | Backlog Externo (Jira/ADO) | ✅ | ✅ | ✅ |
+| `/nc-assess-intake` | Agente | Camada 0: Idea Intake Specialist | ✅ | ✅ | ✅ |
+| `/nc-assess-research` | Agente | Camada 0: Evidence Researcher | ✅ | ✅ | ✅ |
+| `/nc-assess-define` | Agente | Camada 0: Problem Definer | ✅ | ✅ | ✅ |
+| `/nc-assess-shape` | Agente | Camada 0: Concept Shaper | ✅ | ✅ | ✅ |
+| `/nc-assess-decide` | Agente | Camada 0: Assessment Decider | ✅ | ✅ | ✅ |
+| `/nc-intake` | Agente | Camada 1: Discovery Intake (Alias `/speckit-interview`) | ✅ | ✅ | ✅ |
+| `/nc-spec` | Agente | Camada 1: Spec Architect (Alias `/speckit-specify`) | ✅ | ✅ | ✅ |
+| `/nc-critic` | Agente | Camada 1: Spec Auditor | ✅ | ✅ | ✅ |
+| `/nc-governor` | Agente | Camada 1: Gates & Integridade SHA-256 | ✅ | ✅ | ✅ |
+| `/nc-arch` | Agente | Camada 2: Solution Architect | ✅ | ✅ | ✅ |
+| `/nc-qa` | Agente | Camada 2: Test Strategist | ✅ | ✅ | ✅ |
+| `/nc-builder` | Agente | Camada 3: Autonomous Builder (Alias `/speckit-implement` + `/speckit-converge`) | ✅ | ✅ | ✅ |
+| `/nc-shield` | Agente | Camada 2: DevSecOps Guardian | ✅ | ✅ | ✅ |
+| `/nc-telemetry` | Agente | Camada 3: Observability & SRE | ✅ | ✅ | ✅ |
 
 ### Regra de Segurança para Antigravity (`multi_install_safe: false`)
 
@@ -1447,3 +1457,13 @@ decisão #367/#405; copiar scripts corrigidos não resolve esse gate.
 - [ ] Refresh executado em fixture antes de um satélite real
 - [ ] Registry, manifest instalado, arquivos gerenciados e overrides revisados
 - [ ] Check de CI realmente falha em drift/erro e proteção de branch revisada
+
+---
+
+## 7. Análises Comparativas de Frameworks
+
+Para entender como o Nimbus Code se posiciona em relação a outros frameworks e projetos open-source da comunidade de IA e engenharia de software, consulte os relatórios técnicos detalhados:
+
+- [GSD Core vs. Nimbus Code](comparisons/gsd-core-vs-nimbus-code.md): Comparação aprofundada de foco operacional (Context Engineering e ciclos de terminal vs. Governança Corporativa Full-Cycle, RACI, DORA, DevSecOps e FinOps).
+- [Understand-Anything vs. Nimbus Harvest & Catálogo de Reuso](comparisons/understand-anything-vs-nimbus-harvest.md): Comparação de propósitos (Visualização/navegação interativa de AST para onboarding humano vs. Mineração on-demand de componentes e assinaturas sem segredos para governança de IA e economia de tokens).
+
