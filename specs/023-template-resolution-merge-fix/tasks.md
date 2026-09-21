@@ -17,7 +17,7 @@ O escopo adicional S3 foi aprovado para implementação, não para release (#448
   diretório temporário isolado, sem provisioning ou alteração remota.
 - [x] T020 Executar suíte mandatória consolidada após todas as frentes:
   28/28 arquivos aprovados com Bash 5.3.20.
-- [ ] T021 Obter revisão de release e piloto autorizado (#448/#433/#445).
+- [x] T021 Obter revisão de release e piloto autorizado (#448/#433/#445).
 - [x] T022 Remover placeholder exclusivo de wrap dos dois spec-templates
   declarados como prepend, preservando a estratégia dos manifests (#408).
 

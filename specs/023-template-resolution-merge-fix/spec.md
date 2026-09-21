@@ -2,7 +2,7 @@
 
 **Feature Branch**: `023-template-resolution-merge-fix`
 **Created**: 2026-08-24
-**Status**: Draft
+**Status**: Ready
 **Input**: Solicitação formalizada do usuário: "Corrigir o bug de resolução de templates em `.specify/scripts/bash/common.sh`: `resolve_template()`/`resolve_template_content()` hoje escolhem um único arquivo bruto por prioridade (preset antes do core) em vez de compor de fato o conteúdo de múltiplas camadas segundo a estratégia declarada em `preset.yml` (`replace`/`prepend`/`append`/`wrap`), como a própria CLI oficial `specify` já faz internamente (`resolve_content()`). Isso faz com que `plan.md`, `tasks.md`, `constitution.md` e demais artefatos gerados por `setup-plan.sh`/`setup-tasks.sh` em qualquer repositório com o preset `nimbus-code-standards` instalado (central ou satélite) recebam OU o template nativo OU o fragmento bruto do preset, nunca os dois combinados — forçando merge manual repetido, como ocorreu nas specs 021 e 022."
 
 ## Nimbus-Code — Cabeçalho Obrigatório da Spec
