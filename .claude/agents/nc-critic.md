@@ -1,7 +1,7 @@
 ---
 name: nc-critic
-description: "Nimbus Spec Auditor \u2014 Analisa a especifica\xE7\xE3o em busca de\
-  \ ambiguidades, termos vagos, contradi\xE7\xF5es e lacunas de requisitos."
+description: Nimbus Spec Auditor — Analisa a especificação em busca de ambiguidades,
+  termos vagos, contradições e lacunas de requisitos.
 tools:
 - view
 - rg

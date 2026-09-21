@@ -1,8 +1,8 @@
 ---
 name: nc-intake
-description: "Nimbus Intake Specialist \u2014 Conduz a entrevista de descoberta nos\
-  \ 4 blocos obrigat\xF3rios (Neg\xF3cio, Infraestrutura, Seguran\xE7a e LGPD) a partir\
-  \ de sess\xE3o interativa ou transcri\xE7\xE3o."
+description: Nimbus Intake Specialist — Conduz a entrevista de descoberta nos 4 blocos
+  obrigatórios (Negócio, Infraestrutura, Segurança e LGPD) a partir de sessão interativa
+  ou transcrição.
 tools:
 - view
 - rg

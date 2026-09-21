@@ -1,8 +1,7 @@
 ---
 name: nc-governor
-description: "Nimbus Governance Gate \u2014 Gerencia o versionamento da spec, integridade\
-  \ criptogr\xE1fica SHA-256, classifica\xE7\xE3o S0\u2013S4 e gates de aprova\xE7\
-  \xE3o RACI."
+description: Nimbus Governance Gate — Gerencia o versionamento da spec, integridade
+  criptográfica SHA-256, classificação S0–S4 e gates de aprovação RACI.
 tools:
 - view
 - rg

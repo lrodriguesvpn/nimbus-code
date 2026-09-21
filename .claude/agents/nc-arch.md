@@ -1,7 +1,7 @@
 ---
 name: nc-arch
-description: "Nimbus Solution Architect \u2014 Desenha a arquitetura t\xE9cnica, registra\
-  \ ADRs, atualiza grafos de depend\xEAncia e consulta o cat\xE1logo de reuso."
+description: Nimbus Solution Architect — Desenha a arquitetura técnica, registra ADRs,
+  atualiza grafos de dependência e consulta o catálogo de reuso.
 tools:
 - view
 - rg

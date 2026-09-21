@@ -1,8 +1,8 @@
 ---
 name: nc-assess-decide
-description: "Nimbus Assessment Decider \u2014 Aplica o gate formal de viabilidade\
-  \ (Go / Needs Clarification / Kill) e realiza o handoff para o ciclo de especifica\xE7\
-  \xE3o formal (.specify/assessments/<slug>/decision.md)."
+description: Nimbus Assessment Decider — Aplica o gate formal de viabilidade (Go /
+  Needs Clarification / Kill) e realiza o handoff para o ciclo de especificação formal
+  (.specify/assessments/<slug>/decision.md).
 tools:
 - view
 - rg

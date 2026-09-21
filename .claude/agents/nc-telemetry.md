@@ -1,7 +1,7 @@
 ---
 name: nc-telemetry
-description: "Nimbus Observability & SRE \u2014 Consolida observabilidade, logs estruturados\
-  \ em JSON, traces OpenTelemetry, m\xE9tricas DORA e custo real da entrega."
+description: Nimbus Observability & SRE — Consolida observabilidade, logs estruturados
+  em JSON, traces OpenTelemetry, métricas DORA e custo real da entrega.
 tools:
 - view
 - rg

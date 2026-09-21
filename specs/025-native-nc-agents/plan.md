@@ -152,8 +152,13 @@ As decisões e evidências completas estão em [research.md](./research.md).
    ferramentas e approval policy.
 2. Derivar os agentes elegíveis a partir da lista de roles, verificando que cada
    role possui uma skill NC-* correspondente.
-3. Gerar `.github/agents/nc-*.agent.md` com frontmatter VS Code e corpo funcional.
-4. Gerar `.claude/agents/nc-*.md` com frontmatter Claude e corpo funcional.
+3. Gerar **um único** `.github/agents/nimbus.agent.md` (orquestrador `@nimbus`,
+   ver ADL-025-04) com frontmatter VS Code, `tools` = união dos allowlists das
+   15 roles, e corpo renderizado a partir de
+   `scripts/lib/templates/nimbus-agent.template.md` + tabela de cobertura das
+   roles. Nenhum `.github/agents/nc-*.agent.md` é gerado.
+4. Gerar `.claude/agents/nc-*.md` (15 arquivos, um por role) com frontmatter
+   Claude e corpo funcional.
 5. Continuar gerando `.agents/skills/nc-*/SKILL.md` para Antigravity.
 6. Manter `.github/skills/nc-*/SKILL.md` como bridge e fonte de conteúdo.
 
@@ -245,6 +250,7 @@ medida por falha explícita e cobertura de drift.
 | ADL-025-01 | Reusar `.nimbus/agent-manifest.yaml` | Criar `.nimbus/agents.yaml` | Evita duplicação de identidade e drift de governança | Aprovado por @lrodrigues em 2026-09-21 |
 | ADL-025-02 | Manter Antigravity em `.agents/skills` | Inventar `.agents/agents` | Não há contrato confirmado; segurança exige falha explícita | Aprovado por @lrodrigues (Arch Board) em 2026-09-21 |
 | ADL-025-03 | Manter `/nc-*` como bridge | Remover comandos na mesma feature | Evita quebra de usuários e permite rollout canário | Aprovado por @lrodrigues em 2026-09-21 |
+| ADL-025-04 | VS Code recebe um único agente orquestrador (`@nimbus`, gerado a partir de `scripts/lib/templates/nimbus-agent.template.md`) que conduz o usuário (Bug/Fix, Nova Spec, Ideação) e delega internamente para as 15 roles NC, em vez de 15 arquivos `.agent.md` separados | Manter 15 arquivos `.agent.md` (um por role), replicando o modelo Claude/Antigravity | O agent picker do VS Code Copilot Chat fica poluído com 15 entradas; um orquestrador único melhora a UX sem alterar Claude Code (15 subagentes) nem Antigravity (skill bridges), que não sofrem esse problema | Aprovado por @lrodrigues antes da publicação do PR #479 |
 
 ## Constitution Check — Post-Design
 

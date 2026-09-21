@@ -1,7 +1,7 @@
 ---
 name: nc-assess-shape
-description: "Nimbus Concept Shaper \u2014 Modela op\xE7\xF5es de solu\xE7\xE3o conceitual,\
-  \ escopo, apetite de esfor\xE7o e trade-offs (.specify/assessments/<slug>/concept.md)."
+description: Nimbus Concept Shaper — Modela opções de solução conceitual, escopo,
+  apetite de esforço e trade-offs (.specify/assessments/<slug>/concept.md).
 tools:
 - view
 - rg

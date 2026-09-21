@@ -40,6 +40,27 @@ GENERATED_ROOTS = {
     "antigravity": Path(".agents/skills"),
 }
 
+# ---------------------------------------------------------------------------
+# VS Code single-orchestrator projection (ADL: SPEC-025 pivot).
+#
+# Unlike Claude Code and Antigravity — which keep one native file per NC role
+# so specialist subagents/skills remain individually invocable — the VS Code
+# Copilot Chat agent menu is polluted by 15 separate `@nc-*` entries. VS Code
+# instead gets exactly ONE generated agent, `@nimbus`, that actively triages
+# the developer (Bug/Fix, Nova Spec, Ideação) and delegates internally to the
+# same `/nc-*` skills. The orchestrator body is a static, versioned template
+# plus a deterministically generated "Esquadrão Disponível" coverage table,
+# so drift is still verifiable exactly like the per-agent projections.
+# ---------------------------------------------------------------------------
+ORCHESTRATOR_NAME = "nimbus"
+ORCHESTRATOR_TEMPLATE_PATH = Path("scripts/lib/templates/nimbus-agent.template.md")
+ORCHESTRATOR_DEST_PATH = Path(".github/agents/nimbus.agent.md")
+ORCHESTRATOR_DESCRIPTION = (
+    "Nimbus Code Squad Orchestrator — triagem entre Bug/Fix, Nova Spec e Ideação, "
+    "conduzindo o ciclo SDD completo e delegando para os especialistas nc-*."
+)
+ROLES_TABLE_PLACEHOLDER = "{{ROLES_TABLE}}"
+
 
 def fail(message: str) -> None:
     print(f"Error: {message}", file=sys.stderr)
@@ -102,7 +123,39 @@ def role_for(roles: dict[str, dict[str, Any]], agent: str) -> dict[str, Any]:
 
 
 def yaml_frontmatter(values: dict[str, Any]) -> str:
-    return "---\n" + yaml.safe_dump(values, sort_keys=False, allow_unicode=False).rstrip() + "\n---\n\n"
+    return "---\n" + yaml.safe_dump(values, sort_keys=False, allow_unicode=True).rstrip() + "\n---\n\n"
+
+
+def orchestrator_tools(roles: dict[str, dict[str, Any]]) -> list[str]:
+    tools: set[str] = set()
+    for agent in AGENTS:
+        tools.update(str(tool) for tool in role_for(roles, agent).get("tool_allowlist", []))
+    return sorted(tools)
+
+
+def roles_table(roles: dict[str, dict[str, Any]], sources: dict[str, Path]) -> str:
+    header = "| Camada | Comando | Papel |\n| --- | --- | --- |\n"
+    rows = []
+    for agent in AGENTS:
+        role = role_for(roles, agent)
+        source_meta, _ = split_frontmatter(sources[agent].read_text(encoding="utf-8"))
+        role_name = str(source_meta.get("description") or role.get("name") or agent)
+        rows.append(f"| {role.get('layer', '')} | `/{agent}` | {role_name} |")
+    return header + "\n".join(rows) + "\n"
+
+
+def render_orchestrator(root: Path, roles: dict[str, dict[str, Any]], sources: dict[str, Path]) -> str:
+    template_path = root / ORCHESTRATOR_TEMPLATE_PATH
+    if not template_path.is_file():
+        fail(f"orchestrator template missing: {template_path}")
+    template_text = template_path.read_text(encoding="utf-8")
+    body = template_text.replace(ROLES_TABLE_PLACEHOLDER, roles_table(roles, sources))
+    metadata = {
+        "name": ORCHESTRATOR_NAME,
+        "description": ORCHESTRATOR_DESCRIPTION,
+        "tools": orchestrator_tools(roles),
+    }
+    return yaml_frontmatter(metadata) + body
 
 
 def render(root: Path, agent: str, target: str, role: dict[str, Any], source: Path) -> str:
@@ -112,20 +165,19 @@ def render(root: Path, agent: str, target: str, role: dict[str, Any], source: Pa
     tools = [str(tool) for tool in role.get("tool_allowlist", [])]
     if target == "antigravity":
         return source_text
-    if target == "vscode":
-        metadata = {"name": agent, "description": description, "tools": tools}
-    elif target == "claude":
+    if target == "claude":
         metadata = {"name": agent, "description": description, "tools": tools}
     else:
-        fail(f"unsupported target: {target}")
+        fail(f"unsupported per-agent target: {target}")
     return yaml_frontmatter(metadata) + body
 
 
 def destination(root: Path, agent: str, target: str) -> Path:
     if target == "antigravity":
         return root / GENERATED_ROOTS[target] / agent / "SKILL.md"
-    suffix = ".agent.md" if target == "vscode" else ".md"
-    return root / GENERATED_ROOTS[target] / f"{agent}{suffix}"
+    if target == "claude":
+        return root / GENERATED_ROOTS[target] / f"{agent}.md"
+    fail(f"unsupported per-agent target: {target}")
 
 
 def validate_inventory(root: Path) -> tuple[dict[str, dict[str, Any]], dict[str, Path]]:
@@ -158,17 +210,55 @@ def validate_contract(root: Path, agent: str, target: str, role: dict[str, Any],
         fail(f"{target} tools broadened for {agent}: {sorted(actual - expected)}")
 
 
+def stray_vscode_agent_files(root: Path) -> list[Path]:
+    """Any `.github/agents/nc-*.agent.md` file is a menu-pollution regression:
+    VS Code must only ever expose the single `@nimbus` orchestrator."""
+    agents_dir = root / GENERATED_ROOTS["vscode"]
+    if not agents_dir.is_dir():
+        return []
+    return sorted(agents_dir.glob("nc-*.agent.md"))
+
+
+def generate_vscode_orchestrator(root: Path, roles: dict[str, dict[str, Any]], sources: dict[str, Path]) -> None:
+    for stray in stray_vscode_agent_files(root):
+        stray.unlink()
+    path = root / ORCHESTRATOR_DEST_PATH
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(render_orchestrator(root, roles, sources), encoding="utf-8")
+    validate_contract(root, ORCHESTRATOR_NAME, "vscode", {"tool_allowlist": orchestrator_tools(roles)}, path)
+
+
+def check_vscode_orchestrator(root: Path, roles: dict[str, dict[str, Any]], sources: dict[str, Path]) -> None:
+    stray = stray_vscode_agent_files(root)
+    if stray:
+        fail(
+            "VS Code agent menu polluted by legacy per-role files: "
+            + ", ".join(str(p.relative_to(root)) for p in stray)
+        )
+    path = root / ORCHESTRATOR_DEST_PATH
+    if not path.is_file():
+        fail(f"missing vscode orchestrator artifact: {path}")
+    validate_contract(root, ORCHESTRATOR_NAME, "vscode", {"tool_allowlist": orchestrator_tools(roles)}, path)
+    expected = render_orchestrator(root, roles, sources)
+    actual = path.read_text(encoding="utf-8")
+    if expected != actual:
+        fail(f"functional drift for {ORCHESTRATOR_NAME} in vscode: {path}")
+
+
 def generate(root: Path, targets: list[str]) -> None:
     roles, sources = validate_inventory(root)
     for target in targets:
         if target not in TARGETS:
             fail(f"unsupported target: {target}")
+        if target == "vscode":
+            generate_vscode_orchestrator(root, roles, sources)
+            continue
         for agent, source in sources.items():
             path = destination(root, agent, target)
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(render(root, agent, target, role_for(roles, agent), source), encoding="utf-8")
             validate_contract(root, agent, target, role_for(roles, agent), path)
-    print(f"Generated {len(sources)} agents for: {', '.join(targets)}")
+    print(f"Generated agents for: {', '.join(targets)}")
 
 
 def check(root: Path, targets: list[str]) -> None:
@@ -176,6 +266,9 @@ def check(root: Path, targets: list[str]) -> None:
     for target in targets:
         if target not in TARGETS:
             fail(f"unsupported target: {target}")
+        if target == "vscode":
+            check_vscode_orchestrator(root, roles, sources)
+            continue
         for agent, source in sources.items():
             path = destination(root, agent, target)
             if not path.is_file():
@@ -185,7 +278,7 @@ def check(root: Path, targets: list[str]) -> None:
             actual = normalize_body(path.read_text(encoding="utf-8"))
             if expected != actual:
                 fail(f"functional drift for {agent} in {target}: {path}")
-    print(f"Parity OK for {len(sources)} agents across: {', '.join(targets)}")
+    print(f"Parity OK across: {', '.join(targets)}")
 
 
 def main() -> None:

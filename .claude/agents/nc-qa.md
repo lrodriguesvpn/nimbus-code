@@ -1,8 +1,7 @@
 ---
 name: nc-qa
-description: "Nimbus Test Strategist \u2014 Constr\xF3i a estrat\xE9gia de testes,\
-  \ gera tasks.md ordenadas por depend\xEAncia com [P] e planeja su\xEDtes de valida\xE7\
-  \xE3o automatizadas."
+description: Nimbus Test Strategist — Constrói a estratégia de testes, gera tasks.md
+  ordenadas por dependência com [P] e planeja suítes de validação automatizadas.
 tools:
 - view
 - rg

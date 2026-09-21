@@ -5,6 +5,16 @@ description: "Tasks for native NC agent projections"
 
 # Tasks: Native NC Agents
 
+> **Pivot pós-implementação (ADL-025-04):** as tarefas abaixo descrevem o
+> desenho original (`.github/agents/nc-*.agent.md`, 15 arquivos). Após
+> revisão de UX do PR #479, o destino VS Code foi consolidado em um único
+> orquestrador `.github/agents/nimbus.agent.md` (`@nimbus`), gerado a partir
+> de `scripts/lib/templates/nimbus-agent.template.md`. Claude Code e
+> Antigravity permanecem exatamente como descrito (15 arquivos/skills). Ver
+> `plan.md` (ADL-025-04) e `contracts/vscode-custom-agent.contract.md` para o
+> contrato atualizado. Este arquivo é mantido como registro histórico das
+> tarefas originalmente executadas.
+
 **Input**: Design documents from `specs/025-native-nc-agents/`
 
 **Prerequisites**: `plan.md`, `spec.md`, `research.md`, `data-model.md`,

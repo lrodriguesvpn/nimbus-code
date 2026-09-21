@@ -6,8 +6,9 @@
 graph LR
   source[".github/skills/nc-*/SKILL.md"] --> generator["sync-nc-agents-to-integrations.sh"]
   manifest[".nimbus/agent-manifest.yaml"] --> generator
-  generator --> vscode[".github/agents/*.agent.md"]
-  generator --> claude[".claude/agents/*.md"]
+  template["scripts/lib/templates/nimbus-agent.template.md"] --> generator
+  generator --> vscode[".github/agents/nimbus.agent.md (@nimbus, orquestrador único)"]
+  generator --> claude[".claude/agents/*.md (15 arquivos)"]
   generator --> agy[".agents/skills/nc-*/SKILL.md"]
   source --> bridge["/nc-* bridge"]
   parity["Parity gate / Bats"] --> vscode

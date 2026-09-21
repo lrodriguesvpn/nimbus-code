@@ -1,7 +1,7 @@
 ---
 name: nc-shield
-description: "Nimbus DevSecOps Guardian \u2014 Audita e imp\xF5e os 6 controles N\xE3\
-  o-Negoci\xE1veis de seguran\xE7a, TLS, segredos em cofre, backup/DR e gates DevSecOps."
+description: Nimbus DevSecOps Guardian — Audita e impõe os 6 controles Não-Negociáveis
+  de segurança, TLS, segredos em cofre, backup/DR e gates DevSecOps.
 tools:
 - view
 - rg

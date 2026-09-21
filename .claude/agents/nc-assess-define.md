@@ -1,8 +1,7 @@
 ---
 name: nc-assess-define
-description: "Nimbus Problem Definer \u2014 Converte a ideia e evid\xEAncias em uma\
-  \ defini\xE7\xE3o formal do problema, p\xFAblico impactado, dores e metas mensur\xE1\
-  veis (.specify/assessments/<slug>/problem.md)."
+description: Nimbus Problem Definer — Converte a ideia e evidências em uma definição
+  formal do problema, público impactado, dores e metas mensuráveis (.specify/assessments/<slug>/problem.md).
 tools:
 - view
 - rg

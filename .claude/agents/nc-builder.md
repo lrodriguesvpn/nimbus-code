@@ -1,8 +1,7 @@
 ---
 name: nc-builder
-description: "Nimbus Autonomous Builder \u2014 Executa a implementa\xE7\xE3o do c\xF3\
-  digo sob isolamento estrito de sess\xE3o, criando testes, c\xF3digo limpo e PR com\
-  \ rastreabilidade."
+description: Nimbus Autonomous Builder — Executa a implementação do código sob isolamento
+  estrito de sessão, criando testes, código limpo e PR com rastreabilidade.
 tools:
 - view
 - rg

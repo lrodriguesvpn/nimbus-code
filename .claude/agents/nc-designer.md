@@ -1,8 +1,8 @@
 ---
 name: nc-designer
-description: "Nimbus Interface Designer \u2014 Aplica julgamento est\xE9tico de UI/UX\
-  \ de alto padr\xE3o (evita clich\xEAs de 'AI slop'), audita interfaces existentes\
-  \ e gera diretrizes de design distintivas para o produto."
+description: Nimbus Interface Designer — Aplica julgamento estético de UI/UX de alto
+  padrão (evita clichês de 'AI slop'), audita interfaces existentes e gera diretrizes
+  de design distintivas para o produto.
 tools:
 - view
 - rg

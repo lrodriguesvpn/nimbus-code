@@ -1,7 +1,7 @@
 ---
 name: nc-assess-research
-description: "Nimbus Evidence Researcher \u2014 Re\xFAne evid\xEAncias de mercado,\
-  \ usu\xE1rios, concorr\xEAncia e dados para fundamentar ou desafiar a ideia (.specify/assessments/<slug>/research.md)."
+description: Nimbus Evidence Researcher — Reúne evidências de mercado, usuários, concorrência
+  e dados para fundamentar ou desafiar a ideia (.specify/assessments/<slug>/research.md).
 tools:
 - view
 - rg

@@ -1,7 +1,7 @@
 ---
 name: nc-spec
-description: "Nimbus Spec Architect \u2014 Transforma os requisitos da entrevista\
-  \ em especifica\xE7\xE3o funcional estruturada SMART e cen\xE1rios BDD."
+description: Nimbus Spec Architect — Transforma os requisitos da entrevista em especificação
+  funcional estruturada SMART e cenários BDD.
 tools:
 - view
 - rg

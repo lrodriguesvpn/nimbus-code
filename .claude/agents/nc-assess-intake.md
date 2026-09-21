@@ -1,7 +1,7 @@
 ---
 name: nc-assess-intake
-description: "Nimbus Idea Intake Specialist \u2014 Captura e normaliza ideias brutas\
-  \ (texto, URLs, tickets, reposit\xF3rios) em notas de intake de assessment (.specify/assessments/<slug>/intake.md)."
+description: Nimbus Idea Intake Specialist — Captura e normaliza ideias brutas (texto,
+  URLs, tickets, repositórios) em notas de intake de assessment (.specify/assessments/<slug>/intake.md).
 tools:
 - view
 - rg
