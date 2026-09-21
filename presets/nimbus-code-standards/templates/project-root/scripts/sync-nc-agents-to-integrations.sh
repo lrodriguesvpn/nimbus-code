@@ -25,6 +25,7 @@ EXPECTED_AGENTS=(
   "nc-builder"
   "nc-shield"
   "nc-telemetry"
+  "nc-designer"
 )
 
 # Custom Nimbus Code /speckit-* commands that are NOT part of the upstream
@@ -164,6 +165,7 @@ hints = {
     'nc-builder': '[tasks path or feature slug]',
     'nc-shield': '[plan path or feature slug]',
     'nc-telemetry': '[phase or feature slug]',
+    'nc-designer': '[screen/component description, or audit|critique|polish|harden <target>]',
     'speckit-assess-intake': '[raw idea, text, URL, ticket, or codebase pointer]',
     'speckit-assess-research': '[assessment slug or topic to research]',
     'speckit-assess-define': '[assessment slug or problem statement]',
