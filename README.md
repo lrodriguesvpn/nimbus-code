@@ -96,10 +96,10 @@ o preset e a referência de origem ficam registrados em
 
 Os perfis são estritos: `dev_standards` instala a extensão de backlog, a
 extensão de custo, o workflow `nimbus-code-full-cycle`, as automações de
-GitHub Project/DEVSTATS, o catálogo de reuso, o manual de sessões e os
-artefatos de custo; `platform` instala somente o preset, o template de issue e
-as instruções específicas de plataforma. Assim, um repositório de plataforma
-não recebe automações de backlog, custo, DEVSTATS, GitHub Project ou hooks de
+GitHub Project, o catálogo de reuso, o manual de sessões e os artefatos de
+custo; `platform` instala somente o preset, o template de issue e as
+instruções específicas de plataforma. Assim, um repositório de plataforma
+não recebe automações de backlog, custo, GitHub Project ou hooks de
 versionamento de workload por acidente. O bootstrap falha quando uma
 instalação crítica ou o diretório de templates do preset selecionado não pode
 ser aplicado — erros reais não são tratados como "já instalado".

@@ -218,6 +218,19 @@ entries:
     adr: ""
     reuse_count: 0
 
+  - tag: "single-source-multi-target-sync"
+    bounded_context: "dev-platform/multi-agent"
+    description: >
+      Padrão de sincronização de habilidades e agentes a partir de uma fonte única da
+      verdade (.github/skills/) para múltiplos destinos de agentes/plataformas (.claude/skills/,
+      .agents/skills/), aplicando pós-processamento determinístico por alvo (argument hints,
+      flags, conversão de hooks) com verificação de paridade de conteúdo funcional e gate
+      automatizado de prevenção de drift no CI via Bats.
+    source: "specs/024-multi-agent-integration-claude-antigravity/plan.md"
+    adr: ""
+    reuse_count: 0
+
+
   - tag: "harness-engineering-pattern"
     bounded_context: "spec-kit-workflow"
     description: >
