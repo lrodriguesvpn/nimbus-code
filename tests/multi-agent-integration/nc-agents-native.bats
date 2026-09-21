@@ -4,6 +4,19 @@ setup() {
   REPO_ROOT="$(cd "$BATS_TEST_DIRNAME/../.." && pwd)"
 }
 
+@test "VS Code hides Claude native agents from its agent picker" {
+  python3 - "$REPO_ROOT/.vscode/settings.json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+settings = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+locations = settings["chat.agentFilesLocations"]
+assert locations[".github/agents"] is True
+assert locations[".claude/agents"] is False
+PY
+}
+
 @test "native outputs exist for every manifest NC role (claude) and a single orchestrator (vscode)" {
   count="$(find "$REPO_ROOT/.github/agents" -maxdepth 1 -name '*.agent.md' | wc -l | tr -d ' ')"
   [ "$count" -eq 1 ]

@@ -1,3 +1,5 @@
 {
-  "feature_directory": "specs/025-native-nc-agents"
+  "feature_directory": "specs/026-template-usage-governance",
+  "bounded_contexts": [],
+  "repos": []
 }
