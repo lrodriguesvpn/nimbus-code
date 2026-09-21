@@ -24,6 +24,7 @@ setup() {
     "nc-builder"
     "nc-shield"
     "nc-telemetry"
+    "nc-designer"
   )
 
   SPECKIT_COMMANDS=(

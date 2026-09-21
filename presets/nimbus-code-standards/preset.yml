@@ -275,7 +275,7 @@ provides:
       name: "sync-nc-agents-to-integrations-script"
       file: "templates/project-root/scripts/sync-nc-agents-to-integrations.sh"
       strategy: "replace"
-      description: "Sincroniza os 14 agentes /nc-* de .github/skills/ para .claude/skills/ e .agents/skills/ com paridade funcional — copiado para scripts/sync-nc-agents-to-integrations.sh."
+      description: "Sincroniza os 15 agentes /nc-* de .github/skills/ para .claude/skills/ e .agents/skills/ com paridade funcional — copiado para scripts/sync-nc-agents-to-integrations.sh."
 
     - type: "template"
       name: "nc-agents-parity-check-workflow"
