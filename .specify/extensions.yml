@@ -1,5 +1,6 @@
 installed:
 - assess
+- bug
 - nimbus-code-backlog-sync
 settings:
   auto_execute_hooks: true

@@ -48,8 +48,20 @@ Definir uma única política corporativa para todo uso de IA da empresa.
   publicação aberta, compartilhamento indiscriminado) são tratadas como risco de
   shadow IT e devem ser bloqueadas administrativamente.
 
-## Nomenclatura Nimbus
+## Exceções registradas (ferramentas de IA complementares)
 
-Os nomes Nimbus (`nimbus.constitution`, `nimbus.discovery`, `nimbus.plan`,
-etc.) são apenas aliases operacionais do Spec Kit. Eles não substituem nem
-desativam os comandos originais.
+- **TypeSafe/Jev** (skill `typesafe-ai`): adotado como ferramenta
+  **complementar, opcional e experimental** para julgamentos tipados de baixo
+  custo (roteamento, classificação, verificação) — nunca em substituição ao
+  Copilot/GitHub Enterprise Copilot como motor de geração de código, e nunca
+  em decisões S3/S4 sem revisão humana. Ver
+  [ADR 0010](../adr/0010-adocao-experimental-typesafe-jev-para-julgamentos-tipados.md)
+  e [oportunidades de uso no Nimbus Code](../comparisons/typesafe-jev-oportunidades-nimbus-code.md).
+
+## Comandos Nimbus Code e Esquadrão Multiagente
+
+Os comandos `/nc-*` e o esquadrão de 15 agentes `NC-*` (ex.: `/nc-spec`,
+`/nc-arch`, `/nc-qa`, `/nc-builder`, etc.) constituem a camada de especialização
+e governança institucional do NIMBUS CODE™, mantendo total interoperabilidade
+com o motor base do Spec Kit (`speckit-*`). A matriz completa de mapeamento está
+documentada em [nimbus-aliases.md](nimbus-aliases.md).

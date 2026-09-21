@@ -188,6 +188,50 @@ humana constante. Instalada via `scripts/setup-github-labels.sh`.
 
 ---
 
+## Agente Orquestrador `@nimbus` (VS Code) e Fluxo de Bug/Fix
+
+- No VS Code/Copilot Chat, o esquadrão Nimbus Code é acessado por um único
+  agente nativo, **`@nimbus`** (`.github/agents/nimbus.agent.md`, gerado por
+  `scripts/lib/nc-agent-sync.py` a partir de
+  `scripts/lib/templates/nimbus-agent.template.md`). Ele não substitui as 15
+  skills `/nc-*` — ele **conduz** o desenvolvedor (avalia o repositório, faz
+  perguntas de triagem) e delega internamente para elas.
+- Ao ser acionado, `@nimbus` pergunta se o trabalho é: **🐛 Bug/Fix**,
+  **📋 Nova Spec**, ou **💡 Ideação** — e segue o playbook correspondente.
+- Em **Claude Code**, o mesmo esquadrão continua exposto como 15 subagentes
+  nativos separados (`.claude/agents/nc-*.md`) — sem orquestrador único,
+  porque o modelo de delegação de subagentes do Claude Code não sofre o
+  problema de poluição de menu que o agent picker do VS Code sofre. Em
+  **Antigravity**, o acesso continua via skill bridges (`.agents/skills/*`).
+  Os três destinos são gerados/validados pelo mesmo script e cobertos pela
+  suíte `tests/multi-agent-integration/*.bats` (paridade garantida por CI).
+- **Fluxo de Bug/Fix**: o trilho de bug do `@nimbus` (e os comandos
+  `/nc-bug-assess`, `/nc-bug-fix`, `/nc-bug-test` — aliases institucionais de
+  `/speckit-bug-assess`, `/speckit-bug-fix`, `/speckit-bug-test`, mesmo padrão
+  de `/nc-arch` ↔ `/speckit-plan`) pode ser acionado de duas formas:
+  1. **Localmente**, dentro de uma sessão de agente (VS Code, Claude Code),
+     acionando `@nimbus` e escolhendo a opção Bug/Fix, ou chamando
+     `/nc-bug-assess` diretamente.
+  2. **A partir de uma Issue do GHE com label `type:bug`**: o workflow
+     `.github/workflows/agent-auto-assign.yml` já injeta instruções
+     específicas do fluxo de Bug/Fix no `custom_instructions` do Copilot
+     coding agent quando a issue tem `type:bug` **e** `agent:autonomous-ok`
+     (respeitando as mesmas guardrails de `agent:needs-human`,
+     `complexity:S4`, `type:incident` e `status:blocked`).
+- **Não há loop autônomo persistente**: cada acionamento (local ou via
+  `agent-auto-assign.yml`) é uma sessão única e delimitada, que termina com
+  um PR aberto para revisão humana. O Copilot coding agent na nuvem não fica
+  monitorando o repositório continuamente nem reexecuta o fluxo sozinho —
+  ele é atribuído uma vez por evento de label e conclui com a entrega do PR.
+- **`/nc-*taskstoissues`/`/speckit-taskstoissues` só é necessário quando o
+  trabalho será orquestrado por várias pessoas** (ex.: planejamento de
+  equipe, distribuição de tarefas entre desenvolvedores/agentes distintos).
+  Para execução por uma única pessoa/sessão, não é necessário quebrar
+  `tasks.md` em Issues — `/nc-builder` (ou `@nimbus` → Nova Spec →
+  implementação) já processa `tasks.md` diretamente.
+
+---
+
 ## Catálogo de Reuso (Reduzindo Custo de Tokens)
 
 > **Passo obrigatório antes de qualquer `/nimbus-code-plan`**: consulte
@@ -391,6 +435,12 @@ Dados de custo são locais e diff-friendly:
 
 **Privacidade**: Armazena apenas contagens de tokens e metadados — sem prompts,
 respostas ou segredos.
+
+---
+
+## Regra Mandatória de Governança: Atualização do Developer Guide a Cada Versão
+
+A cada nova versão do preset/bundle (`MAJOR`, `MINOR` ou `PATCH` com novas capacidades, novos agentes, novos scripts ou diretrizes), é **obrigatório** atualizar o Developer Guide (`docs/developer-guide.md`) no mesmo PR. Nenhuma versão deve ser lançada sem refletir as capacidades recém-adicionadas no manual central de desenvolvimento.
 
 ---
 

@@ -292,47 +292,126 @@ mkdir -p "$OUT_DIR"
 GRAPH_YAML="${OUT_DIR}/graph.yaml"
 GRAPH_MD="${OUT_DIR}/graph.md"
 
-{
-  echo "# graph.yaml — Bounded Context: ${CONTEXT_SLUG}"
-  echo "# Gerado automaticamente por scripts/generate-context-graph.sh — specs/014-brownfield-multirepo-context-awareness/"
-  echo
-  echo "bounded_context: \"${CONTEXT_SLUG}\""
-  echo "version: 1"
-  echo "generated_at: \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\""
-  echo
-  echo "nodes:"
+# Bloco de contexto multi-repo gerado por este script (YAML)
+_emit_context_yaml_block() {
+  echo "# Grafo de contexto multi-repo (gerado por scripts/generate-context-graph.sh"
+  echo "# — specs/014-brownfield-multirepo-context-awareness/)"
+  echo "context_graph:"
+  echo "  bounded_context: \"${CONTEXT_SLUG}\""
+  echo "  generated_at: \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\""
+  echo "  nodes:"
   for i in "${!NODE_IDS[@]}"; do
-    echo "  - id: \"${NODE_IDS[$i]}\""
-    echo "    type: \"repo\""
-    echo "    repository: \"${NODE_REPOS[$i]}\""
-    echo "    cross_repo: ${NODE_CROSS_REPO[$i]}"
-    echo "    manifest_source: \"${NODE_MANIFEST_SOURCE[$i]}\""
+    echo "    - id: \"${NODE_IDS[$i]}\""
+    echo "      type: \"repo\""
+    echo "      repository: \"${NODE_REPOS[$i]}\""
+    echo "      cross_repo: ${NODE_CROSS_REPO[$i]}"
+    echo "      manifest_source: \"${NODE_MANIFEST_SOURCE[$i]}\""
   done
-  echo
-  echo "edges:"
+  echo "  edges:"
   if [[ "${#EDGES_SRC[@]}" -eq 0 ]]; then
-    echo "  []"
+    echo "    []"
   else
     for i in "${!EDGES_SRC[@]}"; do
-      echo "  - src: \"${EDGES_SRC[$i]}\""
-      echo "    dst: \"${EDGES_DST[$i]}\""
-      echo "    type: \"dependency\""
+      echo "    - src: \"${EDGES_SRC[$i]}\""
+      echo "      dst: \"${EDGES_DST[$i]}\""
+      echo "      type: \"dependency\""
     done
   fi
-  echo
-  echo "unanalyzed_repos:"
+  echo "  unanalyzed_repos:"
   if [[ "${#UNANALYZED_REPOS[@]}" -eq 0 ]]; then
-    echo "  []"
+    echo "    []"
   else
     for r in "${UNANALYZED_REPOS[@]}"; do
-      echo "  - \"${r}\""
+      echo "    - \"${r}\""
     done
   fi
-} > "$GRAPH_YAML"
+}
 
-# ── Emitir graph.md (diagrama Mermaid) ──────────────────────────────────────
-{
-  echo "# Grafo do Bounded Context: ${CONTEXT_SLUG}"
+# Determina se graph.yaml já existe com grafo de módulos internos (i.e., tem
+# chaves de nível raiz como feature:/externals:/complexity: que são de autoria
+# manual — não geradas por este script).
+_has_module_graph() {
+  local f="$1"
+  [[ -f "$f" ]] || return 1
+  grep -qE '^(feature|externals|complexity|spec_ref):[[:space:]]' "$f"
+}
+
+if _has_module_graph "$GRAPH_YAML"; then
+  # ── Modo merge: preserva grafo de módulos, atualiza apenas context_graph ──
+  # Remove o bloco context_graph: pré-existente (todas as linhas desde a
+  # linha "context_graph:" até o fim do arquivo, ou até a próxima chave de
+  # nível raiz que não seja um comentário ou linha em branco).
+  GRAPH_YAML_TMP="$(mktemp)"
+  python3 - "$GRAPH_YAML" "$GRAPH_YAML_TMP" <<'PYEOF'
+import sys, re
+
+src_path, dst_path = sys.argv[1], sys.argv[2]
+with open(src_path, encoding='utf-8') as f:
+    lines = f.readlines()
+
+# Remove trailing blank lines at end of file
+while lines and lines[-1].strip() == '':
+    lines.pop()
+
+# Find the start of the context_graph block (top-level key, not indented)
+context_start = None
+for i, line in enumerate(lines):
+    if re.match(r'^context_graph\s*:', line):
+        context_start = i
+        break
+
+if context_start is not None:
+    lines = lines[:context_start]
+    # Also remove any trailing comment lines that belong to the context_graph
+    # header (lines starting with '#' followed immediately by context_graph:)
+    while lines and lines[-1].strip().startswith('#'):
+        lines.pop()
+
+# Remove trailing blank lines again after stripping context_graph
+while lines and lines[-1].strip() == '':
+    lines.pop()
+
+with open(dst_path, 'w', encoding='utf-8') as f:
+    f.writelines(lines)
+    f.write('\n')
+PYEOF
+  {
+    cat "$GRAPH_YAML_TMP"
+    _emit_context_yaml_block
+  } > "$GRAPH_YAML"
+  rm -f "$GRAPH_YAML_TMP"
+elif [[ -f "$GRAPH_YAML" ]]; then
+  # ── Arquivo existe mas só tem conteúdo do script anterior: substituir ──
+  {
+    echo "# graph.yaml — Bounded Context: ${CONTEXT_SLUG}"
+    echo "# Gerado automaticamente por scripts/generate-context-graph.sh — specs/014-brownfield-multirepo-context-awareness/"
+    echo
+    echo "bounded_context: \"${CONTEXT_SLUG}\""
+    echo "version: 1"
+    echo
+    _emit_context_yaml_block
+  } > "$GRAPH_YAML"
+else
+  # ── Arquivo novo: criar do zero ──────────────────────────────────────────
+  {
+    echo "# graph.yaml — Bounded Context: ${CONTEXT_SLUG}"
+    echo "# Gerado automaticamente por scripts/generate-context-graph.sh — specs/014-brownfield-multirepo-context-awareness/"
+    echo
+    echo "bounded_context: \"${CONTEXT_SLUG}\""
+    echo "version: 1"
+    echo
+    _emit_context_yaml_block
+  } > "$GRAPH_YAML"
+fi
+
+# ── Bloco Mermaid do grafo de contexto multi-repo ────────────────────────────
+# Delimitado por marcadores HTML para permitir merge não-destrutivo em graph.md
+CONTEXT_MD_MARKER_START="<!-- generate-context-graph:start -->"
+CONTEXT_MD_MARKER_END="<!-- generate-context-graph:end -->"
+
+_emit_context_md_block() {
+  echo "${CONTEXT_MD_MARKER_START}"
+  echo "## Grafo de Contexto Multi-Repo: ${CONTEXT_SLUG}"
   echo
   echo "> Gerado automaticamente por \`scripts/generate-context-graph.sh\` — não editar manualmente."
   echo
@@ -347,7 +426,7 @@ GRAPH_MD="${OUT_DIR}/graph.md"
   echo "\`\`\`"
   echo
   if [[ "${#CYCLES_FOUND[@]}" -gt 0 ]]; then
-    echo "## ⚠ Dependências circulares detectadas"
+    echo "### ⚠ Dependências circulares detectadas"
     echo
     for c in "${CYCLES_FOUND[@]}"; do
       echo "- \`${c}\`"
@@ -355,7 +434,7 @@ GRAPH_MD="${OUT_DIR}/graph.md"
     echo
   fi
   if [[ "${#UNANALYZED_REPOS[@]}" -gt 0 ]]; then
-    echo "## Repositórios não analisados"
+    echo "### Repositórios não analisados"
     echo
     echo "Os seguintes repositórios não puderam ser acessados (nem localmente, nem via \`gh api\`):"
     echo
@@ -364,7 +443,68 @@ GRAPH_MD="${OUT_DIR}/graph.md"
     done
     echo
   fi
-} > "$GRAPH_MD"
+  echo "${CONTEXT_MD_MARKER_END}"
+}
+
+# ── Emitir graph.md (diagrama Mermaid) ──────────────────────────────────────
+if [[ -f "$GRAPH_MD" ]] && grep -qF "${CONTEXT_MD_MARKER_START}" "$GRAPH_MD"; then
+  # ── Modo merge: substituir apenas o bloco delimitado por marcadores ───────
+  GRAPH_MD_TMP="$(mktemp)"
+  python3 - "$GRAPH_MD" "$GRAPH_MD_TMP" \
+      "${CONTEXT_MD_MARKER_START}" "${CONTEXT_MD_MARKER_END}" <<'PYEOF'
+import sys
+
+src_path, dst_path, marker_start, marker_end = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+with open(src_path, encoding='utf-8') as f:
+    content = f.read()
+
+before = content[:content.index(marker_start)]
+after_marker = content[content.index(marker_end) + len(marker_end):]
+
+# Strip one leading newline from the trailing part (marker was on its own line)
+if after_marker.startswith('\n'):
+    after_marker = after_marker[1:]
+
+with open(dst_path, 'w', encoding='utf-8') as f:
+    f.write(before)
+PYEOF
+  {
+    cat "$GRAPH_MD_TMP"
+    _emit_context_md_block
+    # Append any content that was after the end marker
+    python3 - "$GRAPH_MD" "${CONTEXT_MD_MARKER_START}" "${CONTEXT_MD_MARKER_END}" <<'PYEOF'
+import sys
+src_path, marker_start, marker_end = sys.argv[1], sys.argv[2], sys.argv[3]
+with open(src_path, encoding='utf-8') as f:
+    content = f.read()
+after = content[content.index(marker_end) + len(marker_end):]
+if after.startswith('\n'):
+    after = after[1:]
+sys.stdout.write(after)
+PYEOF
+  } > "$GRAPH_MD"
+  rm -f "$GRAPH_MD_TMP"
+elif [[ -f "$GRAPH_MD" ]]; then
+  # ── Arquivo existe sem marcadores: adicionar seção de contexto no final ───
+  # Remove trailing newline then append the context block
+  {
+    # Preserve existing content, trim trailing blank lines
+    python3 - "$GRAPH_MD" <<'PYEOF'
+import sys
+with open(sys.argv[1], encoding='utf-8') as f:
+    content = f.read()
+print(content.rstrip(), end='\n\n')
+PYEOF
+    _emit_context_md_block
+  } > "${GRAPH_MD}.tmp" && mv "${GRAPH_MD}.tmp" "$GRAPH_MD"
+else
+  # ── Arquivo novo: criar do zero ──────────────────────────────────────────
+  {
+    echo "# Grafo do Bounded Context: ${CONTEXT_SLUG}"
+    echo
+    _emit_context_md_block
+  } > "$GRAPH_MD"
+fi
 
 echo -e "${GREEN}✓ ${GRAPH_YAML} gerado (${#NODE_IDS[@]} nós, ${#EDGES_SRC[@]} arestas)${NC}"
 echo -e "${GREEN}✓ ${GRAPH_MD} gerado${NC}"

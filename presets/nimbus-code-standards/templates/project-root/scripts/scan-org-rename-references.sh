@@ -203,64 +203,63 @@ run_default_slug_audit() {
 }
 
 run_satellite_preset_audit() {
-  local output_file catalog_file central_repo repos repo registry_json summary preset_id current_version last_updated central_version compare_result drift_status
+  local output_file central_repo repos repo preset_version last_updated drift_status errors
+  local report_helper script_root central_version
 
   output_file="${OUTPUT:-preset-audit-$(date +%Y%m%d-%H%M%S).csv}"
-  catalog_file="$REPO_ROOT/presets/catalog.json"
   central_repo="${ORG}/${NEW_SLUG}"
+  script_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+  report_helper="$script_root/scripts/preset-audit-report.py"
+  central_version="$(python3 "$report_helper" version "$script_root/presets/nimbus-code-standards/preset.yml")"
 
-  if [[ ! -f "$catalog_file" ]]; then
-    echo "❌ Não encontrei ${catalog_file}. Rode este script a partir da raiz do repositório central." >&2
-    exit 1
-  fi
+  export GH_HOST
+  [[ "$ORG" =~ ^[A-Za-z0-9][A-Za-z0-9-]*$ ]] || { echo "Invalid organization" >&2; exit 2; }
 
   echo "repo,current_version,drift_status,last_updated" > "$output_file"
-  repos="$(gh repo list "$ORG" --limit 1000 --json nameWithOwner --jq '.[] | .nameWithOwner')"
+  repos="$(gh api --paginate "orgs/$ORG/repos?per_page=100" --jq '.[].full_name')"
+  errors=0
 
   for repo in $repos; do
+    [[ "$repo" =~ ^[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9][A-Za-z0-9_.-]*$ ]] || {
+      echo "Invalid repository returned by API" >&2
+      exit 2
+    }
+
     if [[ "$repo" == "$central_repo" ]]; then
       continue
     fi
 
-    if registry_json="$(fetch_repo_file "$repo" ".specify/presets/.registry" 2>/dev/null)" && [[ -n "$registry_json" ]]; then
-      summary="$(printf '%s' "$registry_json" | parse_registry_summary)"
-      preset_id="${summary%%$'\t'*}"
-      current_version="$(printf '%s' "$summary" | cut -f2)"
-      last_updated="$(printf '%s' "$summary" | cut -f3)"
-
-      if [[ -z "$preset_id" ]]; then
-        drift_status="invalid_registry"
-      else
-        central_version="$(jq -r --arg preset_id "$preset_id" '.presets[$preset_id].version // empty' "$catalog_file")"
-        if [[ -z "$central_version" ]]; then
-          drift_status="unknown_preset"
-        elif [[ -z "$current_version" ]]; then
-          drift_status="invalid_registry"
-        else
-          compare_result="$(compare_semver_versions "$current_version" "$central_version")"
-          case "$compare_result" in
-            0) drift_status="in_sync" ;;
-            -1) drift_status="drift" ;;
-            1) drift_status="ahead" ;;
-            *) drift_status="invalid_registry" ;;
-          esac
-        fi
-      fi
-
-      [[ -n "$current_version" ]] || current_version="unknown"
-      [[ -n "$last_updated" ]] || last_updated="N/A"
+    if ! preset_version="$(gh api "repos/$repo/contents/.specify/presets/.registry" | \
+      python3 "$report_helper" registry)"; then
+      printf '%s,unknown,error,N/A\n' "$repo" >> "$output_file"
+      echo "ERROR: unable to read preset registry for $repo" >&2
+      errors=$((errors + 1))
+      continue
+    elif [[ "$preset_version" == "$central_version" ]]; then
+      drift_status="in_sync"
     else
-      current_version="missing"
-      drift_status="not_bootstrapped"
-      last_updated="N/A"
+      drift_status="drift"
     fi
 
-    echo "$repo,$current_version,$drift_status,$last_updated" >> "$output_file"
+    if ! last_updated="$(gh api --method GET "repos/$repo/commits" \
+      -f path=.specify -F per_page=1 --jq '.[0].commit.committer.date // "N/A"')"; then
+      echo "ERROR: unable to read preset commit date for $repo" >&2
+      last_updated="N/A"
+      drift_status="error"
+      errors=$((errors + 1))
+    fi
+
+    if [[ "$last_updated" != "N/A" && ! "$last_updated" =~ ^[0-9TZ:+.-]+$ ]]; then
+      last_updated="N/A"
+      drift_status="error"
+      errors=$((errors + 1))
+    fi
+
+    printf '%s,%s,%s,%s\n' "$repo" "$preset_version" "$drift_status" "$last_updated" >> "$output_file"
   done
 
-  echo "✓ Auditoria de presets concluída. Relatório salvo em: $output_file"
-  echo "  Repositórios com drift:"
-  awk -F',' 'NR > 1 && $3 == "drift" { print $1 }' "$output_file"
+  echo "Preset audit report: $output_file (read errors: $errors)"
+  [[ "$errors" == 0 ]] || exit 2
 }
 
 if [[ "$MODE" == "satellite-preset-audit" ]]; then

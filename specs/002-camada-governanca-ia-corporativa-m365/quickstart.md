@@ -22,15 +22,15 @@ Validate that the documentation set presents one corporate AI constitution, clea
    - Nimbus Command Alias Map
 5. Open [graph.md](graph.md) and [graph.yaml](graph.yaml) and verify that all documentation artifacts and external AI tool references are connected.
 6. Open [impact-map.md](impact-map.md) and confirm the feature risks are limited to documentation coherence and naming clarity.
-7. Verify the alias list in the spec matches the requested mapping:
-   - `constitution -> nimbus.constitution`
-   - `specify -> nimbus.discovery`
-   - `clarify -> nimbus.refinement`
-   - `plan -> nimbus.plan`
-   - `tasks -> nimbus.backlog`
-   - `implement -> nimbus.build`
-   - `analyze -> nimbus.validate`
-   - `converge -> nimbus.release`
+7. Verify the command and agent mapping matches the official Nimbus Code matrix:
+   - `constitution -> /nc-governor (speckit-constitution)`
+   - `specify -> /nc-spec (speckit-specify)`
+   - `clarify -> /nc-critic (speckit-clarify)`
+   - `plan -> /nc-arch (speckit-plan)`
+   - `tasks -> /nc-qa (speckit-tasks + speckit-checklist)`
+   - `implement -> /nc-builder (speckit-implement + speckit-converge)`
+   - `analyze -> /nc-shield (speckit-analyze)`
+   - *(Historical note: the legacy `nimbus.<name>` aliases are superseded by the canonical `/nc-*` command layer and `NC-*` agents documented in `docs/ai-governance/nimbus-aliases.md`).*
 
 ## Expected Outcome
 

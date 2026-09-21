@@ -103,6 +103,17 @@ jobs:
           done
           echo "value=$PRIORITY" >> "$GITHUB_OUTPUT"
 
+      - name: Extrair instruções específicas por tipo (bug) para contexto do agente
+        id: type-context
+        if: steps.guard.outputs.skip == ''
+        run: |
+          LABELS="${{ steps.guard.outputs.labels }}"
+          CONTEXT=""
+          if echo ",$LABELS," | grep -q ",type:bug,"; then
+            CONTEXT="Esta issue é do tipo type:bug. Siga o fluxo de Bug/Fix do Nimbus Code (mesmo motor usado pelo orquestrador @nimbus): 1) /speckit-bug-assess (ou /nc-bug-assess) para produzir .specify/bugs/<slug>/assessment.md referenciando esta Issue; 2) /speckit-bug-fix (ou /nc-bug-fix) para aplicar a correção mínima e cirúrgica no escopo identificado; 3) /speckit-bug-test (ou /nc-bug-test) para validar a correção antes de abrir o PR. Não pule a etapa de assessment mesmo em bugs aparentemente simples."
+          fi
+          echo "value=$CONTEXT" >> "$GITHUB_OUTPUT"
+
       - name: Atribuir Copilot coding agent à issue
         if: steps.guard.outputs.skip == ''
         env:
@@ -114,7 +125,7 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/assignees" \
             -f "assignees[]=copilot-swe-agent[bot]" \
-            -f "agent_assignment[custom_instructions]=Prioridade desta issue no backlog: ${{ steps.priority.outputs.value }}. Siga os gates obrigatórios do preset nimbus-code-standards (Security/DevSecOps Gate, Module Dependency Graph, SLO Gate) descritos em copilot-instructions.md antes de abrir o PR."
+            -f "agent_assignment[custom_instructions]=Prioridade desta issue no backlog: ${{ steps.priority.outputs.value }}. Siga os gates obrigatórios do preset nimbus-code-standards (Security/DevSecOps Gate, Module Dependency Graph, SLO Gate) descritos em copilot-instructions.md antes de abrir o PR. ${{ steps.type-context.outputs.value }}"
 
       - name: Confirmar atribuição
         if: steps.guard.outputs.skip == ''
