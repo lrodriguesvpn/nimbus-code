@@ -242,38 +242,36 @@ por trás de decisões que só existem no board, não no código.
 
 ### 2.5. Ciclo normal de features a partir daqui
 
-Com constituição + contexto de board levantados, o resto do ciclo é o padrão
-do Nimbus Code (ver [`workflows/nimbus-code-full-cycle/README.md`](../workflows/nimbus-code-full-cycle/README.md)
+Com constituição + contexto de board levantados, o resto do ciclo segue o fluxo
+padrão do Nimbus Code (ver [`workflows/nimbus-code-full-cycle/README.md`](../workflows/nimbus-code-full-cycle/README.md)
 para a variante com gate de DevSecOps da Nimbus-Code):
 
 ```
-/speckit.specify   → descreve a feature nova (não retro-especifique o app inteiro)
-/speckit.clarify    → (opcional) reduz ambiguidade antes de planejar
-/speckit.plan       → plano técnico (já usa o que o agente aprendeu do código real)
-/speckit.checklist  → (opcional) "testes unitários" da própria spec
-/speckit.tasks      → lista de tarefas ordenada por dependência
-/speckit.analyze    → (opcional, somente leitura) checa consistência spec/plan/tasks
-/speckit.implement  → executa as tarefas (pode levar múltiplos passes em repo grande)
-/speckit.converge   → depois do implement: compara código real vs spec/plan/tasks
-                      e anexa o que faltar como novas tarefas — repita
-                      implement → converge até sair "✅ Converged"
+/nc-spec (ou /speckit-specify)     → descreve a feature nova (não retro-especifique o app inteiro)
+/nc-critic (ou /speckit-clarify)   → (opcional) reduz ambiguidade antes de planejar
+/nc-arch (ou /speckit-plan)        → plano técnico (já usa o que o agente aprendeu do código real)
+/nc-shield (ou /speckit-analyze)   → auditoria de DevSecOps, 6 Controles e gates de segurança
+/nc-designer                       → diretrizes visuais e auditoria UI/UX (se houver frontend)
+/nc-qa (ou /speckit-tasks)         → estratégia de testes e tasks ordenadas por dependência com [P]
+/nc-builder (ou /speckit-implement)→ executa tarefas em TDD sob isolamento estrito de sessão
+/nc-telemetry                      → consolidação de observabilidade, métricas DORA e custo real
 ```
 
-**Camada de aliases Nimbus**: os nomes abaixo são equivalentes operacionais dos
-comandos do Spec Kit. O comando original continua válido.
+**Esquadrão de Agentes e Comandos Nimbus Code (`/nc-*`)**:
+Os comandos `/nc-*` constituem a camada oficial e especializada do NIMBUS CODE™,
+acionando os 15 agentes especializados (NC-*) com isolamento de sessão e governança,
+mantendo total interoperabilidade com o motor base do Spec Kit:
 
-- `constitution` → `nimbus.constitution`
-- `specify` → `nimbus.discovery`
-- `clarify` → `nimbus.refinement`
-- `plan` → `nimbus.plan`
-- `tasks` → `nimbus.backlog`
-- `implement` → `nimbus.build`
-- `analyze` → `nimbus.validate`
-- `converge` → `nimbus.release`
+- **Ideação**: `/nc-assess-intake`, `/nc-assess-research`, `/nc-assess-define`, `/nc-assess-shape`, `/nc-assess-decide`
+- **Descoberta & Espec**: `/nc-intake` (entrevista), `/nc-spec` (`specify`), `/nc-critic` (`clarify`), `/nc-governor` (`constitution`)
+- **Design & Planejamento**: `/nc-arch` (`plan`), `/nc-shield` (`analyze`), `/nc-designer` (UI/UX), `/nc-qa` (`tasks` + `checklist`)
+- **Construção & Sustentação**: `/nc-builder` (`implement` + `converge`), `/nc-telemetry` (FinOps & SRE)
 
-`/speckit.converge` é especialmente útil em brownfield porque é comum já
-existir implementação parcial/legada na mesma área da feature nova — ele é
-**append-only** (nunca edita/apaga código, só pode adicionar tarefas).
+*(Consulte a matriz completa em [`docs/ai-governance/nimbus-aliases.md`](ai-governance/nimbus-aliases.md)).*
+
+`/speckit-converge` (ou `/nc-builder` com verificação de convergência) é especialmente
+útil em brownfield porque é comum já existir implementação parcial/legada na mesma área da
+feature nova — ele é **append-only** (nunca edita/apaga código, só pode adicionar tarefas).
 
 ### 2.6. DOs e DONTs — padrão brownfield (crítico para sucesso)
 
@@ -1351,15 +1349,18 @@ Ver também: [FAQ — Como atualizo um projeto criado com uma versão antiga do 
 - [`docs/extension-candidates.md`](extension-candidates.md) — quais extensões
   (oficiais e da Nimbus-Code) considerar instalar além do bundle padrão.
 
-## Integrações Multi-Agente e Agentes Disponíveis (SPEC 024)
+## Integrações Multi-Agente e Agentes Disponíveis (SPEC 025)
 
-O Nimbus Code suporta três plataformas de execução de agentes com paridade completa nos 17 comandos `/speckit-*` e nos 15 agentes institucionais `/nc-*`:
+O Nimbus Code suporta três plataformas de execução, mantendo os 17 comandos
+`/speckit-*` como workflows e os 15 papéis `/nc-*` como agentes nativos quando
+a plataforma possui contrato próprio. A implementação funcional continua em
+`.github/skills/nc-*/SKILL.md`; os demais arquivos são projeções geradas.
 
 | Plataforma / Agente | Diretório de Instalação | `multi_install_safe` | 17 Comandos `/speckit-*` | 15 Agentes `/nc-*` |
 |---|---|:---:|:---:|:---:|
-| **GitHub Copilot** | `.github/skills/` | `true` | ✅ Nativo | ✅ Fonte única |
-| **Claude Code** | `.claude/skills/` | `true` | ✅ `specify integration install claude` | ✅ Sincronizado (`scripts/sync-nc-agents-to-integrations.sh --target claude`) |
-| **Antigravity** | `.agents/skills/` | `false` | ✅ `specify integration install agy` (Worktree isolado) | ✅ Sincronizado (`scripts/sync-nc-agents-to-integrations.sh --target antigravity`) |
+| **VS Code / GitHub Copilot** | `.github/agents/` + `.github/skills/` | `true` | ✅ Skills/workflows | ✅ Nativo (`*.agent.md`) |
+| **Claude Code** | `.claude/agents/` + `.claude/skills/` | `true` | ✅ Skills/workflows | ✅ Nativo (subagents `*.md`) |
+| **Antigravity** | `.agents/skills/` | `false` | ✅ `specify integration install agy` (Worktree isolado) | ✅ Bridge de skill; não há formato nativo inventado |
 
 ### Tabela de Agentes e Comandos Disponíveis por Integração
 
@@ -1398,19 +1399,50 @@ O Nimbus Code suporta três plataformas de execução de agentes com paridade co
 | `/nc-designer` | Agente | Camada 2: Interface Designer (Exclusivo Nimbus, sem alias speckit) | ✅ | ✅ | ✅ |
 | `/nc-telemetry` | Agente | Camada 3: Observability & SRE | ✅ | ✅ | ✅ |
 
-### Regra de Segurança para Antigravity (`multi_install_safe: false`)
+### Escolha entre agente nativo, bridge e comando
 
-Como o `specify_cli` define `multi_install_safe = false` para Antigravity, a instalação e validação inicial de novas versões deve ocorrer sempre em worktree isolado (`git worktree add ../nimbus-agy-validation`), promovendo para a branch de trabalho somente após validação completa, evitando qualquer sobreposição acidental em ambientes compartilhados.
+- Use o agente nativo (`nc-*.agent.md` no VS Code ou `nc-*.md` no Claude)
+  para delegação direta a um papel institucional.
+- Use `/nc-*` quando precisar do bridge compatível com o fluxo legado ou quando
+  a plataforma expuser apenas comandos/skills.
+- Use `/speckit-*` para workflows do SpecKit (specify, plan, tasks,
+  implement, converge e sincronização de issues). `taskstoissues` é uma
+  operação explícita de planejamento/orquestração: não é necessária para a
+  execução de uma `tasks.md` por uma única pessoa e não roda em loop autônomo.
+
+Como o `specify_cli` define `multi_install_safe = false` para Antigravity, a
+instalação e validação inicial de novas versões deve ocorrer sempre em worktree
+isolado (`git worktree add ../nimbus-agy-validation`), promovendo para a branch
+de trabalho somente após validação completa.
 
 ### Sincronização e Prevenção de Drift
 
-A fonte da verdade de todos os agentes `/nc-*` reside exclusivamente em `.github/skills/nc-*/`. Quando qualquer agente institucional for atualizado, execute:
+A fonte da verdade funcional de todos os agentes `/nc-*` reside exclusivamente
+em `.github/skills/nc-*/`; a governança vem de `.nimbus/agent-manifest.yaml`.
+Quando qualquer agente institucional for atualizado, execute:
 
 ```bash
 ./scripts/sync-nc-agents-to-integrations.sh --target all
 ```
 
-O workflow de CI `.github/workflows/nc-agents-parity-check.yml` executa a suíte Bats `tests/multi-agent-integration/nc-agents-parity.bats` em todo Pull Request que altera skills ou scripts de sincronização, garantindo que nenhum drift passe despercebido.
+Para validar sem escrever arquivos:
+
+```bash
+./scripts/sync-nc-agents-to-integrations.sh --check --target all
+```
+
+O workflow de CI `.github/workflows/nc-agents-parity-check.yml` executa a
+geração/paridade e a suíte Bats em todo Pull Request que altera skills,
+artefatos nativos, manifest ou scripts de sincronização, garantindo que nenhum
+drift passe despercebido.
+
+### Rollback
+
+Se uma projeção gerada falhar na validação, não edite o agente projetado
+manualmente. Restaure a alteração na skill fonte ou no manifest, execute
+`--check` para confirmar a causa e regenere com `--target` explícito. O
+Antigravity continua somente com o bridge em `.agents/skills/`; portanto, a
+ausência de `.agents/agents/` é esperada.
 
 
 ## Phase 2: Automated Preset Synchronization (SPEC 020)
@@ -1524,4 +1556,18 @@ Para entender como o Nimbus Code se posiciona em relação a outros frameworks e
 - [GSD Core vs. Nimbus Code](comparisons/gsd-core-vs-nimbus-code.md): Comparação aprofundada de foco operacional (Context Engineering e ciclos de terminal vs. Governança Corporativa Full-Cycle, RACI, DORA, DevSecOps e FinOps).
 - [Understand-Anything vs. Nimbus Harvest & Catálogo de Reuso](comparisons/understand-anything-vs-nimbus-harvest.md): Comparação de propósitos (Visualização/navegação interativa de AST para onboarding humano vs. Mineração on-demand de componentes e assinaturas sem segredos para governança de IA e economia de tokens).
 - [Impeccable & Claude Design vs. Nimbus Code (`/nc-designer`)](comparisons/impeccable-and-claude-design-vs-nimbus-code.md): Comparação entre o pacote multi-agente `impeccable`, a skill nativa `frontend-design` da Anthropic e a skill institucional `/nc-designer` criada para internalizar julgamento estético de UI sem dependência de ferramentas externas.
+
+---
+
+## 8. Regra Mandatória de Versionamento: Atualização Contínua do Developer Guide
+
+> **Regra Não-Negociável de Governança de Release:**
+> A cada novo versionamento ou bump de versão do preset/bundle (`MAJOR`, `MINOR` ou `PATCH` que introduza alterações conceituais, novos comandos, novos agentes, novos scripts ou novas regras de arquitetura), é **obrigatório** atualizar este Developer Guide (`docs/developer-guide.md`) no mesmo PR do bump de versão.
+
+### 8.1. O que deve ser verificado e atualizado a cada versão:
+1. **Novos Comandos & Agentes**: Documentar novos agentes `NC-*`, skills `/speckit-*` e aliases (ex.: `/nc-designer`, comandos de ideação `/nc-assess-*`).
+2. **Templates e Estrutura de Pastas**: Refletir novos diretórios (ex.: `.specify/assessments/`, `docs/mkt/`, `docs/comparisons/`) e templates entregues aos repositórios.
+3. **Padrões de Integração & Ferramentas**: Atualizar referências de ferramentas, frameworks analisados e melhores práticas consolidadas.
+4. **Sincronização de Templates**: Garantir que os arquivos em `presets/nimbus-code-standards/templates/project-root/` estejam 100% sincronizados com as últimas melhorias da raiz do template.
+5. **Alinhamento do Checklist de Release**: O Developer Guide é a fonte canônica da verdade para os engenheiros — nenhum lançamento de versão é considerado completo sem a sua respectiva atualização documental.
 

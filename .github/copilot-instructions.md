@@ -394,6 +394,12 @@ respostas ou segredos.
 
 ---
 
+## Regra Mandatória de Governança: Atualização do Developer Guide a Cada Versão
+
+A cada nova versão do preset/bundle (`MAJOR`, `MINOR` ou `PATCH` com novas capacidades, novos agentes, novos scripts ou diretrizes), é **obrigatório** atualizar o Developer Guide (`docs/developer-guide.md`) no mesmo PR. Nenhuma versão deve ser lançada sem refletir as capacidades recém-adicionadas no manual central de desenvolvimento.
+
+---
+
 ## Referências
 
 - [Manual de Sessões Remotas e Branches](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/agent-session-manual.md)

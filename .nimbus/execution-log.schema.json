@@ -39,12 +39,18 @@
         "id": {
           "type": "string",
           "enum": [
+            "NC-Assess-Intake",
+            "NC-Assess-Research",
+            "NC-Assess-Define",
+            "NC-Assess-Shape",
+            "NC-Assess-Decide",
             "NC-Intake",
             "NC-Spec",
             "NC-Critic",
             "NC-Governor",
             "NC-Arch",
             "NC-Shield",
+            "NC-Designer",
             "NC-QA",
             "NC-Builder",
             "NC-Telemetry"
@@ -69,12 +75,18 @@
     "phase": {
       "type": "string",
       "enum": [
+        "NC-Assess-Intake",
+        "NC-Assess-Research",
+        "NC-Assess-Define",
+        "NC-Assess-Shape",
+        "NC-Assess-Decide",
         "NC-Intake",
         "NC-Spec",
         "NC-Critic",
         "NC-Governor",
         "NC-Arch",
         "NC-Shield",
+        "NC-Designer",
         "NC-QA",
         "NC-Builder",
         "NC-Telemetry"

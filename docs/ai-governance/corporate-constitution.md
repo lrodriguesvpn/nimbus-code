@@ -48,8 +48,10 @@ Definir uma única política corporativa para todo uso de IA da empresa.
   publicação aberta, compartilhamento indiscriminado) são tratadas como risco de
   shadow IT e devem ser bloqueadas administrativamente.
 
-## Nomenclatura Nimbus
+## Comandos Nimbus Code e Esquadrão Multiagente
 
-Os nomes Nimbus (`nimbus.constitution`, `nimbus.discovery`, `nimbus.plan`,
-etc.) são apenas aliases operacionais do Spec Kit. Eles não substituem nem
-desativam os comandos originais.
+Os comandos `/nc-*` e o esquadrão de 15 agentes `NC-*` (ex.: `/nc-spec`,
+`/nc-arch`, `/nc-qa`, `/nc-builder`, etc.) constituem a camada de especialização
+e governança institucional do NIMBUS CODE™, mantendo total interoperabilidade
+com o motor base do Spec Kit (`speckit-*`). A matriz completa de mapeamento está
+documentada em [nimbus-aliases.md](nimbus-aliases.md).

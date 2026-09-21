@@ -172,6 +172,21 @@ manifest:
       human_approval_policy:
         policy_ref: "approval_matrix_by_complexity"
         write_from_complexity: "S3"
+    - id: "NC-Designer"
+      name: "Nimbus Interface Designer"
+      layer: "experience-design"
+      write_permission: "read-write"
+      allowed_file_scope:
+        - "src/**"
+        - "apps/**"
+        - "components/**"
+        - "styles/**"
+        - "specs/*/design-guidelines.md"
+        - "specs/*/ui-ux-audit.md"
+      tool_allowlist: ["view", "rg", "glob", "bash", "apply_patch", "skill:nc-designer"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S3"
     - id: "NC-QA"
       name: "Nimbus Test Strategist"
       layer: "quality"

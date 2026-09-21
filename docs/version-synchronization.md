@@ -117,6 +117,8 @@ Antes de abrir PR com alterações em bundles/presets:
   - [ ] `preset.yml` (se alter preset)
   - [ ] `bundle.yml` que fornece o preset (se versão mudou)
   - [ ] Bundle version (se mudou)
+- [ ] **Developer Guide atualizado (`docs/developer-guide.md`)** refletindo novos comandos, agentes ou capacidades (Regra Mandatória)
+- [ ] Templates em `presets/nimbus-code-standards/templates/project-root/` sincronizados com a raiz
 - [ ] Timestamps dos catalogs estão atualizados (ou rodei `--fix`)
 - [ ] GitHub Actions workflow passou na CI
 

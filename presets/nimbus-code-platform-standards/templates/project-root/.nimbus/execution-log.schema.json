@@ -20,29 +20,105 @@
     "final_result"
   ],
   "properties": {
-    "event_id": { "type": "string", "minLength": 1 },
-    "timestamp": { "type": "string", "format": "date-time" },
+    "event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
     "actor": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "type"],
+      "required": [
+        "id",
+        "type"
+      ],
       "properties": {
-        "id": { "type": "string", "enum": ["NC-Intake", "NC-Spec", "NC-Critic", "NC-Governor", "NC-Arch", "NC-Shield", "NC-QA", "NC-Builder", "NC-Telemetry"] },
-        "type": { "type": "string", "enum": ["agent", "human"] },
-        "session_id": { "type": "string" }
+        "id": {
+          "type": "string",
+          "enum": [
+            "NC-Assess-Intake",
+            "NC-Assess-Research",
+            "NC-Assess-Define",
+            "NC-Assess-Shape",
+            "NC-Assess-Decide",
+            "NC-Intake",
+            "NC-Spec",
+            "NC-Critic",
+            "NC-Governor",
+            "NC-Arch",
+            "NC-Shield",
+            "NC-Designer",
+            "NC-QA",
+            "NC-Builder",
+            "NC-Telemetry"
+          ]
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "agent",
+            "human"
+          ]
+        },
+        "session_id": {
+          "type": "string"
+        }
       }
     },
-    "run_id": { "type": "string", "minLength": 1 },
-    "phase": { "type": "string", "enum": ["NC-Intake", "NC-Spec", "NC-Critic", "NC-Governor", "NC-Arch", "NC-Shield", "NC-QA", "NC-Builder", "NC-Telemetry"] },
-    "action": { "type": "string", "minLength": 1 },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "phase": {
+      "type": "string",
+      "enum": [
+        "NC-Assess-Intake",
+        "NC-Assess-Research",
+        "NC-Assess-Define",
+        "NC-Assess-Shape",
+        "NC-Assess-Decide",
+        "NC-Intake",
+        "NC-Spec",
+        "NC-Critic",
+        "NC-Governor",
+        "NC-Arch",
+        "NC-Shield",
+        "NC-Designer",
+        "NC-QA",
+        "NC-Builder",
+        "NC-Telemetry"
+      ]
+    },
+    "action": {
+      "type": "string",
+      "minLength": 1
+    },
     "scope": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["files", "directories"],
+      "required": [
+        "files",
+        "directories"
+      ],
       "properties": {
-        "files": { "type": "array", "items": { "type": "string" } },
-        "directories": { "type": "array", "items": { "type": "string" } },
-        "lock_id": { "type": "string" }
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "directories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "lock_id": {
+          "type": "string"
+        }
       }
     },
     "artifacts_produced": {
@@ -50,30 +126,104 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["path", "kind"],
+        "required": [
+          "path",
+          "kind"
+        ],
         "properties": {
-          "path": { "type": "string" },
-          "kind": { "type": "string", "enum": ["document", "code", "test", "log", "handoff", "evidence"] },
-          "checksum": { "type": "string" }
+          "path": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "document",
+              "code",
+              "test",
+              "log",
+              "handoff",
+              "evidence"
+            ]
+          },
+          "checksum": {
+            "type": "string"
+          }
         }
       }
     },
-    "decision": { "type": "string", "enum": ["approved", "rejected", "pending"] },
-    "retry_count": { "type": "integer", "minimum": 0 },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "approved",
+        "rejected",
+        "pending"
+      ]
+    },
+    "retry_count": {
+      "type": "integer",
+      "minimum": 0
+    },
     "approval": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["status", "required"],
+      "required": [
+        "status",
+        "required"
+      ],
       "properties": {
-        "required": { "type": "boolean" },
-        "status": { "type": "string", "enum": ["not_required", "pending", "approved", "rejected", "missing"] },
-        "approved_by": { "type": ["string", "null"] },
-        "approved_at": { "type": ["string", "null"], "format": "date-time" },
-        "gate_id": { "type": ["string", "null"] }
+        "required": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "not_required",
+            "pending",
+            "approved",
+            "rejected",
+            "missing"
+          ]
+        },
+        "approved_by": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "approved_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "gate_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
       }
     },
-    "final_result": { "type": "string", "enum": ["success", "failure", "partial"] },
-    "failure_reason": { "type": ["string", "null"] },
-    "notes": { "type": ["string", "null"] }
+    "final_result": {
+      "type": "string",
+      "enum": [
+        "success",
+        "failure",
+        "partial"
+      ]
+    },
+    "failure_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "notes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
   }
 }
