@@ -33,6 +33,14 @@ setup() {
     "speckit-tasks"
     "speckit-taskstoissues"
   )
+
+  # Custom Nimbus-Code speckit-* commands NOT managed by the upstream `specify`
+  # CLI (unlike SPECKIT_COMMANDS above). They must be explicitly synced by
+  # scripts/sync-nc-agents-to-integrations.sh (see EXTRA_SPECKIT_SKILLS, HRN-0006).
+  CUSTOM_SPECKIT_COMMANDS=(
+    "speckit-interview"
+    "speckit-nimbus-code-backlog-sync-sync"
+  )
 }
 
 # Helper function to compute functional body hash
@@ -158,4 +166,31 @@ print(hashlib.sha256(body.encode('utf-8')).hexdigest())
   grep -qi "Claude Code" "docs/developer-guide.md"
   grep -qi "Antigravity" "docs/developer-guide.md"
   grep -qi "multi_install_safe" "docs/developer-guide.md"
+}
+
+# ------------------------------------------------------------------------------
+# AC7 (HRN-0006 regression): comandos /speckit-* customizados (não geridos pelo
+# `specify` CLI) sincronizados com paridade funcional para Claude e Antigravity.
+# ------------------------------------------------------------------------------
+@test "test_AC7_custom_speckit_commands_synced_to_claude_and_agy" {
+  for cmd in "${CUSTOM_SPECKIT_COMMANDS[@]}"; do
+    local github_file=".github/skills/${cmd}/SKILL.md"
+    local claude_file=".claude/skills/${cmd}/SKILL.md"
+    local agy_file=".agents/skills/${cmd}/SKILL.md"
+
+    [ -f "$github_file" ]
+    [ -f "$claude_file" ]
+    [ -f "$agy_file" ]
+
+    # Claude copy must carry an argument-hint (same contract as nc-* agents)
+    grep -q "argument-hint:" "$claude_file"
+
+    local h_gh h_cl h_ag
+    h_gh=$(compute_hash "$github_file")
+    h_cl=$(compute_hash "$claude_file")
+    h_ag=$(compute_hash "$agy_file")
+
+    [ "$h_gh" = "$h_cl" ]
+    [ "$h_gh" = "$h_ag" ]
+  done
 }

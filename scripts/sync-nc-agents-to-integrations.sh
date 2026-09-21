@@ -22,6 +22,16 @@ EXPECTED_AGENTS=(
   "nc-telemetry"
 )
 
+# Custom Nimbus Code /speckit-* commands that are NOT part of the upstream
+# spec-kit template and therefore are NOT installed by `specify integration
+# install claude|agy`. These must be synced by this script too, or they will
+# silently be missing from .claude/skills/ and .agents/skills/ (see
+# harness-catalog.yaml HRN-0006).
+EXTRA_SPECKIT_SKILLS=(
+  "speckit-interview"
+  "speckit-nimbus-code-backlog-sync-sync"
+)
+
 SOURCE_DIR=".github/skills"
 CLAUDE_DIR=".claude/skills"
 AGY_DIR=".agents/skills"
@@ -128,7 +138,7 @@ dest = sys.argv[3]
 
 content = open(src, 'r', encoding='utf-8').read()
 
-# Default argument hint per NC agent if not specified
+# Default argument hint per NC agent / custom speckit command if not specified
 hints = {
     'nc-intake': '[feature description or transcript path]',
     'nc-spec': '[feature description or interview path]',
@@ -138,7 +148,9 @@ hints = {
     'nc-qa': '[plan path or feature slug]',
     'nc-builder': '[tasks path or feature slug]',
     'nc-shield': '[plan path or feature slug]',
-    'nc-telemetry': '[phase or feature slug]'
+    'nc-telemetry': '[phase or feature slug]',
+    'speckit-interview': 'Feature description, live interview, or transcript path',
+    'speckit-nimbus-code-backlog-sync-sync': 'Optional feature slug or backlog item reference'
 }
 hint = hints.get(agent, '')
 
@@ -148,17 +160,28 @@ in_fm = False
 dash_count = 0
 injected_hint = False
 
-for i, line in enumerate(lines):
+in_desc = False
+
+i = 0
+n = len(lines)
+while i < n:
+    line = lines[i]
     stripped = line.rstrip('\r\n')
     if stripped == '---':
         dash_count += 1
         in_fm = (dash_count == 1)
         out.append(line)
+        i += 1
         continue
 
     if in_fm and not injected_hint and stripped.startswith('description:'):
         out.append(line)
-        # Skip continuation lines if description was folded
+        i += 1
+        # Consume continuation lines of a folded/block-scalar description
+        # (lines indented relative to the top-level key) before injecting.
+        while i < n and lines[i].strip() != '' and (lines[i][:1] in (' ', '\t')):
+            out.append(lines[i])
+            i += 1
         eol = '\n' if line.endswith('\n') else ''
         if hint and 'argument-hint:' not in content:
             out.append(f'argument-hint: \"{hint}\"{eol}')
@@ -166,6 +189,7 @@ for i, line in enumerate(lines):
         continue
 
     out.append(line)
+    i += 1
 
 final_text = ''.join(out)
 open(dest, 'w', encoding='utf-8').write(final_text)
@@ -207,7 +231,19 @@ open(dest, 'w', encoding='utf-8').write(content)
 " "$agent_name" "$src_file" "$dest_file"
 }
 
+# Custom /speckit-* commands must also exist in the source of truth.
+validate_extra_speckit_source() {
+  for skill in "${EXTRA_SPECKIT_SKILLS[@]}"; do
+    local source_file="${SOURCE_DIR}/${skill}/SKILL.md"
+    if [[ ! -f "$source_file" ]]; then
+      echo "Error: Custom speckit skill not found: $source_file" >&2
+      exit 1
+    fi
+  done
+}
+
 validate_source
+validate_extra_speckit_source
 
 if [[ "$TARGET" == "claude" || "$TARGET" == "all" ]]; then
   echo "==> Sincronizando agentes para Claude Code (${CLAUDE_DIR}/)..."
@@ -217,6 +253,14 @@ if [[ "$TARGET" == "claude" || "$TARGET" == "all" ]]; then
     process_for_claude "$agent" "$src" "$dest"
   done
   echo "✅ 9 agentes sincronizados para Claude Code."
+
+  echo "==> Sincronizando comandos /speckit-* customizados para Claude Code (${CLAUDE_DIR}/)..."
+  for skill in "${EXTRA_SPECKIT_SKILLS[@]}"; do
+    src="${SOURCE_DIR}/${skill}/SKILL.md"
+    dest="${CLAUDE_DIR}/${skill}/SKILL.md"
+    process_for_claude "$skill" "$src" "$dest"
+  done
+  echo "✅ ${#EXTRA_SPECKIT_SKILLS[@]} comandos speckit customizados sincronizados para Claude Code."
 fi
 
 if [[ "$TARGET" == "antigravity" || "$TARGET" == "all" ]]; then
@@ -227,4 +271,12 @@ if [[ "$TARGET" == "antigravity" || "$TARGET" == "all" ]]; then
     process_for_antigravity "$agent" "$src" "$dest"
   done
   echo "✅ 9 agentes sincronizados para Antigravity."
+
+  echo "==> Sincronizando comandos /speckit-* customizados para Antigravity (${AGY_DIR}/)..."
+  for skill in "${EXTRA_SPECKIT_SKILLS[@]}"; do
+    src="${SOURCE_DIR}/${skill}/SKILL.md"
+    dest="${AGY_DIR}/${skill}/SKILL.md"
+    process_for_antigravity "$skill" "$src" "$dest"
+  done
+  echo "✅ ${#EXTRA_SPECKIT_SKILLS[@]} comandos speckit customizados sincronizados para Antigravity."
 fi
