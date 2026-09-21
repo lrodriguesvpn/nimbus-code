@@ -1353,9 +1353,9 @@ Ver também: [FAQ — Como atualizo um projeto criado com uma versão antiga do 
 
 ## Integrações Multi-Agente e Agentes Disponíveis (SPEC 024)
 
-O Nimbus Code suporta três plataformas de execução de agentes com paridade completa nos 17 comandos `/speckit-*` e nos 14 agentes institucionais `/nc-*`:
+O Nimbus Code suporta três plataformas de execução de agentes com paridade completa nos 17 comandos `/speckit-*` e nos 15 agentes institucionais `/nc-*`:
 
-| Plataforma / Agente | Diretório de Instalação | `multi_install_safe` | 17 Comandos `/speckit-*` | 14 Agentes `/nc-*` |
+| Plataforma / Agente | Diretório de Instalação | `multi_install_safe` | 17 Comandos `/speckit-*` | 15 Agentes `/nc-*` |
 |---|---|:---:|:---:|:---:|
 | **GitHub Copilot** | `.github/skills/` | `true` | ✅ Nativo | ✅ Fonte única |
 | **Claude Code** | `.claude/skills/` | `true` | ✅ `specify integration install claude` | ✅ Sincronizado (`scripts/sync-nc-agents-to-integrations.sh --target claude`) |
@@ -1395,6 +1395,7 @@ O Nimbus Code suporta três plataformas de execução de agentes com paridade co
 | `/nc-qa` | Agente | Camada 2: Test Strategist | ✅ | ✅ | ✅ |
 | `/nc-builder` | Agente | Camada 3: Autonomous Builder (Alias `/speckit-implement` + `/speckit-converge`) | ✅ | ✅ | ✅ |
 | `/nc-shield` | Agente | Camada 2: DevSecOps Guardian | ✅ | ✅ | ✅ |
+| `/nc-designer` | Agente | Camada 2: Interface Designer (Exclusivo Nimbus, sem alias speckit) | ✅ | ✅ | ✅ |
 | `/nc-telemetry` | Agente | Camada 3: Observability & SRE | ✅ | ✅ | ✅ |
 
 ### Regra de Segurança para Antigravity (`multi_install_safe: false`)
@@ -1522,4 +1523,5 @@ Para entender como o Nimbus Code se posiciona em relação a outros frameworks e
 
 - [GSD Core vs. Nimbus Code](comparisons/gsd-core-vs-nimbus-code.md): Comparação aprofundada de foco operacional (Context Engineering e ciclos de terminal vs. Governança Corporativa Full-Cycle, RACI, DORA, DevSecOps e FinOps).
 - [Understand-Anything vs. Nimbus Harvest & Catálogo de Reuso](comparisons/understand-anything-vs-nimbus-harvest.md): Comparação de propósitos (Visualização/navegação interativa de AST para onboarding humano vs. Mineração on-demand de componentes e assinaturas sem segredos para governança de IA e economia de tokens).
+- [Impeccable & Claude Design vs. Nimbus Code (`/nc-designer`)](comparisons/impeccable-and-claude-design-vs-nimbus-code.md): Comparação entre o pacote multi-agente `impeccable`, a skill nativa `frontend-design` da Anthropic e a skill institucional `/nc-designer` criada para internalizar julgamento estético de UI sem dependência de ferramentas externas.
 
