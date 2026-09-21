@@ -2,7 +2,7 @@
 
 **Feature Branch**: `004-platform-cmdb-dsc-model`  
 **Created**: 2026-08-12  
-**Status**: Draft  
+**Status**: Ready  
 **Input**: User description: "Estruturação do repositório e modelo de Plataforma, integrando descoberta de recursos em nuvem, baselines de segurança do Microsoft 365 e Azure/AWS em um CMDB consumível por IA. Estabelece o modelo Desired State Configuration (DSC) para validação contínua de configurações, conformidade de políticas e auditoria de arquivos Terraform."
 
 ## Nimbus-Code — Cabeçalho Obrigatório da Spec

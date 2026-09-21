@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-18
 
-**Status**: Draft
+**Status**: Ready
 
 **Input**: User description: "Implementar a hierarquia Agile completa (Epic → Feature → User Story → Task) no GitHub Enterprise e GitHub Projects V2, automatizando a criação e os vínculos de sub-issues a partir dos artefatos SDD via `/speckit-taskstoissues`."
 

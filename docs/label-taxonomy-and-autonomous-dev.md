@@ -126,6 +126,29 @@ explicitamente** (ver step "Atribuir Copilot coding agent a issue") em vez de
 tentar e falhar de forma confusa; assim quem instalar o bundle percebe
 rapidamente que falta esse passo de configuracao.
 
+### Issues manuais sem labels de governança: `scripts/apply-governance-labels.sh`
+
+O gatilho do auto-assign (`issues: labeled`) só dispara quando o label
+`agent:autonomous-ok` é efetivamente aplicado numa issue — e nenhum workflow
+deste bundle aplica esse label (ou `priority:*`/`complexity:*`/`type:*`)
+sozinho em issues criadas manualmente (pela UI do GHE, `gh issue create`
+avulso, importação, etc.). Só o `/speckit-taskstoissues` aplica esses labels
+automaticamente, e apenas nas issues de Feature/User Story/Task que ele
+mesmo cria/rastreia.
+
+Para corrigir issues manuais que ficaram sem esses labels, use
+[`scripts/apply-governance-labels.sh`](../scripts/apply-governance-labels.sh):
+ele varre as issues abertas do repositório e aplica defaults sensatos
+(`priority:P2-medium`, `complexity:S2`, `agent:autonomous-ok`/
+`agent:needs-human`, `type:task`) só nos labels ausentes, sem sobrescrever o
+que já existe e sem pedir valor por issue (modo "bulk fix"). Ele honra os
+dois guardrails acima: nunca aplica `agent:autonomous-ok` numa issue
+`complexity:S4` nem `type:incident`, mesmo quando esse label é o único que
+falta. Rode com `--dry-run` primeiro para revisar o que seria alterado. Ver
+`--help` do script e a seção "De onde vêm os labels nas issues" em
+[`docs/developer-guide.md`](./developer-guide.md) para o detalhamento
+completo.
+
 ### Guardrail: por que `complexity:S4` bloqueia sempre
 
 Isso não é uma decisão do workflow — é a aplicação técnica de uma regra que já

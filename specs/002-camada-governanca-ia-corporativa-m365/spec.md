@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-12
 
-**Status**: Draft
+**Status**: Ready
 
 **Input**: User description: "Estabelecer uma camada de governança centralizada para agentes criados no Microsoft 365 (Microsoft 365 Copilot e CoWork), mantendo alinhamento com uma constituição corporativa única para toda IA. Padronizar diretrizes para ferramentas legadas (Claude Enterprise e ChatGPT), ratificando Microsoft Copilot e GitHub Enterprise Copilot como ferramentas oficiais, e disponibilizar a camada de aliases Nimbus no Spec Kit."
 

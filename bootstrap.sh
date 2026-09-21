@@ -1122,6 +1122,24 @@ fi
 persist_bootstrap_metadata "$BUNDLE_ID" "$BUNDLE_VERSION" "$NIMBUS_REF"
 python3 "$LOCAL_PATH/scripts/sync-bundle-artifacts.py" \
   --bundle "$LOCAL_PATH" --target "$WORKDIR" --preset "$SELECTED_PRESET" --initialize
+
+if [[ -f "$WORKDIR/scripts/sync-nc-agents-to-integrations.sh" ]]; then
+  case "$INTEGRATION" in
+    claude)
+      echo "-> Synchronizing NC agents for Claude Code integration..."
+      bash "$WORKDIR/scripts/sync-nc-agents-to-integrations.sh" --target claude || true
+      ;;
+    antigravity|agy)
+      echo "-> Synchronizing NC agents for Antigravity integration..."
+      bash "$WORKDIR/scripts/sync-nc-agents-to-integrations.sh" --target antigravity || true
+      ;;
+    all)
+      echo "-> Synchronizing NC agents for all integrations..."
+      bash "$WORKDIR/scripts/sync-nc-agents-to-integrations.sh" --target all || true
+      ;;
+  esac
+fi
+
 echo
 echo "OK: bundle $BUNDLE_ID v${BUNDLE_VERSION} applied."
 echo "OK: preset installed: $SELECTED_PRESET (repository type: $REPO_TYPE)"

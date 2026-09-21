@@ -271,6 +271,18 @@ provides:
       strategy: "replace"
       description: "Confere se specs/<feature>/retro.md não tem os textos de exemplo do retro-template.md sem substituir — companheiro determinístico de .github/skills/speckit-implement/SKILL.md."
 
+    - type: "template"
+      name: "sync-nc-agents-to-integrations-script"
+      file: "templates/project-root/scripts/sync-nc-agents-to-integrations.sh"
+      strategy: "replace"
+      description: "Sincroniza os 9 agentes /nc-* de .github/skills/ para .claude/skills/ e .agents/skills/ com paridade funcional — copiado para scripts/sync-nc-agents-to-integrations.sh."
+
+    - type: "template"
+      name: "nc-agents-parity-check-workflow"
+      file: "templates/project-root/.github/workflows/nc-agents-parity-check.yml"
+      strategy: "replace"
+      description: "Workflow de CI para verificar paridade funcional e integridade entre integrações Copilot, Claude Code e Antigravity."
+
 tags:
   - "governance"
   - "security"
@@ -299,3 +311,6 @@ tags:
   - "harness-engineering"
   - "success-playbooks"
   - "brownfield-context-graph"
+  - "multi-agent-parity"
+  - "claude-code"
+  - "antigravity"
