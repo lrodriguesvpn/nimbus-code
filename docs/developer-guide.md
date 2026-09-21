@@ -1556,6 +1556,7 @@ Para entender como o Nimbus Code se posiciona em relação a outros frameworks e
 - [GSD Core vs. Nimbus Code](comparisons/gsd-core-vs-nimbus-code.md): Comparação aprofundada de foco operacional (Context Engineering e ciclos de terminal vs. Governança Corporativa Full-Cycle, RACI, DORA, DevSecOps e FinOps).
 - [Understand-Anything vs. Nimbus Harvest & Catálogo de Reuso](comparisons/understand-anything-vs-nimbus-harvest.md): Comparação de propósitos (Visualização/navegação interativa de AST para onboarding humano vs. Mineração on-demand de componentes e assinaturas sem segredos para governança de IA e economia de tokens).
 - [Impeccable & Claude Design vs. Nimbus Code (`/nc-designer`)](comparisons/impeccable-and-claude-design-vs-nimbus-code.md): Comparação entre o pacote multi-agente `impeccable`, a skill nativa `frontend-design` da Anthropic e a skill institucional `/nc-designer` criada para internalizar julgamento estético de UI sem dependência de ferramentas externas.
+- [Oportunidades de uso do TypeSafe/Jev no Nimbus Code](comparisons/typesafe-jev-oportunidades-nimbus-code.md): Mapeamento de onde o skill `typesafe-ai` (modelo **Jev**, julgamentos tipados de baixo custo — roteamento, classificação, verificação) reduz custo na camada de decisão dos agentes `/nc-*`, com a ressalva de que o Jev **não gera código** e não substitui o Copilot como motor de implementação. Ver [ADR 0010](adr/0010-adocao-experimental-typesafe-jev-para-julgamentos-tipados.md).
 
 ---
 
