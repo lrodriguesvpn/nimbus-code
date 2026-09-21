@@ -10,6 +10,11 @@ setup() {
   cd "$REPO_ROOT"
 
   EXPECTED_AGENTS=(
+    "nc-assess-intake"
+    "nc-assess-research"
+    "nc-assess-define"
+    "nc-assess-shape"
+    "nc-assess-decide"
     "nc-intake"
     "nc-spec"
     "nc-critic"
@@ -23,6 +28,11 @@ setup() {
 
   SPECKIT_COMMANDS=(
     "speckit-analyze"
+    "speckit-assess-decide"
+    "speckit-assess-define"
+    "speckit-assess-intake"
+    "speckit-assess-research"
+    "speckit-assess-shape"
     "speckit-checklist"
     "speckit-clarify"
     "speckit-constitution"
@@ -38,6 +48,11 @@ setup() {
   # CLI (unlike SPECKIT_COMMANDS above). They must be explicitly synced by
   # scripts/sync-nc-agents-to-integrations.sh (see EXTRA_SPECKIT_SKILLS, HRN-0006).
   CUSTOM_SPECKIT_COMMANDS=(
+    "speckit-assess-intake"
+    "speckit-assess-research"
+    "speckit-assess-define"
+    "speckit-assess-shape"
+    "speckit-assess-decide"
     "speckit-interview"
     "speckit-nimbus-code-backlog-sync-sync"
   )

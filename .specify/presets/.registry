@@ -2,14 +2,14 @@
   "schema_version": "1.0",
   "presets": {
     "nimbus-code-standards": {
-      "version": "1.19.0",
+      "version": "1.20.0",
       "source": "local",
       "manifest_hash": "sha256:baff266ee7d980d68d392e379a9e38008f1d122cc6c7716cd3b19963ec28225b",
       "enabled": true,
       "priority": 5,
       "registered_commands": {},
       "registered_skills": {},
-      "installed_at": "2026-09-01T21:49:00.000000+00:00"
+      "installed_at": "2026-09-21T13:20:00.000000+00:00"
     }
   }
 }
