@@ -1362,6 +1362,13 @@ a plataforma possui contrato próprio. A implementação funcional continua em
 | **Claude Code** | `.claude/agents/` + `.claude/skills/` | `true` | ✅ Skills/workflows | ✅ Nativo (subagents `*.md`) |
 | **Antigravity** | `.agents/skills/` | `false` | ✅ `specify integration install agy` (Worktree isolado) | ✅ Bridge de skill; não há formato nativo inventado |
 
+> **Importante — VS Code e Claude Code no mesmo workspace:** o Claude Code
+> continua usando os 15 subagentes em `.claude/agents/`, mas o workspace
+> configura `chat.agentFilesLocations` para que o agente local do VS Code não
+> indexe essa pasta. Assim, o seletor do VS Code exibe apenas o orquestrador
+> `@nimbus` de `.github/agents/`; a superfície nativa do Claude Code permanece
+> disponível quando o projeto é aberto por ele.
+
 ### Tabela de Agentes e Comandos Disponíveis por Integração
 
 | Identificador | Tipo | Camada / Descrição | Copilot | Claude Code | Antigravity |
@@ -1571,4 +1578,3 @@ Para entender como o Nimbus Code se posiciona em relação a outros frameworks e
 3. **Padrões de Integração & Ferramentas**: Atualizar referências de ferramentas, frameworks analisados e melhores práticas consolidadas.
 4. **Sincronização de Templates**: Garantir que os arquivos em `presets/nimbus-code-standards/templates/project-root/` estejam 100% sincronizados com as últimas melhorias da raiz do template.
 5. **Alinhamento do Checklist de Release**: O Developer Guide é a fonte canônica da verdade para os engenheiros — nenhum lançamento de versão é considerado completo sem a sua respectiva atualização documental.
-
