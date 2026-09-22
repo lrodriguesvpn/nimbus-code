@@ -15,8 +15,8 @@ System**.
 | Item | Versão instalada |
 | --- | --- |
 | **Nimbus Code CLI** | `0.16.1` |
-| **Bundle `nimbus-code-project-bundle`** ([nimbus-code-spec-kit-template](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template)) | `1.19.0` |
-| — preset `nimbus-code-standards` | `1.19.0` |
+| **Bundle `nimbus-code-project-bundle`** ([nimbus-code-spec-kit-template](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template)) | `1.21.1` |
+| — preset `nimbus-code-standards` | `1.21.1` |
 | — extensão `nimbus-code-backlog-sync` | `1.2.0` |
 | — workflow `nimbus-code-full-cycle` | `1.4.0` |
 

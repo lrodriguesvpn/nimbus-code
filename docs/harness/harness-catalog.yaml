@@ -251,3 +251,109 @@ entries:
     similar_contexts:
       - dev-platform
       - spec-kit-workflow
+
+  - id: HRN-0007
+    date: 2026-09-22
+    complexity: S3
+    bounded_context: spec-kit-workflow
+    error_pattern: >
+      Ao corrigir HRN-0006 trocando listas hardcoded (AGENTS/EXPECTED_AGENTS)
+      por descoberta via glob sobre .github/skills/nc-*, a correção sozinha não
+      era suficiente: 3 agentes (nc-bug-assess, nc-bug-fix, nc-bug-test) existiam
+      como skill mas nunca tiveram entrada em .nimbus/agent-manifest.yaml — a
+      descoberta dinâmica passaria a encontrá-los e o gerador falharia
+      (manifest roles missing) ao tentar sincronizá-los.
+    root_cause: >
+      Quando a extensão "bug" foi adicionada ao preset, os 3 agentes NC-Bug-*
+      foram criados como SKILL.md mas o registro de governança correspondente
+      no manifest (tool_allowlist, allowed_file_scope, human_approval_policy)
+      nunca foi criado — divergindo do padrão já seguido por NC-Assess-*, que
+      também vem de extensão mas tem entrada completa no manifest.
+    impact: >
+      Sem essa correção adicional, a mitigação de HRN-0006 (descoberta dinâmica)
+      teria travado a geração de agentes para todos os 5 alvos assim que
+      implementada, exigindo debugging reativo em vez de correção planejada.
+    fix_applied: >
+      Adicionadas 3 novas entradas em .nimbus/agent-manifest.yaml (NC-Bug-Assess,
+      NC-Bug-Fix, NC-Bug-Test) seguindo o padrão de NC-Critic/NC-Assess-Intake,
+      com escopo de escrita em .specify/bugs/*/{assessment,fix,test}.md (e
+      src/**, tests/**, etc. para NC-Bug-Fix/NC-Bug-Test) — decisão confirmada
+      explicitamente com o usuário antes da implementação (spec 028).
+    prevention: >
+      Ao introduzir um novo agente NC-* (via extensão ou nativo), SEMPRE criar a
+      entrada correspondente em .nimbus/agent-manifest.yaml no mesmo PR que cria
+      o SKILL.md — nunca deixar o registro de governança para depois. Ao
+      corrigir uma descoberta hardcoded → dinâmica em qualquer catálogo (agentes,
+      comandos, integrações), testar a descoberta ANTES de assumir que o
+      restante do pipeline (ex.: validação de manifest) já cobre 100% dos itens
+      que serão descobertos.
+    tags:
+      - agent-manifest-drift
+      - governance-registration-gap
+      - dynamic-discovery
+      - spec-028
+      - hrn-0006-followup
+    source_pr: ""
+    similar_contexts:
+      - dev-platform
+      - spec-kit-workflow
+
+  - id: HRN-0008
+    date: 2026-09-22
+    complexity: S3
+    bounded_context: spec-kit-workflow
+    error_pattern: >
+      Spec 028 estendeu scripts/lib/nc-agent-sync.py e
+      scripts/sync-nc-agents-to-integrations.sh com os alvos "cursor" e
+      "kiro", validou tudo dentro deste repositório-template, mas nunca
+      atualizou bootstrap.sh — o script que repositórios satélite usam para
+      instalar/atualizar o bundle. O `case "$INTEGRATION"` que decide qual
+      alvo de sync de agentes NC-* disparar continuou cobrindo apenas
+      claude/antigravity/all; cursor-agent e kiro-cli caíam silenciosamente
+      em nenhum case (`esac` sem `*)`), sem erro, sem log — nenhum satélite
+      configurado com essas integrações jamais receberia os agentes NC-* nem
+      os 10 comandos /speckit-* proprietários, mesmo após bootstrap ou
+      refresh gerenciado.
+    root_cause: >
+      A validação da spec 028 ficou inteiramente dentro do repositório-
+      template (testes bats + instalação manual local), sem exercitar o
+      caminho real de propagação para consumidores (bootstrap.sh apply/
+      --refresh-preset). O `case` de bootstrap.sh é uma segunda tradução
+      (chave real do `specify` CLI → alvo interno do gerador) que não é
+      coberta por nenhum teste de paridade existente, então a extensão para
+      2 alvos novos não "quebrou" nenhum teste — apenas deixou de propagar.
+    impact: >
+      Detectado antes de qualquer satélite real adotar Cursor/Kiro (achado
+      do próprio usuário revisando o PR, não de um incidente em produção),
+      mas representa exatamente o tipo de drift silencioso que só apareceria
+      quando um time real tentasse usar a integração nova e notasse a
+      ausência dos agentes institucionais dias/semanas depois.
+    fix_applied: >
+      bootstrap.sh: adicionados os casos `cursor-agent|cursor)` e
+      `kiro-cli|kiro)` ao dispatch de sync-nc-agents-to-integrations.sh
+      (mapeando as chaves reais do catálogo `specify integration list` para
+      os alvos internos do gerador); texto de uso (`--integration`)
+      atualizado para não sugerir uma lista desatualizada e incompleta.
+      Novo teste de regressão (`bootstrap-nc-agent-sync-coverage.bats`)
+      extrai dinamicamente `TARGETS` de nc-agent-sync.py e falha se
+      bootstrap.sh não tiver `--target <alvo>` para cada um — protege contra
+      a mesma lacuna se um 6º alvo for adicionado no futuro.
+    prevention: >
+      Toda vez que um novo alvo/integração for adicionado ao gerador de
+      agentes NC-* (TARGETS em nc-agent-sync.py), tratar bootstrap.sh como
+      parte OBRIGATÓRIA do escopo da mesma feature — é o único caminho real
+      de propagação para repositórios satélite, não apenas um "detalhe de
+      infra" a revisar depois. Antes de fechar uma feature de integração
+      multi-agente, rodar (ou pelo menos ler) o `case "$INTEGRATION"` de
+      bootstrap.sh e confirmar que o novo alvo está representado — não
+      confiar apenas em testes que rodam dentro do próprio template.
+    tags:
+      - satellite-propagation-gap
+      - bootstrap-integration-dispatch
+      - multi-agent-integration
+      - spec-028
+      - silent-drift
+    source_pr: ""
+    similar_contexts:
+      - dev-platform
+      - spec-kit-workflow

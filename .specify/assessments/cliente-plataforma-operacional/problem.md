@@ -2,193 +2,175 @@
 
 - **Slug**: cliente-plataforma-operacional
 - **Created**: 2026-09-21T15:37:19-03:00
-- **Inputs used**: intake.md | research.md
+- **Updated (Round 2)**: 2026-09-22T08:15:00-03:00
+- **Inputs used**: intake.md (Round 1 & Round 2) | research.md (Round 1 & Round 2)
 
 ## Problem Statement
 
-Uma empresa de gestão de Cloud precisa operar, de forma recorrente e
-auditável, os artefatos de infraestrutura, segurança, IaC, Terraform e DSC de
-seus clientes, mas esses artefatos e responsabilidades ainda não estão
-claramente separados do ciclo dos projetos de software. Essa separação
-insuficiente pode dificultar ownership, revisão, evidência, controle de drift,
-segregação entre clientes e execução segura de mudanças, justamente quando a
-operação precisa escalar para múltiplos clientes, ambientes e provedores.
+A Venha Pra Nuvem opera duas linhas de negócio distintas que hoje demandam
+estruturação formal de governança de infraestrutura e dados:
+1. **Managed Services (GSN Premium)**: serviço gerenciado de infraestrutura,
+   segurança, CMDB, baselines, schemas de bancos e DSC para clientes
+   gerenciados. A operação necessita que todos os artefatos de infraestrutura,
+   Terraform e estado residam em repositórios dedicados de plataforma/IaC
+   (**princípio "Repo First Company"**), nunca misturados ao código-fonte das
+   aplicações. Além disso, a operação precisa gerenciar de forma unificada tanto
+   ativos que justificam um repositório de IaC dedicado (ex.:
+   `vpn-nibo-connect-iac`) quanto ativos legados ou de menor porte que devem
+   permanecer inventariados diretamente no "Repo Plataforma" central.
+2. **SaaS FinOps (Nuvem 365)**: produto multi-tenant voltado a clientes finais
+   (`nuvem365-nimbuscode-spec`), focado em visibilidade de custos, faturamento
+   multi-cloud (AWS/Azure/OCI), rentabilidade e alertas orçamentários. O Nuvem
+   365 hoje é o contexto formal de FinOps, mas não possui IaC própria
+   versionada em seus repositórios satélite, e seu CMDB interno
+   (`005-cmdb-gcp`) atende ao escopo do produto SaaS, sem integração direta
+   imediata com o CMDB operacional da linha de Managed Services.
 
-A existência de padrões de landing zones que distinguem plataforma de
-workloads apoia a relevância do problema, mas o impacto quantitativo na
-operação desta empresa ainda precisa ser medido. (research.md)
+O problema central consiste em:
+- Como estruturar o **Repo Cliente/Plataforma** para servir à operação de
+  Managed Services (GSN Premium), decidindo se este template permanece como um
+  **modelo de referência/gerador de instâncias por cliente** (como a instância
+  real `venha-pra-nuvem-client-platform`) ou evolui para um **motor central
+  único** multicliente;
+- Como estabelecer um mecanismo claro de **registro e vinculação** de
+  repositórios de IaC dedicados no CMDB, permitindo convivência fluida com
+  ativos mantidos apenas em inventário central;
+- Como conectar o contexto de FinOps (`nuvem365-nimbuscode-spec`/`billing`)
+  como fonte de dados de custo e relatórios de clientes, mantendo os domínios
+  de negócio e as responsabilidades de segurança claramente segregados.
 
 ## Affected Users & Stakeholders
 
 ### Usuários
 
-- **Operadores de Cloud/Plataforma** — precisam localizar, compreender, validar
-  e operar artefatos de infraestrutura e IaC de vários clientes sem misturá-los
-  com código de aplicação. O volume de tempo e retrabalho ainda é
-  `[NEEDS CLARIFICATION]`.
-- **Engenharia de Segurança e Compliance** — precisam verificar baselines,
-  políticas, configuração e evidências por cliente e ambiente, mantendo
-  rastreabilidade e requisitos de residência/privacidade. As frameworks
-  prioritárias ainda são `[NEEDS CLARIFICATION]`.
-- **Responsáveis por IaC/DSC** — precisam manter estado desejado, mudanças,
-  exceções e divergências identificáveis e revisáveis. A distribuição atual de
-  ownership é `[NEEDS CLARIFICATION]`.
-- **Owners de plataforma do cliente** — precisam revisar ou aprovar mudanças e
-  entender o estado operacional de seus ambientes. A frequência e o nível de
-  participação são `[NEEDS CLARIFICATION]`.
-- **Owners de aplicações do cliente** — podem ser impactados por mudanças de
-  plataforma, mas não devem assumir automaticamente a operação dos artefatos
-  que estão fora do software da aplicação. A fronteira de responsabilidade é
-  `[NEEDS CLARIFICATION]`.
-- **Auditores e solicitantes de evidência** — precisam obter evidências
-  confiáveis, contextualizadas e atribuídas ao cliente, ambiente e período
-  corretos. O tempo atual de atendimento é desconhecido.
+- **Operadores de Cloud/Plataforma (Time GSN Premium / Managed Services)** —
+  precisam localizar, inventariar, auditar e operar artefatos de infraestrutura,
+  Terraform, baselines e DSC sem misturá-los com código de aplicação, operando
+  sob o modelo "Repo First Company".
+- **Engenharia de Segurança e Compliance da Venha Pra Nuvem** — precisam
+  auditar configurações, baselines (ex.: M365, CIS, Landing Zones), políticas de
+  drift e registros de evidência por cliente e ambiente, com rastreabilidade
+  total e sem credenciais estáticas (usando WIF / identidades federadas).
+- **Responsáveis por IaC e Terraform** — mantêm estados desejados, planos
+  advisory, branches protegidas e pipelines de homologação/produção, vinculando
+  repositórios de IaC dedicados ao CMDB central.
+- **Desenvolvedores e Owners de Aplicações dos Clientes** — desenvolvem nos
+  repositórios de software (ex.: `vpn-nibo-connect`) com a certeza de que a IaC,
+  segredos e estado de nuvem são geridos isoladamente em repositório apropriado
+  (ex.: `vpn-nibo-connect-iac`).
+- **Usuários do Portal FinOps (Clientes Nuvem 365)** — consomem dashboards de
+  custos, rentabilidade e faturamento multi-cloud gerados pelo produto Nuvem 365.
+- **Auditores externos e internos** — necessitam de pacotes de evidência
+  contextualizados por cliente, ambiente, período e controle (sem esforço
+  manual de consolidação).
 
 ### Stakeholders
 
-- **Liderança da empresa de Managed Services** — decide prioridade, modelo de
-  serviço, risco aceitável e retorno operacional/comercial.
-- **Service Delivery Manager / operação** — responde pela capacidade de entregar
-  mudanças, manter SLAs e coordenar incidentes e aprovações.
-- **Responsável por Segurança/Risco** — decide controles mínimos, exceções,
-  segregação e evidências necessárias.
-- **Responsável por Plataforma/Arquitetura** — define padrões reutilizáveis e
-  a consistência entre clientes, sem conhecer ainda `[NEEDS CLARIFICATION]`
-  quais decisões devem ser globais ou específicas por cliente.
-- **Cliente contratante** — pode aprovar mudanças, exigir evidências e definir
-  requisitos regulatórios, de residência e de acesso. O papel contratual exato
-  precisa ser confirmado.
-- **Finanças/gestão de conta** — avalia custo de operação, margem e
-  possibilidade de vender evidência, governança e segurança como parte do
-  serviço. Os critérios financeiros ainda são `[NEEDS CLARIFICATION]`.
+- **Liderança da Venha Pra Nuvem** — define estratégia comercial para a oferta
+  GSN Premium e para o produto SaaS Nuvem 365, avaliando escalabilidade da
+  operação e margem por cliente.
+- **Service Delivery Managers (SDMs)** — respondem por SLAs, cumprimento de
+  janelas, relatórios operacionais e governança de mudanças de clientes.
+- **Product Owner do Nuvem 365** — lidera o roadmap de FinOps, rentabilidade e
+  features do produto SaaS, incluindo o CMDB GCP para clientes do produto.
+- **Clientes Contratantes de Managed Services** — demandam isolamento estrito de
+  seus ambientes, previsibilidade de mudanças e conformidade regulatória (LGPD).
 
 ## Goals
 
 Os resultados abaixo definem o valor de resolver o problema, sem prescrever
-como resolvê-lo:
+a implementação detalhada:
 
-- Tornar inequívoca a fronteira entre artefatos de plataforma/cliente e
-  projetos de software, incluindo ownership, revisão e responsabilidade por
-  mudanças.
-- Reduzir o esforço necessário para localizar, validar, revisar e auditar
-  Terraform, IaC, DSC, segurança e infraestrutura de um cliente.
-- Aumentar a consistência dos padrões aplicados entre clientes sem apagar
-  diferenças legítimas, exceções aprovadas ou requisitos contratuais.
-- Permitir que a operação identifique o estado declarado, o estado observado,
-  o drift e a evidência correspondente por cliente e ambiente.
-- Preservar segregação de tenants, ambientes, credenciais, estados, evidências
-  e dados sensíveis.
-- Tornar mudanças de plataforma rastreáveis, aprováveis e atribuíveis, com
-  distinção entre planejamento, observação e execução.
-- Reduzir o tempo de resposta a auditorias, incidentes e solicitações de
-  evidência.
-- Permitir medir o custo, a qualidade e a capacidade do serviço de Managed
-  Services à medida que o número de clientes cresce.
+- **Isolamento "Repo First Company"**: Garantir que toda IaC e estado de
+  clientes residam em repositórios segregados do código de aplicação, com
+  esteiras de CI/CD protegidas (plans de leitura em PR, apply manual com
+  aprovação em ambientes controlados).
+- **Vínculo Unificado no CMDB**: Permitir que o "Repo Plataforma" registre e
+  aponte para repositórios de IaC dedicados existentes (ex.:
+  `vpn-nibo-connect-iac`), ao mesmo tempo em que fornece inventário central
+  direto para ativos que não possuem repo de IaC dedicado.
+- **Decisão Arquitetural do Modelo de Plataforma**: Definir com clareza o papel
+  deste template — se atua como gerador/modelo de referência para instâncias por
+  cliente (como `venha-pra-nuvem-client-platform`) ou como motor central
+  multicliente.
+- **Integração com Contexto FinOps**: Estabelecer a interface de contexto com o
+  Nuvem 365 (`nuvem365-nimbuscode-spec`/`billing`) para enriquecer o inventário
+  e a operação com métricas de custo e rentabilidade.
+- **Padronização de Baselines e DSC**: Disponibilizar registros de baseline,
+  políticas de drift advisory e coleta de evidências aplicáveis de forma
+  consistente entre clientes gerenciados.
+- **Auditoria e Rastreabilidade**: Reduzir significativamente o tempo de resposta
+  a solicitações de auditoria e diagnóstico de drift entre estado declarado e
+  estado real.
 
 ## Non-Goals
 
-- Não definir nesta etapa se o resultado será monorepo, repositório por cliente,
-  control plane central, modelo híbrido ou produto SaaS.
-- Não escolher agora cloud, provedor de CI/CD, ITSM, CNAPP, SIEM, secrets
-  manager ou ferramenta de Terraform.
-- Não substituir os projetos de software dos clientes nem assumir ownership do
-  código ou do ciclo de entrega das aplicações.
-- Não presumir que a operação deverá executar mudanças automaticamente em
-  produção.
-- Não substituir plataformas especializadas de segurança, observabilidade,
-  FinOps, ITSM ou gestão de identidades.
-- Não estabelecer ainda frameworks regulatórios prioritários, SLAs, preço,
-  margem ou escopo contratual sem validação com a liderança e clientes.
-- Não tratar as provas atuais do template em fixtures locais como evidência de
-  integração real com APIs cloud, isolamento real entre clientes ou operação
-  produtiva.
+- **Não unificar nesta rodada o CMDB do produto SaaS Nuvem 365 (`005-cmdb-gcp`)
+  com o CMDB de Managed Services**: são produtos e domínios de negócio com
+  propósitos e bases de clientes distintos; qualquer convergência futura é
+  tratada como evolução desacoplada.
+- **Não exigir obrigatoriamente um repositório de IaC dedicado para 100% dos
+  ativos**: ativos legados, menores ou puramente inventariados podem residir
+  diretamente no inventário do Repo Plataforma sem forçar criação de repo
+  exclusivo.
+- **Não alterar o código de aplicação dos clientes**: o escopo se restringe à
+  camada de infraestrutura, plataforma, governança e FinOps.
+- **Não executar mudanças automáticas destrutivas em produção**: a operação
+  mantém o princípio advisory-first e aprovação humana explícita antes de applies
+  de infraestrutura crítica.
+- **Não substituir ferramentas nativas de nuvem ou ITSM de mercado**: o modelo
+  atua como orquestrador de governança e repositório de verdade, integrando-se
+  às ferramentas existentes.
 
 ## Success Metrics
 
-As metas numéricas abaixo são propostas para validação no discovery. Os
-baselines atuais não foram fornecidos e devem ser medidos antes de confirmar os
-targets.
-
-- **Separação de ownership**: 100% dos artefatos incluídos no piloto devem ter
-  cliente, ambiente, owner operacional e owner aprovador identificados
-  (baseline: desconhecido).
-- **Localização operacional**: reduzir em pelo menos 50% o tempo mediano para
-  localizar o artefato, evidência e owner corretos de uma mudança ou finding
-  (baseline: `[NEEDS CLARIFICATION]`).
-- **Rastreabilidade**: 100% das mudanças de plataforma do piloto devem possuir
-  origem, revisão, aprovação, identidade, ambiente e resultado registrados
-  (baseline: desconhecido).
-- **Segregação**: zero ocorrências de acesso cruzado não autorizado entre
-  clientes, ambientes, credenciais, estados ou evidências no piloto (baseline:
-  desconhecido).
-- **Drift**: medir por cliente a quantidade, severidade e idade dos drifts; após
-  estabelecer a linha de base, reduzir em pelo menos 30% a idade mediana de
-  drift classificado como acionável (baseline: desconhecido).
-- **Auditoria**: reduzir em pelo menos 50% o tempo mediano para produzir um
-  pacote de evidências solicitado (baseline: `[NEEDS CLARIFICATION]`).
-- **Reuso**: medir a proporção de artefatos/padrões compartilhados e o custo de
-  atualizá-los, sem aceitar como sucesso apenas aumentar cópia ou duplicação
-  (baseline: desconhecido).
-- **Qualidade do serviço**: acompanhar incidentes, retrabalho, mudanças
-  reprovadas, rollbacks e violações de janela associados a plataforma por
-  cliente (baseline: desconhecido).
-- **Escala operacional**: confirmar que o custo operacional por cliente não
-  cresce linearmente com o número de clientes no piloto; o limiar aceitável é
-  `[NEEDS CLARIFICATION]`.
-- **Valor para o cliente**: validar em entrevistas e/ou renovação contratual
-  que clientes entendem o boundary de plataforma e consideram úteis as
-  evidências e controles entregues (métrica qualitativa inicialmente;
-  `[NEEDS CLARIFICATION]`).
+- **Separação de IaC ("Repo First")**: 100% dos novos projetos e clientes
+  gerenciados com infraestrutura provisionada têm a IaC e o estado versionados
+  fora do repositório de software (baseline atual no piloto NIBO: 100%; baseline
+  geral: em mapeamento).
+- **Cobertura de Inventário no CMDB**: 100% dos ativos gerenciados mapeados no
+  Repo Plataforma, com identificação clara se possuem repo de IaC dedicado
+  vinculado ou se são inventário central.
+- **Rastreabilidade de Mudanças**: 100% das alterações de infraestrutura e
+  baseline com evidência registrada (PR, approver, commit, WIF identity).
+- **Tempo de Resposta a Auditorias**: Redução de pelo menos 50% no tempo
+  necessário para extrair relatórios de conformidade e drift de um cliente
+  gerenciado.
+- **Segregação de Acessos e Estado**: Zero vazamento de credenciais ou estados
+  de Terraform entre clientes ou entre ambientes de homologação/produção.
 
 ## Cost of Inaction
 
-Se o problema permanecer sem definição e tratamento, a empresa tende a
-continuar misturando responsabilidades de plataforma e software, com possível
-duplicação de padrões, ownership ambíguo, maior esforço de auditoria, drift
-menos visível e maior risco de mudanças executadas no contexto incorreto.
-Também ficará difícil saber se o serviço de Managed Services está escalando
-com qualidade ou apenas transferindo esforço manual para cada novo cliente.
-
-Esses impactos são hipóteses operacionais apoiadas pelo research, não medições
-da empresa. O custo real da inação deve ser estabelecido por uma linha de base
-de tempo, incidentes, drift, mudanças, auditorias e custo por cliente.
+Manter o cenário atual acarreta:
+1. Risco de proliferação de IaC desorganizada ou embutida em repositórios de
+   código, quebrando o princípio "Repo First Company".
+2. Ineficiência operacional no time GSN Premium, que precisará navegar em
+   múltiplas convenções ad-hoc para operar clientes distintos.
+3. Desconexão entre os dados de custo gerados no FinOps (Nuvem 365) e a
+   governança operacional dos recursos geridos pela Venha Pra Nuvem.
+4. Dificuldade em escalar a carteira de clientes de Managed Services sem
+   aumentar linearmente o custo de headcount operacional.
 
 ## Open Questions
 
-- [NEEDS CLARIFICATION: Qual é a unidade contratual e operacional de isolamento:
-  cliente, tenant, subscription/account, ambiente ou combinação?]
-- [NEEDS CLARIFICATION: Qual é a população inicial do problema: número de
-  clientes, provedores, contas, ambientes, workloads e mudanças mensais?]
-- [NEEDS CLARIFICATION: Quais tipos de artefatos pertencem obrigatoriamente ao
-  domínio de plataforma e quais permanecem no domínio de software?]
-- [NEEDS CLARIFICATION: Quem pode ler, revisar, aprovar, executar e auditar
-  cada tipo de artefato ou mudança?]
-- [NEEDS CLARIFICATION: A operação inicial será advisory/read-only, ou incluirá
-  execução controlada em ambientes reais?]
-- [NEEDS CLARIFICATION: Quais requisitos de LGPD, residência, retenção,
-  criptografia e segregação de secrets se aplicam por cliente?]
-- [NEEDS CLARIFICATION: Quais frameworks de segurança e compliance têm
-  prioridade comercial e operacional?]
-- [NEEDS CLARIFICATION: Quais padrões precisam ser globais, versionados por
-  cliente, opcionais ou sujeitos a exceção?]
-- [NEEDS CLARIFICATION: Quais integrações existentes são obrigatórias para
-  operação e evidência: GitHub/Azure DevOps, ITSM, CSPM, SIEM, FinOps e
-  secrets management?]
-- [NEEDS CLARIFICATION: O cliente final precisa de acesso direto, aprovação,
-  relatórios ou apenas evidências entregues pela empresa de gestão?]
-- [NEEDS CLARIFICATION: Qual SLA de mudança, incidente e evidência deve ser
-  suportado?]
-- [NEEDS CLARIFICATION: Qual baseline atual será usado para confirmar redução de
-  tempo, drift, retrabalho, incidentes e custo por cliente?]
-- [NEEDS CLARIFICATION: Qual critério determina que a iniciativa deve avançar,
-  ser redimensionada ou ser interrompida após o piloto?]
+- [NEEDS CLARIFICATION: Qual deve ser o modelo operacional definitivo do Repo
+  Plataforma: gerador/template de instâncias por cliente (como
+  `venha-pra-nuvem-client-platform`) ou motor central único multicliente?]
+- [NEEDS CLARIFICATION: Quais são os critérios objetivos para decidir quando um
+  ativo/cliente exige um repositório de IaC dedicado (ex.: tamanho, criticidade,
+  ambiente, exigência contratual) vs. quando permanece como inventário central?]
+- [NEEDS CLARIFICATION: Qual é o padrão oficial de nomenclatura de repositórios
+  de IaC para novos clientes (ex.: `vpn-<cliente>-iac` vs. `vpn-<cliente>-infra`)?]
+- [NEEDS CLARIFICATION: Qual é o formato e protocolo de interface desejado entre
+  o Repo Plataforma e o contexto de FinOps Nuvem 365 (export de relatórios,
+  consumo de API/MCP, ou enriquecimento via schemas comuns)?]
 
 ## Handoff
 
-O problema está suficientemente articulado para seguir à modelagem de
-conceito, mas as métricas e a topologia de operação ainda dependem de
-validação. Próximo passo recomendado:
+A definição do problema está atualizada e alinhada com as evidências do Round 2
+e os direcionamentos de negócio da Venha Pra Nuvem. Próximo passo recomendado:
 
 ```text
 /nc-assess-shape slug=cliente-plataforma-operacional
 ```
+

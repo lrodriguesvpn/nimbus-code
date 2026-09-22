@@ -31,7 +31,7 @@ IGNORED_TOP_LEVEL_ARTIFACTS=(
 print_usage() {
   cat <<'EOF'
 Usage:
-  ./bootstrap.sh [--local <path>] [--ref <tag|branch>] [--integration <copilot|claude|gemini>] [--repo-type <platform|dev_standards>] [--delivery-model <monorepo|multirepo>] [--decision-reason <text>] [--decision-owner <team|role>] [--satellite-domains <CSV>] [--custom-domain-justification <text>] [--custom-domain-ownership <text>] [--refresh-preset]
+  ./bootstrap.sh [--local <path>] [--ref <tag|branch>] [--integration <copilot|claude|antigravity|cursor-agent|kiro-cli|...>] [--repo-type <platform|dev_standards>] [--delivery-model <monorepo|multirepo>] [--decision-reason <text>] [--decision-owner <team|role>] [--satellite-domains <CSV>] [--custom-domain-justification <text>] [--custom-domain-ownership <text>] [--refresh-preset]
   ./bootstrap.sh --detect-preset-version-mismatch [--repo-root <path>] [--source-root <path>] [--json]
 Refresh updates the preset and unmodified managed files only; no init or GitHub provisioning.
 EOF
@@ -1132,6 +1132,14 @@ if [[ -f "$WORKDIR/scripts/sync-nc-agents-to-integrations.sh" ]]; then
     antigravity|agy)
       echo "-> Synchronizing NC agents for Antigravity integration..."
       bash "$WORKDIR/scripts/sync-nc-agents-to-integrations.sh" --target antigravity || true
+      ;;
+    cursor-agent|cursor)
+      echo "-> Synchronizing NC agents for Cursor integration..."
+      bash "$WORKDIR/scripts/sync-nc-agents-to-integrations.sh" --target cursor || true
+      ;;
+    kiro-cli|kiro)
+      echo "-> Synchronizing NC agents for Kiro integration..."
+      bash "$WORKDIR/scripts/sync-nc-agents-to-integrations.sh" --target kiro || true
       ;;
     all)
       echo "-> Synchronizing NC agents for all integrations..."

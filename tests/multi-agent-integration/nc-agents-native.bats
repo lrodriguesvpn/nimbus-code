@@ -24,7 +24,12 @@ PY
   count="$(find "$REPO_ROOT/.github/agents" -maxdepth 1 -name 'nc-*.agent.md' | wc -l | tr -d ' ')"
   [ "$count" -eq 0 ]
   count="$(find "$REPO_ROOT/.claude/agents" -maxdepth 1 -name 'nc-*.md' | wc -l | tr -d ' ')"
-  [ "$count" -eq 15 ]
+  expected_count="$(find "$REPO_ROOT/.github/skills" -maxdepth 1 -type d -name 'nc-*' | wc -l | tr -d ' ')"
+  # Assert against the real source-of-truth count (glob), not a hardcoded
+  # number — a hardcoded expectation here previously drifted silently from
+  # the actual .github/skills/nc-* inventory (see HRN-0006).
+  [ "$count" -eq "$expected_count" ]
+  [ "$expected_count" -ge 15 ]
 }
 
 @test "claude native outputs retain source instructions" {

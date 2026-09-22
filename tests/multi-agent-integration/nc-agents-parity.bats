@@ -210,3 +210,101 @@ print(hashlib.sha256(body.encode('utf-8')).hexdigest())
     [ "$h_gh" = "$h_ag" ]
   done
 }
+
+# ==============================================================================
+# Spec 028: Suporte a Cursor e Kiro como Integrações Agênticas
+# Acceptance Criteria: AC1, AC2, AC3, AC4, AC5, AC6
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 028 AC1: Comandos /speckit-* instalados para Cursor sem afetar outras integrações
+# ------------------------------------------------------------------------------
+@test "test_AC1_cursor_speckit_commands_installed" {
+  for cmd in "${SPECKIT_COMMANDS[@]}"; do
+    [ -f ".cursor/skills/${cmd}/SKILL.md" ]
+  done
+}
+
+# ------------------------------------------------------------------------------
+# 028 AC2: agentes NC-* sincronizados para Cursor (.cursor/skills/nc-<agente>/SKILL.md)
+# com o frontmatter esperado (name/description/compatibility/metadata, sem "tools")
+# ------------------------------------------------------------------------------
+@test "test_AC2_nc_agents_synced_to_cursor" {
+  local discovered_agents
+  discovered_agents=$(find ".github/skills" -maxdepth 1 -type d -name 'nc-*' -exec test -f '{}/SKILL.md' \; -print | xargs -n1 basename | sort)
+  while IFS= read -r agent; do
+    [ -z "$agent" ] && continue
+    local src=".github/skills/${agent}/SKILL.md"
+    local dest=".cursor/skills/${agent}/SKILL.md"
+
+    [ -f "$dest" ]
+    grep -q "^compatibility:" "$dest"
+    grep -q "^metadata:" "$dest"
+    ! grep -q "^tools:" "$dest"
+
+    local src_hash dest_hash
+    src_hash=$(compute_hash "$src")
+    dest_hash=$(compute_hash "$dest")
+    [ "$src_hash" = "$dest_hash" ]
+  done <<< "$discovered_agents"
+}
+
+# ------------------------------------------------------------------------------
+# 028 AC3: Comandos /speckit-* instalados para Kiro (.kiro/prompts/, dot-separado)
+# ------------------------------------------------------------------------------
+@test "test_AC3_kiro_speckit_commands_installed" {
+  for cmd in "${SPECKIT_COMMANDS[@]}"; do
+    local kiro_name="${cmd/-/.}"
+    [ -f ".kiro/prompts/${kiro_name}.md" ]
+  done
+}
+
+# ------------------------------------------------------------------------------
+# 028 AC4: agentes NC-* sincronizados para Kiro via mecanismo nativo Custom
+# agents (.kiro/agents/nc-<agente>.md), NÃO em .kiro/prompts/
+# ------------------------------------------------------------------------------
+@test "test_AC4_nc_agents_synced_to_kiro" {
+  local discovered_agents
+  discovered_agents=$(find ".github/skills" -maxdepth 1 -type d -name 'nc-*' -exec test -f '{}/SKILL.md' \; -print | xargs -n1 basename | sort)
+  while IFS= read -r agent; do
+    [ -z "$agent" ] && continue
+    local src=".github/skills/${agent}/SKILL.md"
+    local dest=".kiro/agents/${agent}.md"
+
+    [ -f "$dest" ]
+    [ ! -f ".kiro/prompts/${agent}.md" ]
+    grep -q "^tools:" "$dest"
+
+    local src_hash dest_hash
+    src_hash=$(compute_hash "$src")
+    dest_hash=$(compute_hash "$dest")
+    [ "$src_hash" = "$dest_hash" ]
+  done <<< "$discovered_agents"
+}
+
+# ------------------------------------------------------------------------------
+# 028 AC5: Gate de paridade cobre os 5 alvos (vscode, claude, antigravity,
+# cursor, kiro) usando a descoberta real de agentes (glob), não uma contagem fixa
+# ------------------------------------------------------------------------------
+@test "test_AC5_nc_agents_parity_gate_five_targets" {
+  run python3 scripts/lib/nc-agent-sync.py check --target all
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"vscode"* ]]
+  [[ "$output" == *"claude"* ]]
+  [[ "$output" == *"antigravity"* ]]
+  [[ "$output" == *"cursor"* ]]
+  [[ "$output" == *"kiro"* ]]
+}
+
+# ------------------------------------------------------------------------------
+# 028 AC6: VS Code continua expondo só o @nimbus após a extensão para 5 alvos
+# (regressão da spec 025) — .github/agents/ nunca ganha arquivos nc-*.agent.md
+# ------------------------------------------------------------------------------
+@test "test_AC6_vscode_single_orchestrator_regression" {
+  run python3 scripts/lib/nc-agent-sync.py check --target vscode
+  [ "$status" -eq 0 ]
+  count="$(find ".github/agents" -maxdepth 1 -name 'nc-*.agent.md' | wc -l | tr -d ' ')"
+  [ "$count" -eq 0 ]
+  [ -f ".github/agents/nimbus.agent.md" ]
+}
+
