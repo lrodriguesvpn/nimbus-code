@@ -3,13 +3,13 @@ name: nc-bug-fix
 description: Nimbus Bug Fix — Aplica a remediação descrita em uma avaliação de bug
   existente e registra o que foi alterado.
 tools:
-- view
-- rg
-- glob
-- bash
-- apply_patch
-- skill:nc-bug-fix
-- skill:speckit-bug-fix
+- Read
+- Grep
+- Glob
+- Bash
+- Edit
+- Write
+- Skill
 ---
 
 ## User Input

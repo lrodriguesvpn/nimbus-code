@@ -3,13 +3,12 @@ name: nc-assess-intake
 description: Nimbus Idea Intake Specialist — Captura e normaliza ideias brutas (texto,
   URLs, tickets, repositórios) em notas de intake de assessment (.specify/assessments/<slug>/intake.md).
 tools:
-- view
-- rg
-- glob
-- bash
-- web_fetch
-- skill:nc-assess-intake
-- skill:speckit-assess-intake
+- Read
+- Grep
+- Glob
+- Bash
+- WebFetch
+- Skill
 ---
 
 ## User Input

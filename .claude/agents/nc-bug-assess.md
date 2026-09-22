@@ -3,13 +3,13 @@ name: nc-bug-assess
 description: Nimbus Bug Triage — Avalia um relato de bug (texto colado, URL ou Issue
   do GHE) contra o código atual, localiza a causa suspeita e propõe remediação.
 tools:
-- view
-- rg
-- glob
-- bash
-- apply_patch
-- skill:nc-bug-assess
-- skill:speckit-bug-assess
+- Read
+- Grep
+- Glob
+- Bash
+- Edit
+- Write
+- Skill
 ---
 
 ## User Input

@@ -4,12 +4,11 @@ description: Nimbus Assessment Decider — Aplica o gate formal de viabilidade (
   Needs Clarification / Kill) e realiza o handoff para o ciclo de especificação formal
   (.specify/assessments/<slug>/decision.md).
 tools:
-- view
-- rg
-- glob
-- bash
-- skill:nc-assess-decide
-- skill:speckit-assess-decide
+- Read
+- Grep
+- Glob
+- Bash
+- Skill
 ---
 
 ## User Input

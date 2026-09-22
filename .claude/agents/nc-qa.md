@@ -3,12 +3,13 @@ name: nc-qa
 description: Nimbus Test Strategist — Constrói a estratégia de testes, gera tasks.md
   ordenadas por dependência com [P] e planeja suítes de validação automatizadas.
 tools:
-- view
-- rg
-- glob
-- bash
-- apply_patch
-- skill:nc-qa
+- Read
+- Grep
+- Glob
+- Bash
+- Edit
+- Write
+- Skill
 ---
 
 ## User Input
