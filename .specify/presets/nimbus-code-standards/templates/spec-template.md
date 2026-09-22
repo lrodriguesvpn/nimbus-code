@@ -83,5 +83,3 @@ rastreabilidade direta com testes de integração. Cada item recebe um ID único
 > - Provider específico é decisão de ambiente, não de template
 
 > *(Adicionar AC-N conforme necessário. Mínimo: 1 critério por feature.)*
-
-{CORE_TEMPLATE}
