@@ -135,11 +135,10 @@ def discover_agents(root: Path) -> tuple[str, ...]:
     skills_dir = root / ".github/skills"
     if not skills_dir.is_dir():
         fail(f"skills source directory missing: {skills_dir}")
-    discovered = sorted(
-        p.name
-        for p in skills_dir.glob("nc-*")
-        if p.is_dir() and (p / "SKILL.md").is_file()
-    )
+    discovered = sorted(p.name for p in skills_dir.glob("nc-*") if p.is_dir())
+    missing = [name for name in discovered if not (skills_dir / name / "SKILL.md").is_file()]
+    if missing:
+        fail(f"source skills missing: {', '.join(missing)}")
     if not discovered:
         fail(f"no nc-* agent skills discovered in {skills_dir}")
     return tuple(discovered)

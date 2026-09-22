@@ -5,6 +5,15 @@ setup() {
   HELPER="$REPO_ROOT/scripts/lib/nc-agent-sync.py"
 }
 
+# Fixture cleanup lives in teardown, never in `trap ... EXIT`: overriding the
+# EXIT trap inside a test hijacks Bats' own reporting, so a failing test
+# vanished from the report ("Executed N instead of expected N+1").
+teardown() {
+  if [ -n "${fixture:-}" ]; then
+    rm -rf "$fixture"
+  fi
+}
+
 @test "claude native projections expose constrained platform metadata" {
   for agent in nc-builder nc-arch nc-qa; do
     [ -f "$REPO_ROOT/.claude/agents/${agent}.md" ]
@@ -48,7 +57,6 @@ setup() {
 
 @test "parity fails when the cursor native body drifts" {
   fixture="$(mktemp -d)"
-  trap 'rm -rf "$fixture"' EXIT
   mkdir -p "$fixture/.nimbus" "$fixture/.github" "$fixture/.cursor"
   cp "$REPO_ROOT/.nimbus/agent-manifest.yaml" "$fixture/.nimbus/"
   cp -R "$REPO_ROOT/.github/skills" "$fixture/.github/"
@@ -62,7 +70,6 @@ setup() {
 
 @test "parity fails when the kiro native body drifts" {
   fixture="$(mktemp -d)"
-  trap 'rm -rf "$fixture"' EXIT
   mkdir -p "$fixture/.nimbus" "$fixture/.github" "$fixture/.kiro"
   cp "$REPO_ROOT/.nimbus/agent-manifest.yaml" "$fixture/.nimbus/"
   cp -R "$REPO_ROOT/.github/skills" "$fixture/.github/"
@@ -76,7 +83,6 @@ setup() {
 
 @test "parity fails when the claude native body drifts" {
   fixture="$(mktemp -d)"
-  trap 'rm -rf "$fixture"' EXIT
   mkdir -p "$fixture/.nimbus" "$fixture/.github" "$fixture/.claude/skills" "$fixture/scripts/lib/templates"
   cp "$REPO_ROOT/.nimbus/agent-manifest.yaml" "$fixture/.nimbus/"
   cp -R "$REPO_ROOT/.github/skills" "$fixture/.github/"
@@ -92,7 +98,6 @@ setup() {
 
 @test "parity fails when the nimbus orchestrator body drifts" {
   fixture="$(mktemp -d)"
-  trap 'rm -rf "$fixture"' EXIT
   mkdir -p "$fixture/.nimbus" "$fixture/.github/agents" "$fixture/scripts/lib/templates"
   cp "$REPO_ROOT/.nimbus/agent-manifest.yaml" "$fixture/.nimbus/"
   cp -R "$REPO_ROOT/.github/skills" "$fixture/.github/"
@@ -129,7 +134,6 @@ setup() {
   printf '\nDRIFT\n' >> "$fixture/.claude/skills/nimbus/SKILL.md"
 
   run python3 "$HELPER" --repo-root "$fixture" check --target claude
-  rm -rf "$fixture"
   [ "$status" -ne 0 ]
   [[ "$output" == *"functional drift for nimbus in claude"* ]]
 }
