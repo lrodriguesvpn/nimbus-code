@@ -297,3 +297,63 @@ entries:
     similar_contexts:
       - dev-platform
       - spec-kit-workflow
+
+  - id: HRN-0008
+    date: 2026-09-22
+    complexity: S3
+    bounded_context: spec-kit-workflow
+    error_pattern: >
+      Spec 028 estendeu scripts/lib/nc-agent-sync.py e
+      scripts/sync-nc-agents-to-integrations.sh com os alvos "cursor" e
+      "kiro", validou tudo dentro deste repositório-template, mas nunca
+      atualizou bootstrap.sh — o script que repositórios satélite usam para
+      instalar/atualizar o bundle. O `case "$INTEGRATION"` que decide qual
+      alvo de sync de agentes NC-* disparar continuou cobrindo apenas
+      claude/antigravity/all; cursor-agent e kiro-cli caíam silenciosamente
+      em nenhum case (`esac` sem `*)`), sem erro, sem log — nenhum satélite
+      configurado com essas integrações jamais receberia os agentes NC-* nem
+      os 10 comandos /speckit-* proprietários, mesmo após bootstrap ou
+      refresh gerenciado.
+    root_cause: >
+      A validação da spec 028 ficou inteiramente dentro do repositório-
+      template (testes bats + instalação manual local), sem exercitar o
+      caminho real de propagação para consumidores (bootstrap.sh apply/
+      --refresh-preset). O `case` de bootstrap.sh é uma segunda tradução
+      (chave real do `specify` CLI → alvo interno do gerador) que não é
+      coberta por nenhum teste de paridade existente, então a extensão para
+      2 alvos novos não "quebrou" nenhum teste — apenas deixou de propagar.
+    impact: >
+      Detectado antes de qualquer satélite real adotar Cursor/Kiro (achado
+      do próprio usuário revisando o PR, não de um incidente em produção),
+      mas representa exatamente o tipo de drift silencioso que só apareceria
+      quando um time real tentasse usar a integração nova e notasse a
+      ausência dos agentes institucionais dias/semanas depois.
+    fix_applied: >
+      bootstrap.sh: adicionados os casos `cursor-agent|cursor)` e
+      `kiro-cli|kiro)` ao dispatch de sync-nc-agents-to-integrations.sh
+      (mapeando as chaves reais do catálogo `specify integration list` para
+      os alvos internos do gerador); texto de uso (`--integration`)
+      atualizado para não sugerir uma lista desatualizada e incompleta.
+      Novo teste de regressão (`bootstrap-nc-agent-sync-coverage.bats`)
+      extrai dinamicamente `TARGETS` de nc-agent-sync.py e falha se
+      bootstrap.sh não tiver `--target <alvo>` para cada um — protege contra
+      a mesma lacuna se um 6º alvo for adicionado no futuro.
+    prevention: >
+      Toda vez que um novo alvo/integração for adicionado ao gerador de
+      agentes NC-* (TARGETS em nc-agent-sync.py), tratar bootstrap.sh como
+      parte OBRIGATÓRIA do escopo da mesma feature — é o único caminho real
+      de propagação para repositórios satélite, não apenas um "detalhe de
+      infra" a revisar depois. Antes de fechar uma feature de integração
+      multi-agente, rodar (ou pelo menos ler) o `case "$INTEGRATION"` de
+      bootstrap.sh e confirmar que o novo alvo está representado — não
+      confiar apenas em testes que rodam dentro do próprio template.
+    tags:
+      - satellite-propagation-gap
+      - bootstrap-integration-dispatch
+      - multi-agent-integration
+      - spec-028
+      - silent-drift
+    source_pr: ""
+    similar_contexts:
+      - dev-platform
+      - spec-kit-workflow
