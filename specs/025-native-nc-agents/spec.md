@@ -3,6 +3,29 @@
   agentes nativos, preservando compatibilidade durante a transicao.
 -->
 
+> **Reaberta em 2026-09-22.** A spec foi dada como entregue (27/27 tasks),
+> mas a validação foi só estrutural: arquivos existiam e o hash do corpo batia
+> com a fonte. Nenhuma task iniciou de fato um agente em cada IDE agêntica.
+> Defeitos encontrados na reabertura:
+>
+> 1. **Claude Code**: os 18 `.claude/agents/nc-*.md` declaravam ferramentas com
+>    nomes do Copilot (`view`, `rg`, `apply_patch`, `skill:*`). O Claude recusa
+>    iniciar o subagente ("would be spawned with zero tools"). Corrigido na
+>    reabertura (ADL-025-05).
+> 2. **Kiro**: mesmos nomes do Copilot em `.kiro/agents/nc-*.md`. Pela
+>    documentação e pela issue kirodotdev/Kiro#11411, a IDE descarta o agente
+>    inteiro sem aviso. Pendente (T032).
+> 3. **Orquestrador `nimbus`**: existia só para VS Code. Claude passa a ter a
+>    skill `/nimbus`; Antigravity, Cursor e Kiro seguem sem orquestrador.
+> 4. **Skill de terceiros `typesafe-ai`** (ADR 0010): presente só em Claude e
+>    Antigravity, porque foi instalada com `npx skills add` (grava em
+>    `.agents/skills/` e cria symlink em `.claude/skills/`) e não passa pela
+>    fonte `.github/skills/` que alimenta o sync. Copilot, a ferramenta oficial,
+>    não a recebe. Pendente de decisão (T037).
+>
+> Critérios de aceitação adicionais da reabertura: **AC-7** a **AC-9** abaixo.
+> Tarefas: `tasks.md`, Phase 7.
+
 ## Nimbus-Code — Cabecalho Obrigatorio da Spec
 
 | Campo | Valor |
@@ -91,6 +114,29 @@ de descontinuacao.
 > **Then** graph, impact-map, ADL, gates de seguranca e estrategia de rollback
 > estao preenchidos antes da implementacao.
 > **Test ref:** `test_AC6_governance_artifacts_complete`
+
+> **AC-7** *(reabertura)*
+> **Given** um agente NC-* gerado para uma plataforma
+> **When** o gate de paridade roda
+> **Then** ele falha se algum nome de ferramenta não for reconhecido pela
+> plataforma de destino, e não apenas quando diverge do manifesto.
+> **Test ref:** `claude native agents only declare tool names Claude Code recognizes`
+
+> **AC-8** *(reabertura)*
+> **Given** cada IDE agêntica suportada (VS Code/Copilot, Claude Code,
+> Antigravity, Cursor, Kiro)
+> **When** a entrega for declarada concluída
+> **Then** existe evidência registrada de um teste real em cada uma: o
+> orquestrador ou um agente NC-* foi iniciado, listou suas ferramentas e leu
+> um arquivo do repositório.
+> **Test ref:** `specs/025-native-nc-agents/ide-validation-matrix.md` (evidência humana)
+
+> **AC-9** *(reabertura)*
+> **Given** uma skill de terceiros aprovada por ADR (ex.: `typesafe-ai`)
+> **When** o sync de integrações roda
+> **Then** ela está presente em todas as IDEs suportadas, ou a exclusão de
+> cada IDE está documentada com o motivo.
+> **Test ref:** a definir em T037
 
 ## User Scenarios & Testing
 

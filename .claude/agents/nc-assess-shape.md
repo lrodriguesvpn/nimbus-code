@@ -3,12 +3,11 @@ name: nc-assess-shape
 description: Nimbus Concept Shaper — Modela opções de solução conceitual, escopo,
   apetite de esforço e trade-offs (.specify/assessments/<slug>/concept.md).
 tools:
-- view
-- rg
-- glob
-- bash
-- skill:nc-assess-shape
-- skill:speckit-assess-shape
+- Read
+- Grep
+- Glob
+- Bash
+- Skill
 ---
 
 ## User Input

@@ -3,12 +3,13 @@ name: nc-shield
 description: Nimbus DevSecOps Guardian — Audita e impõe os 6 controles Não-Negociáveis
   de segurança, TLS, segredos em cofre, backup/DR e gates DevSecOps.
 tools:
-- view
-- rg
-- glob
-- bash
-- apply_patch
-- skill:nc-shield
+- Read
+- Grep
+- Glob
+- Bash
+- Edit
+- Write
+- Skill
 ---
 
 ## User Input

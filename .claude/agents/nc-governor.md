@@ -3,13 +3,13 @@ name: nc-governor
 description: Nimbus Governance Gate — Gerencia o versionamento da spec, integridade
   criptográfica SHA-256, classificação S0–S4 e gates de aprovação RACI.
 tools:
-- view
-- rg
-- glob
-- bash
-- sql
-- apply_patch
-- skill:nc-governor
+- Read
+- Grep
+- Glob
+- Bash
+- Edit
+- Write
+- Skill
 ---
 
 ## User Input

@@ -167,3 +167,15 @@ relevante ao artefato entregue pela tarefa.*
 - [ ] Build multi-stage, quando aplicável (Docker)
 - [ ] Testado localmente ou via `plan`/dry-run antes do merge
 - [ ] Documentação/README do módulo ou serviço atualizada, se o contrato mudou
+
+## Nimbus-Code — Fechamento da Execução Agêntica
+
+*Preencher no encerramento da feature/tarefa para consolidar custo de execução,
+qualidade final, retrabalho e esforço humano do ciclo híbrido.*
+
+- [ ] Tokens consumidos registrados (`input + output`) e vinculados ao artefato entregue
+- [ ] Tempo total da execução registrado (início, fim e duração em minutos)
+- [ ] Horas humanas registradas no campo apropriado do GitHub Project ou artefato equivalente
+- [ ] Qualidade final resumida com status (`passed`, `passed_with_conditions` ou `failed`) e evidências
+- [ ] Retrabalho ocorrido documentado com percentual aproximado e causa resumida
+- [ ] Handoff final preenchido em `.nimbus/contracts/delivery-handoff.contract.yaml` ou contrato equivalente

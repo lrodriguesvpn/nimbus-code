@@ -4,12 +4,13 @@ description: Nimbus Interface Designer — Aplica julgamento estético de UI/UX 
   padrão (evita clichês de 'AI slop'), audita interfaces existentes e gera diretrizes
   de design distintivas para o produto.
 tools:
-- view
-- rg
-- glob
-- bash
-- apply_patch
-- skill:nc-designer
+- Read
+- Grep
+- Glob
+- Bash
+- Edit
+- Write
+- Skill
 ---
 
 ## User Input
