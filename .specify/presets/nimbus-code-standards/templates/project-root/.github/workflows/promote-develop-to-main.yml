@@ -46,25 +46,38 @@ jobs:
 
             let pr = openPRs[0];
             if (!pr) {
-              pr = (await github.rest.pulls.create({
-                owner,
-                repo,
-                base,
-                head,
-                title,
-                body,
-                maintainer_can_modify: true,
-              })).data;
-              core.info(`Created PR #${pr.number}`);
+              try {
+                pr = (await github.rest.pulls.create({
+                  owner,
+                  repo,
+                  base,
+                  head,
+                  title,
+                  body,
+                  maintainer_can_modify: true,
+                })).data;
+                core.info(`Created PR #${pr.number}`);
+              } catch (error) {
+                core.warning(`Could not create PR: ${error.message}. Ensure "Allow GitHub Actions to create and approve pull requests" is enabled in repository/org settings.`);
+              }
             } else {
-              await github.rest.pulls.update({
-                owner,
-                repo,
-                pull_number: pr.number,
-                title,
-                body,
-              });
-              core.info(`Updated existing PR #${pr.number}`);
+              try {
+                await github.rest.pulls.update({
+                  owner,
+                  repo,
+                  pull_number: pr.number,
+                  title,
+                  body,
+                });
+                core.info(`Updated existing PR #${pr.number}`);
+              } catch (error) {
+                core.warning(`Could not update PR #${pr.number}: ${error.message}`);
+              }
+            }
+
+            if (!pr) {
+              core.warning("No PR available — skipping labels and reviewer requests.");
+              return;
             }
 
             const labels = ["release:pending", "agent:needs-human"];

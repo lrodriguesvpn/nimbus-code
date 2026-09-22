@@ -108,10 +108,9 @@ jobs:
             ### O que fazer
 
             1. Identifique (ou crie) a feature em \`specs/<feature-slug>/\`.
-            2. Gere-os com \`/nimbus-code-plan\` (o preset \`nimbus-code-standards\`
-               já inclui os templates de \`graph.yaml\`/\`graph.md\`) ou baixe os
-               templates diretamente de
-               [\`nimbus-code-spec-kit-template\`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/tree/main/presets/nimbus-code-standards/templates/feature-artifacts).
+            2. Copie os templates de:
+               - \`presets/nimbus-code-standards/templates/feature-artifacts/graph.yaml\`
+               - \`presets/nimbus-code-standards/templates/feature-artifacts/graph.md\`
             3. Preencha com os módulos e dependências reais desta PR.
             4. Para complexidade **S3 ou S4**, crie também \`impact-map.md\` no mesmo diretório.
             5. Commit os arquivos nesta mesma PR e faça push.

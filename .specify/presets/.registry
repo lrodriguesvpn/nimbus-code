@@ -2,9 +2,9 @@
   "schema_version": "1.0",
   "presets": {
     "nimbus-code-standards": {
-      "version": "1.21.0",
+      "version": "1.22.0",
       "source": "local",
-      "manifest_hash": "sha256:baff266ee7d980d68d392e379a9e38008f1d122cc6c7716cd3b19963ec28225b",
+      "manifest_hash": "sha256:be9cb3e86a1e03973c8b81a8c63776cfd01e546386f2c5bca82bf0934bd6e8d9",
       "enabled": true,
       "priority": 5,
       "registered_commands": {},

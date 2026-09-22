@@ -120,6 +120,10 @@ declare -a LABELS=(
   "status:needs-triage|ededed|Issue nova, ainda sem priority:*/complexity:* definidos — não deve ser puxada por agente autônomo"
   "status:blocked|5319e7|Bloqueada por dependência externa — pular na fila mesmo com priority:P0-blocker"
 
+  # Sincronização automática de preset — aplicada aos PRs criados pela
+  # auditoria semanal de satélites para facilitar filtro/revisão.
+  "sync:preset-version|1d76db|PR de sincronização automática do preset Nimbus Code gerado pela auditoria semanal"
+
   # Release — classificação de impacto de versão para fluxo semi-automático
   # de publicação de preset/bundle/workflow.
   "release:major|b60205|Mudança incompatível (breaking change) — sugere bump MAJOR"
