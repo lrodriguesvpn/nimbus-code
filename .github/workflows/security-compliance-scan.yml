@@ -2,15 +2,30 @@ name: Varredura semanal de conformidade de segurança
 
 # Varre periodicamente os repositórios da organização (escopo piloto ou
 # org-wide, conforme o flag de rollout) em busca de não conformidades com o
-# baseline de segurança documentado em docs/security-baseline-ghe.md (branch
-# protection, revisão obrigatória de PR, permissões de GitHub Actions e
-# existência de secrets configurados). NUNCA corrige nada automaticamente —
+# baseline de segurança documentado em docs/security-baseline-ghe.md. NUNCA
+# corrige nada automaticamente —
 # apenas detecta e reporta, criando/atualizando Issues idempotentes por
 # repositório (ver specs/007-controle-seguranca-ghe-projetos-plataforma/
 # contracts/finding-schema.md e contracts/weekly-scan-workflow-contract.md).
 #
-# Esta versão cobre os controles de repositório, a governança do Projeto
-# Plataforma (Project V2 consolidado) e a consolidação do relatório mensal.
+# Controles de repositório avaliados (issue #450 — ver seção 5 do baseline):
+#   branch-protection-default, branch-protection-required-patterns,
+#   rulesets-configured, required-review, required-pr-checks,
+#   required-test-checks, required-coverage-check, codeql-enabled,
+#   codeql-recent, codeql-alerts, dependabot-alerts-enabled,
+#   dependabot-security-updates-enabled, dependency-review-enabled,
+#   secret-scanning-enabled, secret-scanning-push-protection-enabled,
+#   secret-alerts, actions-permissions, secrets-configured
+# + governança do Projeto Plataforma (platform-project-access) e relatório
+# mensal consolidado. Branches, padrões protegidos e checks esperados vêm de
+# .github/security-governance.json de cada repositório (fallback: o arquivo
+# deste repositório, SECURITY_SCAN_GOVERNANCE_CONFIG).
+#
+# Permissões do GitHub App (todas READ-ONLY — ver ADR-0008): Metadata,
+# Administration, Contents, Secrets, Code scanning alerts, Dependabot alerts,
+# Secret scanning alerts; na organização, Projects. Nenhuma permissão de
+# escrita em configurações de segurança. Issues: write é exigido apenas no
+# repositório que hospeda os relatórios (issues de não conformidade).
 #
 # Pré-requisitos (3 secrets — GitHub App dedicado, ver ADR-0008):
 #   - SECURITY_SCAN_APP_ID
@@ -54,6 +69,12 @@ permissions:
 jobs:
   scan:
     runs-on: ubuntu-latest
+    # O GitHub App da varredura é somente leitura. A escrita de issues de não
+    # conformidade/relatório mensal acontece APENAS no repositório que hospeda
+    # este workflow, com o GITHUB_TOKEN efêmero do job (issues: write).
+    permissions:
+      contents: read
+      issues: write
     steps:
       - name: Verificar secrets obrigatórios
         run: |
@@ -71,7 +92,9 @@ jobs:
           fi
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
 
       - name: Rodar varredura de conformidade de segurança
         env:
@@ -80,6 +103,9 @@ jobs:
           SECURITY_SCAN_APP_PRIVATE_KEY: ${{ secrets.SECURITY_SCAN_APP_PRIVATE_KEY }}
           SECURITY_SCAN_APP_INSTALLATION_ID: ${{ secrets.SECURITY_SCAN_APP_INSTALLATION_ID }}
           GITHUB_REPOSITORY: ${{ github.repository }}
+          SECURITY_SCAN_GOVERNANCE_CONFIG: .github/security-governance.json
+          SECURITY_SCAN_ISSUES_TOKEN: ${{ github.token }}
+          SECURITY_SCAN_ISSUE_TARGET: report-repository
           SCOPE_INPUT: ${{ github.event.inputs.scope }}
           DRY_RUN_INPUT: ${{ github.event.inputs.dry_run }}
         run: |
