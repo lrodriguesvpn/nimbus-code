@@ -62,6 +62,10 @@ ORCHESTRATOR_PLATFORM_TEXT = {
         ENTRYPOINT_PLACEHOLDER: "**`/nimbus`**, ponto único de entrada do esquadrão Nimbus Code no Claude\nCode",
         RUNTIME_PLACEHOLDER: "sessão interativa no Claude Code; delegue via skill `/nc-*` na\n  conversa principal ou via subagente `nc-*` para tarefas isoladas",
     },
+    "antigravity": {
+        ENTRYPOINT_PLACEHOLDER: "**`/nimbus`** (ou alias **`/nc-nimbus`**), ponto único de entrada do esquadrão Nimbus Code no Antigravity",
+        RUNTIME_PLACEHOLDER: "sessão interativa no Antigravity ou CLI local compatível",
+    },
 }
 
 # The manifest `tool_allowlist` uses GitHub Copilot tool names. Claude Code
