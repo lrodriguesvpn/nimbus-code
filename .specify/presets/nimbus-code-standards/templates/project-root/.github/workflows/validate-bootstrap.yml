@@ -1,0 +1,47 @@
+name: Validate Bootstrap & Preset Version
+
+on:
+  pull_request:
+    paths:
+      - '.specify/**'
+      - 'presets/nimbus-code-standards/preset.yml'
+      - 'bootstrap.sh'
+      - '.github/workflows/validate-bootstrap.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate-bootstrap:
+    name: Detect Preset Version Mismatches
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run preset version detection
+        id: detect
+        env:
+          NIMBUS_PRESET_VERSION: ${{ vars.NIMBUS_PRESET_VERSION }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          detector=".specify/scripts/bash/detect-preset-version-mismatch.sh"
+          if [[ ! -f "$detector" ]]; then
+            echo "::error::Preset detector missing; validation cannot be skipped."
+            exit 2
+          fi
+          status=0
+          bash "$detector" --json > preset-validation.json || status=$?
+          cat preset-validation.json
+          if ! jq -se --argjson code "$status" \
+            'length == 1 and (.[0] |
+             ($code == 0 and .status == "in_sync") or
+             ($code == 1 and .status == "mismatch") or
+             ($code == 2 and .status == "error"))' preset-validation.json >/dev/null; then
+            echo "::error::Invalid detector JSON/exit-status contract."
+            exit 2
+          fi
+          cat preset-validation.json >> "$GITHUB_STEP_SUMMARY"
+          if [[ "$status" != 0 ]]; then
+            echo "::error::Preset validation failed. Review the report and refresh from an approved bundle checkout."
+            exit "$status"
+          fi
