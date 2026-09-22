@@ -4,8 +4,10 @@ set -euo pipefail
 # ==============================================================================
 # Script: scripts/sync-nc-agents-to-integrations.sh
 # Purpose: Synchronize NC-* agent skills from .github/skills/ (single source of
-#          truth) to .claude/skills/ and .agents/skills/ with integration-specific
-#          post-processing (Claude argument-hint/flags; Antigravity hook note).
+#          truth) to .claude/skills/, .agents/skills/, .cursor/skills/ and
+#          .kiro/prompts/ with integration-specific post-processing (Claude
+#          argument-hint/flags; Antigravity/Cursor hook note; Kiro CLI
+#          dot-named single-file prompts with minimal frontmatter).
 # Spec: specs/024-multi-agent-integration-claude-antigravity/
 # Contract: specs/024-multi-agent-integration-claude-antigravity/contracts/nc-agent-sync.contract.md
 # ==============================================================================
@@ -46,6 +48,8 @@ EXTRA_SPECKIT_SKILLS=(
 SOURCE_DIR=".github/skills"
 CLAUDE_DIR=".claude/skills"
 AGY_DIR=".agents/skills"
+CURSOR_DIR=".cursor/skills"
+KIRO_DIR=".kiro/prompts"
 
 print_help() {
   cat <<EOF
@@ -54,8 +58,8 @@ Usage: $(basename "$0") [OPTIONS]
 Synchronizes the ${#EXPECTED_AGENTS[@]} NC-* agents from ${SOURCE_DIR}/ to other integrations.
 
 Options:
-  --target <claude|antigravity|agy|all>   Target integration (default: all)
-  --help                                  Show this help message and exit
+  --target <claude|antigravity|agy|cursor|kiro|all>   Target integration (default: all)
+  --help                                              Show this help message and exit
 EOF
 }
 
@@ -65,7 +69,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --target)
       if [[ $# -lt 2 ]]; then
-        echo "Error: --target requires an argument (claude, antigravity, agy, or all)" >&2
+        echo "Error: --target requires an argument (claude, antigravity, agy, cursor, kiro, or all)" >&2
         exit 1
       fi
       TARGET="$2"
@@ -87,8 +91,8 @@ if [[ "$TARGET" == "agy" ]]; then
   TARGET="antigravity"
 fi
 
-if [[ "$TARGET" != "claude" && "$TARGET" != "antigravity" && "$TARGET" != "all" ]]; then
-  echo "Error: Invalid target '$TARGET'. Must be one of: claude, antigravity, agy, all" >&2
+if [[ "$TARGET" != "claude" && "$TARGET" != "antigravity" && "$TARGET" != "cursor" && "$TARGET" != "kiro" && "$TARGET" != "all" ]]; then
+  echo "Error: Invalid target '$TARGET'. Must be one of: claude, antigravity, agy, cursor, kiro, all" >&2
   exit 1
 fi
 
@@ -253,6 +257,66 @@ open(dest, 'w', encoding='utf-8').write(content)
 " "$agent_name" "$src_file" "$dest_file"
 }
 
+# Cursor uses the same skills layout and hook-note requirement as Antigravity
+# (hyphenated command names, so hook command dots must be converted to
+# hyphens when invoked). Reuse the same post-processing logic.
+process_for_cursor() {
+  process_for_antigravity "$@"
+}
+
+# Compute the Kiro CLI prompt filename for a given source skill name.
+# Kiro's own upstream speckit templates convert the first hyphen after the
+# namespace prefix into a dot (e.g. speckit-plan -> speckit.plan.md,
+# speckit-taskstoissues -> speckit.taskstoissues.md). Apply the same rule to
+# our nc-* and custom speckit-* names (e.g. nc-builder -> nc.builder.md,
+# speckit-assess-shape -> speckit.assess-shape.md).
+kiro_prompt_filename() {
+  local name="$1"
+  python3 -c "
+import sys
+name = sys.argv[1]
+prefix, sep, rest = name.partition('-')
+print((prefix + '.' + rest) if sep else name)
+" "$name"
+}
+
+# T0xx: Post-processing for Kiro CLI
+# Kiro prompts are single .md files (no SKILL.md directory) with a minimal
+# frontmatter: only 'description' (no name/argument-hint/compatibility/
+# metadata/handoffs, since those are not part of the Kiro contract and we
+# have no source data to synthesize handoffs). Kiro uses dots natively in
+# command names, so no hook dot-to-hyphen note is required.
+process_for_kiro() {
+  local agent_name="$1"
+  local src_file="$2"
+  local dest_file="$3"
+
+  mkdir -p "$(dirname "$dest_file")"
+
+  python3 -c "
+import sys, yaml
+
+src = sys.argv[1]
+dest = sys.argv[2]
+
+content = open(src, 'r', encoding='utf-8').read()
+parts = content.split('---', 2)
+if len(parts) >= 3:
+    frontmatter, body = parts[1], parts[2]
+else:
+    frontmatter, body = '', content
+
+data = yaml.safe_load(frontmatter) or {}
+description = str(data.get('description', '')).strip()
+
+# yaml.dump handles quoting/escaping correctly regardless of length or
+# special characters, unlike a hand-rolled regex-based extraction.
+front_yaml = yaml.safe_dump({'description': description}, allow_unicode=True, default_flow_style=False, sort_keys=False)
+out = f'---\n{front_yaml}---{body}'
+open(dest, 'w', encoding='utf-8').write(out)
+" "$src_file" "$dest_file"
+}
+
 # Custom /speckit-* commands must also exist in the source of truth.
 validate_extra_speckit_source() {
   for skill in "${EXTRA_SPECKIT_SKILLS[@]}"; do
@@ -301,4 +365,42 @@ if [[ "$TARGET" == "antigravity" || "$TARGET" == "all" ]]; then
     process_for_antigravity "$skill" "$src" "$dest"
   done
   echo "✅ ${#EXTRA_SPECKIT_SKILLS[@]} comandos speckit customizados sincronizados para Antigravity."
+fi
+
+if [[ "$TARGET" == "cursor" || "$TARGET" == "all" ]]; then
+  echo "==> Sincronizando agentes para Cursor (${CURSOR_DIR}/)..."
+  for agent in "${EXPECTED_AGENTS[@]}"; do
+    src="${SOURCE_DIR}/${agent}/SKILL.md"
+    dest="${CURSOR_DIR}/${agent}/SKILL.md"
+    process_for_cursor "$agent" "$src" "$dest"
+  done
+  echo "✅ ${#EXPECTED_AGENTS[@]} agentes sincronizados para Cursor."
+
+  echo "==> Sincronizando comandos /speckit-* customizados para Cursor (${CURSOR_DIR}/)..."
+  for skill in "${EXTRA_SPECKIT_SKILLS[@]}"; do
+    src="${SOURCE_DIR}/${skill}/SKILL.md"
+    dest="${CURSOR_DIR}/${skill}/SKILL.md"
+    process_for_cursor "$skill" "$src" "$dest"
+  done
+  echo "✅ ${#EXTRA_SPECKIT_SKILLS[@]} comandos speckit customizados sincronizados para Cursor."
+fi
+
+if [[ "$TARGET" == "kiro" || "$TARGET" == "all" ]]; then
+  echo "==> Sincronizando agentes para Kiro CLI (${KIRO_DIR}/)..."
+  for agent in "${EXPECTED_AGENTS[@]}"; do
+    src="${SOURCE_DIR}/${agent}/SKILL.md"
+    filename="$(kiro_prompt_filename "$agent")"
+    dest="${KIRO_DIR}/${filename}.md"
+    process_for_kiro "$agent" "$src" "$dest"
+  done
+  echo "✅ ${#EXPECTED_AGENTS[@]} agentes sincronizados para Kiro CLI."
+
+  echo "==> Sincronizando comandos /speckit-* customizados para Kiro CLI (${KIRO_DIR}/)..."
+  for skill in "${EXTRA_SPECKIT_SKILLS[@]}"; do
+    src="${SOURCE_DIR}/${skill}/SKILL.md"
+    filename="$(kiro_prompt_filename "$skill")"
+    dest="${KIRO_DIR}/${filename}.md"
+    process_for_kiro "$skill" "$src" "$dest"
+  done
+  echo "✅ ${#EXTRA_SPECKIT_SKILLS[@]} comandos speckit customizados sincronizados para Kiro CLI."
 fi

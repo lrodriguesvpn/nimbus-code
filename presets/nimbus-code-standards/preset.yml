@@ -3,7 +3,7 @@ schema_version: "1.0"
 preset:
   id: "nimbus-code-standards"
   name: "Nimbus-Code — Padrões de Governança"
-  version: "1.21.1"
+  version: "1.22.0"
   description: "Constituição base, grafos de módulos obrigatórios (incluindo grafo de contexto multi-repo para brownfield), escala S0–S4 com estimativa de tokens e ajuste por projeto, catálogo de reuso de conteúdo para reduzir custo de tokens, SLO Gate, estratégia de release, ADRs, taxonomia de labels de priorização/desenvolvimento autônomo/DORA, modelo híbrido humano+agente, framework DevSecOps, regras de isolamento de sessões de agente (1 agente por arquivo, fases, limpeza de branches perdidas), rastreamento de custo financeiro real (tokens × preço) por fase SDD, modelo de entrevista de descoberta (negócio/infraestrutura/segurança/LGPD) mesclado com o padrão de entrevista de Product Owner (critérios de aceite validados e análise de quebra de demanda), detecção determinística de retrabalho via histórico git (retro-signal), e manual operacional de uso de agentes remotos da Nimbus-Code, aplicados sobre os templates nativos do Nimbus Code."
   author: "Nimbus-Code"
   repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
