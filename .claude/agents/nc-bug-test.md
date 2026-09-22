@@ -3,13 +3,13 @@ name: nc-bug-test
 description: Nimbus Bug Verification — Valida que um bug previamente corrigido foi
   de fato resolvido e registra o relatório de verificação.
 tools:
-- view
-- rg
-- glob
-- bash
-- apply_patch
-- skill:nc-bug-test
-- skill:speckit-bug-test
+- Read
+- Grep
+- Glob
+- Bash
+- Edit
+- Write
+- Skill
 ---
 
 ## User Input

@@ -3,12 +3,11 @@ name: nc-assess-define
 description: Nimbus Problem Definer — Converte a ideia e evidências em uma definição
   formal do problema, público impactado, dores e metas mensuráveis (.specify/assessments/<slug>/problem.md).
 tools:
-- view
-- rg
-- glob
-- bash
-- skill:nc-assess-define
-- skill:speckit-assess-define
+- Read
+- Grep
+- Glob
+- Bash
+- Skill
 ---
 
 ## User Input

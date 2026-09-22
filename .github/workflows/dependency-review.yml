@@ -18,9 +18,11 @@ permissions:
   pull-requests: write
 
 jobs:
-  dependency-review:
-    name: Dependency Review — CVE High/Critical
+  detect-dependency-review-support:
+    name: Detectar suporte a Dependency Review
     runs-on: ubuntu-latest
+    outputs:
+      supported: ${{ steps.support.outputs.supported }}
 
     steps:
       - name: Verificar suporte a Dependency Review
@@ -68,12 +70,17 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
           echo "::notice::Dependency Review ignorado: ${MESSAGE} (HTTP ${HTTP_CODE})."
 
+  dependency-review:
+    name: Dependency Review — CVE High/Critical
+    runs-on: ubuntu-latest
+    needs: detect-dependency-review-support
+    if: needs.detect-dependency-review-support.outputs.supported == 'true'
+
+    steps:
       - name: Checkout
-        if: steps.support.outputs.supported == 'true'
         uses: actions/checkout@v4
 
       - name: Dependency Review
-        if: steps.support.outputs.supported == 'true'
         uses: actions/dependency-review-action@v4
         with:
           # Bloqueia dependências com severidade High ou Critical

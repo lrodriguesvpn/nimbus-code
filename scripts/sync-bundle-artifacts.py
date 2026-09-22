@@ -58,7 +58,7 @@ def preserve(relative):
     return (
         relative in (
             ".github/copilot-instructions.md", "docs/bounded-contexts.yaml",
-            ".specify/cost/cost-config.yml",
+            ".specify/cost/cost-config.yml", ".vscode/settings.json",
         )
         or relative.endswith("-catalog.yaml")
         or "/overrides/" in relative

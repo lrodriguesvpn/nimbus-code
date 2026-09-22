@@ -5,6 +5,15 @@ setup() {
   HELPER="$REPO_ROOT/scripts/lib/nc-agent-sync.py"
 }
 
+# Fixture cleanup lives in teardown, never in `trap ... EXIT`: overriding the
+# EXIT trap inside a test hijacks Bats' own reporting, so a failing test
+# vanished from the report ("Executed N instead of expected N+1").
+teardown() {
+  if [ -n "${fixture:-}" ]; then
+    rm -rf "$fixture"
+  fi
+}
+
 @test "claude native projections expose constrained platform metadata" {
   for agent in nc-builder nc-arch nc-qa; do
     [ -f "$REPO_ROOT/.claude/agents/${agent}.md" ]
@@ -48,7 +57,6 @@ setup() {
 
 @test "parity fails when the cursor native body drifts" {
   fixture="$(mktemp -d)"
-  trap 'rm -rf "$fixture"' EXIT
   mkdir -p "$fixture/.nimbus" "$fixture/.github" "$fixture/.cursor"
   cp "$REPO_ROOT/.nimbus/agent-manifest.yaml" "$fixture/.nimbus/"
   cp -R "$REPO_ROOT/.github/skills" "$fixture/.github/"
@@ -62,7 +70,6 @@ setup() {
 
 @test "parity fails when the kiro native body drifts" {
   fixture="$(mktemp -d)"
-  trap 'rm -rf "$fixture"' EXIT
   mkdir -p "$fixture/.nimbus" "$fixture/.github" "$fixture/.kiro"
   cp "$REPO_ROOT/.nimbus/agent-manifest.yaml" "$fixture/.nimbus/"
   cp -R "$REPO_ROOT/.github/skills" "$fixture/.github/"
@@ -76,11 +83,12 @@ setup() {
 
 @test "parity fails when the claude native body drifts" {
   fixture="$(mktemp -d)"
-  trap 'rm -rf "$fixture"' EXIT
-  mkdir -p "$fixture/.nimbus" "$fixture/.github" "$fixture/.claude"
+  mkdir -p "$fixture/.nimbus" "$fixture/.github" "$fixture/.claude/skills" "$fixture/scripts/lib/templates"
   cp "$REPO_ROOT/.nimbus/agent-manifest.yaml" "$fixture/.nimbus/"
   cp -R "$REPO_ROOT/.github/skills" "$fixture/.github/"
   cp -R "$REPO_ROOT/.claude/agents" "$fixture/.claude/"
+  cp -R "$REPO_ROOT/.claude/skills/nimbus" "$fixture/.claude/skills/"
+  cp "$REPO_ROOT/scripts/lib/templates/nimbus-agent.template.md" "$fixture/scripts/lib/templates/"
   printf '\nDRIFT\n' >> "$fixture/.claude/agents/nc-builder.md"
 
   run python3 "$HELPER" --repo-root "$fixture" check --target claude
@@ -90,7 +98,6 @@ setup() {
 
 @test "parity fails when the nimbus orchestrator body drifts" {
   fixture="$(mktemp -d)"
-  trap 'rm -rf "$fixture"' EXIT
   mkdir -p "$fixture/.nimbus" "$fixture/.github/agents" "$fixture/scripts/lib/templates"
   cp "$REPO_ROOT/.nimbus/agent-manifest.yaml" "$fixture/.nimbus/"
   cp -R "$REPO_ROOT/.github/skills" "$fixture/.github/"
@@ -101,4 +108,32 @@ setup() {
   run python3 "$HELPER" --repo-root "$fixture" check --target vscode
   [ "$status" -ne 0 ]
   [[ "$output" == *"functional drift"* ]]
+}
+
+@test "claude exposes the nimbus orchestrator as a main-thread skill, not a subagent" {
+  local path="$REPO_ROOT/.claude/skills/nimbus/SKILL.md"
+  [ -f "$path" ]
+  grep -q "^name: nimbus$" "$path"
+  grep -q "Claude" "$path"
+  ! grep -q "^tools:" "$path"
+  # Claude subagents cannot spawn subagents, so an orchestrator subagent could not delegate
+  [ ! -f "$REPO_ROOT/.claude/agents/nimbus.md" ]
+  for agent in nc-builder nc-arch nc-qa; do
+    grep -q "/${agent}" "$path"
+  done
+}
+
+@test "parity fails when the claude nimbus orchestrator drifts" {
+  fixture="$(mktemp -d)"
+  mkdir -p "$fixture/.nimbus" "$fixture/.github" "$fixture/.claude/skills" "$fixture/scripts/lib/templates"
+  cp "$REPO_ROOT/.nimbus/agent-manifest.yaml" "$fixture/.nimbus/"
+  cp -R "$REPO_ROOT/.github/skills" "$fixture/.github/"
+  cp -R "$REPO_ROOT/.claude/agents" "$fixture/.claude/"
+  cp -R "$REPO_ROOT/.claude/skills/nimbus" "$fixture/.claude/skills/"
+  cp "$REPO_ROOT/scripts/lib/templates/nimbus-agent.template.md" "$fixture/scripts/lib/templates/"
+  printf '\nDRIFT\n' >> "$fixture/.claude/skills/nimbus/SKILL.md"
+
+  run python3 "$HELPER" --repo-root "$fixture" check --target claude
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"functional drift for nimbus in claude"* ]]
 }

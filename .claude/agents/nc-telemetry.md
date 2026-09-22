@@ -3,12 +3,13 @@ name: nc-telemetry
 description: Nimbus Observability & SRE — Consolida observabilidade, logs estruturados
   em JSON, traces OpenTelemetry, métricas DORA e custo real da entrega.
 tools:
-- view
-- rg
-- glob
-- bash
-- apply_patch
-- skill:nc-telemetry
+- Read
+- Grep
+- Glob
+- Bash
+- Edit
+- Write
+- Skill
 ---
 
 ## User Input
