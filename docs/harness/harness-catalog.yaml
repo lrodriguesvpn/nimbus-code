@@ -251,3 +251,49 @@ entries:
     similar_contexts:
       - dev-platform
       - spec-kit-workflow
+
+  - id: HRN-0007
+    date: 2026-09-22
+    complexity: S3
+    bounded_context: spec-kit-workflow
+    error_pattern: >
+      Ao corrigir HRN-0006 trocando listas hardcoded (AGENTS/EXPECTED_AGENTS)
+      por descoberta via glob sobre .github/skills/nc-*, a correção sozinha não
+      era suficiente: 3 agentes (nc-bug-assess, nc-bug-fix, nc-bug-test) existiam
+      como skill mas nunca tiveram entrada em .nimbus/agent-manifest.yaml — a
+      descoberta dinâmica passaria a encontrá-los e o gerador falharia
+      (manifest roles missing) ao tentar sincronizá-los.
+    root_cause: >
+      Quando a extensão "bug" foi adicionada ao preset, os 3 agentes NC-Bug-*
+      foram criados como SKILL.md mas o registro de governança correspondente
+      no manifest (tool_allowlist, allowed_file_scope, human_approval_policy)
+      nunca foi criado — divergindo do padrão já seguido por NC-Assess-*, que
+      também vem de extensão mas tem entrada completa no manifest.
+    impact: >
+      Sem essa correção adicional, a mitigação de HRN-0006 (descoberta dinâmica)
+      teria travado a geração de agentes para todos os 5 alvos assim que
+      implementada, exigindo debugging reativo em vez de correção planejada.
+    fix_applied: >
+      Adicionadas 3 novas entradas em .nimbus/agent-manifest.yaml (NC-Bug-Assess,
+      NC-Bug-Fix, NC-Bug-Test) seguindo o padrão de NC-Critic/NC-Assess-Intake,
+      com escopo de escrita em .specify/bugs/*/{assessment,fix,test}.md (e
+      src/**, tests/**, etc. para NC-Bug-Fix/NC-Bug-Test) — decisão confirmada
+      explicitamente com o usuário antes da implementação (spec 028).
+    prevention: >
+      Ao introduzir um novo agente NC-* (via extensão ou nativo), SEMPRE criar a
+      entrada correspondente em .nimbus/agent-manifest.yaml no mesmo PR que cria
+      o SKILL.md — nunca deixar o registro de governança para depois. Ao
+      corrigir uma descoberta hardcoded → dinâmica em qualquer catálogo (agentes,
+      comandos, integrações), testar a descoberta ANTES de assumir que o
+      restante do pipeline (ex.: validação de manifest) já cobre 100% dos itens
+      que serão descobertos.
+    tags:
+      - agent-manifest-drift
+      - governance-registration-gap
+      - dynamic-discovery
+      - spec-028
+      - hrn-0006-followup
+    source_pr: ""
+    similar_contexts:
+      - dev-platform
+      - spec-kit-workflow

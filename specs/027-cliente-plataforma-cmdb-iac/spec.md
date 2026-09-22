@@ -47,15 +47,18 @@
 - Q: Projetos sem repositório de IaC dedicado ficam sem nenhum registro formal? → A: Não. Permanecem como inventário + IaC inline dentro do próprio Repo Plataforma central do cliente — todo projeto tem um vínculo formal, de um dos dois tipos.
 - Q: A integração real com o domínio FinOps do Nuvem 365 faz parte desta feature? → A: Não. Fora de escopo nesta rodada (`decision.md`); tratado apenas como direção futura.
 
-### Perguntas ainda abertas (marcadas como `[NEEDS CLARIFICATION]` nos requisitos abaixo)
+### Session 2026-09-22b (auditoria `/nc-critic` — resolução das 5 perguntas abertas)
 
-Estas não bloquearam o Go (são detalhamento de especificação, não de viabilidade — ver `decision.md`), mas precisam de resposta humana antes da implementação final:
+- Q: Qual deve ser a regra inicial (v1) para decidir se um projeto ganha repositório de IaC dedicado ou fica como inventário inline? → A: Repo dedicado **apenas se o contrato do cliente exigir isolamento formal** (SLA/compliance) — critério binário e restritivo na v1; porte e criticidade técnica deixam de ser gatilhos automáticos nesta versão (podem voltar a ser considerados em versão futura, se necessário).
+- Q: Como deve ser medido o baseline de tempo de localização/rastreabilidade/auditoria antes e depois do rollout? → A: **Cronometragem manual** em tarefas reais de auditoria (ex.: tempo para localizar a IaC de um projeto), registrada em planilha/issue — sem instrumentação automática nesta feature.
+- Q: Quem deve aprovar/revisar novas entradas de vínculo CMDB↔IaC antes de produção? → A: **Reaproveitar os mesmos aprovadores/revisores já configurados no ambiente `homologacao` de `vpn-nibo-connect-iac`** — sem criar papel novo dedicado ao CMDB nesta feature.
+- Q: Qual é o status de `vpn-nibo-connect-infra` frente a `vpn-nibo-connect-iac`? → A: **Ainda não sabemos** — permanece como pendência explícita, a ser esclarecida pelo time responsável por `vpn-nibo-connect-iac` durante a execução da feature; não bloqueia o início da implementação, mas bloqueia a fixação final da convenção de nomenclatura no ADR "Repo First Company" (ver FR-013 e FR-010).
+- Q: O que deve constar no checklist mínimo de LGPD/segurança para o próprio registro de vínculo? → A: **Checklist básico v1** — nenhum PII de cliente final no registro, apenas identificadores técnicos (nome de repo, cliente, projeto, timestamp), validado por amostragem manual (sem revisão formal do time de Segurança/Risco nesta versão).
 
-1. Limiares/pesos exatos de cada dimensão do critério objetivo (porte, criticidade, exigência contratual).
-2. Papel humano formal responsável por aprovar/revisar novas entradas de vínculo CMDB↔IaC.
-3. Se `vpn-nibo-connect-infra` tem propósito distinto de `vpn-nibo-connect-iac` ou é duplicidade de nomenclatura.
-4. Checklist mínimo de LGPD/segurança aplicável ao próprio registro de vínculo (metadados, não segredos).
-5. Método, ferramenta e cadência exatos de medição do baseline de localização/rastreabilidade/auditoria.
+Todas as 5 perguntas originalmente abertas foram resolvidas nesta sessão, exceto a
+pendência de `vpn-nibo-connect-infra` (item 3), que permanece como
+`[NEEDS CLARIFICATION]` de execução — não de viabilidade — e está refletida em
+FR-013 abaixo.
 
 ## Nimbus-Code — Hybrid Collaboration Model
 
@@ -81,7 +84,7 @@ Estas não bloquearam o Go (são detalhamento de especificação, não de viabil
 > **Test ref:** `test_AC2_inventario_inline`
 
 > **AC-3**
-> **Given** o critério objetivo documentado (porte, criticidade, exigência contratual)
+> **Given** o critério objetivo documentado (exigência contratual de isolamento formal — SLA/compliance)
 > **When** o mesmo projeto é avaliado por operadores diferentes
 > **Then** a decisão (dedicado vs. inline) é a mesma para ambos, e a justificativa aplicada fica registrada na entrada do CMDB
 > **Test ref:** `test_AC3_criterio_consistente`
@@ -129,13 +132,13 @@ Como **operador de Managed Services**, quero **registrar um projeto de menor por
 **Acceptance Scenarios**:
 
 1. **Given** um projeto abaixo do limiar do critério objetivo, **When** o operador o registra, **Then** o CMDB cria uma entrada de inventário com IaC inline, marcada como tal.
-2. **Given** um projeto registrado como inventário inline, **When** sua criticidade aumenta o suficiente para atingir o critério objetivo, **Then** é possível migrar a entrada para "repo de IaC dedicado" preservando o histórico da decisão anterior.
+2. **Given** um projeto registrado como inventário inline, **When** o contrato do cliente passa a exigir isolamento formal para esse projeto, **Then** é possível migrar a entrada para "repo de IaC dedicado" preservando o histórico da decisão anterior.
 
 ---
 
 ### User Story 3 — Aplicar critério objetivo de decisão de forma consistente (Priority: P2)
 
-Como **tech lead de Managed Services**, quero **um critério documentado e objetivo (porte, criticidade, exigência contratual)** para que **diferentes operadores cheguem à mesma decisão sobre repo dedicado vs. inventário inline, sem depender de julgamento individual**.
+Como **tech lead de Managed Services**, quero **um critério documentado e objetivo (exigência contratual de isolamento formal — SLA/compliance)** para que **diferentes operadores cheguem à mesma decisão sobre repo dedicado vs. inventário inline, sem depender de julgamento individual**.
 
 **Why this priority**: sem um critério objetivo, as User Stories 1 e 2 funcionam individualmente mas produzem inconsistência entre clientes e operadores — o valor de auditabilidade do CMDB cai.
 
@@ -183,7 +186,7 @@ Como **engenharia de plataforma**, quero **publicar o padrão "IaC e estado semp
 - O que acontece quando um projeto já tem um repositório cujo nome não segue a convenção padrão esperada (ex.: `vpn-nibo-connect-infra` vs. `vpn-nibo-connect-iac`)?
 - Como o sistema evita que um operador copie/cole arquivos Terraform de um repo de IaC dedicado para dentro do Repo Plataforma central por engano, criando duplicação?
 - O que acontece quando um projeto está no limite do critério objetivo — não claramente "dedicado" nem "inventário inline"?
-- Como uma entrada de vínculo é atualizada quando um projeto migra de "inventário inline" para "repo de IaC dedicado" à medida que cresce em criticidade?
+- Como uma entrada de vínculo é atualizada quando um projeto migra de "inventário inline" para "repo de IaC dedicado" à medida que o contrato do cliente passa a exigir isolamento formal?
 - O que acontece se o segundo cliente piloto só tiver ativos pequenos/legados, sem nenhum projeto comparável a `vpn-nibo-connect` para validar o caminho "repo dedicado"?
 - Como o sistema trata um projeto que é descontinuado — a entrada de CMDB é removida, arquivada ou marcada como inativa?
 
@@ -195,16 +198,16 @@ Como **engenharia de plataforma**, quero **publicar o padrão "IaC e estado semp
 - **FR-002**: Cada entrada MUST indicar exatamente um tipo de vínculo — repositório de IaC dedicado (com referência ao repositório) ou inventário com IaC inline — nunca ambos nem nenhum dos dois.
 - **FR-003**: O sistema MUST NOT duplicar o conteúdo Terraform de um repositório de IaC dedicado dentro do Repo Plataforma central — apenas referenciar/linkar.
 - **FR-004**: O sistema MUST registrar origem, autor, timestamp e justificativa (critério aplicado) para cada entrada de vínculo criada ou alterada.
-- **FR-005**: O sistema MUST aplicar um critério objetivo e documentado (dimensões: porte do ativo, criticidade, exigência contratual de isolamento) para decidir entre repositório de IaC dedicado e inventário inline. [NEEDS CLARIFICATION: limiares/pesos exatos de cada dimensão ainda não definidos]
+- **FR-005**: O sistema MUST aplicar um critério objetivo e documentado para decidir entre repositório de IaC dedicado e inventário inline: **repositório dedicado somente quando o contrato do cliente exigir isolamento formal (SLA/compliance) para aquele projeto**; na ausência dessa exigência contratual, o projeto MUST ser registrado como inventário inline, independentemente de porte ou criticidade técnica isolados (decisão da sessão de clarificação 2026-09-22b; porte/criticidade poderão voltar a ser considerados em versão futura do critério, se necessário).
 - **FR-006**: O sistema MUST permitir consultar todos os projetos de um cliente e o tipo de vínculo de cada um a partir do Repo Plataforma central.
 - **FR-007**: O processo de criação de uma nova instância de Repo Plataforma central para um cliente MUST estar documentado de forma repetível, sem depender de conhecimento tácito de quem operou `venha-pra-nuvem-client-platform`.
 - **FR-008**: O sistema MUST ser aplicado, dentro do escopo desta feature, a pelo menos um segundo cliente de managed services além da instância de referência existente.
-- **FR-009**: O sistema MUST medir e registrar baseline de tempo de localização, rastreabilidade e tempo de auditoria antes e depois do rollout em cada cliente piloto. [NEEDS CLARIFICATION: método, ferramenta e cadência exatos de medição]
+- **FR-009**: O sistema MUST medir e registrar baseline de tempo de localização, rastreabilidade e tempo de auditoria antes e depois do rollout em cada cliente piloto, **via cronometragem manual em tarefas reais de auditoria (ex.: tempo para localizar a IaC de um projeto), registrada em planilha/issue** — sem instrumentação automática nesta feature (decisão da sessão de clarificação 2026-09-22b).
 - **FR-010**: A organização MUST documentar o padrão "Repo First Company" como ADR nomeado, referenciando pelo menos um caso real já em produção (`vpn-nibo-connect` / `vpn-nibo-connect-iac`) como evidência.
 - **FR-011**: A alteração de uma entrada de vínculo (ex.: migração de inventário inline para repo dedicado) MUST preservar o histórico da decisão anterior, não sobrescrever silenciosamente.
-- **FR-012**: O sistema MUST ter um papel humano responsável por aprovar/revisar novas entradas de vínculo CMDB↔IaC antes de aplicação em produção. [NEEDS CLARIFICATION: papel/aprovador específico ainda não confirmado formalmente — `decision.md` sugere reaproveitar aprovadores já existentes de `vpn-nibo-connect-iac`]
-- **FR-013**: A organização MUST esclarecer e documentar o papel de `vpn-nibo-connect-infra` frente a `vpn-nibo-connect-iac` antes de fixar a nomenclatura padrão de repositórios de IaC no ADR "Repo First Company". [NEEDS CLARIFICATION: propósitos distintos ou duplicidade de nomenclatura?]
-- **FR-014**: O registro de vínculo no CMDB MUST conter apenas metadados de localização/ownership (nunca credenciais, segredos ou dados de cliente final), respeitando um checklist mínimo de segurança/LGPD aplicável ao próprio registro. [NEEDS CLARIFICATION: conteúdo exato do checklist de LGPD/segurança para este registro]
+- **FR-012**: O sistema MUST ter um papel humano responsável por aprovar/revisar novas entradas de vínculo CMDB↔IaC antes de aplicação em produção — **reaproveitando os mesmos aprovadores/revisores já configurados no ambiente `homologacao` de `vpn-nibo-connect-iac`**, sem criar papel novo dedicado ao CMDB nesta feature (decisão da sessão de clarificação 2026-09-22b).
+- **FR-013**: A organização MUST esclarecer e documentar o papel de `vpn-nibo-connect-infra` frente a `vpn-nibo-connect-iac` antes de fixar a nomenclatura padrão de repositórios de IaC no ADR "Repo First Company". [NEEDS CLARIFICATION: propósitos distintos ou duplicidade de nomenclatura? — pendência mantida deliberadamente na sessão de clarificação 2026-09-22b; a esclarecer com o time responsável por `vpn-nibo-connect-iac` durante a execução da feature, sem bloquear o início da implementação das demais FRs]
+- **FR-014**: O registro de vínculo no CMDB MUST conter apenas metadados de localização/ownership (nunca credenciais, segredos ou dados de cliente final) — **checklist básico v1: nenhum PII de cliente final, apenas identificadores técnicos (nome de repo, cliente, projeto, timestamp), validado por amostragem manual**, sem revisão formal do time de Segurança/Risco nesta versão (decisão da sessão de clarificação 2026-09-22b).
 
 ### Key Entities *(include if feature involves data)*
 
@@ -212,7 +215,7 @@ Como **engenharia de plataforma**, quero **publicar o padrão "IaC e estado semp
 - **ProjectAsset**: projeto/ativo do cliente (ex.: NIBO); pertence a exatamente uma `ClientPlatformInstance`.
 - **IaCLinkEntry**: entrada de CMDB que vincula um `ProjectAsset` a um repositório de IaC dedicado externo (referência, sem duplicar conteúdo).
 - **InlineInventoryEntry**: entrada de CMDB que registra um `ProjectAsset` sem repo de IaC dedicado, com IaC/configuração inline dentro do Repo Plataforma central.
-- **LinkDecisionCriteria**: critério objetivo documentado (dimensões: porte, criticidade, exigência contratual) usado para decidir entre `IaCLinkEntry` e `InlineInventoryEntry`.
+- **LinkDecisionCriteria**: critério objetivo documentado (v1: dimensão única — exigência contratual de isolamento formal, SLA/compliance) usado para decidir entre `IaCLinkEntry` e `InlineInventoryEntry`.
 - **RepoFirstCompanyADR**: documento de arquitetura nomeado que formaliza o padrão "IaC e estado sempre em repositório dedicado, nunca junto do código de aplicação".
 
 ## Success Criteria *(mandatory)*
@@ -230,7 +233,7 @@ Como **engenharia de plataforma**, quero **publicar o padrão "IaC e estado semp
 
 - `venha-pra-nuvem-client-platform` continua sendo a instância de referência e não será migrada nem aposentada nesta feature (Option C explicitamente fora de escopo em `decision.md`).
 - Há pelo menos um segundo cliente de managed services disponível para servir de piloto de instanciação dentro do prazo desta feature.
-- O critério objetivo pode começar com as três dimensões já identificadas (porte, criticidade, exigência contratual) mesmo sem limiares numéricos finais — os limiares serão refinados após aplicação aos casos piloto, conforme resposta às perguntas em aberto.
+- O critério objetivo v1 é binário e baseado exclusivamente em exigência contratual de isolamento (FR-005) — porte e criticidade técnica não são gatilhos automáticos nesta versão; se a experiência do piloto mostrar que isso é insuficiente, o critério pode ser expandido em versão futura.
 - A integração real com o domínio FinOps do Nuvem 365 (`nuvem365-nimbuscode-spec`) permanece fora de escopo desta feature.
 - A segregação de secrets, evidências e acessos entre clientes continua garantida pela separação física de instâncias/repositórios — esta feature não introduz nem exige isolamento lógico multi-tenant adicional.
 - O time responsável por `vpn-nibo-connect-iac` está disponível para esclarecer o papel de `vpn-nibo-connect-infra` durante a execução desta feature.

@@ -8,42 +8,69 @@ set -euo pipefail
 # Spec: specs/025-native-nc-agents/
 # ==============================================================================
 
-EXPECTED_AGENTS=(
-  "nc-assess-intake"
-  "nc-assess-research"
-  "nc-assess-define"
-  "nc-assess-shape"
-  "nc-assess-decide"
-  "nc-intake"
-  "nc-spec"
-  "nc-critic"
-  "nc-governor"
-  "nc-arch"
-  "nc-qa"
-  "nc-builder"
-  "nc-shield"
-  "nc-telemetry"
-  "nc-designer"
-)
-
-# Custom Nimbus Code /speckit-* commands that are NOT part of the upstream
-# spec-kit template and therefore are NOT installed by `specify integration
-# install claude|agy`. These must be synced by this script too, or they will
-# silently be missing from .claude/skills/ and .agents/skills/ (see
-# harness-catalog.yaml HRN-0006).
-EXTRA_SPECKIT_SKILLS=(
-  "speckit-assess-intake"
-  "speckit-assess-research"
-  "speckit-assess-define"
-  "speckit-assess-shape"
-  "speckit-assess-decide"
-  "speckit-interview"
-  "speckit-nimbus-code-backlog-sync-sync"
-)
-
+# EXPECTED_AGENTS and EXTRA_SPECKIT_SKILLS are discovered dynamically from
+# .github/skills/ (the single source of truth) instead of hardcoded lists.
+# A hardcoded list silently drifted from the real source directory in the
+# past (see harness-catalog.yaml HRN-0006: nc-bug-assess/nc-bug-fix/nc-bug-test
+# existed as source skills but were absent from this list, so tests "passed"
+# while those agents were never synced to Claude/Antigravity). Spec 028
+# fixes this by discovering agents/commands via glob, applied uniformly to
+# every target this script supports.
 SOURCE_DIR=".github/skills"
+
+discover_expected_agents() {
+  find "${SOURCE_DIR}" -maxdepth 1 -type d -name 'nc-*' -exec test -f '{}/SKILL.md' \; -print \
+    | xargs -n1 basename \
+    | sort
+}
+
+# Official /speckit-* commands installed natively by `specify integration
+# install <target>` (upstream spec-kit). Any other `speckit-*` directory in
+# ${SOURCE_DIR} is a Nimbus Code proprietary extension and must be synced by
+# this script explicitly (EXTRA_SPECKIT_SKILLS).
+OFFICIAL_SPECKIT_COMMANDS=(
+  "speckit-constitution"
+  "speckit-specify"
+  "speckit-clarify"
+  "speckit-plan"
+  "speckit-tasks"
+  "speckit-implement"
+  "speckit-converge"
+  "speckit-analyze"
+  "speckit-checklist"
+  "speckit-taskstoissues"
+)
+
+discover_extra_speckit_skills() {
+  local all_speckit official is_official skill
+  all_speckit="$(find "${SOURCE_DIR}" -maxdepth 1 -type d -name 'speckit-*' -exec test -f '{}/SKILL.md' \; -print | xargs -n1 basename | sort)"
+  while IFS= read -r skill; do
+    [[ -z "$skill" ]] && continue
+    is_official=0
+    for official in "${OFFICIAL_SPECKIT_COMMANDS[@]}"; do
+      if [[ "$skill" == "$official" ]]; then
+        is_official=1
+        break
+      fi
+    done
+    if [[ "$is_official" -eq 0 ]]; then
+      echo "$skill"
+    fi
+  done <<< "$all_speckit"
+}
+
+mapfile -t EXPECTED_AGENTS < <(discover_expected_agents)
+mapfile -t EXTRA_SPECKIT_SKILLS < <(discover_extra_speckit_skills)
+
+if [[ "${#EXPECTED_AGENTS[@]}" -eq 0 ]]; then
+  echo "Error: no nc-* agent skills discovered in ${SOURCE_DIR}" >&2
+  exit 1
+fi
+
 CLAUDE_DIR=".claude/skills"
 AGY_DIR=".agents/skills"
+CURSOR_SKILLS_DIR=".cursor/skills"
+KIRO_PROMPTS_DIR=".kiro/prompts"
 
 print_help() {
   cat <<EOF
@@ -52,7 +79,7 @@ Usage: $(basename "$0") [OPTIONS]
 Synchronizes the ${#EXPECTED_AGENTS[@]} NC-* agents from ${SOURCE_DIR}/ to other integrations.
 
 Options:
-  --target <vscode|claude|antigravity|agy|all> Target integration (default: all)
+  --target <vscode|claude|antigravity|agy|cursor|kiro|all> Target integration (default: all)
   --check                                 Validate generated outputs without writing
   --help                                  Show this help message and exit
 EOF
@@ -91,8 +118,8 @@ if [[ "$TARGET" == "agy" ]]; then
   TARGET="antigravity"
 fi
 
-if [[ "$TARGET" != "vscode" && "$TARGET" != "claude" && "$TARGET" != "antigravity" && "$TARGET" != "all" ]]; then
-  echo "Error: Invalid target '$TARGET'. Must be one of: vscode, claude, antigravity, agy, all" >&2
+if [[ "$TARGET" != "vscode" && "$TARGET" != "claude" && "$TARGET" != "antigravity" && "$TARGET" != "cursor" && "$TARGET" != "kiro" && "$TARGET" != "all" ]]; then
+  echo "Error: Invalid target '$TARGET'. Must be one of: vscode, claude, antigravity, agy, cursor, kiro, all" >&2
   exit 1
 fi
 
@@ -257,6 +284,33 @@ open(dest, 'w', encoding='utf-8').write(content)
 " "$agent_name" "$src_file" "$dest_file"
 }
 
+# T029/T016 (spec 028): Post-processing for Cursor custom speckit-* commands.
+# Cursor Skills already share the same frontmatter convention as the source
+# (name/description/compatibility/metadata) — plain copy, no rewrite needed.
+process_for_cursor_skill() {
+  local skill_name="$1"
+  local src_file="$2"
+  local dest_file="$3"
+  mkdir -p "$(dirname "$dest_file")"
+  cp "$src_file" "$dest_file"
+}
+
+# T028 (spec 028): Post-processing for Kiro custom speckit-* commands.
+# Kiro's generic /speckit-* commands live in .kiro/prompts/ as flat,
+# dot-separated files (e.g. speckit.constitution.md), confirmed via isolated
+# `specify init --integration kiro-cli` probe (spec 028 clarify session).
+# Only the first hyphen (right after "speckit") is converted to a dot,
+# mirroring exactly what the `specify` CLI does for its own official
+# commands — the rest of the proprietary command name keeps its hyphens.
+process_for_kiro_prompt() {
+  local skill_name="$1"
+  local src_file="$2"
+  local dest_dir="$3"
+  mkdir -p "$dest_dir"
+  local kiro_name="${skill_name/-/.}"
+  cp "$src_file" "${dest_dir}/${kiro_name}.md"
+}
+
 # Custom /speckit-* commands must also exist in the source of truth.
 validate_extra_speckit_source() {
   for skill in "${EXTRA_SPECKIT_SKILLS[@]}"; do
@@ -307,12 +361,33 @@ if [[ "$MODE" == "generate" && ( "$TARGET" == "antigravity" || "$TARGET" == "all
   echo "✅ ${#EXTRA_SPECKIT_SKILLS[@]} comandos speckit customizados sincronizados para Antigravity."
 fi
 
+if [[ "$MODE" == "generate" && ( "$TARGET" == "cursor" || "$TARGET" == "all" ) ]]; then
+  echo "==> Sincronizando comandos /speckit-* customizados para Cursor (${CURSOR_SKILLS_DIR}/)..."
+  for skill in "${EXTRA_SPECKIT_SKILLS[@]}"; do
+    src="${SOURCE_DIR}/${skill}/SKILL.md"
+    dest="${CURSOR_SKILLS_DIR}/${skill}/SKILL.md"
+    process_for_cursor_skill "$skill" "$src" "$dest"
+  done
+  echo "✅ ${#EXTRA_SPECKIT_SKILLS[@]} comandos speckit customizados sincronizados para Cursor."
+fi
+
+if [[ "$MODE" == "generate" && ( "$TARGET" == "kiro" || "$TARGET" == "all" ) ]]; then
+  echo "==> Sincronizando comandos /speckit-* customizados para Kiro (${KIRO_PROMPTS_DIR}/)..."
+  for skill in "${EXTRA_SPECKIT_SKILLS[@]}"; do
+    src="${SOURCE_DIR}/${skill}/SKILL.md"
+    process_for_kiro_prompt "$skill" "$src" "$KIRO_PROMPTS_DIR"
+  done
+  echo "✅ ${#EXTRA_SPECKIT_SKILLS[@]} comandos speckit customizados sincronizados para Kiro."
+fi
+
 NATIVE_TARGET_ARGS=()
 case "$TARGET" in
   vscode) NATIVE_TARGET_ARGS=(--target vscode) ;;
   claude) NATIVE_TARGET_ARGS=(--target claude) ;;
   antigravity) NATIVE_TARGET_ARGS=(--target antigravity) ;;
-  all) NATIVE_TARGET_ARGS=(--target vscode --target claude --target antigravity) ;;
+  cursor) NATIVE_TARGET_ARGS=(--target cursor) ;;
+  kiro) NATIVE_TARGET_ARGS=(--target kiro) ;;
+  all) NATIVE_TARGET_ARGS=(--target vscode --target claude --target antigravity --target cursor --target kiro) ;;
 esac
 
 if [[ "$MODE" == "generate" ]]; then

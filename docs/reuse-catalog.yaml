@@ -223,12 +223,14 @@ entries:
     description: >
       Padrão de sincronização de habilidades e agentes a partir de uma fonte única da
       verdade (.github/skills/) para múltiplos destinos de agentes/plataformas (.claude/skills/,
-      .agents/skills/), aplicando pós-processamento determinístico por alvo (argument hints,
-      flags, conversão de hooks) com verificação de paridade de conteúdo funcional e gate
-      automatizado de prevenção de drift no CI via Bats.
+      .agents/skills/, .cursor/skills/, .kiro/agents/, .kiro/prompts/), aplicando pós-processamento
+      determinístico por alvo (argument hints, flags, conversão de hooks) com verificação de
+      paridade de conteúdo funcional e gate automatizado de prevenção de drift no CI via Bats.
+      A descoberta de agentes/comandos-fonte é feita via glob (não lista hardcoded), mitigação
+      direta de HRN-0006 aplicada em todos os alvos na spec 028.
     source: "specs/024-multi-agent-integration-claude-antigravity/plan.md"
     adr: ""
-    reuse_count: 0
+    reuse_count: 1
 
 
   - tag: "harness-engineering-pattern"

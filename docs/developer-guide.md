@@ -1349,62 +1349,81 @@ Ver também: [FAQ — Como atualizo um projeto criado com uma versão antiga do 
 - [`docs/extension-candidates.md`](extension-candidates.md) — quais extensões
   (oficiais e da Nimbus-Code) considerar instalar além do bundle padrão.
 
-## Integrações Multi-Agente e Agentes Disponíveis (SPEC 025)
+## Integrações Multi-Agente e Agentes Disponíveis (SPEC 025 + SPEC 028)
 
-O Nimbus Code suporta três plataformas de execução, mantendo os 17 comandos
-`/speckit-*` como workflows e os 15 papéis `/nc-*` como agentes nativos quando
-a plataforma possui contrato próprio. A implementação funcional continua em
-`.github/skills/nc-*/SKILL.md`; os demais arquivos são projeções geradas.
+O Nimbus Code suporta cinco plataformas de execução, mantendo os 20 comandos
+`/speckit-*` (10 oficiais do `specify` CLI + 10 proprietários do Nimbus Code)
+como workflows e os 18 papéis `/nc-*` como agentes nativos quando a plataforma
+possui contrato próprio. A implementação funcional continua em
+`.github/skills/nc-*/SKILL.md`; os demais arquivos são projeções geradas —
+descobertas dinamicamente via glob (spec 028, mitigação de HRN-0006), nunca
+listadas manualmente em código.
 
-| Plataforma / Agente | Diretório de Instalação | `multi_install_safe` | 17 Comandos `/speckit-*` | 15 Agentes `/nc-*` |
+| Plataforma / Agente | Diretório de Instalação | `multi_install_safe` | 20 Comandos `/speckit-*` | 18 Agentes `/nc-*` |
 |---|---|:---:|:---:|:---:|
-| **VS Code / GitHub Copilot** | `.github/agents/` + `.github/skills/` | `true` | ✅ Skills/workflows | ✅ Nativo (`*.agent.md`) |
+| **VS Code / GitHub Copilot** | `.github/agents/` + `.github/skills/` | `true` | ✅ Skills/workflows | ✅ Nativo (`*.agent.md`, orquestrador único `@nimbus`) |
 | **Claude Code** | `.claude/agents/` + `.claude/skills/` | `true` | ✅ Skills/workflows | ✅ Nativo (subagents `*.md`) |
 | **Antigravity** | `.agents/skills/` | `false` | ✅ `specify integration install agy` (Worktree isolado) | ✅ Bridge de skill; não há formato nativo inventado |
+| **Cursor** | `.cursor/skills/` | `true` | ✅ `specify integration install cursor-agent` (sem CLI, integração de IDE) | ✅ Bridge de Skill (`name`/`description`/`compatibility`/`metadata`, sem `tools`); nenhum mecanismo nativo de "custom agent" encontrado no Cursor além de Skills/Rules |
+| **Kiro** | `.kiro/prompts/` (comandos) + `.kiro/agents/` (agentes NC-*) | `true` | ✅ `specify integration install kiro-cli` (exige `kiro-cli` no `PATH`, sem versão mínima) | ✅ **Nativo** — mecanismo próprio de "Custom agents" (`.kiro/agents/*.md`), distinto dos prompts genéricos; espelha o pivot já feito para o Claude |
 
 > **Importante — VS Code e Claude Code no mesmo workspace:** o Claude Code
-> continua usando os 15 subagentes em `.claude/agents/`, mas o workspace
+> continua usando os subagentes em `.claude/agents/`, mas o workspace
 > configura `chat.agentFilesLocations` para que o agente local do VS Code não
 > indexe essa pasta. Assim, o seletor do VS Code exibe apenas o orquestrador
 > `@nimbus` de `.github/agents/`; a superfície nativa do Claude Code permanece
 > disponível quando o projeto é aberto por ele.
 
+> **Importante — Kiro usa dois destinos diferentes:** os 20 comandos
+> `/speckit-*` (instalados pelo `specify` CLI) vão para `.kiro/prompts/`, como
+> arquivos planos com nomenclatura `speckit.<nome>.md` (separador `.`, não
+> `-`). Já os 18 agentes institucionais `/nc-*` vão para `.kiro/agents/`, o
+> mecanismo nativo de "Custom agents" do Kiro — **nunca** para
+> `.kiro/prompts/`. Essa distinção é intencional (spec 028) e testada em
+> `tests/multi-agent-integration/nc-agent-contracts.bats`.
+
 ### Tabela de Agentes e Comandos Disponíveis por Integração
 
-| Identificador | Tipo | Camada / Descrição | Copilot | Claude Code | Antigravity |
-|---|---|---|:---:|:---:|:---:|
-| `/speckit-assess-intake` | Workflow | Discovery (Intake de Ideia Bruta) | ✅ | ✅ | ✅ |
-| `/speckit-assess-research` | Workflow | Discovery (Pesquisa & Evidências) | ✅ | ✅ | ✅ |
-| `/speckit-assess-define` | Workflow | Discovery (Definição de Problema) | ✅ | ✅ | ✅ |
-| `/speckit-assess-shape` | Workflow | Discovery (Modelagem de Conceito) | ✅ | ✅ | ✅ |
-| `/speckit-assess-decide` | Workflow | Discovery (Decisão Go/Clarify/Kill) | ✅ | ✅ | ✅ |
-| `/speckit-constitution` | Workflow | Governança & Princípios | ✅ | ✅ | ✅ |
-| `/speckit-specify` | Workflow | Especificação SDD | ✅ | ✅ | ✅ |
-| `/speckit-clarify` | Workflow | Clarificação de Requisitos | ✅ | ✅ | ✅ |
-| `/speckit-checklist` | Workflow | Geração de Checklists | ✅ | ✅ | ✅ |
-| `/speckit-plan` | Workflow | Planejamento de Arquitetura | ✅ | ✅ | ✅ |
-| `/speckit-tasks` | Workflow | Geração de Tarefas | ✅ | ✅ | ✅ |
-| `/speckit-analyze` | Workflow | Análise de Consistência | ✅ | ✅ | ✅ |
-| `/speckit-implement` | Workflow | Implementação de Código | ✅ | ✅ | ✅ |
-| `/speckit-converge` | Workflow | Fechamento de Lacunas | ✅ | ✅ | ✅ |
-| `/speckit-taskstoissues` | Workflow | Sincronização de Issues GHE | ✅ | ✅ | ✅ |
-| `/speckit-interview` | Workflow | Entrevista de Descoberta 4 Blocos | ✅ | ✅ | ✅ |
-| `/speckit-nimbus-code-backlog-sync-sync` | Workflow | Backlog Externo (Jira/ADO) | ✅ | ✅ | ✅ |
-| `/nc-assess-intake` | Agente | Camada 0: Idea Intake Specialist | ✅ | ✅ | ✅ |
-| `/nc-assess-research` | Agente | Camada 0: Evidence Researcher | ✅ | ✅ | ✅ |
-| `/nc-assess-define` | Agente | Camada 0: Problem Definer | ✅ | ✅ | ✅ |
-| `/nc-assess-shape` | Agente | Camada 0: Concept Shaper | ✅ | ✅ | ✅ |
-| `/nc-assess-decide` | Agente | Camada 0: Assessment Decider | ✅ | ✅ | ✅ |
-| `/nc-intake` | Agente | Camada 1: Discovery Intake (Alias `/speckit-interview`) | ✅ | ✅ | ✅ |
-| `/nc-spec` | Agente | Camada 1: Spec Architect (Alias `/speckit-specify`) | ✅ | ✅ | ✅ |
-| `/nc-critic` | Agente | Camada 1: Spec Auditor | ✅ | ✅ | ✅ |
-| `/nc-governor` | Agente | Camada 1: Gates & Integridade SHA-256 | ✅ | ✅ | ✅ |
-| `/nc-arch` | Agente | Camada 2: Solution Architect | ✅ | ✅ | ✅ |
-| `/nc-qa` | Agente | Camada 2: Test Strategist | ✅ | ✅ | ✅ |
-| `/nc-builder` | Agente | Camada 3: Autonomous Builder (Alias `/speckit-implement` + `/speckit-converge`) | ✅ | ✅ | ✅ |
-| `/nc-shield` | Agente | Camada 2: DevSecOps Guardian | ✅ | ✅ | ✅ |
-| `/nc-designer` | Agente | Camada 2: Interface Designer (Exclusivo Nimbus, sem alias speckit) | ✅ | ✅ | ✅ |
-| `/nc-telemetry` | Agente | Camada 3: Observability & SRE | ✅ | ✅ | ✅ |
+| Identificador | Tipo | Camada / Descrição | Copilot | Claude Code | Antigravity | Cursor | Kiro |
+|---|---|---|:---:|:---:|:---:|:---:|:---:|
+| `/speckit-assess-intake` | Workflow | Discovery (Intake de Ideia Bruta) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/speckit-assess-research` | Workflow | Discovery (Pesquisa & Evidências) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/speckit-assess-define` | Workflow | Discovery (Definição de Problema) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/speckit-assess-shape` | Workflow | Discovery (Modelagem de Conceito) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/speckit-assess-decide` | Workflow | Discovery (Decisão Go/Clarify/Kill) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/speckit-constitution` | Workflow | Governança & Princípios | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/speckit-specify` | Workflow | Especificação SDD | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/speckit-clarify` | Workflow | Clarificação de Requisitos | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/speckit-checklist` | Workflow | Geração de Checklists | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/speckit-plan` | Workflow | Planejamento de Arquitetura | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/speckit-tasks` | Workflow | Geração de Tarefas | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/speckit-analyze` | Workflow | Análise de Consistência | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/speckit-implement` | Workflow | Implementação de Código | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/speckit-converge` | Workflow | Fechamento de Lacunas | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/speckit-taskstoissues` | Workflow | Sincronização de Issues GHE | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/speckit-interview` | Workflow | Entrevista de Descoberta 4 Blocos | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/speckit-nimbus-code-backlog-sync-sync` | Workflow | Backlog Externo (Jira/ADO) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/speckit-bug-assess` | Workflow | Triagem de Bug (Camada Bug) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/speckit-bug-fix` | Workflow | Correção de Bug (Camada Bug) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/speckit-bug-test` | Workflow | Verificação de Correção (Camada Bug) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/nc-assess-intake` | Agente | Camada 0: Idea Intake Specialist | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/nc-assess-research` | Agente | Camada 0: Evidence Researcher | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/nc-assess-define` | Agente | Camada 0: Problem Definer | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/nc-assess-shape` | Agente | Camada 0: Concept Shaper | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/nc-assess-decide` | Agente | Camada 0: Assessment Decider | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/nc-intake` | Agente | Camada 1: Discovery Intake (Alias `/speckit-interview`) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/nc-spec` | Agente | Camada 1: Spec Architect (Alias `/speckit-specify`) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/nc-critic` | Agente | Camada 1: Spec Auditor | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/nc-governor` | Agente | Camada 1: Gates & Integridade SHA-256 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/nc-arch` | Agente | Camada 2: Solution Architect | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/nc-qa` | Agente | Camada 2: Test Strategist | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/nc-builder` | Agente | Camada 3: Autonomous Builder (Alias `/speckit-implement` + `/speckit-converge`) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/nc-shield` | Agente | Camada 2: DevSecOps Guardian | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/nc-designer` | Agente | Camada 2: Interface Designer (Exclusivo Nimbus, sem alias speckit) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/nc-telemetry` | Agente | Camada 3: Observability & SRE | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/nc-bug-assess` | Agente | Camada Bug: Bug Triage (Alias `/speckit-bug-assess`) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/nc-bug-fix` | Agente | Camada Bug: Bug Fix (Alias `/speckit-bug-fix`) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `/nc-bug-test` | Agente | Camada Bug: Bug Verification (Alias `/speckit-bug-test`) | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ### Escolha entre agente nativo, bridge e comando
 

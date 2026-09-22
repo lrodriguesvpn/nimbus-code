@@ -13,31 +13,13 @@ from typing import Any
 import yaml
 
 
-AGENTS = tuple(
-    name
-    for name in (
-        "nc-assess-intake",
-        "nc-assess-research",
-        "nc-assess-define",
-        "nc-assess-shape",
-        "nc-assess-decide",
-        "nc-intake",
-        "nc-spec",
-        "nc-critic",
-        "nc-governor",
-        "nc-arch",
-        "nc-qa",
-        "nc-builder",
-        "nc-shield",
-        "nc-telemetry",
-        "nc-designer",
-    )
-)
-TARGETS = ("vscode", "claude", "antigravity")
+TARGETS = ("vscode", "claude", "antigravity", "cursor", "kiro")
 GENERATED_ROOTS = {
     "vscode": Path(".github/agents"),
     "claude": Path(".claude/agents"),
     "antigravity": Path(".agents/skills"),
+    "cursor": Path(".cursor/skills"),
+    "kiro": Path(".kiro/agents"),
 }
 
 # ---------------------------------------------------------------------------
@@ -94,7 +76,7 @@ def functional_hash(path: Path) -> str:
     return hashlib.sha256(normalize_body(path.read_text(encoding="utf-8")).encode()).hexdigest()
 
 
-def load_roles(root: Path) -> dict[str, dict[str, Any]]:
+def load_roles(root: Path, agents: tuple[str, ...]) -> dict[str, dict[str, Any]]:
     manifest_path = root / ".nimbus/agent-manifest.yaml"
     try:
         manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
@@ -104,14 +86,35 @@ def load_roles(root: Path) -> dict[str, dict[str, Any]]:
         fail(f"invalid manifest {manifest_path}: {exc}")
     roles = manifest.get("manifest", {}).get("roles", [])
     result = {str(role.get("id", "")).lower(): role for role in roles}
-    missing = [name for name in AGENTS if f"nc-{name.removeprefix('nc-')}" not in result]
+    missing = [name for name in agents if f"nc-{name.removeprefix('nc-')}" not in result]
     if missing:
         fail(f"manifest roles missing: {', '.join(missing)}")
     return result
 
 
-def source_paths(root: Path) -> dict[str, Path]:
-    sources = {name: root / ".github/skills" / name / "SKILL.md" for name in AGENTS}
+def discover_agents(root: Path) -> tuple[str, ...]:
+    """Discover NC-* agent skill directories from the source of truth
+    (.github/skills/) via glob, instead of a hardcoded list.
+
+    Mitigation for HRN-0006 (docs/harness/harness-catalog.yaml): a hardcoded
+    agent list silently drifted from the real source directory, letting
+    tests "pass" while agents were missing from generated integrations. This
+    discovery is applied uniformly across all targets (spec 028, ADL)."""
+    skills_dir = root / ".github/skills"
+    if not skills_dir.is_dir():
+        fail(f"skills source directory missing: {skills_dir}")
+    discovered = sorted(
+        p.name
+        for p in skills_dir.glob("nc-*")
+        if p.is_dir() and (p / "SKILL.md").is_file()
+    )
+    if not discovered:
+        fail(f"no nc-* agent skills discovered in {skills_dir}")
+    return tuple(discovered)
+
+
+def source_paths(root: Path, agents: tuple[str, ...]) -> dict[str, Path]:
+    sources = {name: root / ".github/skills" / name / "SKILL.md" for name in agents}
     missing = [name for name, path in sources.items() if not path.is_file()]
     if missing:
         fail(f"source skills missing: {', '.join(missing)}")
@@ -126,9 +129,9 @@ def yaml_frontmatter(values: dict[str, Any]) -> str:
     return "---\n" + yaml.safe_dump(values, sort_keys=False, allow_unicode=True).rstrip() + "\n---\n\n"
 
 
-def orchestrator_tools(roles: dict[str, dict[str, Any]]) -> list[str]:
+def orchestrator_tools(roles: dict[str, dict[str, Any]], sources: dict[str, Path]) -> list[str]:
     tools: set[str] = set()
-    for agent in AGENTS:
+    for agent in sources:
         tools.update(str(tool) for tool in role_for(roles, agent).get("tool_allowlist", []))
     return sorted(tools)
 
@@ -136,7 +139,7 @@ def orchestrator_tools(roles: dict[str, dict[str, Any]]) -> list[str]:
 def roles_table(roles: dict[str, dict[str, Any]], sources: dict[str, Path]) -> str:
     header = "| Camada | Comando | Papel |\n| --- | --- | --- |\n"
     rows = []
-    for agent in AGENTS:
+    for agent in sorted(sources.keys()):
         role = role_for(roles, agent)
         source_meta, _ = split_frontmatter(sources[agent].read_text(encoding="utf-8"))
         role_name = str(source_meta.get("description") or role.get("name") or agent)
@@ -153,7 +156,7 @@ def render_orchestrator(root: Path, roles: dict[str, dict[str, Any]], sources: d
     metadata = {
         "name": ORCHESTRATOR_NAME,
         "description": ORCHESTRATOR_DESCRIPTION,
-        "tools": orchestrator_tools(roles),
+        "tools": orchestrator_tools(roles, sources),
     }
     return yaml_frontmatter(metadata) + body
 
@@ -167,6 +170,27 @@ def render(root: Path, agent: str, target: str, role: dict[str, Any], source: Pa
         return source_text
     if target == "claude":
         metadata = {"name": agent, "description": description, "tools": tools}
+    elif target == "cursor":
+        # Cursor Skills expect {name, description, compatibility, metadata}
+        # (no "tools" field) — confirmed by isolated `specify init
+        # --integration cursor-agent` probe (spec 028 clarify session).
+        metadata = {
+            "name": agent,
+            "description": description,
+            "compatibility": str(
+                source_meta.get("compatibility")
+                or "Requires spec-kit project structure with .specify/ directory"
+            ),
+            "metadata": source_meta.get("metadata")
+            or {"author": "nimbus-code", "role": role.get("name", agent)},
+        }
+    elif target == "kiro":
+        # Kiro's native Custom agents mechanism (.kiro/agents/*.md, distinct
+        # from the generic .kiro/prompts/ used for /speckit-* commands).
+        # JSON/Markdown formats share the same fields per
+        # https://kiro.dev/docs/custom-agents/; the markdown body carries the
+        # long-form prompt instead of an inline `prompt` frontmatter string.
+        metadata = {"name": agent, "description": description, "tools": tools}
     else:
         fail(f"unsupported per-agent target: {target}")
     return yaml_frontmatter(metadata) + body
@@ -177,12 +201,17 @@ def destination(root: Path, agent: str, target: str) -> Path:
         return root / GENERATED_ROOTS[target] / agent / "SKILL.md"
     if target == "claude":
         return root / GENERATED_ROOTS[target] / f"{agent}.md"
+    if target == "cursor":
+        return root / GENERATED_ROOTS[target] / agent / "SKILL.md"
+    if target == "kiro":
+        return root / GENERATED_ROOTS[target] / f"{agent}.md"
     fail(f"unsupported per-agent target: {target}")
 
 
 def validate_inventory(root: Path) -> tuple[dict[str, dict[str, Any]], dict[str, Path]]:
-    roles = load_roles(root)
-    sources = source_paths(root)
+    agents = discover_agents(root)
+    roles = load_roles(root, agents)
+    sources = source_paths(root, agents)
     for agent, path in sources.items():
         role = role_for(roles, agent)
         if not role.get("allowed_file_scope") or not role.get("tool_allowlist"):
@@ -200,10 +229,15 @@ def validate_contract(root: Path, agent: str, target: str, role: dict[str, Any],
             fail(f"invalid Antigravity destination for {agent}")
         return
     metadata, _ = split_frontmatter(path.read_text(encoding="utf-8"))
-    required = ("name", "description", "tools")
+    if target == "cursor":
+        required = ("name", "description", "compatibility", "metadata")
+    else:
+        required = ("name", "description", "tools")
     missing = [field for field in required if not metadata.get(field)]
     if missing:
         fail(f"{target} contract missing {', '.join(missing)} for {agent}")
+    if target == "cursor":
+        return
     expected = {str(tool) for tool in role.get("tool_allowlist", [])}
     actual = {str(tool) for tool in metadata.get("tools", [])}
     if not actual.issubset(expected):
@@ -225,7 +259,7 @@ def generate_vscode_orchestrator(root: Path, roles: dict[str, dict[str, Any]], s
     path = root / ORCHESTRATOR_DEST_PATH
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(render_orchestrator(root, roles, sources), encoding="utf-8")
-    validate_contract(root, ORCHESTRATOR_NAME, "vscode", {"tool_allowlist": orchestrator_tools(roles)}, path)
+    validate_contract(root, ORCHESTRATOR_NAME, "vscode", {"tool_allowlist": orchestrator_tools(roles, sources)}, path)
 
 
 def check_vscode_orchestrator(root: Path, roles: dict[str, dict[str, Any]], sources: dict[str, Path]) -> None:
@@ -238,7 +272,7 @@ def check_vscode_orchestrator(root: Path, roles: dict[str, dict[str, Any]], sour
     path = root / ORCHESTRATOR_DEST_PATH
     if not path.is_file():
         fail(f"missing vscode orchestrator artifact: {path}")
-    validate_contract(root, ORCHESTRATOR_NAME, "vscode", {"tool_allowlist": orchestrator_tools(roles)}, path)
+    validate_contract(root, ORCHESTRATOR_NAME, "vscode", {"tool_allowlist": orchestrator_tools(roles, sources)}, path)
     expected = render_orchestrator(root, roles, sources)
     actual = path.read_text(encoding="utf-8")
     if expected != actual:

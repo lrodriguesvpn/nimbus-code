@@ -1,9 +1,11 @@
 {
-  "version": "1.0.8",
+  "version": "1.0.9",
   "integration_state_schema": 1,
   "installed_integrations": [
     "copilot",
-    "claude"
+    "claude",
+    "cursor-agent",
+    "kiro-cli"
   ],
   "integration_settings": {
     "copilot": {
@@ -13,6 +15,14 @@
     "claude": {
       "script": "sh",
       "invoke_separator": "-"
+    },
+    "cursor-agent": {
+      "script": "sh",
+      "invoke_separator": "-"
+    },
+    "kiro-cli": {
+      "script": "sh",
+      "invoke_separator": "."
     }
   },
   "integration": "copilot",
