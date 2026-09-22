@@ -44,6 +44,11 @@ Relatório de Conformidade de Segurança — {mes_referencia}
 _Gerado a partir de {n_execucoes} execuções semanais de `security-compliance-scan.yml`._
 ```
 
+> **Issue #450**: a tabela "Conformidade por controle" lista **todos** os
+> controles de `CONTROL_ORDER` em `scripts/security-compliance-scan.sh` (18
+> controles de repositório + Projeto Plataforma). Controle sem avaliação no
+> mês aparece como `N/A (não avaliado)` — nunca 0% ou 100% inventado.
+
 ## Critério de aceite
 
 - O relatório **deve** existir mensalmente mesmo quando todos os repositórios estão em conformidade (relatório "vazio" de desvios ainda é gerado, evidenciando que a varredura rodou).

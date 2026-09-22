@@ -1,0 +1,107 @@
+name: Dependency Review — Segurança de Supply Chain
+
+# SCA em Pull Requests (docs/security-baseline-ghe.md, seção 13).
+#
+# Bloqueia PRs que introduzem dependências vulneráveis (severidade mínima
+# configurável — padrão high, ou seja, high e critical), dependências
+# proibidas (deny-packages/deny-groups) ou licenças fora da política. A
+# configuração é versionada em .github/dependency-review-config.yml.
+#
+# Check obrigatório estável: `dependency-review`.
+#
+# Roda em TODO PR (sem filtro de paths) de propósito: um required status
+# check com filtro de paths nunca é reportado em PRs que não tocam
+# dependências e deixaria o merge bloqueado como "Expected — waiting". Em PRs
+# sem mudança de dependência a action conclui com sucesso após verificar o
+# diff — isso é o resultado real da avaliação, não um check fictício.
+#
+# Pré-requisito: Dependency Graph habilitado (e, em repositórios privados,
+# GitHub Advanced Security / GitHub Code Security). Quando o recurso não está
+# disponível o job FALHA por padrão (dependency_review.unsupported_behavior =
+# "fail" em .github/security-governance.json) — a ausência do controle não é
+# mascarada como sucesso. O modo "advisory" só é aceito pelo check
+# governance-config com Exception Record ativo.
+#
+# Instalar nos repositórios de projeto junto com os demais workflows:
+#   cp .github/workflows/dependency-review.yml <repo>/.github/workflows/
+#   cp .github/dependency-review-config.yml <repo>/.github/
+
+on:
+  pull_request:
+    branches: ["**"]
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-review:
+    name: dependency-review
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write # comentário de resumo no PR
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Verificar suporte a Dependency Graph
+        id: support
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEPENDENCY_GRAPH_SBOM_URL: ${{ github.api_url }}/repos/${{ github.repository }}/dependency-graph/sbom
+        run: |
+          set -euo pipefail
+
+          behavior="fail"
+          if [ -f .github/security-governance.json ]; then
+            behavior="$(jq -r '.dependency_review.unsupported_behavior // "fail"' .github/security-governance.json)"
+          fi
+
+          HTTP_CODE="$(
+            curl -sS \
+              -u "x-access-token:${GH_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              -o /tmp/dependency-graph-sbom.json \
+              -w "%{http_code}" \
+              "${DEPENDENCY_GRAPH_SBOM_URL}" || true
+          )"
+
+          if [[ "${HTTP_CODE}" =~ ^20[02]$ ]]; then
+            echo "supported=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          MESSAGE="Dependency Graph/SBOM endpoint indisponível."
+          if [[ -s /tmp/dependency-graph-sbom.json ]] && jq -e . /tmp/dependency-graph-sbom.json >/dev/null 2>&1; then
+            MESSAGE="$(jq -r '.message // "Dependency Graph/SBOM endpoint indisponível."' /tmp/dependency-graph-sbom.json)"
+          fi
+
+          echo "supported=false" >> "$GITHUB_OUTPUT"
+          {
+            echo "### ⚠️ Dependency Review NÃO executado"
+            echo
+            echo "O endpoint de Dependency Graph/SBOM não está disponível para este repositório (HTTP ${HTTP_CODE})."
+            echo
+            echo "> ${MESSAGE}"
+            echo
+            echo "Habilite **Dependency Graph** (e **GitHub Advanced Security/Code Security** em repositórios privados)."
+            echo "Comportamento configurado: \`${behavior}\`."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$behavior" = "advisory" ]; then
+            echo "::warning::Dependency Review NÃO executado (${MESSAGE}, HTTP ${HTTP_CODE}) — modo advisory por exceção aprovada; SCA ausente neste PR."
+            exit 0
+          fi
+          echo "::error::Dependency Review indisponível (${MESSAGE}, HTTP ${HTTP_CODE}). O controle SCA é obrigatório — o check falha para não mascarar a ausência."
+          exit 1
+
+      - name: Dependency Review
+        if: steps.support.outputs.supported == 'true'
+        uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4.9.0
+        with:
+          config-file: ./.github/dependency-review-config.yml
+          comment-summary-in-pr: always

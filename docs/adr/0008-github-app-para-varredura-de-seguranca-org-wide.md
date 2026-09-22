@@ -1,7 +1,7 @@
 # 0008 — GitHub App dedicado para varredura de segurança org-wide
 
-- **Status:** Em revisão
-- **Data:** 2026-08-19
+- **Status:** Em revisão _(inalterado pela issue #450 — a aceitação continua dependendo da aprovação humana S4, T037/T038)_
+- **Data:** 2026-08-19 (adendo de permissões: 2026-09-22, issue #450)
 - **Autores:** @copilot (sessão `/speckit-plan`, feature 007)
 - **Contexto:** `007-controle-seguranca-ghe-projetos-plataforma`
 - **Revisores:** _a definir (owner de plataforma / administrador da organização)_
@@ -48,9 +48,12 @@ deve usar.
 ### Opção A — GitHub App dedicado
 
 Um GitHub App ("Nimbus Code Security Auditor") é criado e instalado na
-organização com permissões granulares (`metadata:read`, `administration:read`,
-`secrets:read`, `contents:read`). O workflow gera um installation access token
-de curta duração a cada execução.
+organização com permissões granulares **somente leitura** (`metadata:read`,
+`administration:read`, `secrets:read`, `contents:read` e, após o adendo da
+issue #450, `code_scanning_alerts:read`, `dependabot_alerts:read`,
+`secret_scanning_alerts:read` e `organization_projects:read` — ver seção
+"Adendo" abaixo). O workflow gera um installation access token de curta
+duração a cada execução.
 
 - ✅ Permissões granulares por recurso (não herda escopos amplos de um usuário)
 - ✅ Não fica atrelado ao ciclo de vida de uma conta de pessoa (sem "token órfão")
@@ -92,9 +95,50 @@ leitura), auditabilidade (ações atribuídas ao App) e continuidade operacional
 - Setup inicial exige um administrador da organização (ação manual, fora do escopo de código desta feature — documentada no `quickstart.md`).
 - Introduz um segundo padrão de credencial no repositório (GitHub App, além do PAT já usado por `ensure-github-project.yml`) — aceito porque cada padrão é apropriado ao seu contexto de risco (governança de board vs. leitura de segurança org-wide).
 
+## Adendo (2026-09-22) — Permissões adicionais para a issue #450
+
+A issue [#450](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/450)
+amplia a varredura para Rulesets/branch protection em múltiplas branches,
+required checks, CodeQL, Dependabot, Dependency Review e Secret Scanning. A
+decisão (GitHub App dedicado) **não muda**; muda apenas o conjunto mínimo de
+permissões, **todas somente leitura**:
+
+| Permissão do App (read-only) | Status | Necessária para | Endpoints |
+|---|---|---|---|
+| Repository → Metadata | Existente | Descoberta de repositórios/branches; Rulesets aplicáveis | `GET /orgs/{org}/repos`, `GET /repos/{r}/branches`, `GET /repos/{r}/rules/branches/{b}`, `GET /repos/{r}/rulesets` |
+| Repository → Administration | Existente | Proteção clássica, detalhes de Rulesets, permissões de Actions, Dependabot alerts/security updates, `security_and_analysis`, CodeQL default setup | `.../branches/{b}/protection`, `.../rulesets/{id}`, `.../actions/permissions`, `.../actions/permissions/workflow`, `.../vulnerability-alerts`, `.../automated-security-fixes`, `GET /repos/{r}`, `.../code-scanning/default-setup` |
+| Repository → Contents | Existente | `.github/security-governance.json`, CODEOWNERS, arquivos de workflow | `.../contents/{path}` |
+| Repository → Secrets | Existente | Existência de Actions secrets (metadados, nunca valores) | `.../actions/secrets` |
+| Repository → **Code scanning alerts** | **Nova** | `codeql-enabled`, `codeql-recent`, `codeql-alerts` | `.../code-scanning/analyses`, `.../code-scanning/alerts` |
+| Repository → **Dependabot alerts** | **Nova** | Contagem de alertas critical/high em `dependabot-alerts-enabled` | `.../dependabot/alerts` |
+| Repository → **Secret scanning alerts** | **Nova** | `secret-alerts` (sempre com `hide_secret=true`) | `.../secret-scanning/alerts` |
+| Organization → **Projects** | **Nova (explicitada)** | `platform-project-access` (GraphQL Project V2 — já usado, não estava documentado) | GraphQL `projectsV2` |
+
+Regras mantidas/reforçadas:
+
+- **Nenhuma permissão de escrita** ao App — nem `Issues: write`. As issues de
+  não conformidade e o relatório mensal passam a ser escritos exclusivamente
+  no repositório que hospeda a varredura com o `GITHUB_TOKEN` efêmero do
+  workflow (`permissions: issues: write`), via `SECURITY_SCAN_ISSUES_TOKEN`
+  (`SECURITY_SCAN_ISSUE_TARGET=report-repository`, padrão). Isso também
+  corrige a lacuna anterior, em que o script criava issues com o token do App
+  sem que `Issues: write` constasse na lista de permissões.
+- Criar issues diretamente em cada repositório avaliado
+  (`SECURITY_SCAN_ISSUE_TARGET=scanned-repository`) exigiria uma credencial
+  com `Issues: write` em toda a organização — **não adotado**; depende de novo
+  ADR/aprovação.
+- Endpoint indisponível no plano/instância → `pendente` com evidência; `403`
+  por permissão ausente → erro explícito em `repos_com_erro`. Nunca `ok`.
+- O App nunca lê valores de secrets (Actions secrets: só metadados; alertas de
+  secret scanning: `hide_secret=true` + projeção sem o campo `secret`).
+- A lista de endpoints acima reflete a documentação atual da API REST; a
+  confirmação de que cada permissão é suficiente no GHE.com é feita no piloto
+  (task T063) antes do gate S4.
+
 ### Ações derivadas
 
 - [ ] Criar o GitHub App "Nimbus Code Security Auditor" na organização (owner: administrador da organização)
+- [ ] Conceder ao App as permissões **read-only** adicionais do adendo (Code scanning alerts, Dependabot alerts, Secret scanning alerts, Organization Projects) — task T063, humana
 - [ ] Configurar `SECURITY_SCAN_APP_ID`, `SECURITY_SCAN_APP_PRIVATE_KEY`, `SECURITY_SCAN_APP_INSTALLATION_ID` como GitHub Secrets
 - [ ] Definir e documentar a rotação trimestral da chave privada (owner: responsável de plataforma)
 - [ ] Atualizar o ADL do `plan.md` da feature 007 apontando para este ADR (já feito)

@@ -7,7 +7,7 @@
 feature: "007-controle-seguranca-ghe-projetos-plataforma"
 complexity: "S4"
 version: 1
-updated_at: "2026-08-20"
+updated_at: "2026-09-22"
 spec_ref: "specs/007-controle-seguranca-ghe-projetos-plataforma/spec.md"
 
 nodes:
@@ -40,6 +40,42 @@ nodes:
     type: "module"
     path: "scripts/security-compliance-scan.sh (flag resolution)"
     description: "Resolução do flag security.baseline_scan.org_wide_enabled via abstração OpenFeature (provider env/file-based)"
+
+  # --- issue #450: governança de PR e segurança de código -------------------
+  - id: "security-governance-config"
+    type: "module"
+    path: ".github/security-governance.json"
+    description: "Configuração versionada: branches protegidas, regras, required checks, quality gates, cobertura, CodeQL, SCA (lida pelos workflows de PR e pela varredura)"
+
+  - id: "security-exceptions-registry"
+    type: "module"
+    path: ".github/security-exceptions.json"
+    description: "Exception Records aprovados e expiráveis"
+
+  - id: "pr-quality-gates-workflow"
+    type: "service"
+    path: ".github/workflows/pr-quality-gates.yml"
+    description: "Checks obrigatórios governance-config, build, unit-tests, integration-tests e coverage"
+
+  - id: "quality-gate-scripts"
+    type: "module"
+    path: "scripts/run-quality-gate.sh, scripts/coverage-gate.py, scripts/validate-security-governance.sh, scripts/validate-repo-static.sh"
+    description: "Executor extensível de etapas, gate de cobertura, validador de governança e build estático"
+
+  - id: "codeql-workflow"
+    type: "service"
+    path: ".github/workflows/codeql.yml"
+    description: "SAST CodeQL em PR, push, merge queue e semanal"
+
+  - id: "dependency-review-workflow"
+    type: "service"
+    path: ".github/workflows/dependency-review.yml"
+    description: "SCA em PR (check dependency-review) com .github/dependency-review-config.yml"
+
+  - id: "secret-scan-workflow"
+    type: "service"
+    path: ".github/workflows/secret-scan.yml"
+    description: "Verificação complementar de secrets em PR (gitleaks pinado, relatório redigido)"
 
 nodes_removed: []
 
@@ -74,6 +110,36 @@ edges:
     protocol: "referência documental"
     description: "A documentação define os controles que o script implementa/avalia (não é chamada em runtime, é referência de especificação)"
 
+  - src: "security-compliance-scan-script"
+    dst: "security-governance-config"
+    type: "sync"
+    protocol: "arquivo local + GitHub REST contents API"
+    description: "Lê a configuração padrão e a de cada repositório avaliado (branches, checks esperados, cobertura)"
+
+  - src: "pr-quality-gates-workflow"
+    dst: "quality-gate-scripts"
+    type: "sync"
+    protocol: "shell invocation"
+    description: "Executa etapas declaradas, gate de cobertura e validação de governança"
+
+  - src: "quality-gate-scripts"
+    dst: "security-governance-config"
+    type: "sync"
+    protocol: "in-process (jq/python)"
+    description: "Comandos por etapa, mínimos de cobertura e required checks"
+
+  - src: "quality-gate-scripts"
+    dst: "security-exceptions-registry"
+    type: "sync"
+    protocol: "in-process"
+    description: "Valida exceções (expiração) e aplica exceções ativas ao gate de cobertura"
+
+  - src: "codeql-workflow"
+    dst: "security-governance-config"
+    type: "sync"
+    protocol: "in-process (jq)"
+    description: "Linguagens CodeQL declaradas"
+
 externals:
   - id: "github-app-security-auditor"
     provider: "GitHub"
@@ -86,3 +152,15 @@ externals:
     called_by: ["security-compliance-scan-script"]
     criticality: "high"
     fallback: "Backoff exponencial em rate limit (403/429); repositórios com erro persistente são contabilizados em repos_com_erro e reportados, não bloqueiam os demais"
+
+  - id: "github-code-scanning"
+    provider: "GitHub (Code Security)"
+    called_by: ["codeql-workflow", "security-compliance-scan-script"]
+    criticality: "high"
+    fallback: "Sem GHAS/Code Security o upload falha (check vermelho) e a varredura reporta pendente — nunca ok"
+
+  - id: "gitleaks-release"
+    provider: "gitleaks (release oficial, MIT)"
+    called_by: ["secret-scan-workflow"]
+    criticality: "medium"
+    fallback: "Download com versão e SHA-256 fixados; falha de download/checksum falha o check secret-scan"

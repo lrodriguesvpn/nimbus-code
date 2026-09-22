@@ -13,7 +13,7 @@
 > quando, e o que fazer quando algo sai do previsto). Um referencia o outro; nenhum
 > duplica o conteúdo do outro.
 
-**Última atualização**: 2026-08-19
+**Última atualização**: 2026-09-22 (issue #450 — checks obrigatórios de PR, Rulesets, SAST/SCA/secrets)
 **Owner**: Responsável de Plataforma / Segurança (Nimbus-Code Architecture Board)
 **Feature de origem**: [007-controle-seguranca-ghe-projetos-plataforma](/specs/007-controle-seguranca-ghe-projetos-plataforma/spec.md)
 
@@ -32,6 +32,9 @@
 | ADR da credencial | Decisão de usar GitHub App em vez de PAT | [`docs/adr/0008-github-app-para-varredura-de-seguranca-org-wide.md`](/docs/adr/0008-github-app-para-varredura-de-seguranca-org-wide.md) |
 | Plano técnico completo | Contexto, gates, riscos e ADL desta feature | [`specs/007-controle-seguranca-ghe-projetos-plataforma/plan.md`](/specs/007-controle-seguranca-ghe-projetos-plataforma/plan.md) |
 | Mapa de impacto e risco | Análise de risco, rollback e critérios Go/No-Go (S4) | [`specs/007-controle-seguranca-ghe-projetos-plataforma/impact-map.md`](/specs/007-controle-seguranca-ghe-projetos-plataforma/impact-map.md) |
+| Configuração de governança *(issue #450)* | Branches protegidas, regras, required checks, quality gates, cobertura, CodeQL, SCA | [`.github/security-governance.json`](/.github/security-governance.json) |
+| Exceções *(issue #450)* | Exception Records aprovados e expiráveis | [`.github/security-exceptions.json`](/.github/security-exceptions.json) |
+| Checks obrigatórios de PR *(issue #450)* | `governance-config`, `build`, `unit-tests`, `integration-tests`, `coverage`, `CodeQL`, `dependency-review`, `secret-scan` | `.github/workflows/pr-quality-gates.yml`, `codeql.yml`, `dependency-review.yml`, `secret-scan.yml` |
 
 **Princípio operacional central**: a automação **nunca corrige nada sozinha**. Ela só
 detecta e reporta (issue rastreável). Toda correção de configuração de repositório é
@@ -47,6 +50,8 @@ feita por um humano, seguindo o fluxo Nimbus Code já existente de labels/board/
 | **Responsável de Plataforma** | Owner do workflow e do script; aprova rollout piloto → org-wide; mantém a rotação da chave do App |
 | **Time de Engenharia/Governança** | Recebe e trata as issues de não conformidade dos seus repositórios; participa da auditoria mensal |
 | **Tech Lead / Revisor humano (S4)** | Aprova o `plan.md` e o ADR-0008 antes de qualquer rollout em produção (gate obrigatório, sem exceção) |
+| **Responsável de Segurança** *(issue #450)* | Aprova Exception Records, acompanha SLA de alertas (CodeQL, Dependabot, secrets) e a revogação/rotação de secrets expostos |
+| **Mantenedor do repositório** *(issue #450)* | Mantém `.github/security-governance.json` do seu repositório (branches, comandos de build/teste/cobertura) e os Rulesets/required checks correspondentes |
 
 ---
 
@@ -54,8 +59,8 @@ feita por um humano, seguindo o fluxo Nimbus Code já existente de labels/board/
 
 1. **Segunda-feira, 10h BRT** — o workflow `security-compliance-scan.yml` roda automaticamente (cron) ou pode ser disparado manualmente via `gh workflow run security-compliance-scan.yml` (`workflow_dispatch`).
 2. O script autentica-se como o GitHub App, resolve o escopo (`piloto` ou `org-wide`, conforme o flag `security.baseline_scan.org_wide_enabled`) e descobre os repositórios a avaliar.
-3. Cada repositório é avaliado contra os controles do baseline (branch protection, revisão obrigatória, permissões de Actions, secrets configurados) e, para o Projeto Plataforma, contra a matriz de acesso documentada.
-4. Para cada desvio (`status: pendente` ou `risco`): o script cria ou atualiza (idempotente) uma Issue no formato definido em [`finding-schema.md`](/specs/007-controle-seguranca-ghe-projetos-plataforma/contracts/finding-schema.md), com label `security-baseline` e prioridade conforme severidade.
+3. Cada repositório é avaliado contra os 18 controles de repositório do baseline (seção 5 de `docs/security-baseline-ghe.md`: Rulesets/branch protection na branch padrão e nos padrões configurados, revisão, required checks, testes, cobertura, CodeQL, Dependabot, Dependency Review, Secret Scanning, Push Protection, alertas, permissões de Actions, secrets configurados) usando o `.github/security-governance.json` do próprio repositório (fallback: o deste template) e, para o Projeto Plataforma, contra a matriz de acesso documentada. API indisponível → `pendente`; 403 → erro explícito (`repos_com_erro`).
+4. Para cada desvio (`status: pendente` ou `risco`): o script cria ou atualiza (idempotente) uma Issue no formato definido em [`finding-schema.md`](/specs/007-controle-seguranca-ghe-projetos-plataforma/contracts/finding-schema.md), com label `security-baseline` e prioridade conforme severidade — **no repositório que hospeda a varredura**, usando o `GITHUB_TOKEN` do workflow (o GitHub App é somente leitura).
 5. O log da execução registra `repos_avaliados` e `repos_com_erro`. Se `repos_com_erro / repos_avaliados > 5%`, o workflow emite um `::warning::` (não falha a execução inteira).
 6. **Responsável de cada repositório**: ao receber uma issue `security-baseline`, tratar como qualquer outra issue de prioridade — atribuir responsável, prazo, e corrigir manualmente a configuração indicada. A issue é fechada quando a próxima execução semanal confirmar `status: ok` (ou manualmente, após validação).
 
@@ -81,9 +86,19 @@ A varredura começa restrita ao bounded context piloto (`spec-kit-workflow`, reg
 
 ## 6. Gestão da credencial (GitHub App)
 
+- **Permissões (todas read-only)**: ver tabela da seção 17 de `docs/security-baseline-ghe.md` e o adendo do ADR-0008. Qualquer pedido de permissão de escrita para o App é recusado — escrita de issues usa o `GITHUB_TOKEN` do job.
+
 - **Rotação da chave privada**: trimestral, obrigatória (ver risco registrado no `plan.md` e no `impact-map.md`). Gerar nova chave em Organization Settings → GitHub Apps → "Nimbus Code Security Auditor" → Generate a private key; atualizar o secret `SECURITY_SCAN_APP_PRIVATE_KEY`; revogar a chave antiga.
 - **Monitoramento de uso anômalo**: revisar o audit log da organização (Enterprise audit log) periodicamente em busca de atividade do App fora do padrão esperado (ex.: chamadas fora do horário do cron).
 - **Suspensão de emergência**: em caso de suspeita de comprometimento da chave, suspender a instalação do App imediatamente (Organization Settings → GitHub Apps → Advanced → Suspend) — isso interrompe todo o acesso sem precisar reverter código. Ver plano de rollback completo no [`impact-map.md`](/specs/007-controle-seguranca-ghe-projetos-plataforma/impact-map.md#4-plano-de-rollback).
+
+## 6a. Operação dos checks obrigatórios de PR *(issue #450)*
+
+- **PR bloqueado por check**: o autor corrige a causa (teste, cobertura, alerta CodeQL, dependência, secret). Exceções só via Exception Record aprovado em `.github/security-exceptions.json` (PR revisado por CODEOWNERS; máx. 90 dias).
+- **`governance-config` vermelho por exceção vencida**: renovar com nova aprovação ou remover a exceção e corrigir o controle.
+- **`dependency-review` vermelho por "indisponível"**: habilitar Dependency graph/GitHub Code Security no repositório (não mudar para `advisory` sem exceção).
+- **`secret-scan` vermelho**: tratar como incidente — revogar/rotacionar a credencial em até 24h, remover do código, registrar no alerta; nunca apenas reescrever o histórico.
+- **Novo repositório**: copiar os workflows de PR, `scripts/run-quality-gate.sh`, `scripts/coverage-gate.py`, `scripts/validate-security-governance.sh`, `.github/security-governance.json` (ajustando branches/comandos), `.github/security-exceptions.json`, `.github/dependency-review-config.yml`, `.github/dependabot.yml` e `.gitleaks.toml`; em seguida criar os Rulesets e required checks (ação administrativa).
 
 ## 7. Resposta a incidentes / rollback
 
@@ -106,6 +121,7 @@ Resumo operacional:
 
 **Mensal** (Responsável de Plataforma):
 - [ ] Revisar o relatório mensal consolidado
+- [ ] *(issue #450)* Revisar alertas CodeQL/Dependabot/secret scanning fora do SLA e Exception Records a vencer nos próximos 30 dias
 - [ ] Atualizar a série histórica de % de conformidade por controle
 - [ ] Verificar se algum bounded context precisa de atenção prioritária
 

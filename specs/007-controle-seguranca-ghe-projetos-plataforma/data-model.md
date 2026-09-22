@@ -15,7 +15,7 @@ Política ou configuração obrigatória no GHE avaliada pela varredura.
 
 | Campo | Tipo | Descrição |
 |---|---|---|
-| `id` | string | Identificador estável do controle (ex.: `branch-protection`, `required-review`, `actions-permissions`, `secrets-configured`) |
+| `id` | string | Identificador estável do controle (ex.: `branch-protection-default`, `required-review`, `required-pr-checks`, `codeql-alerts`, `secret-alerts`, `actions-permissions`, `secrets-configured` — lista completa em `contracts/finding-schema.md`; o id legado `branch-protection` foi migrado para `branch-protection-default`) |
 | `nome` | string | Nome legível (ex.: "Proteção de branch") |
 | `escopo` | enum | `repositorio` \| `projeto-plataforma` |
 | `criterio_conformidade` | string | Regra objetiva usada para avaliar `ok`/`pendente`/`risco` |
@@ -100,12 +100,37 @@ Agregação de até 5 `Scan Run` do mesmo mês calendário.
 | `desvios_abertos` | list\<Evidência de Auditoria\> | Ainda não corrigidos ao final do mês |
 | `desvios_fechados_no_mes` | list\<Evidência de Auditoria\> | Corrigidos durante o mês (para medir SC-004) |
 
+### 9. Governance Config *(issue #450)*
+
+Configuração versionada por repositório (`.github/security-governance.json`).
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `branches` | objeto | `default_branch` (`auto`), `production_branches`, `protected_patterns`, `additional_branches` |
+| `branch_rules` | objeto | Aprovadores, CODEOWNERS, dismiss stale, bloqueios de push/force push/deleção, strict, conversas, merge queue |
+| `required_status_checks` | map\<categoria, list\<context\>\> | Checks esperados como obrigatórios (build, unit_tests, integration_tests, coverage, sast, sca, secret_scanning, governance) |
+| `quality_gates` | objeto | `setup_command`/`command`/`not_applicable_reason` por etapa |
+| `coverage` | objeto | `mode` (`report`/`not-applicable`), mínimos global/diff, baseline, relatório |
+| `codeql` | objeto | Linguagens, idade máxima da análise, severidades bloqueantes |
+
+### 10. Exception Record *(issue #450)*
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `id` | string | Identificador único |
+| `control` | string | Controle excetuado |
+| `owner` / `approved_by` | string | Responsável e aprovador |
+| `justification` | string | Motivo e risco residual |
+| `created_at` / `expires_at` | date | Prazo máximo de 90 dias; vencida quebra `governance-config` |
+
 ## Relacionamentos
 
 ```
 Projeto de Repositório (1) ──< avaliado-por >── (N) Evidência de Auditoria
 Projeto Plataforma (1)       ──< avaliado-por >── (N) Evidência de Auditoria
 Controle de Segurança (1)   ──< referenciado-por >── (N) Evidência de Auditoria
+Governance Config (1)        ──< parametriza >── (N) Controle de Segurança (por repositório)
+Exception Record (N)         ──< excetua >── (1) Controle de Segurança
 Perfil de Acesso (N)         ──< aplica-se-a >── Projeto de Repositório | Projeto Plataforma
 Scan Run (1)                 ──< produz >── (N) Evidência de Auditoria
 Compliance Report (1)        ──< agrega >── (4..5) Scan Run

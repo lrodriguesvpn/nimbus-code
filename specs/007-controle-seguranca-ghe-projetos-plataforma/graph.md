@@ -6,7 +6,7 @@
 # Grafo de Módulos — `007-controle-seguranca-ghe-projetos-plataforma`
 
 > **Complexidade:** S4 — Arquitetura, segurança, dados sensíveis ou integração crítica
-> **Última atualização:** 2026-08-20
+> **Última atualização:** 2026-09-22 (issue #450)
 > **Spec:** [spec.md](./spec.md) · **Grafo estruturado:** [graph.yaml](./graph.yaml)
 
 ---
@@ -36,6 +36,23 @@ graph TD
   SCRIPT -->|"cria/atualiza (idempotente)"| ISSUES
   SCRIPT -->|"lê matriz de permissões"| PROJV2
   DOC -.->|"referência de especificação"| SCRIPT
+
+  %% ── issue #450: checks obrigatórios de PR ────────────────────────────────
+  CFG[".github/security-governance.json\n(config versionada)"]
+  EXC[".github/security-exceptions.json"]
+  QG["pr-quality-gates.yml\n(governance-config, build,\nunit-tests, integration-tests, coverage)"]
+  QGS["run-quality-gate.sh · coverage-gate.py\nvalidate-security-governance.sh"]
+  CQ["codeql.yml"]
+  DR["dependency-review.yml"]
+  SS["secret-scan.yml"]
+  CS["Code Scanning / Dependency graph"]:::external
+  QG -->|"invoca"| QGS
+  QGS -->|"lê"| CFG
+  QGS -->|"valida expiração"| EXC
+  CQ -->|"linguagens"| CFG
+  CQ -->|"publica SARIF"| CS
+  DR -->|"consulta diff"| CS
+  SCRIPT -->|"checks/branches esperados"| CFG
 
   classDef external fill:#f5f5f5,stroke:#aaa,color:#555
 ```

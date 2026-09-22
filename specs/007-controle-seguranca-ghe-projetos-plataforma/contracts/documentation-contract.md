@@ -43,7 +43,21 @@ critério de teste de integração `tests/docs/security-baseline-checklist.test.
 8. **Dependências de Workflows com Projects** (atende FR-008)
    - Permissões e secrets mínimos exigidos por qualquer workflow que leia/escreva em Projects V2
 
+9. **Baseline de Rulesets e Branch Protection** (atende FR-009 — issue #450)
+   - Variáveis de branches (`default_branch`, `production_branches`, `protected_patterns`, `additional_branches`)
+   - Matriz de branches protegidas (Ruleset vs. proteção clássica de compatibilidade)
+10. **Matriz de Required Checks** (FR-010)
+11. **Política de Cobertura de Testes** (FR-011) — 80% global/diff, sem redução, N/A justificado
+12. **Política de SAST (CodeQL)** (FR-012)
+13. **Política de SCA e Segurança de Dependências** (FR-013)
+14. **Política de Secret Scanning e Push Protection** (FR-014) — secrets de workflows vs. secrets expostos
+15. **Processo de Exceções** (FR-018)
+16. **SLA de Tratamento por Severidade** (FR-018)
+17. **Evidências, Pré-requisitos de Plano/Licença e Permissões do GitHub App** (FR-017, FR-018)
+18. **Procedimento de Piloto e Validação** (FR-018)
+
 ## Critério de aceite do contrato
 
 - `tests/docs/security-baseline-checklist.test.sh` verifica, via grep de headings, que as 8 seções acima existem no arquivo publicado.
+- `tests/docs/security-governance-policies.test.sh` verifica as seções 9–18 (issue #450).
 - Nenhuma seção pode apenas re-explicar o fluxo Nimbus Code já documentado alhures — deve referenciar por link (regra de reuso da constituição).

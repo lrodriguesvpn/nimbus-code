@@ -101,6 +101,17 @@ specs/013-governanca-testes-pr/, e a task T048 do
 [`tasks.md`](/specs/008-bootstrap-governance-hardening/tasks.md) de
 specs/008-bootstrap-governance-hardening/).
 
+**Atualização (issue #450, SPEC 007 — User Story 4)**:
+`.github/workflows/pr-quality-gates.yml` passou a publicar checks com nomes
+estáveis para uso como required status checks — `unit-tests` executa o mesmo
+`scripts/run-tests.sh` (paridade local/CI preservada), além de
+`governance-config`, `build`, `integration-tests` (N/A declarado neste
+repositório) e `coverage` (N/A declarado; ver
+[`docs/security-baseline-ghe.md`](/docs/security-baseline-ghe.md), seções 10
+e 11). `test-suite.yml` não foi alterado. Marcar qualquer um desses checks
+como obrigatório continua sendo decisão administrativa humana (tasks T065 e
+T067 de specs/007).
+
 Se qualquer segmento (`bootstrap`, `docs`, `scripts`, `workflows`) falhar, a
 saída de `scripts/run-tests.sh` identifica explicitamente qual foi o primeiro
 a falhar, sem exigir inspeção de múltiplos arquivos de log (FR-011, AC-3).

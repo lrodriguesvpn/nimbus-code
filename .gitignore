@@ -27,3 +27,5 @@ platform-governance/coverage/
 platform-governance/dist/
 platform-governance/build/
 platform-governance/.state/
+Claude outputs/*
+_claude-issue-450/* 
