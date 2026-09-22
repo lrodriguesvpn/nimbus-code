@@ -231,3 +231,40 @@ manifest:
       human_approval_policy:
         policy_ref: "approval_matrix_by_complexity"
         write_from_complexity: "S3"
+    - id: "NC-Bug-Assess"
+      name: "Nimbus Bug Triage"
+      layer: "bug"
+      write_permission: "read-write"
+      allowed_file_scope:
+        - ".specify/bugs/*/assessment.md"
+      tool_allowlist: ["view", "rg", "glob", "bash", "apply_patch", "skill:nc-bug-assess", "skill:speckit-bug-assess"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S3"
+    - id: "NC-Bug-Fix"
+      name: "Nimbus Bug Fix"
+      layer: "bug"
+      write_permission: "read-write"
+      allowed_file_scope:
+        - ".specify/bugs/*/fix.md"
+        - "src/**"
+        - "services/**"
+        - "modules/**"
+        - "apps/**"
+        - "scripts/**"
+        - "tests/**"
+      tool_allowlist: ["view", "rg", "glob", "bash", "apply_patch", "skill:nc-bug-fix", "skill:speckit-bug-fix"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S3"
+    - id: "NC-Bug-Test"
+      name: "Nimbus Bug Verification"
+      layer: "bug"
+      write_permission: "read-write"
+      allowed_file_scope:
+        - ".specify/bugs/*/test.md"
+        - "tests/**"
+      tool_allowlist: ["view", "rg", "glob", "bash", "apply_patch", "skill:nc-bug-test", "skill:speckit-bug-test"]
+      human_approval_policy:
+        policy_ref: "approval_matrix_by_complexity"
+        write_from_complexity: "S3"

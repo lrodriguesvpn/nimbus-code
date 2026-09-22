@@ -92,6 +92,13 @@ jobs:
             echo '```bash'
             echo "specify self upgrade --tag v${{ steps.latest.outputs.speckit }}"
             echo "specify bundle update nimbus-code-project-bundle"
+            echo ""
+            echo "# Rematerializa o conteúdo dos comandos /speckit-* oficiais em cada"
+            echo "# integração já instalada neste repositório (o CLI não faz isso sozinho"
+            echo "# ao atualizar — cada integração precisa ser atualizada explicitamente):"
+            echo 'for i in $(python3 -c "import json;print(*json.load(open(\".specify/integration.json\"))[\"installed_integrations\"])"); do'
+            echo '  specify integration upgrade "$i"'
+            echo 'done'
             echo '```'
             echo ""
             echo "Depois de aplicar e testar, rerodar o bootstrap/sync local se algum artefato"

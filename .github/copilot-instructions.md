@@ -444,6 +444,43 @@ A cada nova versão do preset/bundle (`MAJOR`, `MINOR` ou `PATCH` com novas capa
 
 ---
 
+## Atualização deste Repositório a partir do Bundle Nimbus-Code
+
+Quando o Dev pedir para **"atualizar o Nimbus"** (ou equivalente) neste
+repositório, existem **dois mecanismos distintos e complementares** — rode
+ambos, nesta ordem, e nunca aplique silenciosamente sem revisão humana (PR
+normal, nunca commit direto):
+
+1. **Conteúdo Nimbus-Code** (agentes NC-*, presets, workflows, docs deste
+   bundle) — vem do repositório
+   [`nimbus-code-spec-kit-template`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template):
+   ```bash
+   bash /caminho/do/bundle/bootstrap.sh \
+     --local /caminho/do/bundle --refresh-preset --repo-type dev_standards
+   ```
+   (use `platform` no lugar de `dev_standards` se o preset instalado for
+   `nimbus-code-platform-standards`; ver `.specify/presets/.registry`).
+
+2. **Conteúdo oficial do spec-kit upstream** (os comandos `/speckit-*`
+   genéricos, ex.: `speckit-plan`, `speckit-converge` — vêm do pacote
+   `specify-cli`, não deste bundle) — precisa ser rematerializado
+   **explicitamente por integração instalada**, ou o passo 1 sozinho não
+   atualiza o conteúdo desses comandos:
+   ```bash
+   specify self upgrade
+   for i in $(python3 -c "import json;print(*json.load(open('.specify/integration.json'))['installed_integrations'])"); do
+     specify integration upgrade "$i"
+   done
+   ```
+
+Depois de rodar ambos: `git diff --stat`, testar localmente, e abrir PR normal
+— nunca commit direto. Se algum artefato copiado pelo bootstrap tiver
+desaparecido, rerode o passo 1 antes do PR para reidratar. Detalhamento
+completo, incluindo o que cada mecanismo cobre e não cobre:
+`docs/developer-guide.md`, seção "Manual Preset Refresh".
+
+---
+
 ## Referências
 
 - [Manual de Sessões Remotas e Branches](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/agent-session-manual.md)

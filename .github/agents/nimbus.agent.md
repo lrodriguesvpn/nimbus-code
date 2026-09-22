@@ -13,6 +13,9 @@ tools:
 - skill:nc-assess-intake
 - skill:nc-assess-research
 - skill:nc-assess-shape
+- skill:nc-bug-assess
+- skill:nc-bug-fix
+- skill:nc-bug-test
 - skill:nc-builder
 - skill:nc-critic
 - skill:nc-designer
@@ -27,6 +30,9 @@ tools:
 - skill:speckit-assess-intake
 - skill:speckit-assess-research
 - skill:speckit-assess-shape
+- skill:speckit-bug-assess
+- skill:speckit-bug-fix
+- skill:speckit-bug-test
 - sql
 - view
 - web_fetch
@@ -127,19 +133,22 @@ Conduza nesta ordem, aguardando confirmação do humano nos gates S3/S4:
 
 | Camada | Comando | Papel |
 | --- | --- | --- |
+| architecture | `/nc-arch` | Nimbus Solution Architect — Desenha a arquitetura técnica, registra ADRs, atualiza grafos de dependência e consulta o catálogo de reuso. |
+| discovery-assessment | `/nc-assess-decide` | Nimbus Assessment Decider — Aplica o gate formal de viabilidade (Go / Needs Clarification / Kill) e realiza o handoff para o ciclo de especificação formal (.specify/assessments/<slug>/decision.md). |
+| discovery-assessment | `/nc-assess-define` | Nimbus Problem Definer — Converte a ideia e evidências em uma definição formal do problema, público impactado, dores e metas mensuráveis (.specify/assessments/<slug>/problem.md). |
 | discovery-assessment | `/nc-assess-intake` | Nimbus Idea Intake Specialist — Captura e normaliza ideias brutas (texto, URLs, tickets, repositórios) em notas de intake de assessment (.specify/assessments/<slug>/intake.md). |
 | discovery-assessment | `/nc-assess-research` | Nimbus Evidence Researcher — Reúne evidências de mercado, usuários, concorrência e dados para fundamentar ou desafiar a ideia (.specify/assessments/<slug>/research.md). |
-| discovery-assessment | `/nc-assess-define` | Nimbus Problem Definer — Converte a ideia e evidências em uma definição formal do problema, público impactado, dores e metas mensuráveis (.specify/assessments/<slug>/problem.md). |
 | discovery-assessment | `/nc-assess-shape` | Nimbus Concept Shaper — Modela opções de solução conceitual, escopo, apetite de esforço e trade-offs (.specify/assessments/<slug>/concept.md). |
-| discovery-assessment | `/nc-assess-decide` | Nimbus Assessment Decider — Aplica o gate formal de viabilidade (Go / Needs Clarification / Kill) e realiza o handoff para o ciclo de especificação formal (.specify/assessments/<slug>/decision.md). |
-| discovery | `/nc-intake` | Nimbus Intake Specialist — Conduz a entrevista de descoberta nos 4 blocos obrigatórios (Negócio, Infraestrutura, Segurança e LGPD) a partir de sessão interativa ou transcrição. |
-| discovery | `/nc-spec` | Nimbus Spec Architect — Transforma os requisitos da entrevista em especificação funcional estruturada SMART e cenários BDD. |
-| discovery | `/nc-critic` | Nimbus Spec Auditor — Analisa a especificação em busca de ambiguidades, termos vagos, contradições e lacunas de requisitos. |
-| governance | `/nc-governor` | Nimbus Governance Gate — Gerencia o versionamento da spec, integridade criptográfica SHA-256, classificação S0–S4 e gates de aprovação RACI. |
-| architecture | `/nc-arch` | Nimbus Solution Architect — Desenha a arquitetura técnica, registra ADRs, atualiza grafos de dependência e consulta o catálogo de reuso. |
-| quality | `/nc-qa` | Nimbus Test Strategist — Constrói a estratégia de testes, gera tasks.md ordenadas por dependência com [P] e planeja suítes de validação automatizadas. |
+| bug | `/nc-bug-assess` | Nimbus Bug Triage — Avalia um relato de bug (texto colado, URL ou Issue do GHE) contra o código atual, localiza a causa suspeita e propõe remediação. |
+| bug | `/nc-bug-fix` | Nimbus Bug Fix — Aplica a remediação descrita em uma avaliação de bug existente e registra o que foi alterado. |
+| bug | `/nc-bug-test` | Nimbus Bug Verification — Valida que um bug previamente corrigido foi de fato resolvido e registra o relatório de verificação. |
 | delivery | `/nc-builder` | Nimbus Autonomous Builder — Executa a implementação do código sob isolamento estrito de sessão, criando testes, código limpo e PR com rastreabilidade. |
-| security | `/nc-shield` | Nimbus DevSecOps Guardian — Audita e impõe os 6 controles Não-Negociáveis de segurança, TLS, segredos em cofre, backup/DR e gates DevSecOps. |
-| telemetry | `/nc-telemetry` | Nimbus Observability & SRE — Consolida observabilidade, logs estruturados em JSON, traces OpenTelemetry, métricas DORA e custo real da entrega. |
+| discovery | `/nc-critic` | Nimbus Spec Auditor — Analisa a especificação em busca de ambiguidades, termos vagos, contradições e lacunas de requisitos. |
 | experience-design | `/nc-designer` | Nimbus Interface Designer — Aplica julgamento estético de UI/UX de alto padrão (evita clichês de 'AI slop'), audita interfaces existentes e gera diretrizes de design distintivas para o produto. |
+| governance | `/nc-governor` | Nimbus Governance Gate — Gerencia o versionamento da spec, integridade criptográfica SHA-256, classificação S0–S4 e gates de aprovação RACI. |
+| discovery | `/nc-intake` | Nimbus Intake Specialist — Conduz a entrevista de descoberta nos 4 blocos obrigatórios (Negócio, Infraestrutura, Segurança e LGPD) a partir de sessão interativa ou transcrição. |
+| quality | `/nc-qa` | Nimbus Test Strategist — Constrói a estratégia de testes, gera tasks.md ordenadas por dependência com [P] e planeja suítes de validação automatizadas. |
+| security | `/nc-shield` | Nimbus DevSecOps Guardian — Audita e impõe os 6 controles Não-Negociáveis de segurança, TLS, segredos em cofre, backup/DR e gates DevSecOps. |
+| discovery | `/nc-spec` | Nimbus Spec Architect — Transforma os requisitos da entrevista em especificação funcional estruturada SMART e cenários BDD. |
+| telemetry | `/nc-telemetry` | Nimbus Observability & SRE — Consolida observabilidade, logs estruturados em JSON, traces OpenTelemetry, métricas DORA e custo real da entrega. |
 

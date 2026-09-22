@@ -6,6 +6,8 @@ on:
       - '.github/skills/nc-*/**'
       - '.claude/skills/nc-*/**'
       - '.agents/skills/nc-*/**'
+      - '.cursor/skills/nc-*/**'
+      - '.kiro/agents/nc-*.md'
       - '.github/agents/nc-*.agent.md'
       - '.claude/agents/nc-*.md'
       - '.nimbus/agent-manifest.yaml'
