@@ -349,6 +349,20 @@ def check_vscode_orchestrator(root: Path, roles: dict[str, dict[str, Any]], sour
         fail(f"functional drift for {ORCHESTRATOR_NAME} in vscode: {path}")
 
 
+def generate_claude_orchestrator(root: Path, roles: dict[str, dict[str, Any]], sources: dict[str, Path]) -> None:
+    path = root / CLAUDE_ORCHESTRATOR_DEST_PATH
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(render_orchestrator(root, roles, sources, "claude"), encoding="utf-8")
+
+
+def check_claude_orchestrator(root: Path, roles: dict[str, dict[str, Any]], sources: dict[str, Path]) -> None:
+    path = root / CLAUDE_ORCHESTRATOR_DEST_PATH
+    if not path.is_file():
+        fail(f"missing claude orchestrator artifact: {path}")
+    if render_orchestrator(root, roles, sources, "claude") != path.read_text(encoding="utf-8"):
+        fail(f"functional drift for {ORCHESTRATOR_NAME} in claude: {path}")
+
+
 def render_antigravity_orchestrator(
     root: Path, roles: dict[str, dict[str, Any]], sources: dict[str, Path], name: str = "nimbus"
 ) -> str:
@@ -356,10 +370,11 @@ def render_antigravity_orchestrator(
     if not template_path.is_file():
         fail(f"orchestrator template missing: {template_path}")
     template_text = template_path.read_text(encoding="utf-8")
-    body = template_text
-    for placeholder, text in ORCHESTRATOR_PLATFORM_TEXT["antigravity"].items():
-        body = body.replace(placeholder, text)
-    body = body.replace(ROLES_TABLE_PLACEHOLDER, roles_table(roles, sources))
+    body = template_text.replace(ROLES_TABLE_PLACEHOLDER, roles_table(roles, sources))
+    entrypoint_text = "**`@nimbus`** (ou comando **`/nimbus`**), ponto único de entrada do esquadrão Nimbus Code no Antigravity"
+    runtime_text = "sessão interativa no Antigravity; delegue para os especialistas nc-* ou invoque subagentes conforme o ciclo"
+    body = body.replace(ENTRYPOINT_PLACEHOLDER, entrypoint_text)
+    body = body.replace(RUNTIME_PLACEHOLDER, runtime_text)
     user_input_section = (
         "## User Input\n\n```text\n$ARGUMENTS\n```\n\n"
         "You **MUST** consider the user input before proceeding (if not empty).\n\n"
@@ -403,20 +418,6 @@ def check_antigravity_orchestrator(
             fail(f"functional drift for {dest_name} in antigravity: {dest_path}")
 
 
-def generate_claude_orchestrator(root: Path, roles: dict[str, dict[str, Any]], sources: dict[str, Path]) -> None:
-    path = root / CLAUDE_ORCHESTRATOR_DEST_PATH
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(render_orchestrator(root, roles, sources, "claude"), encoding="utf-8")
-
-
-def check_claude_orchestrator(root: Path, roles: dict[str, dict[str, Any]], sources: dict[str, Path]) -> None:
-    path = root / CLAUDE_ORCHESTRATOR_DEST_PATH
-    if not path.is_file():
-        fail(f"missing claude orchestrator artifact: {path}")
-    if render_orchestrator(root, roles, sources, "claude") != path.read_text(encoding="utf-8"):
-        fail(f"functional drift for {ORCHESTRATOR_NAME} in claude: {path}")
-
-
 def generate(root: Path, targets: list[str]) -> None:
     roles, sources = validate_inventory(root)
     for target in targets:
@@ -454,8 +455,6 @@ def check(root: Path, targets: list[str]) -> None:
             actual = normalize_body(path.read_text(encoding="utf-8"))
             if expected != actual:
                 fail(f"functional drift for {agent} in {target}: {path}")
-        if target == "antigravity":
-            check_antigravity_orchestrator(root, roles, sources)
         if target == "claude":
             check_claude_orchestrator(root, roles, sources)
         if target == "antigravity":
