@@ -3,12 +3,13 @@ name: nc-critic
 description: Nimbus Spec Auditor — Analisa a especificação em busca de ambiguidades,
   termos vagos, contradições e lacunas de requisitos.
 tools:
-- view
-- rg
-- glob
-- bash
-- apply_patch
-- skill:nc-critic
+- Read
+- Grep
+- Glob
+- Bash
+- Edit
+- Write
+- Skill
 ---
 
 ## User Input

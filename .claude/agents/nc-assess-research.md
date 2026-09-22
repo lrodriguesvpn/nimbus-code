@@ -3,13 +3,12 @@ name: nc-assess-research
 description: Nimbus Evidence Researcher — Reúne evidências de mercado, usuários, concorrência
   e dados para fundamentar ou desafiar a ideia (.specify/assessments/<slug>/research.md).
 tools:
-- view
-- rg
-- glob
-- bash
-- web_fetch
-- skill:nc-assess-research
-- skill:speckit-assess-research
+- Read
+- Grep
+- Glob
+- Bash
+- WebFetch
+- Skill
 ---
 
 ## User Input

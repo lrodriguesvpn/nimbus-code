@@ -5,6 +5,15 @@ setup() {
   HELPER="$REPO_ROOT/scripts/lib/nc-agent-sync.py"
 }
 
+# Fixture cleanup lives in teardown, never in `trap ... EXIT`: overriding the
+# EXIT trap inside a test hijacks Bats' own reporting, so a failing test
+# vanished from the report ("Executed N instead of expected N+1").
+teardown() {
+  if [ -n "${fixture:-}" ]; then
+    rm -rf "$fixture"
+  fi
+}
+
 @test "foundation helper validates the manifest and source inventory" {
   run python3 "$HELPER" --repo-root "$REPO_ROOT" check --target vscode
   [ "$status" -eq 0 ]
@@ -13,7 +22,6 @@ setup() {
 
 @test "foundation helper fails when a generated source is missing" {
   fixture="$(mktemp -d)"
-  trap 'rm -rf "$fixture"' EXIT
   mkdir -p "$fixture/.nimbus" "$fixture/.github"
   cp "$REPO_ROOT/.nimbus/agent-manifest.yaml" "$fixture/.nimbus/"
   cp -R "$REPO_ROOT/.github/skills" "$fixture/.github/"

@@ -3,12 +3,13 @@ name: nc-builder
 description: Nimbus Autonomous Builder — Executa a implementação do código sob isolamento
   estrito de sessão, criando testes, código limpo e PR com rastreabilidade.
 tools:
-- view
-- rg
-- glob
-- bash
-- apply_patch
-- skill:nc-builder
+- Read
+- Grep
+- Glob
+- Bash
+- Edit
+- Write
+- Skill
 ---
 
 ## User Input

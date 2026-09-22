@@ -3,12 +3,13 @@ name: nc-arch
 description: Nimbus Solution Architect — Desenha a arquitetura técnica, registra ADRs,
   atualiza grafos de dependência e consulta o catálogo de reuso.
 tools:
-- view
-- rg
-- glob
-- bash
-- apply_patch
-- skill:nc-arch
+- Read
+- Grep
+- Glob
+- Bash
+- Edit
+- Write
+- Skill
 ---
 
 ## User Input
