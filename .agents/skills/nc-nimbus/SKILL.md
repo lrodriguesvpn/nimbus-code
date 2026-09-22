@@ -1,42 +1,20 @@
 ---
-name: nimbus
+name: nc-nimbus
 description: Nimbus Code Squad Orchestrator — triagem entre Bug/Fix, Nova Spec e Ideação,
   conduzindo o ciclo SDD completo e delegando para os especialistas nc-*.
-tools:
-- apply_patch
-- bash
-- glob
-- rg
-- skill:nc-arch
-- skill:nc-assess-decide
-- skill:nc-assess-define
-- skill:nc-assess-intake
-- skill:nc-assess-research
-- skill:nc-assess-shape
-- skill:nc-bug-assess
-- skill:nc-bug-fix
-- skill:nc-bug-test
-- skill:nc-builder
-- skill:nc-critic
-- skill:nc-designer
-- skill:nc-governor
-- skill:nc-intake
-- skill:nc-qa
-- skill:nc-shield
-- skill:nc-spec
-- skill:nc-telemetry
-- skill:speckit-assess-decide
-- skill:speckit-assess-define
-- skill:speckit-assess-intake
-- skill:speckit-assess-research
-- skill:speckit-assess-shape
-- skill:speckit-bug-assess
-- skill:speckit-bug-fix
-- skill:speckit-bug-test
-- sql
-- view
-- web_fetch
+compatibility: Requires spec-kit project structure with .specify/ directory
+metadata:
+  author: nimbus-code
+  role: NC-Nimbus
 ---
+
+## User Input
+
+```text
+$ARGUMENTS
+```
+
+You **MUST** consider the user input before proceeding (if not empty).
 
 # NC-Nimbus (Nimbus Code Squad Orchestrator)
 
