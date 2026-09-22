@@ -1560,6 +1560,38 @@ apague o estado nem use o bootstrap normal como um “force refresh”.
 O bootstrap normal continua sendo o caminho de criação/inicialização.
 Uma falha de instalação é reportada; não equivale a atualização concluída.
 
+### Segundo passo obrigatório: rematerializar as integrações (`specify integration upgrade`)
+
+O "Manual Preset Refresh" acima **só cobre o conteúdo do bundle Nimbus-Code**
+(agentes NC-*, presets, workflows, docs deste repositório). Ele **não**
+atualiza o conteúdo dos 12 comandos `/speckit-*` oficiais (ex.: `speckit-plan`,
+`speckit-converge`) — esses vêm do pacote `specify-cli` (spec-kit upstream),
+gerenciado por um mecanismo separado. Sem o passo abaixo, a lógica interna
+desses comandos permanece congelada na versão em que a integração foi
+instalada, mesmo que o CLI e o bundle já tenham sido atualizados — foi
+exatamente esse gap (achado **HRN-0008**, `docs/harness/harness-catalog.yaml`)
+que motivou registrar este passo aqui de forma explícita:
+
+```bash
+specify self upgrade
+for i in $(python3 -c "import json;print(*json.load(open('.specify/integration.json'))['installed_integrations'])"); do
+  specify integration upgrade "$i"
+done
+git diff --stat
+```
+
+O loop lê `.specify/integration.json` para descobrir dinamicamente **todas**
+as integrações já instaladas neste repositório (Copilot não precisa de
+upgrade explícito — é gerido só via arquivos de skill em `.github/skills/`,
+que o passo 1 já cobre — mas Claude, Antigravity, Cursor e Kiro precisam
+deste passo). `specify integration upgrade` compara hashes e bloqueia se
+houver customização local não commitada (use `--force` apenas com
+justificativa registrada em PR).
+
+**Ordem recomendada**: rode o "Manual Preset Refresh" (passo 1) e este passo
+2 juntos, sempre nesta ordem, antes de abrir o PR de atualização — nunca
+apenas um dos dois.
+
 Revise **todas** as alterações (incluindo scripts e workflows, não apenas
 `.specify/`), valide e envie um PR pela branch de trabalho aprovada, sem merge
 automático. A distribuição geral de skills enriquecidas continua sujeita à
