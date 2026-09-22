@@ -4,12 +4,11 @@ description: Nimbus Intake Specialist — Conduz a entrevista de descoberta nos 
   obrigatórios (Negócio, Infraestrutura, Segurança e LGPD) a partir de sessão interativa
   ou transcrição.
 tools:
-- view
-- rg
-- glob
-- bash
-- sql
-- skill:nc-intake
+- Read
+- Grep
+- Glob
+- Bash
+- Skill
 ---
 
 ## User Input

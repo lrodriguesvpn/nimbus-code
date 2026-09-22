@@ -3,12 +3,13 @@ name: nc-spec
 description: Nimbus Spec Architect — Transforma os requisitos da entrevista em especificação
   funcional estruturada SMART e cenários BDD.
 tools:
-- view
-- rg
-- glob
-- bash
-- apply_patch
-- skill:nc-spec
+- Read
+- Grep
+- Glob
+- Bash
+- Edit
+- Write
+- Skill
 ---
 
 ## User Input

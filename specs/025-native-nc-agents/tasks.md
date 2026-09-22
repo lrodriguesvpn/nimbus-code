@@ -157,6 +157,26 @@ Then:
   All agents: rerun T009–T014 and validate the US1 checkpoint
 ```
 
+## Phase 7: Reabertura — Validação real por IDE agêntica (2026-09-22)
+
+**Purpose**: a entrega original validou só estrutura (arquivo existe, hash do
+corpo bate). Esta fase corrige os defeitos encontrados e exige evidência de
+teste real em cada IDE agêntica suportada. Ver o aviso de reabertura em
+`spec.md` e ADL-025-05 em `plan.md`.
+
+- [x] T028 [US1] Traduzir `tool_allowlist` para nomes do Claude Code em `scripts/lib/nc-agent-sync.py` (`CLAUDE_TOOL_MAP`, `claude_tools()`) e fazer `validate_contract()` comparar com a lista traduzida; Referência: AC-7, ADL-025-05.
+- [x] T029 [P] [US2] Adicionar guarda de regressão em `tests/multi-agent-integration/nc-agent-manifest.bats`, que falha se `.claude/agents/nc-*.md` tiver ferramenta não reconhecida pelo Claude ou lista vazia (rejeita os 18 arquivos antigos); Referência: AC-7.
+- [x] T030 [US1] Gerar o orquestrador para Claude como skill `.claude/skills/nimbus/SKILL.md` a partir do mesmo template (placeholders `{{ENTRYPOINT}}`/`{{RUNTIME}}`), com checagem de drift; a saída do VS Code continua idêntica; Referência: ADL-025-05.
+- [ ] T031 [Humano] Teste real no **Claude Code**, em sessão nova (os agentes são carregados no início da sessão): iniciar `nc-critic` como subagente, confirmar que lista `Read`/`Grep`/`Glob`/`Bash`/`Edit`/`Write`/`Skill` e lê um arquivo; rodar `/nimbus` e confirmar o diagnóstico do repositório. Registrar em `ide-validation-matrix.md`; Referência: AC-8.
+- [ ] T032 [US1] Traduzir as ferramentas para **Kiro** conforme `research.md` Decision 5 (`fs_read`, `fs_write`, `shell`, `web_fetch`; skills via `resources: skill://` e geração de `.kiro/skills/`; `permissions: {rules: []}`), com guarda equivalente à T029; Dependências: pesquisa da Decision 5; Referência: AC-7.
+- [ ] T033 [Humano] Teste real no **Kiro IDE e Kiro CLI**: o agente aparece no seletor, lista ferramentas, lê arquivo. Confirmar os três pontos marcados como "não confirmado" na Decision 5; Dependências: T032; Referência: AC-8.
+- [ ] T034 [Humano] Teste real no **Cursor**: `/nc-*` como skill funciona; avaliar gerar subagentes nativos em `.cursor/agents/` e verificar como o Cursor trata `.claude/agents/` (ele também lê essa pasta; o campo `tools` com nomes do Claude pode ser ignorado ou causar erro); Referência: AC-8, research.md Decision 5.
+- [ ] T035 [Humano] Teste real no **Antigravity**: `/nc-*` como skill funciona a partir de `.agents/skills/`; Referência: AC-8.
+- [ ] T036 [Humano] Teste real no **VS Code / Copilot**: `@nimbus` aparece no seletor e as ferramentas declaradas (`view`, `rg`, `glob`, `bash`, `apply_patch`, `web_fetch`, `sql`, `skill:*`) são reconhecidas pelo Copilot no VS Code; esses nomes vêm do Copilot CLI e podem não ser os mesmos do VS Code; Referência: AC-8.
+- [ ] T037 [US3] Decidir e implementar a paridade de skills de terceiros aprovadas por ADR, começando por `typesafe-ai` (ADR 0010): hoje está só em `.agents/skills/` (Antigravity) e em symlink em `.claude/skills/` (Claude), porque `npx skills add` não passa por `.github/skills/`, a fonte do sync. Copilot, Cursor e Kiro não a recebem. Opções: estender o sync para ler `skills-lock.json`, ou documentar a instalação por IDE; Referência: AC-9.
+- [ ] T038 [P] Corrigir o teste `foundation helper fails when a generated source is missing` em `tests/multi-agent-integration/nc-agent-foundation.bats`: ele some do relatório do Bats ("Executed 2 instead of expected 3") sem passar nem falhar, provavelmente pelo `trap ... EXIT` dentro do teste. Já acontecia antes da reabertura. Corrigir também `tests/agent-orchestration/happy-path.test.sh`, que falha no `main` por exigir exatamente 15 papéis no manifesto, que hoje tem 18 (com os `nc-bug-*`).
+- [ ] T039 [Humano] Consolidar `specs/025-native-nc-agents/ide-validation-matrix.md` (IDE, versão, data, quem testou, resultado, evidência) e só então marcar a reabertura como concluída; Dependências: T031, T033, T034, T035, T036; Referência: AC-8.
+
 ## Implementation Strategy
 
 ### MVP First (User Story 1 Only)

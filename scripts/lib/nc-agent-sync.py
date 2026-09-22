@@ -42,6 +42,38 @@ ORCHESTRATOR_DESCRIPTION = (
     "conduzindo o ciclo SDD completo e delegando para os especialistas nc-*."
 )
 ROLES_TABLE_PLACEHOLDER = "{{ROLES_TABLE}}"
+ENTRYPOINT_PLACEHOLDER = "{{ENTRYPOINT}}"
+RUNTIME_PLACEHOLDER = "{{RUNTIME}}"
+
+# Claude Code gets the same orchestrator as a `/nimbus` skill, not a subagent:
+# Claude subagents cannot spawn other subagents, and delegating to the NC-*
+# squad is the orchestrator's whole job — so it must run in the main thread.
+CLAUDE_ORCHESTRATOR_DEST_PATH = Path(".claude/skills/nimbus/SKILL.md")
+ORCHESTRATOR_PLATFORM_TEXT = {
+    "vscode": {
+        ENTRYPOINT_PLACEHOLDER: "**`@nimbus`**, ponto único de entrada do esquadrão Nimbus Code no VS Code /\nCopilot Agent",
+        RUNTIME_PLACEHOLDER: "sessão interativa no VS Code",
+    },
+    "claude": {
+        ENTRYPOINT_PLACEHOLDER: "**`/nimbus`**, ponto único de entrada do esquadrão Nimbus Code no Claude\nCode",
+        RUNTIME_PLACEHOLDER: "sessão interativa no Claude Code; delegue via skill `/nc-*` na\n  conversa principal ou via subagente `nc-*` para tarefas isoladas",
+    },
+}
+
+# The manifest `tool_allowlist` uses GitHub Copilot tool names. Claude Code
+# rejects unknown tool names — a subagent whose list resolves to nothing is
+# refused at spawn time — so Claude projections must be translated, never
+# copied verbatim (spec 025 reopen).
+CLAUDE_TOOL_MAP = {
+    "view": ("Read",),
+    "rg": ("Grep",),
+    "glob": ("Glob",),
+    "bash": ("Bash",),
+    "apply_patch": ("Edit", "Write"),
+    "web_fetch": ("WebFetch",),
+    "sql": (),  # no Claude Code equivalent
+}
+CLAUDE_SKILL_TOOL = "Skill"
 
 
 def fail(message: str) -> None:
@@ -136,6 +168,24 @@ def orchestrator_tools(roles: dict[str, dict[str, Any]], sources: dict[str, Path
     return sorted(tools)
 
 
+def claude_tools(tools: list[str]) -> list[str]:
+    result: list[str] = []
+    for tool in tools:
+        if tool.startswith("skill:"):
+            mapped: tuple[str, ...] = (CLAUDE_SKILL_TOOL,)
+        elif tool in CLAUDE_TOOL_MAP:
+            mapped = CLAUDE_TOOL_MAP[tool]
+        else:
+            fail(f"no Claude Code mapping for manifest tool: {tool}")
+        result.extend(name for name in mapped if name not in result)
+    return result
+
+
+def expected_tools(target: str, role: dict[str, Any]) -> list[str]:
+    tools = [str(tool) for tool in role.get("tool_allowlist", [])]
+    return claude_tools(tools) if target == "claude" else tools
+
+
 def roles_table(roles: dict[str, dict[str, Any]], sources: dict[str, Path]) -> str:
     header = "| Camada | Comando | Papel |\n| --- | --- | --- |\n"
     rows = []
@@ -147,17 +197,28 @@ def roles_table(roles: dict[str, dict[str, Any]], sources: dict[str, Path]) -> s
     return header + "\n".join(rows) + "\n"
 
 
-def render_orchestrator(root: Path, roles: dict[str, dict[str, Any]], sources: dict[str, Path]) -> str:
+def render_orchestrator(
+    root: Path, roles: dict[str, dict[str, Any]], sources: dict[str, Path], target: str = "vscode"
+) -> str:
     template_path = root / ORCHESTRATOR_TEMPLATE_PATH
     if not template_path.is_file():
         fail(f"orchestrator template missing: {template_path}")
-    template_text = template_path.read_text(encoding="utf-8")
-    body = template_text.replace(ROLES_TABLE_PLACEHOLDER, roles_table(roles, sources))
-    metadata = {
-        "name": ORCHESTRATOR_NAME,
-        "description": ORCHESTRATOR_DESCRIPTION,
-        "tools": orchestrator_tools(roles, sources),
-    }
+    body = template_path.read_text(encoding="utf-8")
+    for placeholder, text in ORCHESTRATOR_PLATFORM_TEXT[target].items():
+        body = body.replace(placeholder, text)
+    body = body.replace(ROLES_TABLE_PLACEHOLDER, roles_table(roles, sources))
+    if target == "claude":
+        metadata = {
+            "name": ORCHESTRATOR_NAME,
+            "description": ORCHESTRATOR_DESCRIPTION,
+            "argument-hint": "[bug, feature ou ideia — ou vazio para diagnóstico do repositório]",
+        }
+    else:
+        metadata = {
+            "name": ORCHESTRATOR_NAME,
+            "description": ORCHESTRATOR_DESCRIPTION,
+            "tools": orchestrator_tools(roles, sources),
+        }
     return yaml_frontmatter(metadata) + body
 
 
@@ -169,7 +230,7 @@ def render(root: Path, agent: str, target: str, role: dict[str, Any], source: Pa
     if target == "antigravity":
         return source_text
     if target == "claude":
-        metadata = {"name": agent, "description": description, "tools": tools}
+        metadata = {"name": agent, "description": description, "tools": claude_tools(tools)}
     elif target == "cursor":
         # Cursor Skills expect {name, description, compatibility, metadata}
         # (no "tools" field) — confirmed by isolated `specify init
@@ -238,10 +299,12 @@ def validate_contract(root: Path, agent: str, target: str, role: dict[str, Any],
         fail(f"{target} contract missing {', '.join(missing)} for {agent}")
     if target == "cursor":
         return
-    expected = {str(tool) for tool in role.get("tool_allowlist", [])}
+    expected = set(expected_tools(target, role))
     actual = {str(tool) for tool in metadata.get("tools", [])}
     if not actual.issubset(expected):
         fail(f"{target} tools broadened for {agent}: {sorted(actual - expected)}")
+    if target == "claude" and not actual:
+        fail(f"claude tools resolve to nothing for {agent}: Claude Code refuses to spawn it")
 
 
 def stray_vscode_agent_files(root: Path) -> list[Path]:
@@ -279,6 +342,20 @@ def check_vscode_orchestrator(root: Path, roles: dict[str, dict[str, Any]], sour
         fail(f"functional drift for {ORCHESTRATOR_NAME} in vscode: {path}")
 
 
+def generate_claude_orchestrator(root: Path, roles: dict[str, dict[str, Any]], sources: dict[str, Path]) -> None:
+    path = root / CLAUDE_ORCHESTRATOR_DEST_PATH
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(render_orchestrator(root, roles, sources, "claude"), encoding="utf-8")
+
+
+def check_claude_orchestrator(root: Path, roles: dict[str, dict[str, Any]], sources: dict[str, Path]) -> None:
+    path = root / CLAUDE_ORCHESTRATOR_DEST_PATH
+    if not path.is_file():
+        fail(f"missing claude orchestrator artifact: {path}")
+    if render_orchestrator(root, roles, sources, "claude") != path.read_text(encoding="utf-8"):
+        fail(f"functional drift for {ORCHESTRATOR_NAME} in claude: {path}")
+
+
 def generate(root: Path, targets: list[str]) -> None:
     roles, sources = validate_inventory(root)
     for target in targets:
@@ -287,6 +364,8 @@ def generate(root: Path, targets: list[str]) -> None:
         if target == "vscode":
             generate_vscode_orchestrator(root, roles, sources)
             continue
+        if target == "claude":
+            generate_claude_orchestrator(root, roles, sources)
         for agent, source in sources.items():
             path = destination(root, agent, target)
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -312,6 +391,8 @@ def check(root: Path, targets: list[str]) -> None:
             actual = normalize_body(path.read_text(encoding="utf-8"))
             if expected != actual:
                 fail(f"functional drift for {agent} in {target}: {path}")
+        if target == "claude":
+            check_claude_orchestrator(root, roles, sources)
     print(f"Parity OK across: {', '.join(targets)}")
 
 
