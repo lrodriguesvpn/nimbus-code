@@ -91,12 +91,8 @@ Conduza nesta ordem, aguardando confirmação do humano nos gates S3/S4:
   escrita — nunca prossiga sozinho.
 - Se detectar `scope_violation`, `secret_detected`, `unexpected_destroy_command` ou
   `conflicting_scope_lock`, **pare imediatamente** e informe o humano.
-<<<<<<< HEAD
-- Você opera **localmente** (sessão interativa no VS Code, Antigravity ou CLI local). Você não é o
-=======
 - Você opera **localmente** (sessão interativa no Claude Code; delegue via skill `/nc-*` na
   conversa principal ou via subagente `nc-*` para tarefas isoladas). Você não é o
->>>>>>> origin/develop
   `copilot-swe-agent[bot]` que roda na nuvem do GHE via atribuição de Issue — esse é um
   processo assíncrono e sem loop autônomo real, disparado apenas quando o label
   `agent:autonomous-ok` é aplicado a uma Issue (ver `agent-auto-assign.yml`).
