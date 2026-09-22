@@ -37,6 +37,10 @@ GENERATED_ROOTS = {
 ORCHESTRATOR_NAME = "nimbus"
 ORCHESTRATOR_TEMPLATE_PATH = Path("scripts/lib/templates/nimbus-agent.template.md")
 ORCHESTRATOR_DEST_PATH = Path(".github/agents/nimbus.agent.md")
+ORCHESTRATOR_AGY_PATHS = (
+    Path(".agents/skills/nimbus/SKILL.md"),
+    Path(".agents/skills/nc-nimbus/SKILL.md"),
+)
 ORCHESTRATOR_DESCRIPTION = (
     "Nimbus Code Squad Orchestrator — triagem entre Bug/Fix, Nova Spec e Ideação, "
     "conduzindo o ciclo SDD completo e delegando para os especialistas nc-*."
@@ -57,6 +61,10 @@ ORCHESTRATOR_PLATFORM_TEXT = {
     "claude": {
         ENTRYPOINT_PLACEHOLDER: "**`/nimbus`**, ponto único de entrada do esquadrão Nimbus Code no Claude\nCode",
         RUNTIME_PLACEHOLDER: "sessão interativa no Claude Code; delegue via skill `/nc-*` na\n  conversa principal ou via subagente `nc-*` para tarefas isoladas",
+    },
+    "antigravity": {
+        ENTRYPOINT_PLACEHOLDER: "**`/nimbus`** (ou alias **`/nc-nimbus`**), ponto único de entrada do esquadrão Nimbus Code no Antigravity",
+        RUNTIME_PLACEHOLDER: "sessão interativa no Antigravity ou CLI local compatível",
     },
 }
 
@@ -355,6 +363,61 @@ def check_claude_orchestrator(root: Path, roles: dict[str, dict[str, Any]], sour
         fail(f"functional drift for {ORCHESTRATOR_NAME} in claude: {path}")
 
 
+def render_antigravity_orchestrator(
+    root: Path, roles: dict[str, dict[str, Any]], sources: dict[str, Path], name: str = "nimbus"
+) -> str:
+    template_path = root / ORCHESTRATOR_TEMPLATE_PATH
+    if not template_path.is_file():
+        fail(f"orchestrator template missing: {template_path}")
+    template_text = template_path.read_text(encoding="utf-8")
+    body = template_text.replace(ROLES_TABLE_PLACEHOLDER, roles_table(roles, sources))
+    entrypoint_text = "**`@nimbus`** (ou comando **`/nimbus`**), ponto único de entrada do esquadrão Nimbus Code no Antigravity"
+    runtime_text = "sessão interativa no Antigravity; delegue para os especialistas nc-* ou invoque subagentes conforme o ciclo"
+    body = body.replace(ENTRYPOINT_PLACEHOLDER, entrypoint_text)
+    body = body.replace(RUNTIME_PLACEHOLDER, runtime_text)
+    user_input_section = (
+        "## User Input\n\n```text\n$ARGUMENTS\n```\n\n"
+        "You **MUST** consider the user input before proceeding (if not empty).\n\n"
+    )
+    metadata = {
+        "name": name,
+        "description": ORCHESTRATOR_DESCRIPTION,
+        "compatibility": "Requires spec-kit project structure with .specify/ directory",
+        "metadata": {
+            "author": "nimbus-code",
+            "role": "NC-Nimbus",
+        },
+    }
+    return yaml_frontmatter(metadata) + user_input_section + body
+
+
+def generate_antigravity_orchestrator(
+    root: Path, roles: dict[str, dict[str, Any]], sources: dict[str, Path]
+) -> None:
+    for dest_rel in ORCHESTRATOR_AGY_PATHS:
+        dest_path = root / dest_rel
+        dest_path.parent.mkdir(parents=True, exist_ok=True)
+        dest_name = dest_rel.parent.name
+        dest_path.write_text(
+            render_antigravity_orchestrator(root, roles, sources, name=dest_name),
+            encoding="utf-8",
+        )
+
+
+def check_antigravity_orchestrator(
+    root: Path, roles: dict[str, dict[str, Any]], sources: dict[str, Path]
+) -> None:
+    for dest_rel in ORCHESTRATOR_AGY_PATHS:
+        dest_path = root / dest_rel
+        if not dest_path.is_file():
+            fail(f"missing antigravity orchestrator artifact: {dest_path}")
+        dest_name = dest_rel.parent.name
+        expected = render_antigravity_orchestrator(root, roles, sources, name=dest_name)
+        actual = dest_path.read_text(encoding="utf-8")
+        if expected != actual:
+            fail(f"functional drift for {dest_name} in antigravity: {dest_path}")
+
+
 def generate(root: Path, targets: list[str]) -> None:
     roles, sources = validate_inventory(root)
     for target in targets:
@@ -370,6 +433,8 @@ def generate(root: Path, targets: list[str]) -> None:
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(render(root, agent, target, role_for(roles, agent), source), encoding="utf-8")
             validate_contract(root, agent, target, role_for(roles, agent), path)
+        if target == "antigravity":
+            generate_antigravity_orchestrator(root, roles, sources)
     print(f"Generated agents for: {', '.join(targets)}")
 
 
@@ -392,6 +457,8 @@ def check(root: Path, targets: list[str]) -> None:
                 fail(f"functional drift for {agent} in {target}: {path}")
         if target == "claude":
             check_claude_orchestrator(root, roles, sources)
+        if target == "antigravity":
+            check_antigravity_orchestrator(root, roles, sources)
     print(f"Parity OK across: {', '.join(targets)}")
 
 
