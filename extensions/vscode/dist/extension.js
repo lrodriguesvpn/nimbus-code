@@ -3,6 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.activate = activate;
 exports.deactivate = deactivate;
 const vscode = require("vscode");
+const os = require("os");
+const https = require("https");
 function activate(context) {
     const outputChannel = vscode.window.createOutputChannel('Nimbus Code');
     outputChannel.appendLine('[Nimbus Code] Extensão ativada com sucesso.');
@@ -10,6 +12,52 @@ function activate(context) {
     const mode = config.get('mode', 'local_unrestricted');
     if (mode === 'local_unrestricted') {
         outputChannel.appendLine('[Nimbus Code] Executando em modo LOCAL IRRESTRITO (Teste & DevX ativo).');
+    }
+    // Função auxiliar para enviar telemetria/registro de inicialização pública para auditoria e CRM
+    async function registerCommunityTelemetry(workspaceName, remoteUrl, userEmail, userName, company) {
+        const payload = {
+            timestamp: new Date().toISOString(),
+            event: 'nimbus_community_init',
+            workspace: workspaceName,
+            remoteUrl: remoteUrl || 'local_only',
+            user: {
+                username: userName || os.userInfo().username,
+                email: userEmail || 'unknown',
+                company: company || 'unknown',
+                hostname: os.hostname(),
+                platform: os.platform()
+            },
+            clientVersion: context.extension.packageJSON.version || '1.0.0'
+        };
+        outputChannel.appendLine(`[Nimbus Code Telemetry] Registrando inicialização pública: ${JSON.stringify(payload)}`);
+        // Endpoint webhook/telemetria seguro da Venha Pra Nuvem
+        const telemetryUrl = 'https://api.venhapranuvem.com.br/telemetry/nimbus-community';
+        try {
+            const data = JSON.stringify(payload);
+            const urlObj = new URL(telemetryUrl);
+            const req = https.request({
+                hostname: urlObj.hostname,
+                port: 443,
+                path: urlObj.pathname,
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': Buffer.byteLength(data),
+                    'User-Agent': 'Nimbus-Code-VSCode-Extension'
+                },
+                timeout: 4000
+            }, (res) => {
+                outputChannel.appendLine(`[Nimbus Code Telemetry] Resposta: ${res.statusCode}`);
+            });
+            req.on('error', (e) => {
+                outputChannel.appendLine(`[Nimbus Code Telemetry] Aviso: Webhook offline ou unreachable (${e.message}). Registro mantido local.`);
+            });
+            req.write(data);
+            req.end();
+        }
+        catch {
+            // Falha silenciosa para não bloquear o desenvolvedor
+        }
     }
     // 0. Status Bar Item (Indicador visual sempre visível e clicável)
     const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
@@ -62,53 +110,110 @@ function activate(context) {
             }
         }
     }
+    // Função auxiliar para detectar se o workspace atual é do GHE da Venha Pra Nuvem
+    async function detectVpnEnterpriseEnvironment() {
+        try {
+            // 1. Checar remotes git do workspace se houver extensão Git do VS Code
+            const gitExtension = vscode.extensions.getExtension('vscode.git');
+            if (gitExtension) {
+                const gitApi = gitExtension.exports.getAPI(1);
+                if (gitApi && gitApi.repositories && gitApi.repositories.length > 0) {
+                    for (const repo of gitApi.repositories) {
+                        const remotes = repo.state.remotes || [];
+                        for (const r of remotes) {
+                            const url = r.fetchUrl || r.pushUrl || '';
+                            if (url.includes('venha-pra-nuvem.ghe.com') || url.includes('venha-pra-nuvem/')) {
+                                return { isVpnEnterprise: true, reason: 'Repositório hospedado no GitHub Enterprise da Venha Pra Nuvem', remoteUrl: url };
+                            }
+                        }
+                    }
+                }
+            }
+            // 2. Checar sessões de autenticação do VS Code (GitHub / GHE)
+            const gheSession = await vscode.authentication.getSession('github-enterprise', ['repo'], { createIfNone: false });
+            if (gheSession && gheSession.account.label.toLowerCase().includes('venha-pra-nuvem')) {
+                return { isVpnEnterprise: true, reason: 'Usuário autenticado no GitHub Enterprise da Venha Pra Nuvem' };
+            }
+        }
+        catch {
+            // Fallback gracioso
+        }
+        return { isVpnEnterprise: false };
+    }
     // 1. Comandos do Command Palette
     context.subscriptions.push(vscode.commands.registerCommand('nimbus.initRepository', async () => {
         const hasWorkspace = await ensureWorkspace();
         if (!hasWorkspace) {
             return;
         }
-        const choice = await vscode.window.showQuickPick([
-            {
-                label: '🟢 Inicializar Nimbus Code Community (Gratuito)',
-                detail: 'Configura o fluxo Spec-Driven Development (SDD), constitution.md e templates locais.',
-                action: 'community'
-            },
-            {
-                label: '🔵 Obter Nimbus Code Enterprise (Venha Pra Nuvem)',
-                detail: 'Desbloqueia 18 agentes nativos, Harness Corporativo, Harvest Brownfield e Sanfona de Dev.',
-                action: 'enterprise'
-            }
-        ], {
-            placeHolder: 'Escolha como deseja inicializar o Nimbus Code neste workspace:'
+        const envCheck = await detectVpnEnterpriseEnvironment();
+        const options = [];
+        if (envCheck.isVpnEnterprise) {
+            options.push({
+                label: '🚀 Inicializar Nimbus Code Enterprise (VPN)',
+                detail: `Ambiente VPN Detectado (${envCheck.reason}). Instala o bundle completo com 18 agentes nativos e bootstrap.`,
+                action: 'enterprise_init'
+            });
+        }
+        options.push({
+            label: '🟢 Inicializar Nimbus Code Community (Gratuito / BSL 1.1)',
+            detail: 'Configura o fluxo Spec-Driven Development (SDD), constitution.md e templates locais.',
+            action: 'community'
+        }, {
+            label: '🔵 Sobre o Nimbus Code Enterprise (Venha Pra Nuvem)',
+            detail: 'Desbloqueia 18 agentes nativos, Harness Corporativo, Harvest Brownfield e Sanfona de Dev.',
+            action: 'enterprise_info'
+        });
+        const choice = await vscode.window.showQuickPick(options, {
+            placeHolder: envCheck.isVpnEnterprise
+                ? '🏢 Ambiente Enterprise VPN detectado! Selecione o modo de inicialização:'
+                : 'Escolha como deseja inicializar o Nimbus Code neste workspace:'
         });
         if (!choice) {
             return;
         }
-        if (choice.action === 'community') {
-            const rootUri = vscode.workspace.workspaceFolders[0].uri;
+        if (choice.action === 'enterprise_init') {
+            const terminal = vscode.window.createTerminal('Nimbus Code Enterprise Bootstrap');
+            terminal.show();
+            terminal.sendText('curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bootstrap.sh | bash');
+            vscode.window.showInformationMessage('🚀 Executando bootstrap oficial do Nimbus Code Enterprise no terminal integrado...');
+        }
+        else if (choice.action === 'community') {
+            const rootFolder = vscode.workspace.workspaceFolders[0];
+            const rootUri = rootFolder.uri;
             const constitutionUri = vscode.Uri.joinPath(rootUri, 'constitution.md');
             const specifyDirUri = vscode.Uri.joinPath(rootUri, '.specify');
             const templatesDirUri = vscode.Uri.joinPath(rootUri, '.specify', 'templates');
             try {
+                // Solicitar opcionalmente dados para registro e suporte personalizado
+                const userEmail = await vscode.window.showInputBox({
+                    prompt: 'Opcional: Informe seu email corporativo para suporte da comunidade e atualizações:',
+                    placeHolder: 'seu-email@empresa.com'
+                });
+                const userCompany = await vscode.window.showInputBox({
+                    prompt: 'Opcional: Nome da sua empresa/organização:',
+                    placeHolder: 'Empresa / Time'
+                });
                 await vscode.workspace.fs.createDirectory(templatesDirUri);
                 const defaultConstitution = `# Constituição do Projeto (Nimbus Code Community Edition)\n\n## Princípios Não-Negociáveis\n1. **Especificação Antes do Código**: Crie spec.md e plan.md antes de implementar.\n2. **TDD**: Testes automatizados obrigatórios.\n3. **Segurança**: Jamais comite credenciais ou segredos.\n4. **Isolamento**: Altere somente arquivos do escopo da tarefa.\n`;
                 await vscode.workspace.fs.writeFile(constitutionUri, Buffer.from(defaultConstitution, 'utf8'));
                 const defaultSpec = `# Feature Specification: [Nome]\n\n**Slug:** \`[slug]\`\n\n## 1. Visão Geral\n[Descrição]\n\n## 2. Requisitos SMART\n- **S/M/A/R/T:** [Critérios]\n\n## 3. Cenários BDD\n- **Dado** ... **Quando** ... **Então** ...\n`;
                 await vscode.workspace.fs.writeFile(vscode.Uri.joinPath(templatesDirUri, 'spec-template.md'), Buffer.from(defaultSpec, 'utf8'));
+                // Enviar telemetria para registro do usuário/empresa
+                await registerCommunityTelemetry(rootFolder.name, envCheck.remoteUrl || '', userEmail, undefined, userCompany);
                 vscode.window.showInformationMessage('✅ Workspace inicializado com sucesso no modo Nimbus Code Community! Use o Copilot Chat para interagir com o @nimbus.');
             }
             catch (err) {
                 vscode.window.showErrorMessage(`Falha ao criar arquivos do Nimbus Code: ${err?.message || err}`);
             }
         }
-        else if (choice.action === 'enterprise') {
+        else if (choice.action === 'enterprise_info') {
             const contactChoice = await vscode.window.showInformationMessage('🏢 Nimbus Code Enterprise VPN: inclui 18 agentes nativos com RACI, Catálogo Central de Harness Corporativo, API de Harvest para código legado (Brownfield) e Sanfona de Dev.', 'Abrir Site da VPN', 'Falar com Especialista');
             if (contactChoice === 'Abrir Site da VPN') {
-                vscode.env.openExternal(vscode.Uri.parse('https://venhapranuven.com.br'));
+                vscode.env.openExternal(vscode.Uri.parse('https://venhapranuvem.com.br'));
             }
             else if (contactChoice === 'Falar com Especialista') {
-                vscode.env.openExternal(vscode.Uri.parse('mailto:contato@venhapranuven.com.br?subject=Interesse%20no%20Nimbus%20Code%20Enterprise'));
+                vscode.env.openExternal(vscode.Uri.parse('mailto:contato@venhapranuvem.com.br?subject=Interesse%20no%20Nimbus%20Code%20Enterprise'));
             }
         }
     }));

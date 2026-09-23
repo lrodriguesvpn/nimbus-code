@@ -3,7 +3,7 @@
 # 🚀 Nimbus Code
 
 ### AI Agentic Spec-Driven Development (SDD) Framework & Multi-IDE Tools
-**Desenvolvido e Mantido por [Venha Pra Nuvem (VPN)](https://venhapranuven.com.br)**
+**Desenvolvido e Mantido por [Venha Pra Nuvem (VPN)](https://venhapranuvem.com.br)**
 
 [![License: BSL 1.1](https://img.shields.io/badge/License-BSL%201.1-blue.svg)](LICENSE)
 [![VS Code Extension](https://img.shields.io/badge/VS%20Code-Extension%20Available-brightgreen.svg)](extensions/vscode)
@@ -73,4 +73,4 @@ Precisa de aceleração de entrega, modernização de sistemas legados ou govern
 - 🛡️ **Harness Corporativo:** Compartilhe guardrails e lições aprendidas entre todos os times de desenvolvimento da empresa.
 - 🪗 **Sanfona de Dev:** Expanda temporariamente sua capacidade de engenharia com os especialistas da Venha Pra Nuvem que dominam o framework.
 
-👉 **Contato Comercial & Parcerias:** [venhapranuven.com.br](https://venhapranuven.com.br) | **E-mail:** contato@venhapranuven.com.br
+👉 **Contato Comercial & Parcerias:** [venhapranuvem.com.br](https://venhapranuvem.com.br) | **E-mail:** contato@venhapranuvem.com.br
