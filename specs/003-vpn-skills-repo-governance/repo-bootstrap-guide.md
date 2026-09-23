@@ -41,7 +41,7 @@ não gerencia contas cloud, tenants ou ambientes), então o preset correto é
 
 ## Ordem de operações
 
-### 1. Criar o repositório (manual, humano — [issue #70](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/70))
+### 1. Criar o repositório (manual, humano — [issue #70](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/70))
 
 - Criar `VPN-SKILLS` na organização `venha-pra-nuvem` no **GitHub Enterprise**
   (`venha-pra-nuvem.ghe.com`) — nunca no GitHub público, conforme política de
@@ -51,12 +51,12 @@ não gerencia contas cloud, tenants ou ambientes), então o preset correto é
 - Não inicializar com README/license pelo GitHub — o `bootstrap.sh` e as tasks
   desta feature cuidam disso.
 
-### 2. Rodar o bootstrap Nimbus Code no repositório novo (manual, humano — [issue #71](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/71))
+### 2. Rodar o bootstrap Nimbus Code no repositório novo (manual, humano — [issue #71](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/71))
 
 Dentro do clone local do `VPN-SKILLS` recém-criado:
 
 ```sh
-curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bootstrap.sh | bash
+curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/raw/main/bootstrap.sh | bash
 ```
 
 Isso já resolve automaticamente, sem precisar de tasks manuais de código, uma
@@ -75,7 +75,7 @@ parte relevante do escopo de **Phase 1** do `tasks.md` desta feature:
   `agent:*`, `status:*`, `dora:*`) e tenta criar o GitHub Project V2 do
   repositório automaticamente (requer `gh` CLI autenticado).
 
-### 3. Decidir a estratégia de GitHub App para o VPN-SKILLS (manual, humano — [issue #72](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/72))
+### 3. Decidir a estratégia de GitHub App para o VPN-SKILLS (manual, humano — [issue #72](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/72))
 
 Conforme `plan.md` (ADL-004), a API e o CLI do VPN-SKILLS precisam acessar
 repositórios/organização no GitHub (ex.: compliance report generator lendo
@@ -95,7 +95,7 @@ necessária antes de implementar T095/T114 (camada de autenticação):
 008 ser implementada), com nota registrada no ADL-004 do `plan.md` para migrar
 para o App organizacional único quando ele existir.
 
-### 4. Confirmar CODEOWNERS e branch protection (manual, humano — [issue #73](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/73))
+### 4. Confirmar CODEOWNERS e branch protection (manual, humano — [issue #73](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/73))
 
 - Branch `main` protegida, PR obrigatório, ao menos 1 revisão humana
   (constituição, "Qualidade e Processo").

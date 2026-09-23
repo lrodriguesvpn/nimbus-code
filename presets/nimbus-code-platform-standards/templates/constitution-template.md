@@ -4,7 +4,7 @@
   © Venha Pra Nuvem — Propriedade Intelectual Exclusiva.
   Uso restrito a colaboradores autorizados da organização venha-pra-nuvem.
   Cópia, redistribuição ou uso externo são proibidos — ver LICENSE no repositório
-  nimbus-code-spec-kit-template. Alterações exigem aprovação do @nimbus-code-arch-board.
+  nimbus-code. Alterações exigem aprovação do @nimbus-code-arch-board.
 -->
 
 <!--
@@ -111,7 +111,7 @@
   | Schema/dados de banco | Não | Extração read-only (ver tabela de reconciliação acima) |
 
 - Detalhamento completo, com exemplos e justificativa de cada linha, em
-  [`docs/platform-standards-and-legacy-infra.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/platform-standards-and-legacy-infra.md).
+  [`docs/platform-standards-and-legacy-infra.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/blob/main/docs/platform-standards-and-legacy-infra.md).
 - Qualquer resultado de `terraform plan`/reconciliação equivalente relevante a
   Well-Architected (segurança, custo, confiabilidade) deve ser validado contra
   as 5 pilares antes de ser aceito como padrão — não apenas "aplica e funciona".
@@ -354,7 +354,7 @@ Se CMDB init falhar após 3 retries, contatar time de governança — não pross
   (`docs/adr/`), nunca apenas como comentário de PR.
 
 Ver o detalhamento técnico completo em
-[`docs/platform-standards-and-legacy-infra.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/platform-standards-and-legacy-infra.md) —
+[`docs/platform-standards-and-legacy-infra.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/blob/main/docs/platform-standards-and-legacy-infra.md) —
 matriz de ferramentas por domínio, fluxo de reconciliação zero-diff, e o
 piloto interno (Venha Pra Nuvem como "Cliente Frontier").
 

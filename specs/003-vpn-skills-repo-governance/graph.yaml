@@ -315,7 +315,7 @@ integrations:
   - name: "project-bootstrap-template"
     type: "git-submodule"
     description: "Reference to skills.yaml schema in project templates"
-    repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
+    repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code"
     path: "templates/skills.yaml"
     
   - name: "github-actions-workflow"

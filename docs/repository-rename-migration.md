@@ -21,7 +21,7 @@ Este documento formaliza a transição do repositório para **`nimbus-code`** (F
 Troca-se o slug do repositório-base:
 
 - **de:** `speckit-nimbus-code-standards`
-- **para:** `nimbus-code-spec-kit-template`
+- **para:** `nimbus-code`
 
 Isso afeta:
 
@@ -52,7 +52,7 @@ As referências foram consolidadas nas seguintes classes:
 
 Executar primeiro:
 
-1. Renomear o repositório para `nimbus-code-spec-kit-template`
+1. Renomear o repositório para `nimbus-code`
 2. Publicar releases/catálogos já apontando para o novo slug
 3. Atualizar bootstrap, templates, manifests e links absolutos
 4. Atualizar a documentação institucional explicando a diferença entre os dois
@@ -147,15 +147,15 @@ O script lista cada hit da organização com:
 Para **cada ocorrência** que o script apontar:
 
 1. Trocar slug antigo:
-   - `speckit-nimbus-code-standards` → `nimbus-code-spec-kit-template`
+   - `speckit-nimbus-code-standards` → `nimbus-code`
 2. Trocar URL raw:
    - `https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-nimbus-code-standards/...`
-   - `https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/...`
+   - `https://raw.venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/...`
 3. Trocar URL web:
    - `https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/speckit-nimbus-code-standards`
-   - `https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template`
+   - `https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code`
 4. Trocar caminhos locais:
-   - `./speckit-nimbus-code-standards/...` → `./nimbus-code-spec-kit-template/...`
+   - `./speckit-nimbus-code-standards/...` → `./nimbus-code/...`
 
 Prioridade:
 

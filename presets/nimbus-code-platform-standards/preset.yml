@@ -6,7 +6,7 @@ preset:
   version: "0.5.0"
   description: "Constituição para repositórios de PLATAFORMA/CLIENTE/TENANT (ambientes, contas cloud, tenants M365/GWS/D365 e sistemas legados) — inventário multi-nuvem, contracts do Evidence Plane / Desired State Plane / Delivery Plane, pipeline de ciclo de vida (discovery → imported → plan_diff_zero → landing_zone_generated → managed), regra de zero-diff e proibição de apply direto fora do workflow protegido."
   author: "Nimbus-Code"
-  repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
+  repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code"
   license: "Proprietary"
 
 requires:

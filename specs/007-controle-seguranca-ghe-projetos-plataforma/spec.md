@@ -113,8 +113,8 @@ Como **responsável de plataforma/segurança**, quero que branches principais se
 > anteriormente identificadas como SC-003 foram consolidadas no mesmo ID,
 > mantendo tanto a auditoria mensal quanto a varredura semanal/relatório mensal.
 > Isso não aprova requisitos, checklist ou rollout. As revisões
-> [#450](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/450)
-> e [#60/T038](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/60)
+> [#450](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/450)
+> e [#60/T038](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/60)
 > estavam abertas na consulta desta data; aprovação S4, ADR-0008 aceito e
 > evidência do piloto continuam dependências humanas.
 

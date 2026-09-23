@@ -1,4 +1,4 @@
-# Bounded Contexts — nimbus-code-spec-kit-template
+# Bounded Contexts — nimbus-code
 #
 # Lista oficial dos bounded contexts deste projeto (o próprio template Nimbus Code).
 # Para projetos que usam este template como base, este arquivo serve de exemplo —
@@ -31,7 +31,7 @@ version: 1
 contexts:
   - slug: "spec-kit-workflow"
     description: "Templates, scripts e docs do Nimbus Code Spec Kit — fluxo specify/plan/tasks/implement."
-    repository: "venha-pra-nuvem/nimbus-code-spec-kit-template"
+    repository: "venha-pra-nuvem/nimbus-code"
     stack: "Bash/YAML/Markdown"
     team: "platform"
     autonomous_ok: true
@@ -60,6 +60,16 @@ contexts:
     stack: "Azure Functions (Python)"
     team: "platform"
     autonomous_ok: false  # infraestrutura nova, sem primeira revisão humana ainda
+
+  - slug: "nimbus-code-mkt"
+    description: >
+      Repositório satélite interno dedicado à geração, versionamento e governança de
+      documentos de marketing, posicionamento de produto, pitches comerciais, decks
+      executivos e estratégias de go-to-market do Nimbus Code.
+    repository: "venha-pra-nuvem/nimbus-code-mkt"
+    stack: "Markdown / Python / PPTX"
+    team: "marketing-product"
+    autonomous_ok: true
 
 # Exemplos para projetos reais (descomente e ajuste):
 #

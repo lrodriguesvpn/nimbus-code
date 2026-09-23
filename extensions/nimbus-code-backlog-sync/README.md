@@ -24,13 +24,13 @@ já que `specs/` é a fonte formal) simplesmente recusam o prompt.
 ## Instalação isolada (sem o bundle completo)
 
 ```bash
-specify extension add nimbus-code-backlog-sync --from https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/vX.Y.Z/nimbus-code-backlog-sync-X.Y.Z.zip
+specify extension add nimbus-code-backlog-sync --from https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/releases/download/vX.Y.Z/nimbus-code-backlog-sync-X.Y.Z.zip
 ```
 
 Ou em modo desenvolvimento:
 
 ```bash
-specify extension add --dev ./nimbus-code-spec-kit-template/extensions/nimbus-code-backlog-sync
+specify extension add --dev ./nimbus-code/extensions/nimbus-code-backlog-sync
 ```
 
 Depois, copiar o template de configuração:

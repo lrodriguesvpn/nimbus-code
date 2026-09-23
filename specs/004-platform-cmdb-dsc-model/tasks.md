@@ -27,7 +27,7 @@ existentes, e a CLI e os grafos apontam para suas localizações reais.
   `platform-governance/.env.example` não existe no checkout auditado.
 - **Lacunas de evidência:** SSO real, descoberta cloud real, persistência durável,
   atualização operacional em 24h e aprovação S4 não foram comprovados. A issue
-  [#458](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/458)
+  [#458](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/458)
   foi criada em 2026-09-20 para acompanhar a prontidão operacional e os gates S4,
   após a auditoria inicial não identificar issue aberta para essas lacunas.
   O fechamento da feature #147 não comprova prontidão operacional. As lacunas

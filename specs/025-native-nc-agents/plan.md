@@ -198,7 +198,7 @@ As decisões e evidências completas estão em [research.md](./research.md).
 |---|---|
 | **Bounded context** | `spec-kit-workflow` |
 | **Grafo do contexto** | [graph.yaml](./graph.yaml) e [graph.md](./graph.md) |
-| **Dependências relevantes** | Apenas `venha-pra-nuvem/nimbus-code-spec-kit-template` |
+| **Dependências relevantes** | Apenas `venha-pra-nuvem/nimbus-code` |
 | **Padrões de harvest aplicáveis** | Nenhuma |
 
 ## Nimbus-Code — Estratégia de Release

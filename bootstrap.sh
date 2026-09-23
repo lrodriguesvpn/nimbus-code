@@ -2,6 +2,7 @@
 # Bootstrap: applies the nimbus-code-project-bundle to a new or existing repository.
 set -euo pipefail
 
+
 STANDARDS_REPO="${NIMBUS_STANDARDS_REPO:-https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code}"
 LEGACY_STANDARDS_REPO="https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
 LOCAL_PATH=""
@@ -927,7 +928,7 @@ if [[ "$BOOTSTRAP_MODE" != "refresh" && "$REPO_TYPE" == "dev_standards" ]]; then
 
   echo "-> Installing extension cost (spec-kit-cost)..."
   install_component extension cost "extension cost (spec-kit-cost)" \
-    specify extension install cost --version ">=1.0.0"
+    specify extension add cost
 
   echo "-> Installing extension bug (Bug Triage Workflow)..."
   install_component extension bug "extension bug" \

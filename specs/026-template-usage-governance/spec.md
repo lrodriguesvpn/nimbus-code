@@ -25,7 +25,7 @@
 ## Nimbus-Code — Objetivo e Contexto Estratégico
 
 **Objetivo:**
-Transformar o repositório **`nimbus-code`** (renomeado a partir de `nimbus-code-spec-kit-template`) em um framework corporativo distribuível com **Governança de Propriedade Intelectual (IP)**, suporte a **modelo de licenciamento BSL 1.1 / Source-Available no repositório público da extensão**, e entrega desacoplada em múltiplas camadas (**Core do Framework**, **Extensão VS Code / Multi-IDE**, **Servidor MCP Universal** e **Infraestrutura Cloud Azure**), viabilizando a estratégia de **Sanfona de Dev / Staff Augmentation de Alta Eficiência** da Venha Pra Nuvem (VPN), com **Zero Lock-in de Runtime**, **Segurança Absoluta de Código (No-Source-Leak)** e **Zero Custo de Inferência de Tokens para a VPN (Modelo BYO-LLM)**.
+Transformar o repositório **`nimbus-code`** (renomeado a partir de `nimbus-code`) em um framework corporativo distribuível com **Governança de Propriedade Intelectual (IP)**, suporte a **modelo de licenciamento BSL 1.1 / Source-Available no repositório público da extensão**, e entrega desacoplada em múltiplas camadas (**Core do Framework**, **Extensão VS Code / Multi-IDE**, **Servidor MCP Universal** e **Infraestrutura Cloud Azure**), viabilizando a estratégia de **Sanfona de Dev / Staff Augmentation de Alta Eficiência** da Venha Pra Nuvem (VPN), com **Zero Lock-in de Runtime**, **Segurança Absoluta de Código (No-Source-Leak)** e **Zero Custo de Inferência de Tokens para a VPN (Modelo BYO-LLM)**.
 
 ### Estrutura de Monorepo e Separação de Camadas
 

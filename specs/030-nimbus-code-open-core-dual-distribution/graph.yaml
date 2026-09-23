@@ -1,0 +1,20 @@
+name: "030-nimbus-code-open-core-dual-distribution"
+version: "1.0.0"
+bounded_context: "governance-distribution"
+modules:
+  - name: "presets/nimbus-code-community"
+    type: "preset"
+    description: "Scaffold e templates simplificados de SDD sem IP fechado da VPN"
+    dependencies: []
+  - name: "extensions/vscode"
+    type: "extension"
+    description: "Extensão VS Code com menus interativos e comando de inicialização dual-tier"
+    dependencies: ["presets/nimbus-code-community"]
+  - name: "scripts/export-public-repo.sh"
+    type: "automation"
+    description: "Script de exportação com sanitização e proteção de segredos/IP"
+    dependencies: ["extensions/vscode", "presets/nimbus-code-community"]
+  - name: "scripts/sync-public-repo.sh"
+    type: "automation"
+    description: "Esteira de sincronização segura com o repositório público GitHub"
+    dependencies: ["scripts/export-public-repo.sh"]

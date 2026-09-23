@@ -28,6 +28,11 @@
   "contributes": {
     "commands": [
       {
+        "command": "nimbus.initRepository",
+        "title": "Nimbus Code: Inicializar Repositório (Community / Enterprise)",
+        "category": "Nimbus Code"
+      },
+      {
         "command": "nimbus.openSquad",
         "title": "Nimbus Code: Abrir Orquestrador do Esquadrão (@nimbus)",
         "category": "Nimbus Code"
@@ -76,6 +81,9 @@
     "menus": {
       "commandPalette": [
         {
+          "command": "nimbus.initRepository"
+        },
+        {
           "command": "nimbus.openSquad"
         },
         {
@@ -117,6 +125,11 @@
           "type": "string",
           "default": "https://ca-nimbus-code-entitlement-api.azurecontainerapps.io",
           "description": "URL do backend de governança da VPN (utilizado no modo enterprise_licensed)."
+        },
+        "nimbus.telemetry.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Habilita o registro opcional de telemetria de inicialização Community (nome de usuário, e-mail e empresa informados, hostname e plataforma). Desabilitado por padrão; mesmo habilitado, o envio só ocorre após consentimento explícito do usuário no momento da inicialização (conformidade LGPD)."
         }
       }
     }

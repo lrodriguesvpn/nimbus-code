@@ -14,7 +14,7 @@
 
 Este documento define os **perfis de senioridade** e a **taxa média de
 custo/hora** usados para calcular o custo real de tarefas no
-[modelo híbrido (agente + humano)](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/ai-code-quality-and-observability.md#8-modelo-híbrido-agentes-de-ia--humanos-codando-juntos):
+[modelo híbrido (agente + humano)](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/blob/main/docs/ai-code-quality-and-observability.md#8-modelo-híbrido-agentes-de-ia--humanos-codando-juntos):
 
 ```
 Custo real da tarefa = custo de tokens (agente) + (horas humanas × taxa do perfil)
@@ -38,7 +38,7 @@ Custo real da tarefa = custo de tokens (agente) + (horas humanas × taxa do perf
 
 1. Ao lançar horas no campo **"Horas Humanas"** do GitHub Project (ver
    [`docs/ai-code-quality-and-observability.md` seção
-   8](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/ai-code-quality-and-observability.md#onde-lançar-as-horas-humanas)),
+   8](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/blob/main/docs/ai-code-quality-and-observability.md#onde-lançar-as-horas-humanas)),
    registre também, no comentário da issue/PR, **qual perfil** fez aquele
    trabalho (Júnior/Pleno/Sênior) — o campo numérico do Project não distingue
    perfil sozinho.
@@ -92,7 +92,7 @@ custo/orçamento, a própria prática perde a validade.
 ## PMO — status por projeto e status global
 
 Ver [`docs/ai-code-quality-and-observability.md` seção
-8](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/ai-code-quality-and-observability.md#como-o-pmo-acompanha-o-status-visão-por-projeto-e-visão-global)
+8](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/blob/main/docs/ai-code-quality-and-observability.md#como-o-pmo-acompanha-o-status-visão-por-projeto-e-visão-global)
 para como o PMO consome esse dado: visão por projeto via Insights do GitHub
 Project, e visão consolidada (multi-repo) via `scripts/pmo-cost-rollup.sh`.
 

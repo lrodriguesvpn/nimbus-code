@@ -1,6 +1,6 @@
 # Implementation Plan: Multi-Agent Integration (Claude Code + Antigravity)
 
-**Branch**: `024-multi-agent-integration-claude-antigravity` | **Date**: 2026-09-20 | **Spec**: [spec.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/users-lrodrigues-projects-nimbus-code-spec-kit-t/specs/024-multi-agent-integration-claude-antigravity/spec.md)
+**Branch**: `024-multi-agent-integration-claude-antigravity` | **Date**: 2026-09-20 | **Spec**: [spec.md](/Users/lrodrigues/projects/nimbus-code.worktrees/users-lrodrigues-projects-nimbus-code-spec-kit-t/specs/024-multi-agent-integration-claude-antigravity/spec.md)
 
 **Input**: Feature specification from `specs/024-multi-agent-integration-claude-antigravity/spec.md`
 
@@ -211,7 +211,7 @@ Para S3/S4, criar também `impact-map.md` na mesma pasta.*
 | Campo | Valor |
 |---|---|
 | **Bounded context** | `spec-kit-workflow` (registrado em `docs/bounded-contexts.yaml`) |
-| **Grafo do contexto** | [graph.yaml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/users-lrodrigues-projects-nimbus-code-spec-kit-t/specs/024-multi-agent-integration-claude-antigravity/graph.yaml) / [graph.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/users-lrodrigues-projects-nimbus-code-spec-kit-t/specs/024-multi-agent-integration-claude-antigravity/graph.md) |
+| **Grafo do contexto** | [graph.yaml](/Users/lrodrigues/projects/nimbus-code.worktrees/users-lrodrigues-projects-nimbus-code-spec-kit-t/specs/024-multi-agent-integration-claude-antigravity/graph.yaml) / [graph.md](/Users/lrodrigues/projects/nimbus-code.worktrees/users-lrodrigues-projects-nimbus-code-spec-kit-t/specs/024-multi-agent-integration-claude-antigravity/graph.md) |
 | **Dependências relevantes para esta feature** | Nenhuma — bounded context `spec-kit-workflow` é single-repo (o próprio template Nimbus Code); não há repos satélite afetados por esta feature |
 | **Padrões de harvest aplicáveis** | Nenhuma — nenhuma entrada de `docs/reuse-catalog.yaml` originada de `scripts/harvest-patterns.sh` cobre este domínio |
 

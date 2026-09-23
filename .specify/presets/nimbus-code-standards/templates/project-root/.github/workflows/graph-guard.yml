@@ -121,7 +121,7 @@ jobs:
             a cada PR garante rastreabilidade de dependências, análise de impacto e reduz o custo
             de onboarding e debugging. Ver [docs/module-graphs.md](../docs/module-graphs.md).
 
-            > _Gate definido pelo preset \`nimbus-code-standards\` — [saiba mais](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template)._
+            > _Gate definido pelo preset \`nimbus-code-standards\` — [saiba mais](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code)._
             `;
             await github.rest.issues.createComment({
               owner: context.repo.owner,

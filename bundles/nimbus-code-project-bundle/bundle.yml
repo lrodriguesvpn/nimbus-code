@@ -16,19 +16,19 @@ provides:
   presets:
     - id: "nimbus-code-standards"
       version: "1.22.0"
-      source: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
+      source: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code"
       priority: 5
       strategy: "wrap"
 
   extensions:
     - id: "nimbus-code-backlog-sync"
       version: "1.2.0"
-      source: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
+      source: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code"
 
   workflows:
     - id: "nimbus-code-full-cycle"
       version: "1.4.0"
-      source: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
+      source: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code"
 
 tags:
   - "nimbus-code"

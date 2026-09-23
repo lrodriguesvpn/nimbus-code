@@ -2,7 +2,7 @@
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning  
 **Created**: 2026-08-24  
-**Feature**: [spec.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/specs/021-dora-metrics-governance/spec.md)
+**Feature**: [spec.md](/Users/lrodrigues/projects/nimbus-code/specs/021-dora-metrics-governance/spec.md)
 
 ## Content Quality
 
@@ -37,7 +37,7 @@
 ## Notes
 
 - Itens WEB/Impeccable e OpenFeature não se aplicam ao escopo desta feature de governança DORA (não há contexto WEB nem estratégia de toggle como requisito funcional do escopo).
-- O bounded context foi definido como `spec-kit-workflow`, slug existente em [bounded-contexts.yaml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/docs/bounded-contexts.yaml).
+- O bounded context foi definido como `spec-kit-workflow`, slug existente em [bounded-contexts.yaml](/Users/lrodrigues/projects/nimbus-code/docs/bounded-contexts.yaml).
 
 ---
 

@@ -2,7 +2,7 @@
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
 **Created**: 2026-08-24
-**Feature**: [spec.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/feature020-artifacts-consolidation-phase-1/specs/023-template-resolution-merge-fix/spec.md)
+**Feature**: [spec.md](/Users/lrodrigues/projects/nimbus-code.worktrees/feature020-artifacts-consolidation-phase-1/specs/023-template-resolution-merge-fix/spec.md)
 
 ## Content Quality
 

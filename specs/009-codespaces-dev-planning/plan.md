@@ -8,8 +8,8 @@
 
 Os artefatos de referência existem, mas não representam rollout nem decisão
 arquitetural aprovada. As issues
-[#455](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/455)
-e [#436](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/436)
+[#455](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/455)
+e [#436](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/436)
 estavam abertas na consulta desta data e exigem revisão humana da adoção.
 Ver [estado verificável em tasks.md](tasks.md#estado-verificável--2026-09-20)
 para a divergência entre as alegações de #455 e os checklists locais.

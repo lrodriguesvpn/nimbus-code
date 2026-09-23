@@ -87,7 +87,7 @@ infra/
 └── main.tf                 # Function App, Application Insights, Key Vault references (Terraform)
 ```
 
-**Structure Decision**: serviço único (não monólito complexo) com um módulo por conector atrás de uma interface comum (`connectors/base.py`), seguindo o desenho já validado com o Dev nesta sessão. Repositório próprio (não vive dentro de `nimbus-code-spec-kit-template`), mesmo precedente de extração usado por `vpn-skills` (SPEC-003).
+**Structure Decision**: serviço único (não monólito complexo) com um módulo por conector atrás de uma interface comum (`connectors/base.py`), seguindo o desenho já validado com o Dev nesta sessão. Repositório próprio (não vive dentro de `nimbus-code`), mesmo precedente de extração usado por `vpn-skills` (SPEC-003).
 
 ## Complexity Tracking
 

@@ -2,7 +2,7 @@
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning  
 **Created**: 2026-08-24  
-**Feature**: [/Users/lrodrigues/projects/nimbus-code-spec-kit-template/specs/017-nimbus-digital-engineer-platform/spec.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/specs/017-nimbus-digital-engineer-platform/spec.md)
+**Feature**: [/Users/lrodrigues/projects/nimbus-code/specs/017-nimbus-digital-engineer-platform/spec.md](/Users/lrodrigues/projects/nimbus-code/specs/017-nimbus-digital-engineer-platform/spec.md)
 
 ## Content Quality
 
@@ -37,4 +37,4 @@
 ## Notes
 
 - O contexto WEB não se aplica a esta feature de plataforma/orquestração; item mantido como atendido por não aplicabilidade.
-- O grafo de contexto foi gerado automaticamente; há aviso de 1 repositório sem análise completa em [graph.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/specs/017-nimbus-digital-engineer-platform/graph.md).
+- O grafo de contexto foi gerado automaticamente; há aviso de 1 repositório sem análise completa em [graph.md](/Users/lrodrigues/projects/nimbus-code/specs/017-nimbus-digital-engineer-platform/graph.md).

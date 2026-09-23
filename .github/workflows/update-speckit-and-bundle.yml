@@ -9,7 +9,7 @@ name: Verificar atualizações do Nimbus Code e do bundle Nimbus-Code
 # estiver em drift, o caminho oficial de atualização é reaplicar o mesmo
 # bootstrap/sync do bundle para reidratar os artefatos faltantes antes do PR,
 # conforme a política em
-# https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template#versão-do-bundle-em-uso--política-de-atualização
+# https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code#versão-do-bundle-em-uso--política-de-atualização
 #
 # Em topologia multirepo, este workflow é o mecanismo oficial de alinhamento
 # contínuo entre Repo Central e satélites. Satélite não deve aplicar mudanças
@@ -61,7 +61,7 @@ jobs:
             echo "::warning::Secret VPNDEV_STANDARDS_READ_TOKEN não configurado; verificação de atualização do bundle será ignorada."
           else
             if ! LATEST_BUNDLE=$(curl -fsSL -H "Authorization: token ${VPNDEV_TOKEN}" \
-              https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bundles/catalog.json \
+              https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/raw/main/bundles/catalog.json \
               | python3 -c "import json,sys;print(json.load(sys.stdin)['bundles']['nimbus-code-project-bundle']['version'])" 2>/dev/null); then
               LATEST_BUNDLE=""
               echo "::warning::Não foi possível consultar o catalog.json do bundle; verificação de atualização do bundle será ignorada nesta execução."
@@ -104,7 +104,7 @@ jobs:
             echo "Depois de aplicar e testar, rerodar o bootstrap/sync local se algum artefato"
             echo "copiado tiver sumido, abrir um PR normal com o diff e atualizar a tabela"
             echo "de versões na seção 'Nimbus Code — Padrões Nimbus-Code' do README (ver"
-            echo "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/templates/README-bundle-section.md)."
+            echo "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/blob/main/templates/README-bundle-section.md)."
           } > /tmp/issue-body.md
 
       - name: Abrir ou atualizar issue de verificação

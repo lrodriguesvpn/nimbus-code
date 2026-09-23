@@ -16,7 +16,7 @@ if [[ ! -f "$SCRIPT_PATH" ]]; then
   exit 1
 fi
 
-export GITHUB_REPOSITORY="venha-pra-nuvem/nimbus-code-spec-kit-template"
+export GITHUB_REPOSITORY="venha-pra-nuvem/nimbus-code"
 
 # shellcheck disable=SC1090
 source "$SCRIPT_PATH"

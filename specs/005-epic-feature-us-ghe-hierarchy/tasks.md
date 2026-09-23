@@ -32,7 +32,7 @@
   - Cria apenas os tipos ausentes (idempotente)
   - Detecta ausência de suporte (GHE Server legado) e ativa modo degradado com mensagem clara
   - Tipos a criar: Epic (cor roxo), Feature (cor azul), User Story (cor verde), Task (cor cinza), Bug (cor vermelho)
-  - **Nota**: já implementado (passo `[4/9]` de `scripts/setup-github-project.sh`) — a lógica está inline no script em vez de extraída para uma função nomeada `setup_issue_types`, mas cobre 100% do requisito (query prévia, criação idempotente por tipo ausente, detecção de modo degradado). Validado em 2026-08-20 rodando `check-issue-types` do novo helper (`.specify/scripts/bash/create-github-issue-hierarchy.sh`) contra `venha-pra-nuvem/nimbus-code-spec-kit-template` — retornou `native` (Issue Types já configurados na org).
+  - **Nota**: já implementado (passo `[4/9]` de `scripts/setup-github-project.sh`) — a lógica está inline no script em vez de extraída para uma função nomeada `setup_issue_types`, mas cobre 100% do requisito (query prévia, criação idempotente por tipo ausente, detecção de modo degradado). Validado em 2026-08-20 rodando `check-issue-types` do novo helper (`.specify/scripts/bash/create-github-issue-hierarchy.sh`) contra `venha-pra-nuvem/nimbus-code` — retornou `native` (Issue Types já configurados na org).
 - [x] T006 [US1] Atualizar numeração de passos e resumo final em `scripts/setup-github-project.sh` para incluir o novo passo de Issue Types
   - **Nota**: já implementado — passo `[4/9]` e resumo final (`[10/10]`) já listam os 5 Issue Types e a orientação de fallback via labels.
 
@@ -77,7 +77,7 @@
   - Verificar count de sub-issues existentes antes de adicionar
   - Se `count >= 90`: imprimir aviso de aproximação do limite
   - Se `count >= 100`: abortar com erro claro sugerindo dividir a feature
-  - **Implementado nesta sessão**: `link_sub_issue()` em `create-github-issue-hierarchy.sh` consulta `subIssuesSummary.total` do parent antes de cada vínculo; valores confirmados contra dado real do repo (`venha-pra-nuvem/nimbus-code-spec-kit-template#66` retornou `total: 22`).
+  - **Implementado nesta sessão**: `link_sub_issue()` em `create-github-issue-hierarchy.sh` consulta `subIssuesSummary.total` do parent antes de cada vínculo; valores confirmados contra dado real do repo (`venha-pra-nuvem/nimbus-code#66` retornou `total: 22`).
 
 **Checkpoint**: Hierarquia Epic → Feature → US → Task funciona ponta a ponta no GHE com deduplicação e fallback.
 

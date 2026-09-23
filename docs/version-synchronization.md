@@ -125,7 +125,7 @@ Antes de abrir PR com alterações em bundles/presets:
 ## Estrutura de Versionamento
 
 ```
-nimbus-code-spec-kit-template (repo)
+nimbus-code (repo)
 ├── bundles/
 │   ├── nimbus-code-project-bundle/
 │   │   └── bundle.yml (v1.11.0)

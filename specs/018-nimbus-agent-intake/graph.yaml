@@ -6,9 +6,9 @@ version: 2
 generated_at: "2026-09-20T15:03:00Z"
 
 nodes:
-  - id: "venha-pra-nuvem-nimbus-code-spec-kit-template"
+  - id: "venha-pra-nuvem-nimbus-code"
     type: "repo"
-    repository: "venha-pra-nuvem/nimbus-code-spec-kit-template"
+    repository: "venha-pra-nuvem/nimbus-code"
     cross_repo: false
     manifest_source: "unavailable"
   - id: "venha-pra-nuvem-nimbus-agent"
@@ -19,7 +19,7 @@ nodes:
 
 edges:
   - from: "venha-pra-nuvem-nimbus-agent"
-    to: "venha-pra-nuvem-nimbus-code-spec-kit-template"
+    to: "venha-pra-nuvem-nimbus-code"
     type: "direct-intake"
 
 unanalyzed_repos:

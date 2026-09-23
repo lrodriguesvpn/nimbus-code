@@ -2,7 +2,7 @@
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
 **Created**: 2025-06-18
-**Feature**: [spec.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/users-lrodrigues-projects-nimbus-code-spec-kit-t/specs/024-multi-agent-integration-claude-antigravity/spec.md)
+**Feature**: [spec.md](/Users/lrodrigues/projects/nimbus-code.worktrees/users-lrodrigues-projects-nimbus-code-spec-kit-t/specs/024-multi-agent-integration-claude-antigravity/spec.md)
 
 ## Content Quality
 

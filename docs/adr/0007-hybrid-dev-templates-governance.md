@@ -53,6 +53,6 @@ Adotar o padrão `hybrid-dev-templates` com as seguintes regras:
 
 ## Rollout
 
-- Aplicar em `nimbus-code-spec-kit-template`.
+- Aplicar em `nimbus-code`.
 - Validar em projetos piloto.
 - Expandir para bootstrap padrão após validação.

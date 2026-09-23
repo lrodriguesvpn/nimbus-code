@@ -120,7 +120,7 @@ Latest: Merge from prior batch
    - Decision: Enable for org or proceed with documented design independently
 
 2. **T006** (15 mins):
-   - Open a Codespace on the pilot repo (`nimbus-code-spec-kit-template`)
+   - Open a Codespace on the pilot repo (`nimbus-code`)
    - Verify: `node --version`, `python3 --version`, `gh --version` all available without manual setup
    - Mark complete
 

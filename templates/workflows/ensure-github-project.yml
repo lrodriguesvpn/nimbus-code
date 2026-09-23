@@ -73,14 +73,14 @@ jobs:
             echo "found=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Clonar scripts do nimbus-code-spec-kit-template
+      - name: Clonar scripts do nimbus-code
         if: steps.check.outputs.found != 'true'
         env:
           AUTH_TOKEN: ${{ steps.resolve-token.outputs.token }}
           CLONE_DIR: ${{ runner.temp }}/nimbus-code-standards
         run: |
           rm -rf "$CLONE_DIR"
-          git clone --depth 1 "https://x-access-token:${AUTH_TOKEN}@venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template.git" "$CLONE_DIR"
+          git clone --depth 1 "https://x-access-token:${AUTH_TOKEN}@venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code.git" "$CLONE_DIR"
 
       - name: Criar GitHub Project (não existia)
         if: steps.check.outputs.found != 'true'

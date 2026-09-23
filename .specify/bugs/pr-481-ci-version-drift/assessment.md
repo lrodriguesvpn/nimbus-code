@@ -2,7 +2,7 @@
 
 - **Slug**: `pr-481-ci-version-drift`
 - **Created**: 2026-09-21T17:54:09-03:00
-- **Source**: GHE PR [#481](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/pull/481) and failed workflow run [219390096](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/actions/runs/219390096)
+- **Source**: GHE PR [#481](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/pull/481) and failed workflow run [219390096](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/actions/runs/219390096)
 - **Verdict**: valid, likely pre-existing
 - **Severity**: high
 

@@ -8,9 +8,9 @@ extension:
   category: "integration"
   effect: "read-write"
   author: "Nimbus-Code"
-  repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
+  repository: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code"
   license: "Proprietary"
-  homepage: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
+  homepage: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code"
 
 requires:
   speckit_version: ">=0.16.0"

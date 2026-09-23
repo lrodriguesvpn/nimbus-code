@@ -16,7 +16,7 @@
 | `google-connector` | Novo | Médio — afeta só chamadas roteadas ao Google | platform |
 | `aws-bedrock-connector` | Novo | Médio — afeta só chamadas roteadas à AWS | platform |
 | `observability` | Novo | Médio — falha aqui não bloqueia a resposta, mas cega a visibilidade de custo | platform |
-| `scripts/harvest-patterns.sh` (repositório-fonte) | **Nenhuma mudança** | N/A — contrato mantido intencionalmente inalterado (FR-001) | platform (nimbus-code-spec-kit-template) |
+| `scripts/harvest-patterns.sh` (repositório-fonte) | **Nenhuma mudança** | N/A — contrato mantido intencionalmente inalterado (FR-001) | platform (nimbus-code) |
 
 ---
 
