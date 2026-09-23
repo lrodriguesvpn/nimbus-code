@@ -2,7 +2,7 @@
 # Bootstrap: applies the nimbus-code-project-bundle to a new or existing repository.
 set -euo pipefail
 
-/Users/lrodrigues/projects/nimbus-code.worktrees/nimbus-code-framework-strategy/extensions/vscode/nimbus-code-extension-0.1.0.vsixSTANDARDS_REPO="${NIMBUS_STANDARDS_REPO:-https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code}"
+NIMBUS_STANDARDS_REPO="${NIMBUS_STANDARDS_REPO:-https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code}"
 LEGACY_STANDARDS_REPO="https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code"
 LOCAL_PATH=""
 NIMBUS_REF="${NIMBUS_REF:-main}"
