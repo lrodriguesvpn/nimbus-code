@@ -1,0 +1,78 @@
+name: Sync Public Nimbus Code Repository
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'extensions/**'
+      - 'servers/**'
+      - 'scripts/export-public-repo.sh'
+      - 'scripts/sync-public-repo.sh'
+      - '.github/workflows/sync-public-extension.yml'
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        description: 'Branch de destino no repositório público (develop ou main)'
+        required: true
+        default: 'develop'
+        type: choice
+        options:
+          - develop
+          - main
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    name: Clean Export & Sync to Public Repo
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Compile Extension & MCP Server
+        run: |
+          echo "📦 Compilando Extensão VS Code..."
+          cd extensions/vscode && npm install && npm run compile
+          cd ../..
+          echo "🔌 Compilando Servidor MCP..."
+          cd servers/mcp-nimbus && npm install && npm run build
+          cd ../..
+
+      - name: Set Target Branch
+        id: branch_step
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "TARGET_BRANCH=${{ github.event.inputs.target_branch }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "TARGET_BRANCH=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Export and Security Scan
+        run: |
+          chmod +x scripts/export-public-repo.sh scripts/sync-public-repo.sh
+          echo "🛡️ Gerando export limpo e verificando ausência de segredos..."
+          bash scripts/sync-public-repo.sh --branch "${{ steps.branch_step.outputs.TARGET_BRANCH }}" --no-push
+
+      - name: Push to Public Repository
+        env:
+          PUBLIC_REPO_TOKEN: ${{ secrets.PUBLIC_REPO_SYNC_TOKEN }}
+          GIT_USER_NAME: "Nimbus Code Release Bot"
+          GIT_USER_EMAIL: "bot@venhapranuvem.com.br"
+        run: |
+          if [ -z "$PUBLIC_REPO_TOKEN" ]; then
+            echo "⚠️ AVISO: Secret 'PUBLIC_REPO_SYNC_TOKEN' não configurada. O push automático foi ignorado nesta execução."
+            echo "ℹ️ Para habilitar o push automático no GitHub Actions, adicione o secret 'PUBLIC_REPO_SYNC_TOKEN' (Personal Access Token com escopo repo no github.com/lrodriguesvpn/nimbus-code)."
+          else
+            bash scripts/sync-public-repo.sh --branch "${{ steps.branch_step.outputs.TARGET_BRANCH }}"
+          fi

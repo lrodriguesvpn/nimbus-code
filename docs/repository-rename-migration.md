@@ -1,26 +1,20 @@
-# Migração de Nome do Repositório — NIMBUS CODE
+# Migração de Nome e Arquitetura do Repositório — NIMBUS CODE
 
-Este documento formaliza a separação entre os dois repositórios da iniciativa
-NIMBUS CODE e serve como guia operacional para a troca do slug do repositório
-base.
+Este documento formaliza a transição do repositório para **`nimbus-code`** (Framework & Platform) e a separação de distribuição do repositório público da extensão sob licença BSL 1.1.
 
-## 1. Diferença entre os repositórios
+## 1. Topologia de Repositórios e Visibilidade
 
-| Repositório | Tipo | Fonte de verdade para | Responsável principal |
+| Repositório | Visibilidade | Papel & Conteúdo | Licença |
 |---|---|---|---|
-| `nimbus-code-spec-kit-template` | template / foundation | bootstrap, presets, extensões, workflows, catálogos, templates e documentação operacional | arquitetura, padrões e automações |
-| `nimbus-code` | produto / marketing | branding, naming comercial, storytelling, decks, páginas e GTM | produto, liderança e marketing |
+| **`venha-pra-nuvem/nimbus-code`** | **Privado VPN** | Monorepo Central: presets corporativos, 15 agentes `nc-*`, harness, catálogo de reuso, IaC Terraform Azure e engine `bootstrap.sh`. | Proprietário VPN |
+| **`venha-pra-nuvem/nimbus-code-extension`** | **Público GitHub** | Repositório Público: Adaptadores de clientes (`clients/vscode`, `clients/mcp-server`), manual de onboarding e documentação pública. | **BSL 1.1** (Source-Available) |
 
-### Regras
+### Regras de Separação de IP
 
-- O **repo template/foundation** pode ser citado pelo repo de produto, mas não o
-  contrário como dependência operacional.
-- O **repo de produto/marketing** não deve publicar catálogos, bootstrap ou
-  templates consumidos por outros projetos.
-- O **nome comercial** é **NIMBUS CODE™ AI Delivery System**.
-- O **substrato técnico** continua sendo **GitHub Nimbus Code**.
-- Os nomes técnicos do modelo (`specify`, `plan`, `tasks`, `implement`,
-  `converge`, `spec.md`, `plan.md`) **não mudam**.
+- O repositório central **`nimbus-code`** é a única fonte da verdade (*Single Source of Truth*).
+- O repositório público **`nimbus-code-extension`** recebe apenas o código dos clientes via pipeline de release filtrado.
+- Nenhum prompt proprietário dos agentes `nc-*`, regras de governança S0–S4 ou segredos de infraestrutura são expostos no repositório público.
+- **Modelo BYO-LLM:** Usuários do modo Community trazem seus próprios modelos de IA e o motor upstream `specify-cli`. Clientes Enterprise contratam a VPN para utilizar o squad completo de agentes especialistas e a capacidade produtiva sob demanda.
 
 ## 2. O que muda com o rename
 
