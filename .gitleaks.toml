@@ -6,7 +6,7 @@
 # falso positivo aceito precisa de Exception Record aprovado em
 # .github/security-exceptions.json (controle "secret-scan") e de uma entrada
 # específica (path + regex) abaixo, revisada por CODEOWNERS.
-title = "nimbus-code-spec-kit-template gitleaks config"
+title = "nimbus-code gitleaks config"
 
 [extend]
 useDefault = true
