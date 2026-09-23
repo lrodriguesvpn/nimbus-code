@@ -163,7 +163,25 @@ export function activate(context: vscode.ExtensionContext) {
             const remotes = repo.state.remotes || [];
             for (const r of remotes) {
               const url = r.fetchUrl || r.pushUrl || '';
-              if (url.includes('venha-pra-nuvem.ghe.com') || url.includes('venha-pra-nuvem/')) {
+              let isVpnRemote = false;
+
+              try {
+                const parsed = new URL(url);
+                const host = parsed.hostname.toLowerCase();
+                const path = parsed.pathname.toLowerCase();
+
+                isVpnRemote = host === 'venha-pra-nuvem.ghe.com' || (host === 'venha-pra-nuvem.ghe.com' && path.includes('/venha-pra-nuvem/'));
+              } catch {
+                // Fallback para formatos de remote Git não-URL (ex.: git@host:owner/repo.git)
+                const scpLikeMatch = url.match(/^[^@]+@([^:]+):(.+)$/);
+                if (scpLikeMatch) {
+                  const host = scpLikeMatch[1].toLowerCase();
+                  const repoPath = scpLikeMatch[2].toLowerCase();
+                  isVpnRemote = host === 'venha-pra-nuvem.ghe.com' && repoPath.includes('venha-pra-nuvem/');
+                }
+              }
+
+              if (isVpnRemote) {
                 return { isVpnEnterprise: true, reason: 'Repositório hospedado no GitHub Enterprise da Venha Pra Nuvem', remoteUrl: url };
               }
             }
