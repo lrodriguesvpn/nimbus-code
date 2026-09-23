@@ -1,32 +1,28 @@
-# nimbus-code-spec-kit-template
+# Nimbus Code (Core Framework & Platform)
 
-> ⚠️ **Propriedade Intelectual — Uso Interno Exclusivo**
-> Este repositório e todo o seu conteúdo (templates, presets, extensões, workflows,
-> padrões de governança e documentação) são propriedade exclusiva da **Venha Pra Nuvem**.
-> Cópia, redistribuição ou uso fora da organização são expressamente proibidos — ver
-> [`LICENSE`](LICENSE). Qualquer alteração em arquivos de padrão exige aprovação do
-> `@nimbus-code-arch-board` via Pull Request (ver [`.github/CODEOWNERS`](.github/CODEOWNERS)).
+> ⚠️ **Propriedade Intelectual & Licenciamento — Venha Pra Nuvem (VPN)**
+> Este repositório central (`nimbus-code`) é a fonte canônica do **Nimbus Code Framework**.
+> Ele contém o core proprietário da VPN (presets institucionais, 15 agentes especialistas `nc-*`, harness de engenharia e catálogo de reuso).
+> Os adaptadores de cliente (`clients/vscode`, `clients/mcp-server`) são distribuídos publicamente sob licença **BSL 1.1** (Source-Available / Avaliação Livre e Produção via Licença VPN).
+> Qualquer alteração exige aprovação do `@nimbus-code-arch-board` via Pull Request (ver [`.github/CODEOWNERS`](.github/CODEOWNERS)).
 
-Repositório-base do **NIMBUS CODE™ AI Delivery System** para bootstrap,
-templates, presets, workflows, catálogos e documentação operacional.
-Tecnicamente, ele continua sendo construído **sobre o GitHub Nimbus Code** e
-preserva os nomes operacionais do modelo (`specify`, `plan`, `tasks`,
-`implement`, `converge`) para que futuras atualizações do upstream possam ser
-absorvidas sem retrabalho conceitual.
+Repositório central do **NIMBUS CODE™ AI Delivery System** para engine do framework,
+presets corporativos, orquestração multi-IDE (`@nimbus`), adaptadores de clientes e infraestrutura de governança.
 
-## Posicionamento dos repositórios NIMBUS CODE
+## Arquitetura de Camadas do NIMBUS CODE
 
-| Repositório | Papel | O que contém | O que não deve conter |
+| Camada | Diretório / Módulo | Visibilidade & Licença | Descrição |
 |---|---|---|---|
-| **`nimbus-code-spec-kit-template`** | **Template / foundation** | bootstrap, presets, extensões, workflows, catálogos, templates e documentação operacional | storytelling de produto, landing pages, GTM e ativos de marketing |
-| **`nimbus-code`** | **Produto / marketing** | naming comercial, narrativa executiva, decks, páginas, posicionamento e materiais de venda | dependências operacionais para bootstrap, automação ou catálogos |
+| **Core Framework** | `presets/`, `scripts/`, `specs/`, `templates/`, `bootstrap.sh` | **Privado VPN** (Proprietário) | Presets corporativos, personas `nc-*`, regras S0–S4, SHA-256 e harness. |
+| **Clients / Multi-IDE** | `extensions/vscode/`, `servers/mcp-nimbus/` | **Público / BSL 1.1** | Extensão VS Code/Cursor e Servidor MCP universal (Claude Code, Cursor, AGY). |
+| **Cloud & Entitlement** | `infrastructure/nimbus-code-extension-iac/` | **Privado VPN** (Azure) | IaC Terraform (Container Apps, Storage WORM 5y, Key Vault, PostgreSQL). |
+| **Documentação** | `docs/` | **Público / Governança** | Manuais de onboarding, guias do desenvolvedor e FAQ da BSL 1.1. |
 
-**Regra de leitura para a organização:**
-- **template/foundation repo** = como os projetos são criados e governados;
-- **product/marketing repo** = como o NIMBUS CODE é apresentado e vendido.
+## Modelo Operacional: "Sanfona de Dev" e BYO-LLM
 
-O **nome comercial do sistema** é **NIMBUS CODE™ AI Delivery System**. O
-**nome técnico base** continua sendo **Nimbus Code**.
+1. **Zero Custo de Tokens para a VPN (BYO-LLM):** Toda inferência de código é realizada com a infraestrutura de IA do próprio cliente (GitHub Copilot corporativo, chaves de API do cliente). A VPN nunca paga a inferência dos desenvolvedores.
+2. **Community / Self-Service:** Desenvolvedores utilizam a extensão pública com `specify-cli` upstream para testes locais irrestritos.
+3. **Enterprise & Sanfona de Dev:** Clientes que contratam a VPN contam com os squads de aceleração e o esquadrão completo de agentes `nc-*` para entregas de alta complexidade.
 
 ## Governança corporativa de IA
 

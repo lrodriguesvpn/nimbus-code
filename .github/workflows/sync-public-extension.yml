@@ -1,0 +1,31 @@
+name: Sync Public Extension Repository
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'extensions/vscode/**'
+      - 'servers/mcp-nimbus/**'
+
+jobs:
+  sync:
+    name: Filtered Sync to Public Repo
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Git Config
+        run: |
+          git config --global user.name "Nimbus Code Release Bot"
+          git config --global user.email "bot@venhapranuven.com.br"
+
+      - name: Push to Public Extension Repo
+        env:
+          PUBLIC_REPO_TOKEN: ${{ secrets.PUBLIC_REPO_SYNC_TOKEN }}
+        run: |
+          echo "Sincronizando clientes 'extensions/vscode' e 'servers/mcp-nimbus' para o repositório público..."
+          # Pipeline de sincronização filtrada garantindo Zero Source Leak dos agentes internos

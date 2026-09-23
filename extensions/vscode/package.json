@@ -1,0 +1,110 @@
+{
+  "name": "nimbus-code-extension",
+  "displayName": "Nimbus Code — AI Agentic SDD Framework",
+  "description": "Extensão Multi-IDE para orquestração de Agentes Autônomos de Desenvolvimento com Spec-Driven Development (SDD).",
+  "version": "0.1.0",
+  "publisher": "venha-pra-nuvem",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "AI",
+    "Programming Languages",
+    "Linters",
+    "Other"
+  ],
+  "keywords": [
+    "nimbus-code",
+    "copilot",
+    "sdd",
+    "spec-driven-development",
+    "ai-agents",
+    "vpn"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "nimbus.openSquad",
+        "title": "Nimbus Code: Abrir Orquestrador do Esquadrão (@nimbus)",
+        "category": "Nimbus Code"
+      },
+      {
+        "command": "nimbus.newSpec",
+        "title": "Nimbus Code: Criar Nova Especificação (/nc-spec)",
+        "category": "Nimbus Code"
+      },
+      {
+        "command": "nimbus.planArchitecture",
+        "title": "Nimbus Code: Planejar Arquitetura Técnica (/nc-arch)",
+        "category": "Nimbus Code"
+      },
+      {
+        "command": "nimbus.generateTasks",
+        "title": "Nimbus Code: Gerar Estratégia de Testes e Tasks (/nc-qa)",
+        "category": "Nimbus Code"
+      },
+      {
+        "command": "nimbus.implementFeature",
+        "title": "Nimbus Code: Executar Implementação Autônoma (/nc-builder)",
+        "category": "Nimbus Code"
+      },
+      {
+        "command": "nimbus.verifyHealth",
+        "title": "Nimbus Code: Verificar Status do Repositório e Licença",
+        "category": "Nimbus Code"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "nimbus.openSquad"
+        },
+        {
+          "command": "nimbus.newSpec"
+        },
+        {
+          "command": "nimbus.planArchitecture"
+        },
+        {
+          "command": "nimbus.generateTasks"
+        },
+        {
+          "command": "nimbus.implementFeature"
+        },
+        {
+          "command": "nimbus.verifyHealth"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Nimbus Code",
+      "properties": {
+        "nimbus.mode": {
+          "type": "string",
+          "enum": ["local_unrestricted", "enterprise_licensed"],
+          "default": "local_unrestricted",
+          "description": "Modo de operação: local irrestrito (para testes e avaliação) ou licenciado Enterprise (com validação corporativa)."
+        },
+        "nimbus.entitlementUrl": {
+          "type": "string",
+          "default": "https://ca-nimbus-code-entitlement-api.azurecontainerapps.io",
+          "description": "URL do backend de governança da VPN (utilizado no modo enterprise_licensed)."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.0"
+  }
+}

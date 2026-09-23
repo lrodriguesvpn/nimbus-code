@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "nimbus-code": {
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/servers/mcp-nimbus/dist/index.js"
+      ]
+    }
+  },
+  "servers": {
+    "nimbus-code": {
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/servers/mcp-nimbus/dist/index.js"
+      ]
+    }
+  }
+}

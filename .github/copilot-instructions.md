@@ -453,7 +453,7 @@ normal, nunca commit direto):
 
 1. **Conteúdo Nimbus-Code** (agentes NC-*, presets, workflows, docs deste
    bundle) — vem do repositório
-   [`nimbus-code-spec-kit-template`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template):
+   [`nimbus-code`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code) (anteriormente `nimbus-code-spec-kit-template`):
    ```bash
    bash /caminho/do/bundle/bootstrap.sh \
      --local /caminho/do/bundle --refresh-preset --repo-type dev_standards
@@ -483,11 +483,11 @@ completo, incluindo o que cada mecanismo cobre e não cobre:
 
 ## Referências
 
-- [Manual de Sessões Remotas e Branches](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/agent-session-manual.md)
-- [Guia do Dev Nimbus-Code](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/developer-guide.md)
-- [Seleção de Modelos por Complexidade](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/ai-code-quality-and-observability.md#6-seleção-de-modelo-por-complexidade-s0s4)
-- [Grafos de Módulos — Guia](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/module-graphs.md)
-- [Labels — Priorização e Desenvolvimento Autônomo](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/label-taxonomy-and-autonomous-dev.md)
-- [Modelo Híbrido e Estimativa de Tokens](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/ai-code-quality-and-observability.md#8-modelo-híbrido-agentes-de-ia--humanos-codando-juntos)
-- [Catálogo de Reuso](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/ai-code-quality-and-observability.md#9-catálogo-de-reuso--reduzindo-custo-de-tokens-com-conteúdo-já-existente)
-- [Rastreamento de Custo — Cost Tracking Workflow](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/cost-tracking-workflow.md)
+- [Manual de Sessões Remotas e Branches](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/blob/main/docs/agent-session-manual.md)
+- [Guia do Dev Nimbus-Code](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/blob/main/docs/developer-guide.md)
+- [Seleção de Modelos por Complexidade](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/blob/main/docs/ai-code-quality-and-observability.md#6-seleção-de-modelo-por-complexidade-s0s4)
+- [Grafos de Módulos — Guia](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/blob/main/docs/module-graphs.md)
+- [Labels — Priorização e Desenvolvimento Autônomo](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/blob/main/docs/label-taxonomy-and-autonomous-dev.md)
+- [Modelo Híbrido e Estimativa de Tokens](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/blob/main/docs/ai-code-quality-and-observability.md#8-modelo-híbrido-agentes-de-ia--humanos-codando-juntos)
+- [Catálogo de Reuso](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/blob/main/docs/ai-code-quality-and-observability.md#9-catálogo-de-reuso--reduzindo-custo-de-tokens-com-conteúdo-já-existente)
+- [Rastreamento de Custo — Cost Tracking Workflow](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/blob/main/docs/cost-tracking-workflow.md)
