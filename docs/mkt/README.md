@@ -19,5 +19,4 @@
 ## Análises Técnicas de Mercado no Repositório Central
 
 As análises comparativas e benchmarkings técnicos com ferramentas de mercado (GSD, Claude Code/Impeccable, TypeSafe AI, Understand Anything) permanecem catalogadas no repositório central em:
-- [docs/comparisons/](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/nimbus-code-framework-strategy/docs/comparisons)
-
+- [`docs/comparisons/`](comparisons/)
