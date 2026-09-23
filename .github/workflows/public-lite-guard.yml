@@ -1,0 +1,91 @@
+name: Public Lite Guard
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-lite-contract:
+    name: Validate Lite artifact contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify public tree and content policy
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          import sys
+
+          root = Path(".")
+          manifest = root / "PUBLIC-LITE-MANIFEST.txt"
+          if not manifest.is_file():
+              sys.exit("PUBLIC-LITE-MANIFEST.txt is required.")
+
+          allowed = {
+              line.strip()
+              for line in manifest.read_text(encoding="utf-8").splitlines()
+              if line.strip() and not line.lstrip().startswith("#")
+          }
+          files = {
+              path.relative_to(root).as_posix()
+              for path in root.rglob("*")
+              if path.is_file() and ".git" not in path.parts
+          }
+
+          unexpected = sorted(files - allowed)
+          missing = sorted(allowed - files)
+          if unexpected or missing:
+              if unexpected:
+                  print("Unexpected files:", *unexpected, sep="\n  ")
+              if missing:
+                  print("Missing manifest files:", *missing, sep="\n  ")
+              sys.exit(1)
+
+          forbidden_paths = (
+              ".specify/",
+              "specs/",
+              "docs/harness/",
+              "docs/playbooks/",
+              "docs/adr/",
+              "bundles/",
+              "infrastructure/",
+              "modules/",
+              "services/",
+              "scripts/",
+          )
+          offenders = [
+              path for path in files
+              if any(path.startswith(prefix) for prefix in forbidden_paths)
+          ]
+          if offenders:
+              print("Enterprise-only paths found:", *sorted(offenders), sep="\n  ")
+              sys.exit(1)
+
+          forbidden_content = re.compile(
+              r"venha-pra-nuvem\.ghe\.com|"
+              r"ca-nimbus-code-entitlement-api|"
+              r"api\.venhapranuvem\.com\.br|"
+              r"(?i:harvest (de codigo|& ingestao)|harness corporativo|18 agentes|"
+              r"uso interno exclusivo|inteligência vpn dev)"
+          )
+          for relative_path in sorted(files):
+              if relative_path in {
+                  "PUBLIC-LITE-MANIFEST.txt",
+                  ".github/workflows/public-lite-guard.yml",
+              }:
+                  continue
+              content = (root / relative_path).read_text(
+                  encoding="utf-8", errors="ignore"
+              )
+              if forbidden_content.search(content):
+                  sys.exit(
+                      f"Enterprise-only content found in {relative_path}."
+                  )
+          PY

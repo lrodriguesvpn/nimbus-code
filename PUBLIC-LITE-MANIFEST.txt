@@ -1,0 +1,21 @@
+# This is the complete, versioned contract for the public Lite repository.
+# Every exported file must appear here; no implicit directory allowlist is used.
+.github/workflows/public-lite-guard.yml
+LICENSE
+PUBLIC-LITE-MANIFEST.txt
+README.md
+extensions/vscode/LICENSE
+extensions/vscode/dist/extension.js
+extensions/vscode/package.json
+extensions/vscode/src/extension.ts
+extensions/vscode/tsconfig.json
+presets/nimbus-code-community/README.md
+presets/nimbus-code-community/templates/constitution.md
+presets/nimbus-code-community/templates/plan-template.md
+presets/nimbus-code-community/templates/spec-template.md
+presets/nimbus-code-community/templates/tasks-template.md
+servers/mcp-nimbus/LICENSE
+servers/mcp-nimbus/dist/index.js
+servers/mcp-nimbus/package.json
+servers/mcp-nimbus/src/index.ts
+servers/mcp-nimbus/tsconfig.json

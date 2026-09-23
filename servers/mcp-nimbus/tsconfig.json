@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2022",
+    "outDir": "dist-lite",
+    "lib": ["ES2022", "DOM"],
+    "sourceMap": false,
+    "rootDir": "src/lite",
+    "strict": true
+  },
+  "include": ["src/lite/index.ts"]
+}

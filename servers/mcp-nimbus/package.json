@@ -1,0 +1,20 @@
+{
+  "name": "@nimbus-code/mcp-lite",
+  "version": "0.1.0",
+  "description": "MCP Lite do Nimbus Code para templates locais de Spec-Driven Development.",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "nimbus-code-mcp-lite": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  }
+}
