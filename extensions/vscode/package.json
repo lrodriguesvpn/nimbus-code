@@ -28,6 +28,11 @@
   "contributes": {
     "commands": [
       {
+        "command": "nimbus.initRepository",
+        "title": "Nimbus Code: Inicializar Repositório (Community / Enterprise)",
+        "category": "Nimbus Code"
+      },
+      {
         "command": "nimbus.openSquad",
         "title": "Nimbus Code: Abrir Orquestrador do Esquadrão (@nimbus)",
         "category": "Nimbus Code"
@@ -75,6 +80,9 @@
     ],
     "menus": {
       "commandPalette": [
+        {
+          "command": "nimbus.initRepository"
+        },
         {
           "command": "nimbus.openSquad"
         },

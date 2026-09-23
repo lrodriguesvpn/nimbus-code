@@ -16,31 +16,41 @@
 
 ## 🌟 O que é o Nimbus Code?
 
-O **Nimbus Code** é um framework de engenharia de software orientado a agentes de inteligência artificial construído sobre o paradigma de **Spec-Driven Development (SDD)**. 
+O **Nimbus Code** é um framework de engenharia de software orientado a agentes de IA que implementa o ciclo completo de **Spec-Driven Development (SDD)**: da ideia bruta à entrega de código testado e auditado.
 
-Ele orquestra um esquadrão de agentes especializados (`@nimbus`, `/nc-spec`, `/nc-arch`, `/nc-qa`, `/nc-builder`, `/nc-critic`, `/nc-shield`) para transformar intenções de negócio em software testado, seguro e governado.
-
----
-
-## 🏛️ Filosofia Open-Core & BYO-LLM
-
-1. **Zero Custo de Tokens (BYO-LLM):** Você traz seu próprio provedor de IA (GitHub Copilot corporativo, chaves Claude/OpenAI, ou modelos locais). O Nimbus Code nunca intermedia suas chaves de API nem armazena seu código.
-2. **Uso Local Gratuito:** O uso para desenvolvimento individual, testes e avaliação é totalmente gratuito sob a licença **BSL 1.1**.
-3. **Enterprise & Squad VPN:** Para governança centralizada, esteiras de conformidade LGPD/DevSecOps e o modelo **Sanfona de Dev (Staff Augmentation com Nimbus Code)**, [entre em contato com a Venha Pra Nuvem](https://venhapranuven.com.br).
+Distribuímos o framework em dois modelos:
+1. **Nimbus Code Community (Lite)** — Gratuito sob licença **BSL 1.1** para desenvolvedores, avaliação e testes locais.
+2. **Nimbus Code Enterprise (VPN Edition)** — Solução corporativa completa com governança S0–S4, squad de 18 especialistas, Harvest de código legado (*Brownfield*) e apoio de engenharia da **Venha Pra Nuvem**.
 
 ---
 
-## 📦 Componentes Públicos neste Repositório
+## ⚖️ Matriz Comparativa: Community vs Enterprise
 
-* **[`extensions/vscode`](extensions/vscode):** Extensão para VS Code, Cursor e Antigravity com menus do esquadrão, Command Palette e participante de chat nativo (`@nimbus`).
-* **[`servers/mcp-nimbus`](servers/mcp-nimbus):** Servidor universal compatível com o [Model Context Protocol (MCP)](https://modelcontextprotocol.io), permitindo o uso do Nimbus Code no Claude Code, Cursor e IDEs agenticas.
+| Capacidade / Funcionalidade | 🟢 Community (Lite) | 🏢 Enterprise (VPN) |
+|---|:---:|:---:|
+| **Modelo de Licença** | BSL 1.1 (Dev & Testes Gratuito) | Licença Corporativa / Consultoria VPN |
+| **Extensão VS Code / Multi-IDE** | ✅ Inclusa | ✅ Inclusa |
+| **Scaffold SDD (`spec`, `plan`, `tasks`)** | ✅ Templates Base | ✅ Avançado com BDD & SMART rígidos |
+| **Orquestrador `@nimbus`** | ✅ Triagem Lite (Bug, Spec, Ideação) | ✅ Squad Completo de 18 Agentes Nativos |
+| **Harness Engineering (Lições Aprendidas)** | ⚪ Local manual | 🌟 **Catálogo Central Corporativo da VPN** |
+| **Harvest de Código Legado (Brownfield)** | ❌ Não incluso | 🌟 **Gateway & API de Harvest Automatizado** |
+| **Catálogo de Reuso Multi-Repo** | ❌ Não incluso | 🌟 **Indexação Global de Padrões e ADRs** |
+| **Governança RACI e DevSecOps Gate** | ⚪ Básico | 🌟 **Gates S0–S4 com Auditoria Criptográfica** |
+| **Sanfona de Desenvolvimento (Time VPN)** | ❌ Apenas Comunidade | 🌟 **Engenheiros Especialistas sob Demanda** |
 
 ---
 
-## 🚀 Como Iniciar
+## 🏛️ Filosofia BYO-LLM (Bring Your Own LLM)
+
+- **Zero Custo de Intermediação de Tokens:** Você utiliza seu próprio GitHub Copilot corporativo, chaves de API Claude/OpenAI ou modelos locais.
+- **Privacidade Total:** Seu código nunca trafega por servidores intermediários do Nimbus Code.
+
+---
+
+## 🚀 Como Começar (Community Edition)
 
 ### 1. Extensão VS Code
-Abra a pasta `extensions/vscode`, compile e empacote:
+Instale o pacote `.vsix` em `extensions/vscode` ou compile localmente:
 ```bash
 cd extensions/vscode
 npm install
@@ -49,24 +59,18 @@ npx @vscode/vsce package
 code --install-extension nimbus-code-extension-0.1.0.vsix
 ```
 
-### 2. Servidor MCP (Claude Code / Cursor / Windsurf)
-Configure no seu arquivo de MCP (ex: `~/.claude/mcp.json` ou `.vscode/mcp.json`):
-```json
-{
-  "mcpServers": {
-    "nimbus-code": {
-      "command": "node",
-      "args": ["/caminho/para/servers/mcp-nimbus/dist/index.js"]
-    }
-  }
-}
-```
+### 2. Inicializar Repositório
+No VS Code, abra a **Command Palette** (`Ctrl+Shift+P` ou `Cmd+Shift+P`) e execute:
+> `Nimbus Code: Inicializar Repositório (Community / Enterprise)`
 
 ---
 
-## 🏢 Sobre a Venha Pra Nuvem (VPN)
+## 🏢 Desbloqueie o Nimbus Code Enterprise com a VPN
 
-A **Venha Pra Nuvem** é especialista em modernização de aplicações, arquiteturas em nuvem resilientes e aceleração de engenharia orientada a IA.
+Precisa de aceleração de entrega, modernização de sistemas legados ou governança corporativa de IA?
 
-- **Website:** [venhapranuven.com.br](https://venhapranuven.com.br)
-- **Licenciamento Comercial:** contato@venhapranuven.com.br
+- 🌾 **Harvest Brownfield:** Automatize a extração de regras de negócio de bases legadas e migrações para nuvem.
+- 🛡️ **Harness Corporativo:** Compartilhe guardrails e lições aprendidas entre todos os times de desenvolvimento da empresa.
+- 🪗 **Sanfona de Dev:** Expanda temporariamente sua capacidade de engenharia com os especialistas da Venha Pra Nuvem que dominam o framework.
+
+👉 **Contato Comercial & Parcerias:** [venhapranuven.com.br](https://venhapranuven.com.br) | **E-mail:** contato@venhapranuven.com.br

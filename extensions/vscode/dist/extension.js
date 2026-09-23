@@ -63,8 +63,58 @@ function activate(context) {
         }
     }
     // 1. Comandos do Command Palette
+    context.subscriptions.push(vscode.commands.registerCommand('nimbus.initRepository', async () => {
+        const hasWorkspace = await ensureWorkspace();
+        if (!hasWorkspace) {
+            return;
+        }
+        const choice = await vscode.window.showQuickPick([
+            {
+                label: '🟢 Inicializar Nimbus Code Community (Gratuito)',
+                detail: 'Configura o fluxo Spec-Driven Development (SDD), constitution.md e templates locais.',
+                action: 'community'
+            },
+            {
+                label: '🔵 Obter Nimbus Code Enterprise (Venha Pra Nuvem)',
+                detail: 'Desbloqueia 18 agentes nativos, Harness Corporativo, Harvest Brownfield e Sanfona de Dev.',
+                action: 'enterprise'
+            }
+        ], {
+            placeHolder: 'Escolha como deseja inicializar o Nimbus Code neste workspace:'
+        });
+        if (!choice) {
+            return;
+        }
+        if (choice.action === 'community') {
+            const rootUri = vscode.workspace.workspaceFolders[0].uri;
+            const constitutionUri = vscode.Uri.joinPath(rootUri, 'constitution.md');
+            const specifyDirUri = vscode.Uri.joinPath(rootUri, '.specify');
+            const templatesDirUri = vscode.Uri.joinPath(rootUri, '.specify', 'templates');
+            try {
+                await vscode.workspace.fs.createDirectory(templatesDirUri);
+                const defaultConstitution = `# Constituição do Projeto (Nimbus Code Community Edition)\n\n## Princípios Não-Negociáveis\n1. **Especificação Antes do Código**: Crie spec.md e plan.md antes de implementar.\n2. **TDD**: Testes automatizados obrigatórios.\n3. **Segurança**: Jamais comite credenciais ou segredos.\n4. **Isolamento**: Altere somente arquivos do escopo da tarefa.\n`;
+                await vscode.workspace.fs.writeFile(constitutionUri, Buffer.from(defaultConstitution, 'utf8'));
+                const defaultSpec = `# Feature Specification: [Nome]\n\n**Slug:** \`[slug]\`\n\n## 1. Visão Geral\n[Descrição]\n\n## 2. Requisitos SMART\n- **S/M/A/R/T:** [Critérios]\n\n## 3. Cenários BDD\n- **Dado** ... **Quando** ... **Então** ...\n`;
+                await vscode.workspace.fs.writeFile(vscode.Uri.joinPath(templatesDirUri, 'spec-template.md'), Buffer.from(defaultSpec, 'utf8'));
+                vscode.window.showInformationMessage('✅ Workspace inicializado com sucesso no modo Nimbus Code Community! Use o Copilot Chat para interagir com o @nimbus.');
+            }
+            catch (err) {
+                vscode.window.showErrorMessage(`Falha ao criar arquivos do Nimbus Code: ${err?.message || err}`);
+            }
+        }
+        else if (choice.action === 'enterprise') {
+            const contactChoice = await vscode.window.showInformationMessage('🏢 Nimbus Code Enterprise VPN: inclui 18 agentes nativos com RACI, Catálogo Central de Harness Corporativo, API de Harvest para código legado (Brownfield) e Sanfona de Dev.', 'Abrir Site da VPN', 'Falar com Especialista');
+            if (contactChoice === 'Abrir Site da VPN') {
+                vscode.env.openExternal(vscode.Uri.parse('https://venhapranuven.com.br'));
+            }
+            else if (contactChoice === 'Falar com Especialista') {
+                vscode.env.openExternal(vscode.Uri.parse('mailto:contato@venhapranuven.com.br?subject=Interesse%20no%20Nimbus%20Code%20Enterprise'));
+            }
+        }
+    }));
     context.subscriptions.push(vscode.commands.registerCommand('nimbus.openSquad', async () => {
         const option = await vscode.window.showQuickPick([
+            { label: '🌟 Inicializar Repositório', detail: 'Configurar Nimbus Code Community ou Conectar ao Enterprise VPN', command: 'nimbus.initRepository' },
             { label: '🚀 Orquestrador do Squad', detail: 'Chamar @nimbus para triagem geral (Bug/Fix, Nova Spec, Ideação)', query: '@nimbus conduzir processo de engenharia' },
             { label: '💡 Ideação & Validação de Hipótese', detail: 'Executar ciclo de assessment (/nc-assess-intake, /nc-assess-shape, /nc-assess-decide)', command: 'nimbus.ideation' },
             { label: '🐛 Triagem e Correção de Bug', detail: 'Executar fluxo de Bug/Fix (/nc-bug-assess, /nc-bug-fix, /nc-bug-test)', command: 'nimbus.bugFix' },
