@@ -1,0 +1,56 @@
+{
+  "name": "nimbus-code-lite-extension",
+  "displayName": "Nimbus Code Lite",
+  "description": "Extensão Lite para iniciar um fluxo local de Spec-Driven Development.",
+  "version": "0.1.0",
+  "publisher": "venha-pra-nuvem",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lrodriguesvpn/nimbus-code.git"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "AI",
+    "Other"
+  ],
+  "keywords": [
+    "nimbus-code",
+    "sdd",
+    "spec-driven-development"
+  ],
+  "activationEvents": [
+    "onCommand:nimbus.initRepository",
+    "onCommand:nimbus.openLiteGuide"
+  ],
+  "main": "./dist/extension.js",
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "nimbus.initRepository",
+        "title": "Nimbus Code Lite: Inicializar Repositório",
+        "category": "Nimbus Code Lite"
+      },
+      {
+        "command": "nimbus.openLiteGuide",
+        "title": "Nimbus Code Lite: Como começar",
+        "category": "Nimbus Code Lite"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./tsconfig.json",
+    "package": "npx @vscode/vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.0"
+  }
+}

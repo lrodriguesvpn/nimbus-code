@@ -1,30 +1,54 @@
 # Nimbus Code Lite
 
-## Engenharia de software com IA, na IDE agentica que o seu time ja usa
+Nimbus Code Lite e uma distribuicao local com codigo-fonte disponivel, para
+iniciar praticas de Spec-Driven Development (SDD): especificacao, planejamento,
+tarefas e validacao. Ela e adequada para aprendizado, avaliacao e projetos
+locais.
 
-O Nimbus Code Lite ajuda times a transformar ideias em entregas de software mais
-previsiveis: descoberta, especificacao, planejamento, tarefas, implementacao e
-validacao.
+> Esta distribuicao contem somente os componentes Lite. Ela nao inclui codigo,
+> catalogos ou automacoes da oferta Enterprise da Venha Pra Nuvem.
 
-Ele e um framework agnostico de IDE agentica. Use o mesmo metodo de engenharia
-onde o seu time ja trabalha: VS Code com GitHub Copilot, Antigravity, Claude
-Code, Cursor AI ou Kiro.
+## Componentes
 
-## Comece pelo Lite
+- **Extensao VS Code Lite** para inicializar os artefatos SDD no workspace.
+- **MCP Lite** com templates locais para constituicao, especificacao, plano e tarefas.
+- **Preset Community** com os mesmos templates em Markdown.
 
-O Lite e a porta de entrada para experimentar o metodo Nimbus Code, estruturar a
-colaboracao entre pessoas e agentes de IA e criar um caminho consistente entre
-estrategia e codigo.
+## Como usar
 
-## Evolua com a Venha Pra Nuvem
+### Extensao VS Code
 
-Para empresas que precisam de governanca, aceleracao de entregas e
-acompanhamento especializado, a Venha Pra Nuvem oferece o Nimbus Code
-Enterprise como servico profissional.
+```bash
+cd extensions/vscode
+npm install
+npm run compile
+npm run package
+```
 
-Saiba mais em [venhapranuvem.com.br](https://venhapranuvem.com.br).
+Instale o arquivo `.vsix` gerado e execute **Nimbus Code Lite: Inicializar
+Repositorio** pela Command Palette.
 
----
+### MCP Lite
 
-Nimbus Code Lite e destinado a avaliacao e uso inicial. O Nimbus Code Enterprise
-e contratado diretamente com a Venha Pra Nuvem.
+```bash
+cd servers/mcp-nimbus
+npm install
+npm run build
+node dist/index.js
+```
+
+O servidor expoe apenas os tools `nimbus_lite_get_template` e
+`nimbus_lite_getting_started`.
+
+## Oferta Enterprise
+
+O Nimbus Code Enterprise e uma oferta comercial separada da Venha Pra Nuvem.
+Para conhecer a oferta e obter suporte especializado, acesse
+[venhapranuvem.com.br](https://venhapranuvem.com.br) ou escreva para
+[contato@venhapranuvem.com.br](mailto:contato@venhapranuvem.com.br).
+
+## Licenca
+
+Nimbus Code Lite usa a **Business Source License 1.1 (BSL 1.1)**: e gratuito
+para avaliacao, educacao, testes nao produtivos e uso pessoal. Producao ou uso
+comercial requer licenca da Venha Pra Nuvem. Consulte [LICENSE](LICENSE).
