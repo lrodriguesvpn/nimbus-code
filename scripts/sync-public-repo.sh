@@ -62,7 +62,7 @@ if [ "$DO_PUSH" = true ]; then
 
   # Se houver token via env var (CI), usar autenticação com token
   if [ -n "${PUBLIC_REPO_TOKEN:-}" ]; then
-    AUTH_REPO_URL="https://${PUBLIC_REPO_TOKEN}@github.com/lrodriguesvpn/nimbus-code.git"
+    AUTH_REPO_URL="https://x-access-token:${PUBLIC_REPO_TOKEN}@github.com/lrodriguesvpn/nimbus-code.git"
   else
     AUTH_REPO_URL="$TARGET_REPO"
   fi
