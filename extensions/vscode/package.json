@@ -33,6 +33,16 @@
         "category": "Nimbus Code"
       },
       {
+        "command": "nimbus.ideation",
+        "title": "Nimbus Code: Ideação & Validação de Hipótese (/nc-assess-*)",
+        "category": "Nimbus Code"
+      },
+      {
+        "command": "nimbus.bugFix",
+        "title": "Nimbus Code: Triagem e Correção de Bug (/nc-bug-*)",
+        "category": "Nimbus Code"
+      },
+      {
         "command": "nimbus.newSpec",
         "title": "Nimbus Code: Criar Nova Especificação (/nc-spec)",
         "category": "Nimbus Code"
@@ -53,6 +63,11 @@
         "category": "Nimbus Code"
       },
       {
+        "command": "nimbus.auditSecurity",
+        "title": "Nimbus Code: Auditar Segurança & DevSecOps (/nc-shield)",
+        "category": "Nimbus Code"
+      },
+      {
         "command": "nimbus.verifyHealth",
         "title": "Nimbus Code: Verificar Status do Repositório e Licença",
         "category": "Nimbus Code"
@@ -62,6 +77,12 @@
       "commandPalette": [
         {
           "command": "nimbus.openSquad"
+        },
+        {
+          "command": "nimbus.ideation"
+        },
+        {
+          "command": "nimbus.bugFix"
         },
         {
           "command": "nimbus.newSpec"
@@ -74,6 +95,9 @@
         },
         {
           "command": "nimbus.implementFeature"
+        },
+        {
+          "command": "nimbus.auditSecurity"
         },
         {
           "command": "nimbus.verifyHealth"
