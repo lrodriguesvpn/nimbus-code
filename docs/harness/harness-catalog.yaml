@@ -357,3 +357,41 @@ entries:
     similar_contexts:
       - dev-platform
       - spec-kit-workflow
+
+  - id: HRN-0009
+    date: 2026-09-22
+    complexity: S2
+    bounded_context: spec-kit-workflow
+    error_pattern: >
+      Tentativa de criar commit, atualizar branches ou associar mudanças a um PR
+      já mesclado (MERGED) ou fechado (CLOSED), sem antes checar o status atual do PR
+      no GitHub/GHE via CLI/API.
+    root_cause: >
+      O agente assumiu que o PR ativo da sessão anterior continuava aberto e tentou
+      submeter instruções ou criar branches a partir de um estado obsoleto, sem
+      inspecionar o ciclo de vida do PR (`gh pr view`) antes da ação de entrega.
+    impact: >
+      Falhas em comandos de push/merge, logs de erro poluídos, confusão no rastreamento
+      de branches e necessidade de abrir PRs adicionais reativamente para entregar
+      commits órfãos em develop.
+    fix_applied: >
+      Auditoria do PR via `gh pr view <n>`, confirmação de que o PR anterior já havia
+      sido mesclado em develop, criação de um novo PR específico para a correção com
+      merge limpo e sincronização das esteiras.
+    prevention: >
+      Antes de associar qualquer trabalho a um PR existente ou tentar mesclar/atualizar
+      uma branch de feature, o agente DEVE consultar o status do PR via `gh pr view`
+      ou ferramenta equivalente. Se o PR estiver com status MERGED ou CLOSED:
+      (1) NUNCA tentar reutilizar ou associar novas alterações a ele;
+      (2) Atualizar a base local a partir de develop (`git pull origin develop`);
+      (3) Abrir um novo PR para a nova alteração ou aplicar diretamente caso instruído.
+    tags:
+      - pr-lifecycle-validation
+      - merged-pr-reuse
+      - git-branch-governance
+      - agent-workflow-guard
+    source_pr: ""
+    similar_contexts:
+      - dev-platform
+      - infra-automation
+      - release-management
