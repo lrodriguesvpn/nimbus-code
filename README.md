@@ -8,6 +8,8 @@
 
 Repositório central do **NIMBUS CODE™ AI Delivery System** para engine do framework,
 presets corporativos, orquestração multi-IDE (`@nimbus`), adaptadores de clientes e infraestrutura de governança.
+O framework oferece suporte a VS Code e a outras IDEs agênticas, incluindo
+Antigravity, Claude Code, Cursor AI e Kiro.
 
 ## Arquitetura de Camadas do NIMBUS CODE
 
