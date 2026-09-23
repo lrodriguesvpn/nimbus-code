@@ -6,7 +6,7 @@
 # Mapa de Impacto — `007-controle-seguranca-ghe-projetos-plataforma`
 
 > **Complexidade:** S4 — Arquitetura, segurança, dados sensíveis ou integração crítica
-> **Última atualização:** 2026-08-20
+> **Última atualização:** 2026-09-22 (issue #450)
 > **Grafo:** [graph.md](./graph.md) · [graph.yaml](./graph.yaml)
 
 ---
@@ -18,6 +18,9 @@
 | `docs/security-baseline-ghe.md` | Criação (novo documento) | Baixo — documentação, sem efeito em runtime | Responsável de plataforma |
 | `.github/workflows/security-compliance-scan.yml` | Criação (novo workflow) | Médio — roda semanalmente contra toda a organização | Squad de plataforma/governança |
 | `scripts/security-compliance-scan.sh` | Criação (novo script) | Médio — lógica central de avaliação e criação de issues | Squad de plataforma/governança |
+| `scripts/security-compliance-scan.sh` *(issue #450)* | Extensão (18 controles, config por repositório, issues centralizadas) | Médio — mais chamadas de API por repositório; issues passam a ser criadas no repositório de relatório | Squad de plataforma/governança |
+| Workflows de PR *(issue #450)*: `pr-quality-gates.yml`, `codeql.yml`, `dependency-review.yml`, `secret-scan.yml` | Criação/atualização | Alto quando marcados como required checks — podem bloquear PRs | Responsável de plataforma + mantenedores |
+| `.github/security-governance.json`, `.github/security-exceptions.json` *(issue #450)* | Criação | Médio — parametrizam gates e exceções | Responsável de plataforma/segurança |
 | GitHub App "Nimbus Code Security Auditor" (novo) | Criação (configuração administrativa, fora do repositório) | **Alto** — credencial com leitura em todos os repositórios da organização | Administrador da organização no GHE |
 | `docs/reuse-catalog.yaml` | Atualização futura (ao fechar a feature) | Baixo — apenas adiciona entrada de catálogo | Squad de plataforma |
 
@@ -56,6 +59,10 @@ Módulos **não modificados por esta feature** que podem ser afetados por efeito
 | Falso positivo gera issue incorreta e ruído para os times | Média | Baixa | 🟢 Baixo | Piloto com bounded context `spec-kit-workflow` antes do rollout org-wide; critério de rollback definido no `plan.md` |
 | GitHub App mal configurado concede permissão de escrita além do necessário | Baixa | Alta | 🟡 Médio | Revisão humana obrigatória (S4) da configuração de permissões do App antes da instalação; checklist no `quickstart.md` |
 | Ausência de observabilidade dedicada (dashboard/alerta) na primeira versão | Média | Baixa | 🟢 Baixo | Aceito como risco documentado nesta fase (ver Security & DevSecOps Gate do `plan.md`); revisar após 1 mês de operação piloto |
+| *(issue #450)* `dependency-review` falha em repositórios sem Dependency graph/GHAS e bloqueia PRs após virar required check | Média | Média | 🟡 Médio | Habilitar recursos antes de marcar o check como obrigatório (T064/T065); modo `advisory` apenas com Exception Record |
+| *(issue #450)* Aumento de chamadas de API por repositório (Rulesets, branches, CodeQL, alertas) pressiona rate limit | Média | Média | 🟡 Médio | Cache por repositório, limite de branches por padrão (`SECURITY_SCAN_MAX_BRANCHES_PER_PATTERN`), retry com backoff; medir no piloto |
+| *(issue #450)* Permissão read-only adicional do App insuficiente em algum endpoint do GHE.com | Média | Baixa | 🟢 Baixo | Resultado vira erro explícito/`pendente` (nunca `ok`); confirmar no piloto (T063) |
+| *(issue #450)* Issues migram do repositório avaliado para o repositório de relatório | Baixa | Baixa | 🟢 Baixo | Repositório avaliado no título/campo/marcador; issues legadas com marcador antigo são localizadas e fechadas pela migração de id |
 
 > **Score:** 🔴 Alto (prob. ≥ Média **e** sev. Alta) · 🟡 Médio · 🟢 Baixo
 
@@ -90,6 +97,7 @@ Módulos **não modificados por esta feature** que podem ser afetados por efeito
 - [ ] Documentação (`docs/security-baseline-ghe.md`) revisada e aprovada
 - [ ] **Revisão humana obrigatória (S4)** do plano completo e do ADR-0008 registrada e aprovada
 - [ ] Plano de rollback revisado e comunicado ao responsável de plataforma
+- [ ] *(issue #450)* Recursos GHAS/Dependency graph habilitados e Rulesets/required checks aplicados no piloto antes de exigir os checks (T064/T065); rollback = remover o check do Ruleset (não requer código)
 
 ---
 

@@ -30,6 +30,26 @@ A feature tem duas camadas:
    - Roda **semanalmente** (cron); consolida os resultados de 4 execuções em um **relatório mensal**.
    - **Não corrige automaticamente** — para cada desvio, cria/atualiza uma Issue rastreável (idempotente por chave `repo+controle`, reaproveitando o padrão de deduplicação já catalogado em `docs/reuse-catalog.yaml` tag `speckit-deduplication-by-id`).
 
+**Extensão da issue #450 (User Story 4)** — terceira camada, **Checks
+obrigatórios de PR**, e ampliação da camada de detecção:
+
+3. **Camada de Checks de PR** — workflows com nomes de job estáveis usados
+   como required status checks em Rulesets: `pr-quality-gates.yml`
+   (`governance-config`, `build`, `unit-tests`, `integration-tests`,
+   `coverage`), `codeql.yml` (`codeql-analyze (<linguagem>)` + `CodeQL`),
+   `dependency-review.yml` (`dependency-review`) e `secret-scan.yml`
+   (`secret-scan`). Comandos por linguagem, branches protegidas e checks
+   esperados são declarados em `.github/security-governance.json`
+   (configuração versionada e parametrizável por repositório); exceções em
+   `.github/security-exceptions.json`.
+4. **Detecção ampliada** — a varredura semanal avalia 18 controles de
+   repositório (Rulesets/proteção clássica em múltiplas branches, required
+   checks, cobertura, CodeQL, Dependabot, Dependency Review, Secret Scanning,
+   Push Protection, alertas), com classificação explícita de API indisponível
+   (`pendente`) e 403 (erro), sem auto-remediação. O GitHub App continua
+   somente leitura; issues são escritas com o `GITHUB_TOKEN` do workflow no
+   repositório de relatório.
+
 **Localização dos artefatos:**
 - `docs/security-baseline-ghe.md` — documentação (guia + checklists)
 - `.github/workflows/security-compliance-scan.yml` — workflow semanal de varredura
@@ -106,6 +126,24 @@ docs/adr/
 
 docs/
 └── security-operations-manual.md         # Runbook operacional (papéis, ciclo semanal/mensal, rollout, incidentes)
+
+# issue #450 — governança de PR e segurança de código
+.github/
+├── security-governance.json               # Configuração versionada: branches, regras, required checks, quality gates, cobertura, CodeQL, SCA
+├── security-exceptions.json               # Exception Records (owner, aprovador, prazo, expiração)
+├── dependency-review-config.yml           # Severidade mínima, escopos, licenças, dependências proibidas
+├── dependabot.yml                         # Dependabot version updates
+└── workflows/
+    ├── pr-quality-gates.yml               # governance-config, build, unit-tests, integration-tests, coverage
+    ├── codeql.yml                         # SAST (CodeQL)
+    ├── dependency-review.yml              # SCA em PR (atualizado)
+    └── secret-scan.yml                    # Verificação complementar de secrets (gitleaks pinado)
+.gitleaks.toml                             # Regras do secret-scan (estende o padrão)
+scripts/
+├── validate-security-governance.sh        # Check governance-config
+├── run-quality-gate.sh                    # Executor extensível de build/testes/cobertura
+├── validate-repo-static.sh                # Etapa build deste repositório (bash -n, shellcheck, JSON/YAML, actionlint)
+└── coverage-gate.py                       # Gate de cobertura (global, diff, baseline, exceções)
 ```
 
 **Structure Decision**: Reaproveita a convenção já estabelecida neste repositório (`scripts/*.sh` + `.github/workflows/*.yml` + `docs/*.md`) — nenhuma nova pasta de "aplicação" é necessária, pois a feature é documentação + automação de governança, não um serviço novo.
@@ -154,6 +192,12 @@ identificado — assim o Dev entra no `/nimbus-code-implement` sem surpresas.*
 | AC-6 (US3.2) | Desvio vira issue rastreável com prioridade e responsável | integração | `tests/scripts/security-compliance-scan.issue-creation.test.sh` | — |
 | AC-7 (FR-005a/b) | Scan roda semanalmente e descobre todos os repos via API (sem lista manual) | integração | `tests/workflows/security-compliance-scan.discovery.test.sh` | — |
 | AC-8 (FR-004a) | Scan autentica via GitHub App somente-leitura (não PAT de usuário) | integração | `tests/scripts/security-compliance-scan.auth.test.sh` | — |
+| AC-9 (US4, FR-009–FR-014, FR-018) | Documentação cobre Rulesets, matrizes de branches e checks, cobertura, SAST, SCA, secrets, exceções, SLA, evidências, pré-requisitos, permissões do App e piloto | integração | `tests/docs/security-governance-policies.test.sh` | — |
+| AC-10 (US4.1/4.3, FR-009, FR-015, FR-016) | Varredura avalia branch padrão + padrões, Rulesets, required checks, cobertura, CodeQL, Dependabot, Dependency Review, Secret Scanning/Push Protection e alertas; API indisponível/403 nunca é `ok` | integração | `tests/scripts/security-compliance-scan.governance-controls.test.sh`, `tests/scripts/security-compliance-scan.detect.test.sh` | — |
+| AC-11 (US4, FR-015, FR-017) | Issues idempotentes, migração de id legado, fechamento em `ok`, dry-run sem escrita, App nunca escreve | integração | `tests/scripts/security-compliance-scan.issue-lifecycle.test.sh` | — |
+| AC-12 (US4.2, FR-011) | Cobertura < 80%, redução ou relatório ausente bloqueiam | integração | `tests/scripts/coverage-gate.test.sh` | — |
+| AC-13 (US4.2/4.4, FR-010, FR-018) | Config inválida, check N/A obrigatório, exceção vencida e Action sem pin bloqueiam; teste falhando bloqueia | integração | `tests/scripts/validate-security-governance.test.sh`, `tests/scripts/run-quality-gate.test.sh` | — |
+| AC-14 (US4.2, FR-010, FR-012, FR-013) | Workflows com triggers, nomes estáveis, SHA fixado, permissões mínimas; rollout piloto preservado | integração | `tests/workflows/security-governance-workflows.test.sh`, `tests/workflows/security-compliance-scan.discovery.test.sh` | Execução real dos workflows depende do GHE/GHAS (T066) |
 
 > Linha com **Tipo: N/A** exige justificativa explícita (ex.: dependência externa
 > indisponível em CI). Critérios sem entrada nesta tabela são tratados como sem
@@ -275,7 +319,7 @@ objetivamente por que considera fora do padrão, e:
 |---|---|---|---|---|
 | **Backup & Disaster Recovery** | Todo datastore com dado real (produção) tem backup automatizado, retenção definida e restore testado/documentado ao menos uma vez | **Não — bloqueante** | N/A | Feature não cria datastore próprio; evidências de conformidade são Issues no GHE (já possui backup/retenção nativos da plataforma) |
 | Autenticação (SSO) | Sistemas novos (greenfield) devem usar SSO | Sim, com justificativa no ADL | N/A | Feature não expõe superfície de autenticação própria; usa autenticação nativa do GitHub (GitHub App/OAuth) |
-| Segredos no código/repositório | Nunca em texto plano; secret scanning bloqueia merge se detectar | **Não — bloqueante** | Pendente (implementação) | Private key do GitHub App e qualquer token auxiliar DEVEM ser armazenados como GitHub Secret (`SECURITY_SCAN_APP_ID`, `SECURITY_SCAN_APP_PRIVATE_KEY`) — nunca commitados; validar em `/speckit-tasks`/`/speckit-implement` |
+| Segredos no código/repositório | Nunca em texto plano; secret scanning bloqueia merge se detectar | **Não — bloqueante** | Implementado em código (issue #450: `secret-scan` + controles de Secret Scanning/Push Protection); habilitação real pendente (T064/T065) | Private key do GitHub App e qualquer token auxiliar DEVEM ser armazenados como GitHub Secret (`SECURITY_SCAN_APP_ID`, `SECURITY_SCAN_APP_PRIVATE_KEY`) — nunca commitados; validar em `/speckit-tasks`/`/speckit-implement` |
 | Branch/merge protegido | PR obrigatório + revisão antes de merge em branch protegida; nenhum merge com CI vermelho ou check obrigatório pulado | **Não — bloqueante** | ✓ Pass | Convenção já vigente neste repositório (branch `main` protegida) |
 | Isolamento de ambiente | Credencial de produção nunca usada em ambiente de dev/test | **Não — bloqueante** | Pendente (implementação) | GitHub App de produção não deve ser usado em testes locais/CI de PR — testes de `security-compliance-scan.sh` devem usar mocks/fixtures da API, não chamadas reais ao GHE de produção |
 | Containers | Imagem base pinada, scan de vulnerabilidade, usuário não-root | Sim, com justificativa no ADL | N/A | Feature não usa containers — workflow roda em runner padrão do GitHub Actions com `gh` CLI |
@@ -321,6 +365,11 @@ padrão institucional. Decisões triviais/óbvias não precisam de entrada aqui.
 | Comportamento em não conformidade | Auto-remediação vs. detectar-e-reportar vs. híbrido | Detectar e reportar (issue rastreável, correção manual) | Menor risco de mudança não revisada em produção vs. resolução mais lenta de desvios | N/A — decisão de clarificação do usuário, alinhada ao least privilege | Usuário (sessão de clarificação, 2026-08-19) |
 | Frequência de varredura | Mensal apenas vs. semanal vs. sob demanda vs. por evento | Semanal (scan) + relatório mensal (consolidado) | Mais execuções que o mínimo de SC-003 original, mas garante detecção mais rápida de desvio entre auditorias mensais | N/A — decisão de clarificação do usuário | Usuário (sessão de clarificação, 2026-08-19) |
 | Escopo de repositórios cobertos | Lista explícita configurável vs. detecção por marcador Nimbus Code vs. todos os repositórios da organização | Todos os repositórios da organização (descoberta via API) | Maior superfície de varredura e necessidade de paginação/rate-limit vs. simplicidade de manutenção de lista manual | N/A — decisão de clarificação do usuário | Usuário (sessão de clarificação, 2026-08-19) |
+| Proteção de branches (issue #450) | Proteção clássica vs. Repository/Organization Rulesets | Rulesets preferencialmente; clássica aceita e reportada como compatibilidade (`rulesets-configured` = `pendente`) | Varredura precisa consultar duas fontes (rules/branches + protection) | N/A — alinhado à recomendação atual do GitHub | A confirmar (revisão S4) |
+| Destino das issues de não conformidade (issue #450) | Issue em cada repositório (App com `Issues: write`) vs. issues centralizadas no repositório de relatório com `GITHUB_TOKEN` | Centralizadas no repositório de relatório (`SECURITY_SCAN_ISSUE_TARGET=report-repository`), App 100% read-only | Times acompanham desvios no repositório de relatório (repo avaliado no título/campo) em vez de no próprio repo | Requisito explícito da issue #450: não conceder escrita ao App de auditoria; corrige lacuna anterior (App criava issues sem `Issues: write` documentado) | A confirmar (revisão S4) |
+| Verificação de secrets em PR (issue #450) | Só GitHub Secret Scanning/Push Protection vs. + verificação complementar em CI | Nativos (obrigatórios, auditados) + `secret-scan.yml` com gitleaks CLI pinado (licença MIT, sem secrets) | Mais um binário externo (versão + checksum fixados) | N/A | A confirmar (revisão S4) |
+| Cobertura neste repositório (issue #450) | Inventar métrica vs. instrumentar bash (kcov) vs. `not-applicable` justificado | `not-applicable` justificado, testes (`unit-tests`) como gate; `coverage-gate.py` pronto para repositórios com LCOV/Cobertura | Sem métrica de cobertura para o próprio template | Não há ferramenta de cobertura aplicável e pinada no runner para bash; requisito proíbe métrica inventada | A confirmar (revisão S4) |
+| Dependency Review indisponível (issue #450) | Pular silenciosamente (comportamento anterior) vs. falhar | Falhar por padrão; `advisory` só com Exception Record | PRs podem bloquear até Dependency graph/GHAS ser habilitado | Requisito: ausência de controle não pode ser mascarada como sucesso | A confirmar (revisão S4) |
 | Linguagem/stack da automação | Node.js/TypeScript (Octokit) vs. Bash + `gh` CLI vs. Python | Bash + `gh` CLI | Menos type-safety/testabilidade que Node.js vs. reuso total do padrão já estabelecido no repositório (`scripts/*.sh`) e zero dependência nova | N/A — não é desvio de padrão, é reforço do padrão já existente | — |
 
 > **ADR relacionado**: [0008 — GitHub App para varredura de segurança org-wide](/docs/adr/0008-github-app-para-varredura-de-seguranca-org-wide.md)

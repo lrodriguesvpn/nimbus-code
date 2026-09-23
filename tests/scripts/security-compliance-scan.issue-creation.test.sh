@@ -5,6 +5,7 @@ set -euo pipefail
 # tests/scripts/security-compliance-scan.issue-creation.test.sh
 #
 # T025 / AC-6: validates the required issue fields for non-compliance findings.
+# Atualizado pela issue #450 (T054): controle branch-protection-default.
 ###############################################################################
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -36,14 +37,16 @@ check_contains() {
 
 echo "== tests/scripts/security-compliance-scan.issue-creation.test.sh =="
 
-body_blocker="$(build_issue_body "org/repo-demo" "branch-protection" "risco" "GET /repos/org/repo-demo/branches/main/protection -> 404" "security-baseline:org/repo-demo:branch-protection")"
+body_blocker="$(build_issue_body "org/repo-demo" "branch-protection-default" "risco" "repository=org/repo-demo | branch=main | endpoint=GET /repos/org/repo-demo/branches/main/protection -> 404" "security-baseline:org/repo-demo:branch-protection-default")"
 body_medium="$(build_issue_body "org/repo-demo" "secrets-configured" "pendente" "GET /repos/org/repo-demo/actions/secrets -> total_count=0" "security-baseline:org/repo-demo:secrets-configured")"
 
 check_contains "Issue bloqueante recebe prioridade P0" "**Prioridade**: priority:P0-blocker" "$body_blocker"
 check_contains "Issue inclui responsável inicial" "**Responsavel inicial**:" "$body_blocker"
 check_contains "Issue inclui prazo sugerido" "**Prazo sugerido para correcao**:" "$body_blocker"
 check_contains "Issue inclui critério de validação" "### Criterio de validacao da correcao" "$body_blocker"
-check_contains "Issue inclui marcador de deduplicação" "<!-- security-baseline-finding-id: security-baseline:org/repo-demo:branch-protection -->" "$body_blocker"
+check_contains "Issue inclui marcador de deduplicação" "<!-- security-baseline-finding-id: security-baseline:org/repo-demo:branch-protection-default -->" "$body_blocker"
+check_contains "Issue inclui evidência com repository/branch/endpoint" "repository=org/repo-demo | branch=main | endpoint=GET" "$body_blocker"
+check_contains "Remediação orienta preferir Rulesets" "Ruleset" "$body_blocker"
 check_contains "Issue não bloqueante recebe prioridade P2" "**Prioridade**: priority:P2-medium" "$body_medium"
 
 echo ""

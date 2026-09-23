@@ -2,8 +2,9 @@
 # Bootstrap: applies the nimbus-code-project-bundle to a new or existing repository.
 set -euo pipefail
 
-NIMBUS_STANDARDS_REPO="${NIMBUS_STANDARDS_REPO:-https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code}"
-LEGACY_STANDARDS_REPO="https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code"
+
+STANDARDS_REPO="${NIMBUS_STANDARDS_REPO:-https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code}"
+LEGACY_STANDARDS_REPO="https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
 LOCAL_PATH=""
 NIMBUS_REF="${NIMBUS_REF:-main}"
 INTEGRATION="${SPECKIT_INTEGRATION_DEFAULT:-copilot}"

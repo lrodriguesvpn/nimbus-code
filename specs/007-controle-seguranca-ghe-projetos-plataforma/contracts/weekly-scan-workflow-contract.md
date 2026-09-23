@@ -24,14 +24,22 @@ O workflow **DEVE falhar explicitamente** (não silenciosamente) se qualquer um 
 ```yaml
 permissions:
   contents: read
+
+jobs:
+  scan:
+    permissions:
+      contents: read
+      issues: write   # GITHUB_TOKEN apenas para issues no repositório de relatório (issue #450)
 ```
+
+O GitHub App permanece **somente leitura** (permissões no ADR-0008, adendo).
 
 ## Passos (contrato de comportamento, não implementação)
 
 1. Verificar secrets obrigatórios (falhar com `::error::` se ausente).
 2. Gerar installation access token do GitHub App.
 3. Resolver o flag `security.baseline_scan.org_wide_enabled` (OpenFeature) — se `false`, restringir a descoberta ao bounded context piloto (`spec-kit-workflow`); se `true`, descobrir todos os repositórios da organização.
-4. Para cada repositório no escopo resolvido: avaliar cada `Controle de Segurança` (ver `data-model.md`) usando a API do GitHub (branch protection, required reviews, Actions permissions, secrets configurados).
+4. Para cada repositório no escopo resolvido: carregar `.github/security-governance.json` do repositório (fallback: configuração da varredura) e avaliar cada `Controle de Segurança` (ver `data-model.md`) usando a API do GitHub — os 18 controles de repositório da issue #450 (Rulesets/proteção clássica na branch padrão e nos padrões configurados, required checks, cobertura, CodeQL, Dependabot, Dependency Review, Secret Scanning, Push Protection, alertas, Actions permissions, secrets configurados). API indisponível → `pendente`; 403 → erro explícito; nunca `ok`.
 5. Para o Projeto Plataforma: avaliar a matriz de permissões (`Perfil de Acesso`) do Project V2.
 6. Para cada `Evidência de Auditoria` com `status != ok`: criar ou atualizar (idempotente por `id`) a Issue rastreável correspondente.
 7. Publicar o resumo da execução (`Scan Run`) nos logs do workflow (`::notice::`) incluindo `repos_avaliados` e `repos_com_erro`.

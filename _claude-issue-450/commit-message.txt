@@ -1,0 +1,34 @@
+feat: harden GitHub security governance and PR controls
+
+Amplia a SPEC 007 (issue #450) com proteção de branches e checks
+obrigatórios de PR, e estende a varredura semanal de conformidade:
+
+- Configuração versionada .github/security-governance.json (branches
+  protegidas parametrizáveis: default, produção, release/*, hotfix/*,
+  adicionais; regras; required checks; quality gates; cobertura; CodeQL;
+  SCA) e registro de exceções .github/security-exceptions.json.
+- Workflows com nomes de check estáveis e Actions fixadas por SHA:
+  pr-quality-gates.yml (governance-config, build, unit-tests,
+  integration-tests, coverage), codeql.yml, dependency-review.yml
+  (indisponibilidade não é mais mascarada) e secret-scan.yml (gitleaks
+  pinado com checksum, relatório redigido). Dependabot version updates.
+- scripts/security-compliance-scan.sh: 18 controles de repositório
+  (Rulesets + proteção clássica em múltiplas branches, required checks,
+  testes, cobertura, CodeQL, Dependabot, Dependency Review, Secret
+  Scanning, Push Protection, alertas), config por repositório, erro
+  explícito para 403 e pendente para API indisponível, retry de rate
+  limit, migração do id legado branch-protection, issues centralizadas
+  no repositório de relatório com GITHUB_TOKEN (App 100% read-only).
+- Gate de cobertura (80% global/diff, sem redução sem exceção) e
+  validador de governança; cobertura N/A justificada neste repositório.
+- Documentação: baseline §9–§18, adendo de permissões read-only do
+  ADR-0008, spec/plan/tasks/quickstart/contratos/manual atualizados.
+- Testes com fixtures (sem API real): docs, scripts e workflows.
+
+Não habilita rollout org-wide: o gate S4 (T038) e o flag
+security.baseline_scan.org_wide_enabled permanecem inalterados.
+
+Refs #450
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01EauiDqCNsQJEcG8xwUP3uP

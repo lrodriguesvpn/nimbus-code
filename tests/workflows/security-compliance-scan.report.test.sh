@@ -34,7 +34,7 @@ check_contains() {
 
 echo "== tests/workflows/security-compliance-scan.report.test.sh =="
 
-aggregate='{"runs":4,"total_repos":12,"controls":{"branch-protection":{"pct_ok":75},"required-review":{"pct_ok":83.33},"actions-permissions":{"pct_ok":91.67},"secrets-configured":{"pct_ok":66.67},"platform-project-access":{"pct_ok":100}},"open_findings":[{"repo":"org/repo-a","controle_id":"branch-protection","timestamp":"2026-08-05T12:00:00Z","issue_url":"https://ghe.example/org/repo-a/issues/1"}]}'
+aggregate='{"runs":4,"total_repos":12,"controls":{"branch-protection-default":{"pct_ok":75},"secret-alerts":{"pct_ok":91.67},"required-review":{"pct_ok":83.33},"actions-permissions":{"pct_ok":91.67},"secrets-configured":{"pct_ok":66.67},"platform-project-access":{"pct_ok":100}},"open_findings":[{"repo":"org/repo-a","controle_id":"branch-protection","timestamp":"2026-08-05T12:00:00Z","issue_url":"https://ghe.example/org/repo-a/issues/1"}]}'
 closed='[{"repo":"org/repo-b","controle_id":"required-review","created_at":"2026-08-02T10:00:00Z","closed_at":"2026-08-09T11:30:00Z","url":"https://ghe.example/org/repo-b/issues/2"}]'
 
 report="$(build_monthly_report_markdown "2026-08" "$aggregate" '{}' "$closed")"
@@ -42,6 +42,12 @@ report="$(build_monthly_report_markdown "2026-08" "$aggregate" '{}' "$closed")"
 check_contains "Título do relatório mensal" "## Relatorio de Conformidade - 2026-08" "$report"
 check_contains "Inclui total de repositórios avaliados" "**Total de repositorios avaliados**: 12" "$report"
 check_contains "Tabela de conformidade lista o controle do Projeto Plataforma" "| Matriz de acesso do Projeto Plataforma | 100% | N/A |" "$report"
+check_contains "Tabela lista a proteção da branch padrão (issue #450)" "| Branch protection (padrão) | 75% | N/A |" "$report"
+check_contains "Tabela lista alertas de secret (issue #450)" "| Alertas de secret abertos | 91.67% | N/A |" "$report"
+check_contains "Controle sem dados no mês aparece como não avaliado (nunca 0% ou 100% inventado)" "| CodeQL habilitado | N/A (não avaliado) | N/A |" "$report"
+for control_label in "Rulesets configurados" "Required checks de PR" "Checks de teste obrigatorios" "Check de cobertura obrigatorio" "Dependency Review" "Push Protection"; do
+  check_contains "Tabela inclui a linha '${control_label}'" "| ${control_label} |" "$report"
+done
 check_contains "Tabela de desvios abertos inclui issue atual" "| org/repo-a | branch-protection | 2026-08-05 | https://ghe.example/org/repo-a/issues/1 |" "$report"
 check_contains "Tabela de desvios corrigidos inclui issue fechada" "| org/repo-b | required-review | 2026-08-02 | 2026-08-09 | https://ghe.example/org/repo-b/issues/2 |" "$report"
 

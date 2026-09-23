@@ -34,6 +34,7 @@
 | T019–T023 | [#41](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/41)–[#45](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/45) | User Story 2 #68 |
 | T024–T032 | [#46](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/46)–[#54](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/54) | User Story 3 #69 |
 | T033–T041 | [#55](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/55)–[#63](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/63) | Feature #66 (Polish, sem US específica) |
+| T042–T068 | [#450](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/450) (sub-issues a gerar via `/speckit-taskstoissues`) | User Story 4 (governança de PR e segurança de código) |
 
 Cada issue de Task recebeu labels de `priority:*`, `complexity:*`, `type:*` e `agent:autonomous-ok`/`agent:needs-human` (T004 e T038 são `agent:needs-human`, refletindo `[Humano]` nesta lista).
 
@@ -262,6 +263,54 @@ Cada issue de Task recebeu labels de `priority:*`, `complexity:*`, `type:*` e `a
 
 ---
 
+## Phase 7: User Story 4 - Governança de PR, proteção de branches e segurança de código (Priority: P1) — issue #450
+
+**Goal**: Branch padrão, produção, `release/*`, `hotfix/*` e branches principais configuráveis protegidas (Rulesets preferencialmente); todo PR exige build, testes, cobertura, CodeQL, Dependency Review e verificação de secrets como required checks; a varredura semanal detecta e reporta (sem auto-remediação) os 18 controles de repositório.
+
+**Independent Test**: `bash scripts/run-tests.sh` (ou os arquivos de teste abaixo individualmente) passa sem API real; no piloto, um PR com falha proposital é bloqueado e a varredura em dry-run produz evidência dos 18 controles.
+
+**Status desta sessão (2026-09-22)**: T042–T061 implementados e testados localmente com fixtures (sem API real, sem secrets). T062–T068 dependem de ação humana/infraestrutura (GitHub App, GHAS, Rulesets, aprovação) e permanecem pendentes. O rollout org-wide **não** foi habilitado — o gate S4 (T038) continua obrigatório.
+
+### Tests for User Story 4
+
+- [x] T042 [P] [US4] Escrever `tests/docs/security-governance-policies.test.sh` validando as seções 9–18 de `docs/security-baseline-ghe.md`, o adendo de permissões read-only do ADR-0008 e a rastreabilidade em `spec.md`/`tasks.md`/`quickstart.md` (AC-9)
+- [x] T043 [P] [US4] Escrever `tests/scripts/security-compliance-scan.governance-controls.test.sh` cobrindo Rulesets vs. proteção clássica, `release/*`/`hotfix/*` (branches existentes e futuras), required checks ausentes, cobertura (report/N/A), CodeQL ausente/desatualizado/alertas high-critical, Dependabot/Dependency Review ausentes, Secret Scanning/Push Protection ausentes, alertas de secret sem expor valor, API indisponível, 403 e rate limit (AC-10)
+- [x] T044 [P] [US4] Escrever `tests/scripts/security-compliance-scan.issue-lifecycle.test.sh` cobrindo criação idempotente, migração do id legado `branch-protection`, fechamento ao voltar para `ok`, dry-run sem escrita, token de escrita ≠ token do App e varredura completa de um repositório (AC-11)
+- [x] T045 [P] [US4] Escrever `tests/scripts/coverage-gate.test.sh` (80% global/diff, relatório ausente, baseline, exceção ativa/vencida, LCOV/Cobertura) (AC-12)
+- [x] T046 [P] [US4] Escrever `tests/scripts/validate-security-governance.test.sh` e `tests/scripts/run-quality-gate.test.sh` (config inválida, check N/A obrigatório, exceção vencida, Action sem SHA/`@latest`, teste falhando bloqueia) (AC-13)
+- [x] T047 [P] [US4] Escrever `tests/workflows/security-governance-workflows.test.sh` e ampliar `tests/workflows/security-compliance-scan.discovery.test.sh` (triggers, nomes estáveis ↔ config, pinagem, permissions, piloto vs. org-wide preservado) (AC-14)
+
+### Implementation for User Story 4
+
+- [x] T048 [US4] Criar configuração versionada `.github/security-governance.json` (branches, regras, required checks, quality gates, cobertura, CodeQL, SCA, secret scanning) e `.github/security-exceptions.json` (vazio)
+- [x] T049 [P] [US4] Implementar `scripts/validate-security-governance.sh` (check `governance-config`)
+- [x] T050 [P] [US4] Criar `.github/workflows/pr-quality-gates.yml` (jobs `governance-config`, `build`, `unit-tests`, `integration-tests`, `coverage`) + `scripts/run-quality-gate.sh` + `scripts/validate-repo-static.sh`
+- [x] T051 [P] [US4] Implementar `scripts/coverage-gate.py` (global, diff, baseline, exceções)
+- [x] T052 [P] [US4] Criar `.github/workflows/codeql.yml` (PR, push, merge queue, semanal; linguagens da config; SHA fixado; permissões mínimas)
+- [x] T053 [P] [US4] Atualizar `.github/workflows/dependency-review.yml` (check estável `dependency-review`, SHA fixado, indisponibilidade falha por padrão) + `.github/dependency-review-config.yml`
+- [x] T054 [P] [US4] Criar `.github/dependabot.yml` (version updates `github-actions` e `npm`)
+- [x] T055 [P] [US4] Criar `.github/workflows/secret-scan.yml` (gitleaks pinado com checksum, commits do PR, relatório redigido) + `.gitleaks.toml`
+- [x] T056 [US4] Estender `scripts/security-compliance-scan.sh` com os 18 controles de repositório, configuração por repositório, avaliação multi-branch (Rulesets + clássica), classificação explícita de erros de API (403/404/plano) e retry de rate limit
+- [x] T057 [US4] Preservar/estender findings e issues: migração do id legado, issues centralizadas no repositório de relatório com `GITHUB_TOKEN` (`SECURITY_SCAN_ISSUES_TOKEN`), prazos por severidade, relatório mensal com todos os controles (depende de T056)
+- [x] T058 [US4] Atualizar `.github/workflows/security-compliance-scan.yml`: checkout fixado por SHA, `issues: write` apenas para o `GITHUB_TOKEN`, `SECURITY_SCAN_GOVERNANCE_CONFIG` — **sem** alterar escopo/flag (rollout piloto preservado)
+- [x] T059 [US4] Atualizar `docs/security-baseline-ghe.md` (seções 1, 4, 5, 6, 8) e adicionar seções 9–18
+- [x] T060 [P] [US4] Adicionar adendo de permissões read-only ao ADR-0008 (status permanece "Em revisão")
+- [x] T061 [P] [US4] Atualizar `spec.md`, `plan.md`, `quickstart.md`, `data-model.md`, `contracts/*`, `graph.yaml`/`graph.md` e `docs/security-operations-manual.md`
+
+### Pendências humanas / de infraestrutura (User Story 4)
+
+- [ ] T062 [Humano] Revisar e aprovar o PR da issue #450 (revisores sugeridos: @moises, @eduardo-pereira) — sem merge automático
+- [ ] T063 [Humano] Conceder ao GitHub App as permissões **read-only** adicionais (Code scanning alerts, Dependabot alerts, Secret scanning alerts, Organization Projects) e confirmar no piloto que cada endpoint da seção 17 responde (depende de T004/T005)
+- [ ] T064 [Humano] Habilitar nos repositórios piloto: Dependency graph, Dependabot alerts e security updates, GitHub Code Security (CodeQL + Dependency Review) e Secret Protection (Secret Scanning + Push Protection); configurar *Check runs failure threshold* = High or higher
+- [ ] T065 [Humano] Criar os Rulesets da seção 9 (branch padrão, `release/*`, `hotfix/*`) e marcar como obrigatórios os checks da seção 10 no piloto; liberar em *Allowed actions* `actions/checkout`, `actions/upload-artifact`, `actions/dependency-review-action` e `github/codeql-action`
+- [ ] T066 Executar o procedimento de piloto da seção 18 (PR com falhas propositais bloqueado + varredura dry-run e real) e anexar a evidência ao PR/issue #450 (depende de T063–T065)
+- [ ] T067 [Humano] Decidir sobre `test-suite.yml` (job `Suíte de Testes Mandatória (relatório)` duplica `unit-tests`): manter, remover ou promover — decisão da política de testes (spec 013)
+- [ ] T068 Pinar por SHA e declarar `permissions:` nos workflows legados apontados como aviso pelo `governance-config` (fora do escopo desta issue; abrir issue de follow-up)
+
+**Checkpoint**: US4 implementada e testada com fixtures; ativação real depende de T062–T066 e o rollout org-wide continua dependente de T038.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
@@ -278,6 +327,7 @@ Cada issue de Task recebeu labels de `priority:*`, `complexity:*`, `type:*` e `a
 - **User Story 1 (P1)**: Pode iniciar após Foundational (Phase 2) — sem dependência de outras stories
 - **User Story 2 (P1)**: Pode iniciar após Foundational (Phase 2) — independente de US1, mas usa a mesma estrutura de `Compliance Finding` (Phase 2)
 - **User Story 3 (P2)**: Pode iniciar documentação/testes após Foundational; a integração final (T031) depende dos avaliadores de US1 (T018) e US2 (T023) estarem prontos para agregar o relatório completo
+- **User Story 4 (P1, issue #450)**: Estende US1/US3 (avaliadores e relatório); implementação em código não depende de T004, mas a validação real (T066) depende de T004/T005, T063–T065 e o rollout org-wide continua dependendo de T038
 
 ### Within Each User Story
 
@@ -345,7 +395,7 @@ Com múltiplos desenvolvedores/agentes:
 
 - [P] tasks = arquivos diferentes, sem dependência
 - [Story] label mapeia a task à user story correspondente para rastreabilidade
-- T004 e T038 são as duas únicas tasks desta feature com `Responsável.Humano = sim` — todas as demais são executáveis por agente
+- T004, T038 e T062–T065/T067 são as tasks desta feature com `Responsável.Humano = sim` — as demais são executáveis por agente (T066 depende de infraestrutura humana)
 - Verificar que os testes falham antes de implementar
 - Commit após cada task ou grupo lógico
 - Esta feature é **S4** — nenhuma expansão para "todos os repositórios da organização" deve ocorrer sem a aprovação humana registrada em T038
@@ -419,7 +469,7 @@ Com múltiplos desenvolvedores/agentes:
 
 - [ ] Sem segredo hardcoded — `SECURITY_SCAN_APP_PRIVATE_KEY` e demais credenciais apenas via GitHub Secrets
 - [ ] Nenhum recurso de nuvem (AWS/GCP/Azure) provisionado por esta feature — N/A para regra de IaC/Terraform
-- [ ] Versões fixadas (actions do workflow) — sem `@latest`/sem versão
+- [x] Versões fixadas (actions do workflow) — sem `@latest`/sem versão _(issue #450: `security-compliance-scan.yml` e os novos workflows usam SHA completo; validado por `governance-config`)_
 - [ ] Permissões seguem least privilege — GitHub App com escopo somente-leitura mínimo (T004)
 - [ ] Health check / critério de sucesso do workflow definido (SLO Gate do `plan.md`: conclusão em até 30 min, ≤5% de erro)
 - [ ] N/A — Build multi-stage/Docker (workflow roda em runner padrão do GitHub Actions, sem containers)
