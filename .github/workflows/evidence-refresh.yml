@@ -31,7 +31,7 @@ jobs:
             scripts/validate-no-direct-write-commands.sh
 
       - name: Setup Terraform (opcional)
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
         with:
           terraform_wrapper: false
 
