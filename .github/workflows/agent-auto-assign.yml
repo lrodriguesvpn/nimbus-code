@@ -33,7 +33,7 @@ jobs:
           # https://docs.github.com/actions/reference/workflows-and-actions/contexts#context-availability) —
           # avaliar aqui em env (permitido) e ler via env.* no if acima.
           NIMBUS_APP_CONFIGURED: ${{ secrets.NIMBUS_APP_ID != '' && secrets.NIMBUS_APP_PRIVATE_KEY != '' }}
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.NIMBUS_APP_ID }}
           private-key: ${{ secrets.NIMBUS_APP_PRIVATE_KEY }}
