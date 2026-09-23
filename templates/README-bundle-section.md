@@ -33,5 +33,4 @@ Nimbus Code) — não altere por conta própria fora do fluxo do PR automático 
 (`.github/workflows/update-speckit-and-bundle.yml`).
 
 > **Importante:** `nimbus-code` é o repositório
-> **template/foundation**. O repositório `nimbus-code` é o repositório
-> **produto/marketing** e não substitui esta dependência técnica.
+> **template/foundation**. Artefatos de produto/marketing ficam no repositório satélite `nimbus-code-mkt` e/ou no repositório público — e não substituem esta dependência técnica.
