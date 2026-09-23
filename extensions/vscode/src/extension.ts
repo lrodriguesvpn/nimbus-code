@@ -19,8 +19,46 @@ export function activate(context: vscode.ExtensionContext) {
   statusBarItem.show();
   context.subscriptions.push(statusBarItem);
 
+  // Função auxiliar para validar se há workspace aberto ou oferecer abertura/clonagem de repo
+  async function ensureWorkspace(): Promise<boolean> {
+    const folders = vscode.workspace.workspaceFolders;
+    if (folders && folders.length > 0) {
+      return true;
+    }
+
+    const choice = await vscode.window.showWarningMessage(
+      '⚠️ O Nimbus Code requer uma pasta ou repositório Git aberto para gerenciar especificações e artefatos.',
+      'Abrir Pasta Local',
+      'Clonar Repositório Git',
+      'Continuar Mesmo Assim'
+    );
+
+    if (choice === 'Abrir Pasta Local') {
+      await vscode.commands.executeCommand('vscode.openFolder');
+      return false;
+    } else if (choice === 'Clonar Repositório Git') {
+      const repoUrl = await vscode.window.showInputBox({
+        prompt: 'Informe a URL do repositório Git que deseja clonar e abrir:',
+        placeHolder: 'https://github.com/usuario/meu-projeto.git'
+      });
+      if (repoUrl) {
+        await vscode.commands.executeCommand('git.clone', repoUrl);
+      }
+      return false;
+    } else if (choice === 'Continuar Mesmo Assim') {
+      return true;
+    }
+
+    return false;
+  }
+
   // Função auxiliar para abrir chat do Copilot com o prompt pronto
   async function triggerChatOrPrompt(queryText: string) {
+    const hasWorkspace = await ensureWorkspace();
+    if (!hasWorkspace) {
+      return;
+    }
+
     try {
       await vscode.commands.executeCommand('workbench.action.chat.open', { query: queryText });
     } catch {
