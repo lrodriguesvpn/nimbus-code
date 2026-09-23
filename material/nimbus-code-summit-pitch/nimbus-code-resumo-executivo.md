@@ -2,7 +2,7 @@
 
 > Documento de apoio para apresentação institucional (ex.: Microsoft Summit).
 > Todos os números marcados como "real" foram extraídos ao vivo do repositório
-> `venha-pra-nuvem/nimbus-code-spec-kit-template` em 2026-08-20. Números
+> `venha-pra-nuvem/nimbus-code` em 2026-08-20. Números
 > marcados como "ilustrativo" são conceituais, para fins didáticos de slide.
 
 ---

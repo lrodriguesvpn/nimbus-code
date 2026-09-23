@@ -126,7 +126,7 @@ não-finalizadas ou PRs abandonados.*
   como comentário na tabela acima para rastrear padrões ao longo do tempo
 
 > **Referência:** para o comando de auditoria de branches e o protocolo completo
-> de limpeza, ver [`docs/agent-session-manual.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/agent-session-manual.md#7-controle-de-branches-perdidas).
+> de limpeza, ver [`docs/agent-session-manual.md`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/blob/main/docs/agent-session-manual.md#7-controle-de-branches-perdidas).
 
 ## Nimbus-Code — Estimativa vs. Consumo Real de Tokens e Horas Humanas
 

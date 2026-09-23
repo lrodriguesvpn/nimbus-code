@@ -10,7 +10,7 @@
 - [ ] Git e GitHub CLI (`gh`) instalados
 - [ ] Acesso a dois projetos piloto (internos, onde testar)
 - [ ] Permissão de push em branch `develop` dos projetos piloto
-- [ ] Acesso ao repositório [nimbus-code-spec-kit-template](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template)
+- [ ] Acesso ao repositório [nimbus-code](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code)
 
 ---
 

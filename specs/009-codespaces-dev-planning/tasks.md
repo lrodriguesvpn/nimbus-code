@@ -20,8 +20,8 @@ pelo registro de implementação de 2026-08-20 abaixo.
 
 O devcontainer e os guias existem; JSON e sintaxe do script foram verificados
 localmente, sem abrir Codespace. Os 11 marcadores concluídos não aprovam adoção:
-[#455](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/455)
-e [#436](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/436)
+[#455](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/455)
+e [#436](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/436)
 estavam abertas, solicitando decisão do Architecture Board, Platform Lead e
 DevSecOps sobre Local First, Codespaces opcional, custos e segredos. Essas
 propostas permanecem para decisão humana, não são uma arquitetura aprovada.

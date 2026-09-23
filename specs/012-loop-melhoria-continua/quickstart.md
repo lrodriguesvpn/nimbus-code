@@ -23,7 +23,7 @@ Ver [data-model.md](./data-model.md) para o schema completo das entidades e
 ## Cenário 2 — Calcular os Indicadores DORA (AC-2)
 
 ```bash
-./scripts/process-metrics-report.sh --repo-owner venha-pra-nuvem --repo-name nimbus-code-spec-kit-template --since 2026-07-01 --until 2026-08-20
+./scripts/process-metrics-report.sh --repo-owner venha-pra-nuvem --repo-name nimbus-code --since 2026-07-01 --until 2026-08-20
 ```
 
 **Resultado esperado**: saída com os 4 indicadores (deployment frequency,

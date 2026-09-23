@@ -203,7 +203,7 @@ export function activate(context: vscode.ExtensionContext) {
       if (choice.action === 'enterprise_init') {
         const terminal = vscode.window.createTerminal('Nimbus Code Enterprise Bootstrap');
         terminal.show();
-        terminal.sendText('curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bootstrap.sh | bash');
+        terminal.sendText('curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/raw/main/bootstrap.sh | bash');
         vscode.window.showInformationMessage('🚀 Executando bootstrap oficial do Nimbus Code Enterprise no terminal integrado...');
       } else if (choice.action === 'community') {
         const rootFolder = vscode.workspace.workspaceFolders![0];

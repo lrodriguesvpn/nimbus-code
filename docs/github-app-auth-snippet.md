@@ -73,8 +73,8 @@ funcionando via fallback (`VPNDEV_PROJECT_TOKEN`, `ADD_TO_PROJECT_PAT` ou
 ## Checklist manual para concluir T006 depois do rollout administrativo
 
 ```bash
-gh secret set NIMBUS_APP_ID --repo venha-pra-nuvem/nimbus-code-spec-kit-template
-gh secret set NIMBUS_APP_PRIVATE_KEY --repo venha-pra-nuvem/nimbus-code-spec-kit-template < caminho/para/chave.pem
+gh secret set NIMBUS_APP_ID --repo venha-pra-nuvem/nimbus-code
+gh secret set NIMBUS_APP_PRIVATE_KEY --repo venha-pra-nuvem/nimbus-code < caminho/para/chave.pem
 ```
 
 > Observação: o segundo comando acima é apenas um lembrete operacional para o

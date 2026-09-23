@@ -3,7 +3,7 @@
   manualmente a cada atualização aprovada do bundle/Nimbus Code. Não edite a versão
   aqui sem antes ter aprovado e aplicado a atualização correspondente — ver a
   política de versionamento em
-  https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template#versão-do-bundle-em-uso--política-de-atualização
+  https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code#versão-do-bundle-em-uso--política-de-atualização
 -->
 
 ## Nimbus Code — NIMBUS CODE / Padrões Nimbus-Code
@@ -15,7 +15,7 @@ System**.
 | Item | Versão instalada |
 | --- | --- |
 | **Nimbus Code CLI** | `0.16.1` |
-| **Bundle `nimbus-code-project-bundle`** ([nimbus-code-spec-kit-template](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template)) | `1.22.0` |
+| **Bundle `nimbus-code-project-bundle`** ([nimbus-code](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code)) | `1.22.0` |
 | — preset `nimbus-code-standards` | `1.22.0` |
 | — extensão `nimbus-code-backlog-sync` | `1.2.0` |
 | — workflow `nimbus-code-full-cycle` | `1.4.0` |
@@ -32,6 +32,6 @@ ou estejam fora de sincronia.
 Nimbus Code) — não altere por conta própria fora do fluxo do PR automático semanal
 (`.github/workflows/update-speckit-and-bundle.yml`).
 
-> **Importante:** `nimbus-code-spec-kit-template` é o repositório
+> **Importante:** `nimbus-code` é o repositório
 > **template/foundation**. O repositório `nimbus-code` é o repositório
 > **produto/marketing** e não substitui esta dependência técnica.

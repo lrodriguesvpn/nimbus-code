@@ -31,13 +31,13 @@ aditiva (`wrap`/`append`).
 ## Instalação isolada (sem o bundle completo)
 
 ```bash
-specify preset add nimbus-code-standards --from https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/vX.Y.Z/nimbus-code-standards-X.Y.Z.zip --priority 5
+specify preset add nimbus-code-standards --from https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/releases/download/vX.Y.Z/nimbus-code-standards-X.Y.Z.zip --priority 5
 ```
 
 Ou, em modo desenvolvimento, a partir de um clone local:
 
 ```bash
-specify preset add --dev ./nimbus-code-spec-kit-template/presets/nimbus-code-standards --priority 5
+specify preset add --dev ./nimbus-code/presets/nimbus-code-standards --priority 5
 ```
 
 > Normalmente este preset não é instalado isoladamente — ele é instalado como parte
@@ -69,7 +69,7 @@ política de versionamento consolidada em [`../../README.md`](../../README.md).
 ```bash
 mkdir /tmp/nimbus-code-preset-smoke && cd /tmp/nimbus-code-preset-smoke
 specify init --here --integration copilot --ignore-agent-tools
-specify preset add --dev /path/to/nimbus-code-spec-kit-template/presets/nimbus-code-standards --priority 5
+specify preset add --dev /path/to/nimbus-code/presets/nimbus-code-standards --priority 5
 specify preset resolve constitution-template
 specify preset resolve plan-template
 ```
@@ -78,13 +78,13 @@ specify preset resolve plan-template
 ## Instalação isolada (sem o bundle completo)
 
 ```bash
-specify preset add nimbus-code-standards --from https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/vX.Y.Z/nimbus-code-standards-X.Y.Z.zip --priority 5
+specify preset add nimbus-code-standards --from https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/releases/download/vX.Y.Z/nimbus-code-standards-X.Y.Z.zip --priority 5
 ```
 
 Ou, em modo desenvolvimento, a partir de um clone local:
 
 ```bash
-specify preset add --dev ./nimbus-code-spec-kit-template/presets/nimbus-code-standards --priority 5
+specify preset add --dev ./nimbus-code/presets/nimbus-code-standards --priority 5
 ```
 
 > Normalmente este preset não é instalado isoladamente — ele é instalado como parte
@@ -102,7 +102,7 @@ política de versionamento consolidada em [`../../README.md`](../../README.md).
 ```bash
 mkdir /tmp/nimbus-code-preset-smoke && cd /tmp/nimbus-code-preset-smoke
 specify init --here --integration copilot --ignore-agent-tools
-specify preset add --dev /path/to/nimbus-code-spec-kit-template/presets/nimbus-code-standards --priority 5
+specify preset add --dev /path/to/nimbus-code/presets/nimbus-code-standards --priority 5
 specify preset resolve constitution-template
 specify preset resolve plan-template
 ```

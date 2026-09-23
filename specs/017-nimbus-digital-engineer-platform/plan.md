@@ -66,7 +66,7 @@ O checklist de qualidade citado em #442 não existe neste checkout;
 |---|---|
 | **Bounded context** | `spec-kit-workflow` |
 | **Grafo do contexto** | [graph.yaml](./graph.yaml) e [graph.md](./graph.md) |
-| **Dependências relevantes para esta feature** | `nimbus-agent`, `nimbus-code-spec-kit-template`, repositórios satélites de execução |
+| **Dependências relevantes para esta feature** | `nimbus-agent`, `nimbus-code`, repositórios satélites de execução |
 | **Padrões de harvest aplicáveis** | Nenhuma entrada adicional de harvest aplicada |
 
 ## Nimbus-Code — Estratégia de Release

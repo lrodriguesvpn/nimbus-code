@@ -63,7 +63,7 @@ Já documentado em detalhe no [README raiz](../README.md#como-um-projeto-novo-j�
 Resumo:
 
 ```bash
-curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bootstrap.sh | bash
+curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/raw/main/bootstrap.sh | bash
 ```
 
 Isso já deixa o projeto com `specify init` feito e o bundle
@@ -78,7 +78,7 @@ preset para manter o mesmo fluxo em qualquer repositório inicializado.
 ou evitar qualquer fragilidade de `curl | bash`:**
 
 ```bash
-curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bootstrap.sh \
+curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/raw/main/bootstrap.sh \
   -o /tmp/nimbus-bootstrap.sh
 bash /tmp/nimbus-bootstrap.sh
 ```
@@ -144,7 +144,7 @@ board — antes de escrever a primeira spec.
 
 ```bash
 cd meu-repo-existente
-curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bootstrap.sh | bash
+curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/raw/main/bootstrap.sh | bash
 ```
 
 Para **repo brownfield que ainda não tem Spec Kit/Nimbus Code**, este é o ponto
@@ -159,7 +159,7 @@ bootstrap complementar da Nimbus-Code no mesmo fluxo**.
 ```bash
 cd meu-repo-existente
 specify init --here --integration copilot --force
-curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bootstrap.sh | bash
+curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/raw/main/bootstrap.sh | bash
 ```
 
 Use esta variação só se você **quiser separar conscientemente** a criação da
@@ -924,7 +924,7 @@ abertas mesmo com implementação concluída.
 
 #### Correção permanente aplicada
 
-- Workflow de fallback: [close-referenced-issues-fallback.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/close-referenced-issues-fallback.yml)
+- Workflow de fallback: [close-referenced-issues-fallback.yml](/Users/lrodrigues/projects/nimbus-code/.github/workflows/close-referenced-issues-fallback.yml)
   fecha issues abertas referenciadas na PR mergeada (incluindo seção
   "Issues Resolvidas"), quando o auto-close padrão não ocorreu.
 - Instrução obrigatória no Copilot: sempre usar `Closes #<n>` no corpo da PR.
@@ -965,7 +965,7 @@ tem seu próprio repo onde o Copilot Agent abre PRs e onde as Tasks são criadas
 | Mobile | `mobile-` | `org/mobile-ios`, `org/mobile-android` |
 | Biblioteca compartilhada | `lib-` | `org/lib-commons`, `org/lib-ui` |
 | Infraestrutura (IaC) | `infra` ou `infra-` | `org/infra`, `org/infra-aws` |
-| Repo Central (governança) | nome do produto | `org/nimbus-code-spec-kit-template` |
+| Repo Central (governança) | nome do produto | `org/nimbus-code` |
 
 ### 5.2. Registrando um novo microsserviço
 
@@ -1190,13 +1190,13 @@ Classifique cada PR que toca superfície de bundle/preset com um label:
 - `release:patch` — correção compatível
 - `release:skip` — sem impacto de versão
 
-> O script [setup-github-labels.sh](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/scripts/setup-github-labels.sh)
+> O script [setup-github-labels.sh](/Users/lrodrigues/projects/nimbus-code/scripts/setup-github-labels.sh)
 > cria/atualiza esses labels.
 
 ### 6.2.1. Gate automático para não depender de memória humana
 
 O workflow
-[release-readiness-gate.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/release-readiness-gate.yml)
+[release-readiness-gate.yml](/Users/lrodrigues/projects/nimbus-code/.github/workflows/release-readiness-gate.yml)
 roda em toda PR para `develop` e bloqueia merge quando:
 
 - a PR toca superfície de release (`presets/`, `extensions/`, `workflows/`,
@@ -1208,13 +1208,13 @@ roda em toda PR para `develop` e bloqueia merge quando:
 ### 6.3. Recomendação automática de bump em `develop`
 
 Ao merge de PR em `develop`, o workflow
-[release-impact-advisor.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/release-impact-advisor.yml)
+[release-impact-advisor.yml](/Users/lrodrigues/projects/nimbus-code/.github/workflows/release-impact-advisor.yml)
 registra recomendação na issue `Release Candidate: develop` (`release:pending`).
 
 ### 6.4. PR automático de promoção `develop` -> `main`
 
 O workflow
-[promote-develop-to-main.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/promote-develop-to-main.yml)
+[promote-develop-to-main.yml](/Users/lrodrigues/projects/nimbus-code/.github/workflows/promote-develop-to-main.yml)
 abre/atualiza o PR de promoção e solicita revisão para aprovadores configurados
 nas variáveis do repositório:
 
@@ -1231,10 +1231,10 @@ Mesmo com automação, o merge para `main` exige:
 ### 6.6. Publicação da versão
 
 Após merge em `main`, o workflow
-[tag-release-on-main.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/tag-release-on-main.yml)
+[tag-release-on-main.yml](/Users/lrodrigues/projects/nimbus-code/.github/workflows/tag-release-on-main.yml)
 cria/pusha a tag `vX.Y.Z` automaticamente com base na versão do bundle. Em
 seguida, o workflow
-[release.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/release.yml)
+[release.yml](/Users/lrodrigues/projects/nimbus-code/.github/workflows/release.yml)
 publica os assets, validando que a tag aponta para commit da `main`.
 
 ### 6.7. Atualizando um projeto consumidor para a versão mais recente do bundle
@@ -1254,7 +1254,7 @@ com o agente de Copilot **dentro do repositório do projeto consumidor**:
 
 ```text
 Você está atualizando este projeto para a versão mais recente do bundle
-`nimbus-code-project-bundle` da Nimbus-Code (fonte: nimbus-code-spec-kit-template).
+`nimbus-code-project-bundle` da Nimbus-Code (fonte: nimbus-code).
 Siga este roteiro sem pular etapas:
 
 1. Diagnóstico
@@ -1262,9 +1262,9 @@ Siga este roteiro sem pular etapas:
      "Nimbus Code — Padrões Nimbus-Code") para descobrir as versões
      instaladas hoje (Nimbus Code CLI, bundle, preset, extensão, workflow).
    - Compare com a versão mais recente publicada nos catalog.json de
-     nimbus-code-spec-kit-template (registre os catálogos primeiro se ainda
+     nimbus-code (registre os catálogos primeiro se ainda
      não estiverem registrados, com os comandos da seção "Publicação e
-     Catálogo" do README de nimbus-code-spec-kit-template).
+     Catálogo" do README de nimbus-code).
    - Se a versão instalada já for a mais recente, pare aqui e informe — não
      há nada para atualizar.
 
@@ -1622,7 +1622,7 @@ O Nimbus Code opera em um modelo de distribuição Dual-Package (Open-Core / Sou
 
 | Dimensão | Nimbus Code Community (Extensão Pública) | Nimbus Code Enterprise (VPN Monorepo) |
 |---|---|---|
-| **Repositório** | Público no GitHub (`venha-pra-nuvem/nimbus-code-extension` / `github.com/lrodriguesvpn/nimbus-code`) | Privado no GHE VPN (`venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template`) |
+| **Repositório** | Público no GitHub (`venha-pra-nuvem/nimbus-code-extension` / `github.com/lrodriguesvpn/nimbus-code`) | Privado no GHE VPN (`venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code`) |
 | **Licença** | BSL 1.1 (Business Source License) | Proprietária Enterprise Venha Pra Nuvem |
 | **Squad de Agentes** | Orquestrador `@nimbus` + 18 Papéis via Skills base do Spec Kit | 18 Agentes Nativos dedicados com RACI, Prompts Especializados e Guardrails |
 | **Harness Corporativo** | Não incluso | Catálogo centralizado de prevenção de falhas (`docs/harness/`) |

@@ -120,11 +120,11 @@ vínculo indevido causado por este mesmo passo antes do fix de `$GIT_ROOT`).
 ### Regressão do bug da issue #21 (fix desta sessão)
 
 Para confirmar o fix de `$GIT_ROOT`:
-1. Clone o template em `/tmp/nimbus-code-spec-kit-template`.
+1. Clone o template em `/tmp/nimbus-code`.
 2. Em outro projeto (`~/meu-app`, com seu próprio `docs/bounded-contexts.yaml`), rode:
    ```bash
    cd ~/meu-app
-   /tmp/nimbus-code-spec-kit-template/scripts/setup-github-project.sh
+   /tmp/nimbus-code/scripts/setup-github-project.sh
    ```
 3. **Esperado**: o script lê `~/meu-app/docs/bounded-contexts.yaml` (não o do clone em
    `/tmp`) — confirmado por código: `_GIT_ROOT` agora vem de `git rev-parse --show-toplevel`

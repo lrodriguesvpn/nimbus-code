@@ -199,7 +199,7 @@ specs/023-template-resolution-merge-fix/
 | Campo | Valor |
 |---|---|
 | **Bounded context** | `spec-kit-workflow` |
-| **Grafo do contexto** | [graph.yaml](./graph.yaml) / [graph.md](./graph.md) — single-repo (`venha-pra-nuvem/nimbus-code-spec-kit-template`), sem repos satélite mapeados para este bounded context |
+| **Grafo do contexto** | [graph.yaml](./graph.yaml) / [graph.md](./graph.md) — single-repo (`venha-pra-nuvem/nimbus-code`), sem repos satélite mapeados para este bounded context |
 | **Dependências relevantes para esta feature** | Nenhuma — mudança confinada a este repositório; repos satélite apenas **consomem** o resultado (templates corretamente compostos) na próxima sincronização de preset, sem exigir mudança própria |
 | **Padrões de harvest aplicáveis** | Nenhuma entrada em `docs/reuse-catalog.yaml` relacionada a composição de templates |
 

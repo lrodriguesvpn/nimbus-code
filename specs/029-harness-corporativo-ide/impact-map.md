@@ -10,7 +10,7 @@
 
 | Módulo | Tipo de Mudança | Impacto Estimado | Owner |
 |---|---|---|---|
-| `scripts/harvest-patterns.sh` | Modificação (Extensão) | Alto — adiciona modo `--source ide-harness` e validações de isolamento estrito de escrita | platform (nimbus-code-spec-kit-template) |
+| `scripts/harvest-patterns.sh` | Modificação (Extensão) | Alto — adiciona modo `--source ide-harness` e validações de isolamento estrito de escrita | platform (nimbus-code) |
 | `scripts/lib/harness_anonymizer.py` | Novo | Crítico — motor local de detecção e redação preventiva; falha aqui expõe credenciais ou PII ao LLM | security / platform |
 | `scripts/lib/central_repo_writer.py` | Novo | Médio — valida integridade e isolamento de escrita no repositório central dedicado | platform |
 | `nimbus-code-harness-corporativo` (GHE) | Novo Repositório Central | Alto — repositório centralizado de governança para armazenar itens brutos, triagem e regras promovidas | comitê nimbus-code / arch-board |

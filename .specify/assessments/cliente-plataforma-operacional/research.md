@@ -263,11 +263,11 @@ pontos abaixo.
 
 ### 2.1 Auditoria item-a-item dos artefatos de template (CMDB/Terraform/Baselines/Schemas/DSC)
 
-Escopo auditado: [specs/004-platform-cmdb-dsc-model/spec.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/plataforma-assess-intake-improvements/specs/004-platform-cmdb-dsc-model/spec.md),
-[platform-governance/](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/plataforma-assess-intake-improvements/platform-governance),
-[platform/baseline-registry.yaml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/plataforma-assess-intake-improvements/platform/baseline-registry.yaml),
-[platform/drift-policy.yaml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/plataforma-assess-intake-improvements/platform/drift-policy.yaml),
-[platform/evidence-registry.yaml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/plataforma-assess-intake-improvements/platform/evidence-registry.yaml).
+Escopo auditado: [specs/004-platform-cmdb-dsc-model/spec.md](/Users/lrodrigues/projects/nimbus-code.worktrees/plataforma-assess-intake-improvements/specs/004-platform-cmdb-dsc-model/spec.md),
+[platform-governance/](/Users/lrodrigues/projects/nimbus-code.worktrees/plataforma-assess-intake-improvements/platform-governance),
+[platform/baseline-registry.yaml](/Users/lrodrigues/projects/nimbus-code.worktrees/plataforma-assess-intake-improvements/platform/baseline-registry.yaml),
+[platform/drift-policy.yaml](/Users/lrodrigues/projects/nimbus-code.worktrees/plataforma-assess-intake-improvements/platform/drift-policy.yaml),
+[platform/evidence-registry.yaml](/Users/lrodrigues/projects/nimbus-code.worktrees/plataforma-assess-intake-improvements/platform/evidence-registry.yaml).
 
 | Item | Estado observado | Ainda faz sentido? | Evidência |
 |---|---|---|---|

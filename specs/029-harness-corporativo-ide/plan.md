@@ -1,6 +1,6 @@
 # Implementation Plan: Harness Corporativo — Consolidação de Harness Agêntico IDE Pessoal
 
-**Branch**: `029-harness-corporativo-ide` | **Date**: 2026-09-22 | **Spec**: [specs/029-harness-corporativo-ide/spec.md](file:///Users/lrodrigues/.gemini/antigravity/worktrees/nimbus-code-spec-kit-template/nimbus_integration/specs/029-harness-corporativo-ide/spec.md)
+**Branch**: `029-harness-corporativo-ide` | **Date**: 2026-09-22 | **Spec**: [specs/029-harness-corporativo-ide/spec.md](file:///Users/lrodrigues/.gemini/antigravity/worktrees/nimbus-code/nimbus_integration/specs/029-harness-corporativo-ide/spec.md)
 
 **Input**: Feature specification from `specs/029-harness-corporativo-ide/spec.md` e interview em `specs/029-harness-corporativo-ide/interview.md`
 
@@ -95,7 +95,7 @@ specs/029-harness-corporativo-ide/
 ### Source Code (repository root & central repo)
 
 ```text
-# No repositório de templates / ferramentas (nimbus-code-spec-kit-template)
+# No repositório de templates / ferramentas (nimbus-code)
 scripts/
 ├── harvest-patterns.sh          # Extensão da CLI com suporte a --source ide-harness
 ├── sync-corporate-harness.sh    # Script de redistribuição opcional idempotente (Etapa 2)
@@ -226,7 +226,7 @@ scripts/
 |---|---|
 | **Bounded context** | `harness-corporativo` |
 | **Grafo do contexto** | [specs/029-harness-corporativo-ide/graph.md](./graph.md) |
-| **Dependências relevantes para esta feature** | `nimbus-code-spec-kit-template` (fornecedor da CLI) e `nimbus-code-harness-corporativo` (repositório central GHE de destino) |
+| **Dependências relevantes para esta feature** | `nimbus-code` (fornecedor da CLI) e `nimbus-code-harness-corporativo` (repositório central GHE de destino) |
 | **Padrões de harvest aplicáveis** | `brownfield-multirepo-context-graph`, `022-nimbuscode-harvest-gateway` e `refresh_managed_project_root_files` |
 
 ---

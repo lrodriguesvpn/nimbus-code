@@ -53,7 +53,7 @@ automaticamente.
   ## Contexto
   Esta feature (spec 022) planeja um serviço novo que ainda não tem
   repositório próprio — todo o desenho técnico foi feito em
-  `nimbus-code-spec-kit-template` como artefato de planejamento (mesmo
+  `nimbus-code` como artefato de planejamento (mesmo
   precedente de `vpn-skills`, SPEC-003).
 
   ## Objetivo

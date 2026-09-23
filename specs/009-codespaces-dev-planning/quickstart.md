@@ -6,7 +6,7 @@ governança propostos por este plano.
 ## Cenário 1 — Devcontainer zero-setup (AC-1)
 
 ```sh
-gh codespace create --repo <org>/nimbus-code-spec-kit-template --devcontainer-path .devcontainer/devcontainer.json
+gh codespace create --repo <org>/nimbus-code --devcontainer-path .devcontainer/devcontainer.json
 gh codespace ssh
 python3 --version && node --version && gh --version
 ```

@@ -94,7 +94,7 @@ nenhuma issue é duplicada.
 - [x] T015 [P] Implementar vinculação de repos ao Project V2 via GraphQL `linkProjectV2ToRepository` em `scripts/setup-github-project.sh`, lendo `docs/bounded-contexts.yaml` (AC-11)
 - [x] T016 Implementar idempotência da vinculação em `scripts/setup-github-project.sh` — não duplicar vínculo, imprimir "✓ já vinculado" (AC-12)
 - [x] T017 Implementar aviso (não abort) quando `bounded-contexts.yaml` está ausente em `scripts/setup-github-project.sh` (AC-13)
-- [x] T018 [P] Corrigir o bug de resolução de `$GIT_ROOT` relatado na [issue #21](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/21) em `scripts/setup-github-project.sh` — hoje usa o diretório do script (`BASH_SOURCE`) em vez do diretório de chamada (`$PWD`) para localizar `docs/bounded-contexts.yaml`, causando vínculo incorreto quando o script é chamado por caminho absoluto de outro clone
+- [x] T018 [P] Corrigir o bug de resolução de `$GIT_ROOT` relatado na [issue #21](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/21) em `scripts/setup-github-project.sh` — hoje usa o diretório do script (`BASH_SOURCE`) em vez do diretório de chamada (`$PWD`) para localizar `docs/bounded-contexts.yaml`, causando vínculo incorreto quando o script é chamado por caminho absoluto de outro clone
 - [x] T019 Validar manualmente os 15 ACs do `spec.md` contra a implementação atual (a maioria já implementada — ver notas de status acima) e registrar resultado em um `quickstart.md` para esta feature (hoje ausente)
 - [x] T020 Adicionar teste unitário bash (`bats`) para a resolução de `--bounded-contexts` em `create-new-feature.sh` (candidato identificado no `plan.md`, AC-4/AC-6), cobrindo caso de slug válido e slug inválido
 

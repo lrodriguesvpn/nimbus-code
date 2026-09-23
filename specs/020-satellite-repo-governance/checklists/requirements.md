@@ -2,7 +2,7 @@
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
 **Created**: 2026-08-24
-**Feature**: [spec.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/specs/020-satellite-repo-governance/spec.md)
+**Feature**: [spec.md](/Users/lrodrigues/projects/nimbus-code/specs/020-satellite-repo-governance/spec.md)
 
 ## Content Quality
 

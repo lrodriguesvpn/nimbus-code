@@ -19,21 +19,21 @@
 
 | Nível | Issue | Título |
 |---|---|---|
-| Epic | [#65](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/65) | Governança de Segurança do GHE — Nimbus-Code |
-| Feature (007) | [#66](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/66) | Controle de Segurança no GHE para Projetos e Projeto Plataforma |
-| User Story 1 | [#67](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/67) | Definir baseline de segurança para repositórios de projeto |
-| User Story 2 | [#68](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/68) | Definir governança de segurança para o Projeto Plataforma |
-| User Story 3 | [#69](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/69) | Padronizar auditoria e operação contínua |
+| Epic | [#65](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/65) | Governança de Segurança do GHE — Nimbus-Code |
+| Feature (007) | [#66](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/66) | Controle de Segurança no GHE para Projetos e Projeto Plataforma |
+| User Story 1 | [#67](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/67) | Definir baseline de segurança para repositórios de projeto |
+| User Story 2 | [#68](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/68) | Definir governança de segurança para o Projeto Plataforma |
+| User Story 3 | [#69](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/69) | Padronizar auditoria e operação contínua |
 
 **Tasks → Issue (sub-issue do parent indicado):**
 
 | Task | Issue | Sub-issue de |
 |---|---|---|
-| T001–T010 | [#23](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/23)–[#32](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/32) | Feature #66 (Setup/Foundational, sem US específica) |
-| T011–T018 | [#33](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/33)–[#40](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/40) | User Story 1 #67 |
-| T019–T023 | [#41](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/41)–[#45](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/45) | User Story 2 #68 |
-| T024–T032 | [#46](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/46)–[#54](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/54) | User Story 3 #69 |
-| T033–T041 | [#55](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/55)–[#63](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/63) | Feature #66 (Polish, sem US específica) |
+| T001–T010 | [#23](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/23)–[#32](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/32) | Feature #66 (Setup/Foundational, sem US específica) |
+| T011–T018 | [#33](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/33)–[#40](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/40) | User Story 1 #67 |
+| T019–T023 | [#41](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/41)–[#45](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/45) | User Story 2 #68 |
+| T024–T032 | [#46](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/46)–[#54](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/54) | User Story 3 #69 |
+| T033–T041 | [#55](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/55)–[#63](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/63) | Feature #66 (Polish, sem US específica) |
 
 Cada issue de Task recebeu labels de `priority:*`, `complexity:*`, `type:*` e `agent:autonomous-ok`/`agent:needs-human` (T004 e T038 são `agent:needs-human`, refletindo `[Humano]` nesta lista).
 
@@ -59,7 +59,7 @@ Cada issue de Task recebeu labels de `priority:*`, `complexity:*`, `type:*` e `a
 
 **Status desta sessão (MVP)**: T004 é manual (criação do GitHub App na organização) e permanece pendente — nenhum agente pode executá-la. Como consequência, T005 (configurar os secrets reais com as credenciais do App) também permanece pendente, pois depende diretamente de T004. T006–T010 foram implementados em código (a lógica de autenticação, descoberta, dedup de issue e resolução de flag funciona assim que os secrets existirem — ela falha explicitamente com `::error::` enquanto não existirem, sem simular autenticação).
 
-- [ ] T004 [Humano] Criar o GitHub App "Nimbus Code Security Auditor" na organização com permissões somente-leitura (`metadata:read`, `administration:read`, `secrets:read`, `contents:read`) e instalá-lo — ver ADR [0008](/docs/adr/0008-github-app-para-varredura-de-seguranca-org-wide.md) _(decisão consolidada em [issue #72](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/72) junto com specs 003/008 — aguardar decisão de App único antes de criar um App isolado)_
+- [ ] T004 [Humano] Criar o GitHub App "Nimbus Code Security Auditor" na organização com permissões somente-leitura (`metadata:read`, `administration:read`, `secrets:read`, `contents:read`) e instalá-lo — ver ADR [0008](/docs/adr/0008-github-app-para-varredura-de-seguranca-org-wide.md) _(decisão consolidada em [issue #72](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/72) junto com specs 003/008 — aguardar decisão de App único antes de criar um App isolado)_
 
   ```markdown
   ## Contexto

@@ -2,7 +2,7 @@
 
 Análise de quais extensões (oficiais do Nimbus Code + customizadas da Nimbus-Code)
 fazem sentido como **repositório independente** vs. viver dentro deste
-monorepo (`nimbus-code-spec-kit-template`).
+monorepo (`nimbus-code`).
 
 ## Extensões oficiais do Nimbus Code (`bundled: true`) — não recriar
 

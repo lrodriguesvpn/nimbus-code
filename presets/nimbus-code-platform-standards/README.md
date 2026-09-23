@@ -113,13 +113,13 @@ com revisão humana e identidade dedicada.
 ## Instalação isolada
 
 ```bash
-specify preset add nimbus-code-platform-standards --from https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/releases/download/vX.Y.Z/nimbus-code-platform-standards-0.5.0.zip --priority 5
+specify preset add nimbus-code-platform-standards --from https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/releases/download/vX.Y.Z/nimbus-code-platform-standards-0.5.0.zip --priority 5
 ```
 
 Ou, em modo desenvolvimento, a partir de um clone local:
 
 ```bash
-specify preset add --dev ./nimbus-code-spec-kit-template/presets/nimbus-code-platform-standards --priority 5
+specify preset add --dev ./nimbus-code/presets/nimbus-code-platform-standards --priority 5
 ```
 
 ## Detalhamento completo

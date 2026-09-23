@@ -169,7 +169,7 @@ tests/scripts/                                   # novos testes de integração 
 |---|---|
 | **Bounded context** | `spec-kit-workflow` |
 | **Grafo do contexto** | N/A — esta feature não introduz dependência cross-repo; o `graph.yaml`/`graph.md` desta feature contém o **module dependency graph** (não o context graph auto-gerado por `/speckit-specify`, que foi substituído nesta fase de planejamento por não haver módulos multi-repo relevantes) |
-| **Dependências relevantes para esta feature** | Nenhuma fora do repositório central — toda a extensão ocorre em `scripts/`, `docs/playbooks/` e `tests/` do próprio `nimbus-code-spec-kit-template` |
+| **Dependências relevantes para esta feature** | Nenhuma fora do repositório central — toda a extensão ocorre em `scripts/`, `docs/playbooks/` e `tests/` do próprio `nimbus-code` |
 | **Padrões de harvest aplicáveis** | Nenhuma entrada de `docs/reuse-catalog.yaml` originada de `scripts/harvest-patterns.sh` é relevante a esta feature |
 
 ## Nimbus-Code — Estratégia de Release

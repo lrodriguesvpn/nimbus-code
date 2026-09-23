@@ -46,7 +46,7 @@ A feature envolve atualização de **três camadas de templates e scripts** que 
 
 ### Dependencies
 
-- Projeto [nimbus-code-spec-kit-template](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template) — repositório base com templates e skills
+- Projeto [nimbus-code](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code) — repositório base com templates e skills
 - GitHub Enterprise (GHE) — plataforma de publicação de tasks e rastreio
 - Documentação Nimbus-Code (`docs/ai-code-quality-and-observability.md`, `docs/developer-guide.md`)
 - [SPEC KIT COST](https://github.com/venha-pra-nuvem/spec-kit-cost) — projeto GitHub público para rastreio de custo

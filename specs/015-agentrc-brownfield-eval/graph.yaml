@@ -6,9 +6,9 @@ version: 1
 generated_at: "2026-08-24T00:51:13Z"
 
 nodes:
-  - id: "venha-pra-nuvem-nimbus-code-spec-kit-template"
+  - id: "venha-pra-nuvem-nimbus-code"
     type: "repo"
-    repository: "venha-pra-nuvem/nimbus-code-spec-kit-template"
+    repository: "venha-pra-nuvem/nimbus-code"
     cross_repo: false
     manifest_source: "unavailable"
 
@@ -16,4 +16,4 @@ edges:
   []
 
 unanalyzed_repos:
-  - "venha-pra-nuvem/nimbus-code-spec-kit-template"
+  - "venha-pra-nuvem/nimbus-code"

@@ -56,7 +56,7 @@ Os dois presets fazem parte do **`nimbus-code-project-bundle`**, que inclui tamb
 Bootstrap em um único comando:
 
 ```bash
-curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bootstrap.sh | bash
+curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/raw/main/bootstrap.sh | bash
 ```
 
 ---
@@ -65,11 +65,11 @@ curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-
 
 | # | Documento | O que você vai aprender |
 |---|---|---|
-| 1 | [**README principal**](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/README.md) | Visão geral do sistema, componentes e como tudo se encaixa |
-| 2 | [**Guia do Desenvolvedor**](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/developer-guide.md) | Como usar o Nimbus Code no dia a dia — greenfield, brownfield e importar card do Azure DevOps/JIRA |
-| 3 | [**Boas Práticas Brownfield**](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/brownfield-best-practices.md) | Como adotar o Nimbus Code em repositórios existentes sem quebrar nada |
-| 4 | [**Qualidade e Observabilidade de IA**](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/ai-code-quality-and-observability.md) | Como o PMO acompanha qualidade, custo real e métricas DORA |
-| 5 | [**Taxonomia de Labels e Dev Autônomo**](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/blob/main/docs/label-taxonomy-and-autonomous-dev.md) | Como priorizar issues, acionar o Copilot agent automaticamente e evitar conflito com automações nativas do GitHub |
+| 1 | [**README principal**](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/blob/main/README.md) | Visão geral do sistema, componentes e como tudo se encaixa |
+| 2 | [**Guia do Desenvolvedor**](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/blob/main/docs/developer-guide.md) | Como usar o Nimbus Code no dia a dia — greenfield, brownfield e importar card do Azure DevOps/JIRA |
+| 3 | [**Boas Práticas Brownfield**](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/blob/main/docs/brownfield-best-practices.md) | Como adotar o Nimbus Code em repositórios existentes sem quebrar nada |
+| 4 | [**Qualidade e Observabilidade de IA**](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/blob/main/docs/ai-code-quality-and-observability.md) | Como o PMO acompanha qualidade, custo real e métricas DORA |
+| 5 | [**Taxonomia de Labels e Dev Autônomo**](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/blob/main/docs/label-taxonomy-and-autonomous-dev.md) | Como priorizar issues, acionar o Copilot agent automaticamente e evitar conflito com automações nativas do GitHub |
 
 ---
 
@@ -81,4 +81,4 @@ Qualquer dúvida, respondam antes da reunião.
 ---
 
 *Repositório base do sistema:*  
-[https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template)
+[https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code)

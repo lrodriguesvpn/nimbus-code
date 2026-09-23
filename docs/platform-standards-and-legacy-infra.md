@@ -180,7 +180,7 @@ repositório de workload correspondente.
 ## 10. Instalação e relação com outros documentos
 
 ```bash
-specify preset add --dev ./nimbus-code-spec-kit-template/presets/nimbus-code-platform-standards --priority 5
+specify preset add --dev ./nimbus-code/presets/nimbus-code-platform-standards --priority 5
 ```
 
 Ver também:

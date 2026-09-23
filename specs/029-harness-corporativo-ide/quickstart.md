@@ -11,7 +11,7 @@ Este guia prático fornece o passo a passo executável para testar e validar o c
 ## Pré-requisitos
 
 1. Python 3.11+ instalado localmente.
-2. Repositório template atualizado (`nimbus-code-spec-kit-template`).
+2. Repositório template atualizado (`nimbus-code`).
 3. Repositório central clonado localmente para os testes (ex.: `../nimbus-code-harness-corporativo`).
 4. Variáveis de ambiente configuradas para chamadas ao Gateway (apenas nos cenários com LLM).
 

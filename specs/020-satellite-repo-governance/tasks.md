@@ -1,7 +1,7 @@
 # Tasks: Governança de Repos Satélite e Intake Greenfield MultiRepo
 
-**Entrada**: Artefatos de design de [specs/020-satellite-repo-governance/](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/specs/020-satellite-repo-governance)  
-**Pré-requisitos**: [plan.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/specs/020-satellite-repo-governance/plan.md) ✅, [spec.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/specs/020-satellite-repo-governance/spec.md) ✅, [research.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/specs/020-satellite-repo-governance/research.md) ✅, [data-model.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/specs/020-satellite-repo-governance/data-model.md) ✅, [quickstart.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/specs/020-satellite-repo-governance/quickstart.md) ✅, [graph.yaml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/specs/020-satellite-repo-governance/graph.yaml) ✅, [graph.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/specs/020-satellite-repo-governance/graph.md) ✅, [impact-map.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/specs/020-satellite-repo-governance/impact-map.md) ✅, [contracts/](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/specs/020-satellite-repo-governance/contracts) ✅  
+**Entrada**: Artefatos de design de [specs/020-satellite-repo-governance/](/Users/lrodrigues/projects/nimbus-code/specs/020-satellite-repo-governance)  
+**Pré-requisitos**: [plan.md](/Users/lrodrigues/projects/nimbus-code/specs/020-satellite-repo-governance/plan.md) ✅, [spec.md](/Users/lrodrigues/projects/nimbus-code/specs/020-satellite-repo-governance/spec.md) ✅, [research.md](/Users/lrodrigues/projects/nimbus-code/specs/020-satellite-repo-governance/research.md) ✅, [data-model.md](/Users/lrodrigues/projects/nimbus-code/specs/020-satellite-repo-governance/data-model.md) ✅, [quickstart.md](/Users/lrodrigues/projects/nimbus-code/specs/020-satellite-repo-governance/quickstart.md) ✅, [graph.yaml](/Users/lrodrigues/projects/nimbus-code/specs/020-satellite-repo-governance/graph.yaml) ✅, [graph.md](/Users/lrodrigues/projects/nimbus-code/specs/020-satellite-repo-governance/graph.md) ✅, [impact-map.md](/Users/lrodrigues/projects/nimbus-code/specs/020-satellite-repo-governance/impact-map.md) ✅, [contracts/](/Users/lrodrigues/projects/nimbus-code/specs/020-satellite-repo-governance/contracts) ✅  
 **Organização**: tarefas agrupadas por user story para permitir implementação incremental, validação independente e separação explícita entre governança permanente e bugfix operacional do bootstrap.
 
 ## Format: `[ID] [P?] [US?] Description with file path`
@@ -186,12 +186,12 @@ Executar uma revisão humana curta sobre os artefatos operacionais alterados par
 Confirmação documentada de que a regra está clara para um novo integrante do time sem precisar de explicação oral complementar.
 
 ## Critérios de Aceite
-- [ ] [AC-6] A regra “specs só no repo central” aparece explicitamente em [docs/developer-guide.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/docs/developer-guide.md)
-- [ ] [AC-6] A regra aparece de forma coerente em [docs/bounded-contexts.yaml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/docs/bounded-contexts.yaml)
-- [ ] [AC-6] O fluxo brownfield não incentiva `specs/` locais em [templates/BROWNFIELD-SETUP-CHECKLIST.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/templates/BROWNFIELD-SETUP-CHECKLIST.md)
+- [ ] [AC-6] A regra “specs só no repo central” aparece explicitamente em [docs/developer-guide.md](/Users/lrodrigues/projects/nimbus-code/docs/developer-guide.md)
+- [ ] [AC-6] A regra aparece de forma coerente em [docs/bounded-contexts.yaml](/Users/lrodrigues/projects/nimbus-code/docs/bounded-contexts.yaml)
+- [ ] [AC-6] O fluxo brownfield não incentiva `specs/` locais em [templates/BROWNFIELD-SETUP-CHECKLIST.md](/Users/lrodrigues/projects/nimbus-code/templates/BROWNFIELD-SETUP-CHECKLIST.md)
 
 ## Passos Operacionais
-1. Ler as seções alteradas de [docs/developer-guide.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/docs/developer-guide.md), [docs/bounded-contexts.yaml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/docs/bounded-contexts.yaml) e [templates/BROWNFIELD-SETUP-CHECKLIST.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/templates/BROWNFIELD-SETUP-CHECKLIST.md).
+1. Ler as seções alteradas de [docs/developer-guide.md](/Users/lrodrigues/projects/nimbus-code/docs/developer-guide.md), [docs/bounded-contexts.yaml](/Users/lrodrigues/projects/nimbus-code/docs/bounded-contexts.yaml) e [templates/BROWNFIELD-SETUP-CHECKLIST.md](/Users/lrodrigues/projects/nimbus-code/templates/BROWNFIELD-SETUP-CHECKLIST.md).
 2. Verificar se um novo integrante do time conseguiria responder, sem contexto adicional, onde vivem os artefatos de spec e o que um satélite deve ou não armazenar.
 3. Se houver ambiguidade, devolver feedback no PR ou abrir issue de ajuste antes do merge.
 
@@ -213,7 +213,7 @@ Humano: sim
 ### T035 — Validação humana final dos cenários da feature
 
 ## Contexto
-A feature altera governança e onboarding do bootstrap. Antes de concluir, é necessário executar um walkthrough final dos cenários definidos em [quickstart.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/specs/020-satellite-repo-governance/quickstart.md).
+A feature altera governança e onboarding do bootstrap. Antes de concluir, é necessário executar um walkthrough final dos cenários definidos em [quickstart.md](/Users/lrodrigues/projects/nimbus-code/specs/020-satellite-repo-governance/quickstart.md).
 
 ## Objetivo
 Confirmar que os cenários AC-1 a AC-7 permanecem coerentes entre spec, plan, quickstart, documentação e implementação.
@@ -229,7 +229,7 @@ Checklist final aprovado, com confirmação de que a feature pode seguir para im
 - [ ] [AC-7] O alinhamento satélite → bundle oficial por PR revisado está claro
 
 ## Passos Operacionais
-1. Abrir [quickstart.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/specs/020-satellite-repo-governance/quickstart.md).
+1. Abrir [quickstart.md](/Users/lrodrigues/projects/nimbus-code/specs/020-satellite-repo-governance/quickstart.md).
 2. Executar a leitura sequencial dos 6 cenários de validação.
 3. Conferir os arquivos referenciados em cada cenário.
 4. Registrar no PR qualquer divergência encontrada entre documentação, contrato e implementação.

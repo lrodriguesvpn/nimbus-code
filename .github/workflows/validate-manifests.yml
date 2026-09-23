@@ -8,7 +8,7 @@ name: Validate Manifests — Schema dos Componentes Nimbus-Code
 # compatibilidade com o specify CLI — problema identificado quando o campo
 # speckit_version foi renomeado para nimbus_code_version sem gate de CI.
 #
-# Instalar neste repositório (nimbus-code-spec-kit-template):
+# Instalar neste repositório (nimbus-code):
 #   Já instalado. Não copiar para repositórios de projeto — este gate é
 #   exclusivo do repositório de templates/presets.
 
@@ -171,7 +171,7 @@ jobs:
             silenciosamente, podendo causar incompatibilidades em runtime.
 
             > _Gate definido pelo workflow \`validate-manifests.yml\` do repositório
-            > \`nimbus-code-spec-kit-template\`._
+            > \`nimbus-code\`._
             `;
             await github.rest.issues.createComment({
               owner: context.repo.owner,

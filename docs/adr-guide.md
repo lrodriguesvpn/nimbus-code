@@ -8,7 +8,7 @@ escolhas a cada nova feature ou novo membro do time.
 
 | Escopo | Localização |
 |---|---|
-| **Organizacional** (afeta múltiplos projetos da Nimbus-Code) | `docs/adr/` neste repositório (`nimbus-code-spec-kit-template`) |
+| **Organizacional** (afeta múltiplos projetos da Nimbus-Code) | `docs/adr/` neste repositório (`nimbus-code`) |
 | **De projeto** (afeta só um repositório) | `docs/adr/` no repositório do projeto |
 
 Regra de decisão: se a decisão *puder* afetar um segundo projeto no futuro,

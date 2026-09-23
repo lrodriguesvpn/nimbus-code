@@ -15,11 +15,11 @@ The Teams interview path is roadmap-only and is not an edge in the MVP flow.
 
 ```mermaid
 graph LR
-  venha-pra-nuvem-nimbus-code-spec-kit-template["venha-pra-nuvem/nimbus-code-spec-kit-template"]
+  venha-pra-nuvem-nimbus-code["venha-pra-nuvem/nimbus-code"]
 ```
 
 ## Repositórios não analisados
 
 Os seguintes repositórios não puderam ser acessados (nem localmente, nem via `gh api`):
 
-- `venha-pra-nuvem/nimbus-code-spec-kit-template`
+- `venha-pra-nuvem/nimbus-code`

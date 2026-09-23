@@ -327,7 +327,7 @@ Project uses vpn-client-setup v2.0.5 (deprecated 2026-08-01, grace period 60 day
 
 **Dependency Chain**:
 ```
-nimbus-code-spec-kit-template (bootstrap)
+nimbus-code (bootstrap)
   ├─ References: skills.yaml schema from VPN-SKILLS
   ├─ CI/CD: Validates against VPN-SKILLS catalog
   └─ Initialization: vpn-skills init creates manifest

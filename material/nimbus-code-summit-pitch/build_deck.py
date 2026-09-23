@@ -4,7 +4,7 @@ editaveis (python-pptx ChartData), para uso em apresentacao institucional
 (ex.: Microsoft Summit).
 
 Dados reais extraidos ao vivo do repositorio
-venha-pra-nuvem/nimbus-code-spec-kit-template em 2026-08-20 (ver
+venha-pra-nuvem/nimbus-code em 2026-08-20 (ver
 nimbus-code-resumo-executivo.md para o detalhamento e fontes).
 """
 from pptx import Presentation
@@ -320,7 +320,7 @@ add_bg(s4, NAVY)
 add_text(s4, Inches(0.6), Inches(0.35), Inches(10), Inches(0.45),
           "PROVA REAL \u2014 DADOS DO PROJETO EM PRODU\u00c7\u00c3O", size=16, color=CYAN, bold=True)
 add_text(s4, Inches(0.6), Inches(0.72), Inches(11.5), Inches(0.5),
-          "N\u00fameros extra\u00eddos ao vivo do reposit\u00f3rio nimbus-code-spec-kit-template (2026-08-20)",
+          "N\u00fameros extra\u00eddos ao vivo do reposit\u00f3rio nimbus-code (2026-08-20)",
           size=13, color=LIGHT)
 
 # KPI callouts

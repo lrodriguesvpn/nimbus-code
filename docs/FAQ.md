@@ -16,7 +16,7 @@ texto ou tabela não garante fechamento automático.
 1. Regra de PR no time: toda issue implementada deve aparecer no corpo da PR com
    `Closes #<n>` (ou `Fixes #<n>`).
 2. Fallback automático: workflow
-   [close-referenced-issues-fallback.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/close-referenced-issues-fallback.yml)
+   [close-referenced-issues-fallback.yml](/Users/lrodrigues/projects/nimbus-code/.github/workflows/close-referenced-issues-fallback.yml)
    tenta fechar issues abertas referenciadas em PR mergeada quando o vínculo
    padrão falhar.
 
@@ -43,10 +43,10 @@ Regras obrigatórias:
 Use labels por PR (`release:major`, `release:minor`, `release:patch`,
 `release:skip`) e consolide na issue `Release Candidate: develop`, alimentada
 pelo workflow
-[release-impact-advisor.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/release-impact-advisor.yml).
+[release-impact-advisor.yml](/Users/lrodrigues/projects/nimbus-code/.github/workflows/release-impact-advisor.yml).
 
 Além disso, o gate
-[release-readiness-gate.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/release-readiness-gate.yml)
+[release-readiness-gate.yml](/Users/lrodrigues/projects/nimbus-code/.github/workflows/release-readiness-gate.yml)
 bloqueia PR para `develop` sem classificação correta de `release:*`, mas
 auto-rotula `release:skip` para mudanças só de documentação de release e
 `release:patch` quando a PR já altera arquivos versionados + `catalog.json`.
@@ -54,7 +54,7 @@ auto-rotula `release:skip` para mudanças só de documentação de release e
 ## O PR `develop` -> `main` pode ser automático com aprovador?
 
 Sim. O workflow
-[promote-develop-to-main.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/promote-develop-to-main.yml)
+[promote-develop-to-main.yml](/Users/lrodrigues/projects/nimbus-code/.github/workflows/promote-develop-to-main.yml)
 cria/atualiza esse PR e pede review para os aprovadores configurados nas vars:
 
 - `NIMBUS_MAIN_PR_REVIEWERS` (CSV de usuários)
@@ -63,13 +63,13 @@ cria/atualiza esse PR e pede review para os aprovadores configurados nas vars:
 ## A publicação da versão pode acontecer antes do merge em `main`?
 
 Não. A tag `vX.Y.Z` deve ser criada só depois do merge em `main`. O workflow
-[release.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/release.yml)
+[release.yml](/Users/lrodrigues/projects/nimbus-code/.github/workflows/release.yml)
 valida isso e falha se a tag não estiver em commit da `main`.
 
 ## Quem cria a tag agora?
 
 Após merge em `main`, o workflow
-[tag-release-on-main.yml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template/.github/workflows/tag-release-on-main.yml)
+[tag-release-on-main.yml](/Users/lrodrigues/projects/nimbus-code/.github/workflows/tag-release-on-main.yml)
 cria/pusha a tag automaticamente usando a versão definida em
 `bundles/nimbus-code-project-bundle/bundle.yml`. Se a tag já existir, ele não duplica.
 
@@ -85,7 +85,7 @@ Detalhamento completo em
 
 ```text
 Você está atualizando este projeto para a versão mais recente do bundle
-`nimbus-code-project-bundle` da Nimbus-Code (fonte: nimbus-code-spec-kit-template).
+`nimbus-code-project-bundle` da Nimbus-Code (fonte: nimbus-code).
 Siga este roteiro sem pular etapas:
 
 1. Diagnóstico
@@ -93,9 +93,9 @@ Siga este roteiro sem pular etapas:
      "Nimbus Code — Padrões Nimbus-Code") para descobrir as versões
      instaladas hoje (Nimbus Code CLI, bundle, preset, extensão, workflow).
    - Compare com a versão mais recente publicada nos catalog.json de
-     nimbus-code-spec-kit-template (registre os catálogos primeiro se ainda
+     nimbus-code (registre os catálogos primeiro se ainda
      não estiverem registrados, com os comandos da seção "Publicação e
-     Catálogo" do README de nimbus-code-spec-kit-template).
+     Catálogo" do README de nimbus-code).
    - Se a versão instalada já for a mais recente, pare aqui e informe — não
      há nada para atualizar.
 

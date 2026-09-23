@@ -1,5 +1,5 @@
 <!--
-  Este repositório (nimbus-code-spec-kit-template) gera presets para outros projetos, mas
+  Este repositório (nimbus-code) gera presets para outros projetos, mas
   também é, ele mesmo, um "projeto vivo" da VPN Dev — este é o primeiro artefato SDD
   dogfooded aqui, seguindo o próprio spec-template.md do preset vpndev-standards.
 -->
@@ -56,7 +56,7 @@ inteiros, docs de referência completos) mesmo quando uma feature anterior já
 resolveu um problema equivalente (ex.: padrão de correlation-id, CRUD padrão,
 outbox pattern). Isso aumenta o custo de tokens por tarefa sem necessidade,
 especialmente em tarefas S0/S1 (30–40% do volume, conforme
-[`ai-code-quality-and-observability.md`](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/branch-perdido-verificacao/docs/ai-code-quality-and-observability.md#6-seleção-de-modelo-por-complexidade-s0s4),
+[`ai-code-quality-and-observability.md`](/Users/lrodrigues/projects/nimbus-code.worktrees/branch-perdido-verificacao/docs/ai-code-quality-and-observability.md#6-seleção-de-modelo-por-complexidade-s0s4),
 seção 6) que não precisariam do contexto completo.
 
 ## Escopo (proposta a refinar no `/speckit-plan`, se aprovado)

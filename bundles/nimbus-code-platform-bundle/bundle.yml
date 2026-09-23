@@ -16,7 +16,7 @@ provides:
   presets:
     - id: "nimbus-code-platform-standards"
       version: "0.5.0"
-      source: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template"
+      source: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code"
       priority: 5
       strategy: "wrap"
 

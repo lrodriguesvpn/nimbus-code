@@ -2,7 +2,7 @@
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
 **Created**: 2026-08-20
-**Feature**: [spec.md](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/vpn-skills-repo-governance-specs/specs/009-codespaces-dev-planning/spec.md)
+**Feature**: [spec.md](/Users/lrodrigues/projects/nimbus-code.worktrees/vpn-skills-repo-governance-specs/specs/009-codespaces-dev-planning/spec.md)
 
 ## Content Quality
 

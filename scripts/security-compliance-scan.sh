@@ -388,7 +388,7 @@ build_issue_body() {
   deadline_days=$(issue_deadline_days_for_priority "$priority")
   due_date=$(date_plus_days_iso "$deadline_days")
   detected_at=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-  doc_repo="${GITHUB_REPOSITORY:-venha-pra-nuvem/nimbus-code-spec-kit-template}"
+  doc_repo="${GITHUB_REPOSITORY:-venha-pra-nuvem/nimbus-code}"
   doc_link="https://${GH_HOST}/${doc_repo}/blob/main/${DOC_REFERENCE_PATH}"
 
   if [[ "$control_id" == "platform-project-access" ]]; then

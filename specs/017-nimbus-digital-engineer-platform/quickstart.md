@@ -4,7 +4,7 @@
 Validar ponta a ponta o fluxo da plataforma Nimbus em modos governados, desde intake até handoff.
 
 ## Pré-requisitos
-- Acesso ao repositório de governança (`nimbus-code-spec-kit-template`)
+- Acesso ao repositório de governança (`nimbus-code`)
 - Ambiente com integrações de origem simuladas (M365/GitHub)
 - Política de classificação de modo configurada
 - Papel de aprovador habilitado para checkpoints

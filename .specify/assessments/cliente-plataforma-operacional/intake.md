@@ -71,8 +71,8 @@ O problema a ser investigado é como transformar o template atual em uma base op
 ### Restated
 
 Antes de decidir qualquer coisa nova, a empresa quer auditar o que já existe
-no template (spec [004-platform-cmdb-dsc-model](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/plataforma-assess-intake-improvements/specs/004-platform-cmdb-dsc-model/spec.md) e o módulo implementado
-[platform-governance/](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/plataforma-assess-intake-improvements/platform-governance) — CMDB via Terraform, baselines, schemas de banco em
+no template (spec [004-platform-cmdb-dsc-model](/Users/lrodrigues/projects/nimbus-code.worktrees/plataforma-assess-intake-improvements/specs/004-platform-cmdb-dsc-model/spec.md) e o módulo implementado
+[platform-governance/](/Users/lrodrigues/projects/nimbus-code.worktrees/plataforma-assess-intake-improvements/platform-governance) — CMDB via Terraform, baselines, schemas de banco em
 `platform-governance/db/migrations/`, DSC) e decidir, item a item, o que ainda
 faz sentido manter e o que não faz mais sentido, à luz de um novo dado
 operacional: existe um repositório real chamado "Nuvem365-nimbuscode-spec"
@@ -87,9 +87,9 @@ Cliente/Plataforma de cada cliente, e não disperso ou fora desse modelo.
 - **Raised by**: mesma origem do intake original (empresa de gestão de Cloud) — [NEEDS CLARIFICATION: área/papel responsável confirmado].
 - **Trigger**: necessidade de revisar o inventário de artefatos já suportados pelo template (CMDB, Terraform, baselines, schemas, DSC) antes de expandir o escopo, e de incorporar um repositório real de FinOps ("Nuvem365-nimbuscode-spec") ao modelo operacional.
 - **Existing context adicional identificado nesta rodada**:
-  - [004-platform-cmdb-dsc-model](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/plataforma-assess-intake-improvements/specs/004-platform-cmdb-dsc-model/spec.md) — spec formal já `Ready`, complexidade S4, cobre autenticação SSO, coleta multicloud, CMDB para IA, baselines M365, e modelo DSC versionado.
-  - [platform-governance/](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/plataforma-assess-intake-improvements/platform-governance) — implementação já existente com discovery (Azure/AWS/GCP), baseline engine, DSC profile composer/renderer, CMDB consolidation service, validação advisory de Terraform, migrations de banco (`001_initial.sql` a `004_dsc_profiles.sql`).
-  - [platform/baseline-registry.yaml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/plataforma-assess-intake-improvements/platform/baseline-registry.yaml), [platform/drift-policy.yaml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/plataforma-assess-intake-improvements/platform/drift-policy.yaml) e [platform/evidence-registry.yaml](/Users/lrodrigues/projects/nimbus-code-spec-kit-template.worktrees/plataforma-assess-intake-improvements/platform/evidence-registry.yaml) — registros de plataforma já presentes na raiz do template.
+  - [004-platform-cmdb-dsc-model](/Users/lrodrigues/projects/nimbus-code.worktrees/plataforma-assess-intake-improvements/specs/004-platform-cmdb-dsc-model/spec.md) — spec formal já `Ready`, complexidade S4, cobre autenticação SSO, coleta multicloud, CMDB para IA, baselines M365, e modelo DSC versionado.
+  - [platform-governance/](/Users/lrodrigues/projects/nimbus-code.worktrees/plataforma-assess-intake-improvements/platform-governance) — implementação já existente com discovery (Azure/AWS/GCP), baseline engine, DSC profile composer/renderer, CMDB consolidation service, validação advisory de Terraform, migrations de banco (`001_initial.sql` a `004_dsc_profiles.sql`).
+  - [platform/baseline-registry.yaml](/Users/lrodrigues/projects/nimbus-code.worktrees/plataforma-assess-intake-improvements/platform/baseline-registry.yaml), [platform/drift-policy.yaml](/Users/lrodrigues/projects/nimbus-code.worktrees/plataforma-assess-intake-improvements/platform/drift-policy.yaml) e [platform/evidence-registry.yaml](/Users/lrodrigues/projects/nimbus-code.worktrees/plataforma-assess-intake-improvements/platform/evidence-registry.yaml) — registros de plataforma já presentes na raiz do template.
   - Repositório **Nuvem365-nimbuscode-spec** (externo a este template) — apontado pelo usuário como o site de FinOps voltado a clientes; ainda não inspecionado nesta sessão. [NEEDS CLARIFICATION: localização/organização GHE, acesso e conteúdo atual desse repositório.]
 
 ### Idea Boundaries Captured (atualização desta rodada)

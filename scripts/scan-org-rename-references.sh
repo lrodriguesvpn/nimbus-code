@@ -4,7 +4,7 @@ set -euo pipefail
 
 ORG="${ORG:-venha-pra-nuvem}"
 OLD_SLUG="${OLD_SLUG:-speckit-nimbus-code-standards}"
-NEW_SLUG="${NEW_SLUG:-nimbus-code-spec-kit-template}"
+NEW_SLUG="${NEW_SLUG:-nimbus-code}"
 GH_HOST="${GH_HOST:-venha-pra-nuvem.ghe.com}"
 MODE="${MODE:-}"
 OUTPUT="${OUTPUT:-}"

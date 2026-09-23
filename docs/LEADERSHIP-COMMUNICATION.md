@@ -78,7 +78,7 @@ nimbus-code-project-bundle v1.0.0
 
 **Bootstrap automático:**
 ```bash
-curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bootstrap.sh | bash
+curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/raw/main/bootstrap.sh | bash
 ```
 
 **Resultado:** projeto pronto em ~15 min (antes: 3-4 dias)
@@ -243,7 +243,7 @@ Projeção Anual (40 devs, 5 features/semana):
 ## 🔗 RECURSOS
 
 **Bundle repo:**
-https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template
+https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code
 
 **Docs principais:**
 - Developer Guide: `docs/developer-guide.md`

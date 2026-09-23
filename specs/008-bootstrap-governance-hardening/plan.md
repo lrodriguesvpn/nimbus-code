@@ -14,18 +14,18 @@ não comprovam atualização/reinstalação correta de versões de preset.
 
 - **Divergência de classificação:** este plano registra S3 com revisão obrigatória
   de segurança, enquanto
-  [#451](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/451)
+  [#451](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/451)
   solicita revisão S4. A classificação precisa de ratificação humana; nenhuma
   delas foi alterada ou aprovada neste saneamento. A alegação "19/19 Bats" da
   issue não foi reproduzida nesta auditoria.
 - **Pendências abertas consultadas:**
-  [#433](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/433)
+  [#433](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/433)
   (verificar App existente e piloto),
-  [#103/T022](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/103)
+  [#103/T022](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/103)
   (piloto com/sem secrets),
-  [#107/T026](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/107)
+  [#107/T026](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/107)
   (teste com desenvolvedor) e
-  [#111/T030](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/issues/111)
+  [#111/T030](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/issues/111)
   (aprovação humana). T005/T006 continuam dependendo da confirmação do App e
   dos secrets; o fechamento de #72 não comprova essa configuração, pois seu
   último comentário relata fechamento incorreto e ausência de App/secrets

@@ -453,7 +453,7 @@ normal, nunca commit direto):
 
 1. **Conteúdo Nimbus-Code** (agentes NC-*, presets, workflows, docs deste
    bundle) — vem do repositório
-   [`nimbus-code`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code) (anteriormente `nimbus-code-spec-kit-template`):
+   [`nimbus-code`](https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code) (anteriormente `nimbus-code`):
    ```bash
    bash /caminho/do/bundle/bootstrap.sh \
      --local /caminho/do/bundle --refresh-preset --repo-type dev_standards

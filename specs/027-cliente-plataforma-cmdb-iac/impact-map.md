@@ -50,7 +50,7 @@
 
 | Fase | Escopo | Repositório |
 |---|---|---|
-| Fase 1 (esta feature) | Modelo de dados de referência + lógica de decisão + ADR | `nimbus-code-spec-kit-template` (este) |
+| Fase 1 (esta feature) | Modelo de dados de referência + lógica de decisão + ADR | `nimbus-code` (este) |
 | Fase 2 (fora desta sessão) | Aplicação do modelo em `venha-pra-nuvem-client-platform` (migração do cliente GSN Premium existente) | `venha-pra-nuvem-client-platform` |
 | Fase 3 (fora desta sessão) | Onboarding do segundo cliente piloto de Managed Services | Novo repo de instância (a criar) |
 | Fase 4 (fora desta sessão) | Medição de baseline (FR-009) e consolidação de SC-001 a SC-005 | `venha-pra-nuvem-client-platform` + segundo cliente |

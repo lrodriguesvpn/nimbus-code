@@ -184,7 +184,7 @@ plataforma — GitHub, Microsoft 365, Azure, Google Workspace, GCP) estão em
 ## Como um projeto novo já nasce com isso
 
 ```bash
-curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bootstrap.sh | bash
+curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/raw/main/bootstrap.sh | bash
 ```
 
 Isso executa `specify init` (se ainda nao inicializado), exige a selecao explicita do tipo de repositorio (`platform` ou `dev_standards`) e instala preset + extensao + workflow na versao publicada mais recente da branch `main`.
@@ -207,7 +207,7 @@ facilitar validação humana e alinhamento com a [quickstart](specs/020-satellit
 **Alternativa mais robusta para troubleshooting, VPN/proxy ou shell com pipe restrito:**
 
 ```bash
-curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bootstrap.sh \
+curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/raw/main/bootstrap.sh \
   -o /tmp/nimbus-bootstrap.sh
 bash /tmp/nimbus-bootstrap.sh
 ```
@@ -382,7 +382,7 @@ coding agent quando `agent:autonomous-ok` é aplicado), `promote-develop-to-main
 `bootstrap.sh`, copie o checklist para o seu `.specify/`:
 
 ```bash
-curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/templates/BROWNFIELD-SETUP-CHECKLIST.md \
+curl -fsSL https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/raw/main/templates/BROWNFIELD-SETUP-CHECKLIST.md \
   > .specify/BROWNFIELD-SETUP-CHECKLIST.md
 git add .specify/BROWNFIELD-SETUP-CHECKLIST.md
 ```
@@ -441,19 +441,19 @@ Para registrar os catálogos uma vez por projeto (ou uma vez por máquina, em
 
 ```bash
 specify preset catalog add \
-  https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/presets/catalog.json \
+  https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/raw/main/presets/catalog.json \
   --name nimbus-code --priority 5 --install-allowed
 
 specify extension catalog add \
-  https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/extensions/catalog.json \
+  https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/raw/main/extensions/catalog.json \
   --name nimbus-code --install-allowed
 
 specify workflow catalog add \
-  https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/workflows/catalog.json \
+  https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/raw/main/workflows/catalog.json \
   --name nimbus-code
 
 specify bundle catalog add \
-  https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/raw/main/bundles/catalog.json \
+  https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/raw/main/bundles/catalog.json \
   --id nimbus-code --priority 5 --policy install-allowed
 ```
 
@@ -492,7 +492,7 @@ deles instalado pelo bundle hoje.
 ## Estrutura
 
 ```text
-nimbus-code-spec-kit-template/
+nimbus-code/
 ├── presets/nimbus-code-standards/           # preset.yml + templates/
 ├── extensions/nimbus-code-backlog-sync/     # extension.yml + commands/
 ├── workflows/nimbus-code-full-cycle/        # workflow.yml

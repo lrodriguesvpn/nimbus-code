@@ -116,7 +116,7 @@ docs/
 dependem da GHE API real (sub-issues, Issue Types, Projects v2). A API não é
 mockável de forma confiável em CI sem um servidor GHE de teste dedicado —
 indisponível para esta fase. Todos os cenários serão validados manualmente
-contra o repo `venha-pra-nuvem/nimbus-code-spec-kit-template`.
+contra o repo `venha-pra-nuvem/nimbus-code`.
 
 ---
 

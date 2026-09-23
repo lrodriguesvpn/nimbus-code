@@ -112,7 +112,7 @@ sequenceDiagram
     participant Boot as bootstrap.sh
     participant Cat as Catálogos (presets/extensions/workflows/bundles)
     participant CLI as specify CLI
-    participant Repo as nimbus-code-spec-kit-template
+    participant Repo as nimbus-code
 
     Dev->>Boot: curl bootstrap.sh | bash
     Boot->>CLI: specify init (se necessário)

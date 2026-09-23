@@ -181,7 +181,7 @@ externals:
 
   - id: "nimbus-docs"
     name: "Nimbus-Code Documentation"
-    url: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template/tree/main/docs"
+    url: "https://venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code/tree/main/docs"
     type: "reference"
     description: "Architecture decision records, module graphs guide, label taxonomy"
     owner: "Dev Platform"
