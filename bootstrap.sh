@@ -927,8 +927,13 @@ if [[ "$BOOTSTRAP_MODE" != "refresh" && "$REPO_TYPE" == "dev_standards" ]]; then
     specify extension add --dev "$LOCAL_PATH/extensions/nimbus-code-backlog-sync"
 
   echo "-> Installing extension cost (spec-kit-cost)..."
-  install_component extension cost "extension cost (spec-kit-cost)" \
-    specify extension add cost
+  if ! component_is_installed extension cost; then
+    (printf "y\n" | specify extension add cost --from https://github.com/Quratulain-bilal/spec-kit-cost/archive/refs/tags/v1.0.0.tar.gz) || \
+    install_component extension cost "extension cost (spec-kit-cost)" \
+      specify extension add cost
+  else
+    echo "  INFO: extension cost already installed; leaving existing installation unchanged."
+  fi
 
   echo "-> Installing extension bug (Bug Triage Workflow)..."
   install_component extension bug "extension bug" \
