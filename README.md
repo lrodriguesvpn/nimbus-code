@@ -48,7 +48,7 @@ O Lite permite validar o metodo com independencia. O Enterprise acrescenta o
 acompanhamento profissional para transformar essa validacao em capacidade de
 entrega sustentavel.
 
-## Cresca com a Sanfona de Dev
+## Cresca com o Nimbus Code - Scale Delivery
 
 O caminho foi desenhado para a sua empresa evoluir sem perder o que ja
 aprendeu:
@@ -56,9 +56,9 @@ aprendeu:
 1. **Comece com o Lite** para experimentar o metodo no seu proprio ritmo.
 2. **Evolua para o Enterprise** quando precisar de uma operacao de engenharia
    mais estruturada.
-3. **Acione a Sanfona de Dev da Venha Pra Nuvem** quando o desafio pedir mais
-   capacidade: especialistas podem reforcar temporariamente seu time em
-   projetos, etapas ou entregas de maior complexidade.
+3. **Acione o Nimbus Code - Scale Delivery da Venha Pra Nuvem** quando o
+   desafio pedir mais capacidade: especialistas podem reforcar temporariamente
+   seu time em projetos, etapas ou entregas de maior complexidade.
 
 A Venha Pra Nuvem atua como extensao do seu time, ajustando a capacidade de
 engenharia ao momento do negocio e preservando a continuidade do metodo Nimbus
@@ -109,7 +109,7 @@ a entrega e transformar o plano em tarefas verificaveis.
 
 Quando a necessidade evoluir, a **Venha Pra Nuvem** pode apoiar desde a
 adocao do Nimbus Code Enterprise ate a expansao temporaria da capacidade do
-seu time pela Sanfona de Dev.
+seu time pelo Nimbus Code - Scale Delivery.
 
 **[Conheca a Venha Pra Nuvem](https://venhapranuvem.com.br)** ·
 **[Fale com o time](mailto:contato@venhapranuvem.com.br)**
