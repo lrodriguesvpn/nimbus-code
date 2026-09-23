@@ -36,12 +36,14 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand('nimbus.openSquad', async () => {
       const option = await vscode.window.showQuickPick([
-        { label: '🚀 Orquestrador do Squad', detail: 'Chamar @nimbus para triagem (Bug/Fix, Nova Spec, Ideação)', query: '@nimbus orquestrar projeto' },
-        { label: '📋 Criar Nova Especificação', detail: 'Executar /nc-spec (SMART + BDD)', query: '@nimbus /nc-spec ' },
-        { label: '📐 Planejar Arquitetura Técnica', detail: 'Executar /nc-arch (ADRs + Grafos de Dependência)', query: '@nimbus /nc-arch ' },
-        { label: '🧪 Gerar Estratégia de Testes', detail: 'Executar /nc-qa (Estratégia de QA e tasks.md [P])', query: '@nimbus /nc-qa ' },
-        { label: '🛠️ Executar Implementação Autônoma', detail: 'Executar /nc-builder (Implementar tasks.md sob isolamento)', query: '@nimbus /nc-builder ' },
-        { label: '🛡️ Auditar Segurança & DevSecOps', detail: 'Executar /nc-shield (Controles não-negociáveis e TLS)', query: '@nimbus /nc-shield ' },
+        { label: '🚀 Orquestrador do Squad', detail: 'Chamar @nimbus para triagem geral (Bug/Fix, Nova Spec, Ideação)', query: '@nimbus conduzir processo de engenharia' },
+        { label: '💡 Ideação & Validação de Hipótese', detail: 'Executar ciclo de assessment (/nc-assess-intake, /nc-assess-shape, /nc-assess-decide)', command: 'nimbus.ideation' },
+        { label: '🐛 Triagem e Correção de Bug', detail: 'Executar fluxo de Bug/Fix (/nc-bug-assess, /nc-bug-fix, /nc-bug-test)', command: 'nimbus.bugFix' },
+        { label: '📋 Criar Nova Especificação', detail: 'Executar /nc-spec (SMART + BDD)', command: 'nimbus.newSpec' },
+        { label: '📐 Planejar Arquitetura Técnica', detail: 'Executar /nc-arch (ADRs + Grafos de Dependência)', command: 'nimbus.planArchitecture' },
+        { label: '🧪 Gerar Estratégia de Testes', detail: 'Executar /nc-qa (Estratégia de QA e tasks.md [P])', command: 'nimbus.generateTasks' },
+        { label: '🛠️ Executar Implementação Autônoma', detail: 'Executar /nc-builder (Implementar tasks.md sob isolamento)', command: 'nimbus.implementFeature' },
+        { label: '🛡️ Auditar Segurança & DevSecOps', detail: 'Executar /nc-shield (Controles não-negociáveis, TLS e segredos)', command: 'nimbus.auditSecurity' },
         { label: '🔍 Verificar Status e Licença', detail: 'Checar modo DevX / Enterprise da VPN', command: 'nimbus.verifyHealth' }
       ], {
         placeHolder: 'Selecione uma ação do Squad Nimbus Code:'
@@ -53,6 +55,34 @@ export function activate(context: vscode.ExtensionContext) {
         } else if (option.query) {
           await triggerChatOrPrompt(option.query);
         }
+      }
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('nimbus.ideation', async () => {
+      const idea = await vscode.window.showInputBox({
+        prompt: 'Descreva a ideia bruta ou hipótese a ser validada:',
+        placeHolder: 'ex: Permitir login sem senha via Magic Link'
+      });
+      if (idea) {
+        await triggerChatOrPrompt(`@nimbus /nc-assess-intake Validar e estruturar a seguinte ideia: ${idea}`);
+      } else {
+        await triggerChatOrPrompt('@nimbus iniciar ciclo de ideação e assessment');
+      }
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('nimbus.bugFix', async () => {
+      const bugDesc = await vscode.window.showInputBox({
+        prompt: 'Descreva o comportamento inesperado ou cole o link/texto do bug:',
+        placeHolder: 'ex: Erro 500 ao tentar renovar token JWT expirado'
+      });
+      if (bugDesc) {
+        await triggerChatOrPrompt(`@nimbus /nc-bug-assess Avaliar e propor remediação para o bug: ${bugDesc}`);
+      } else {
+        await triggerChatOrPrompt('@nimbus iniciar triagem de bug');
       }
     })
   );
@@ -84,6 +114,12 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand('nimbus.implementFeature', async () => {
       await triggerChatOrPrompt('@nimbus /nc-builder Executar implementação autônoma das tasks em tasks.md');
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('nimbus.auditSecurity', async () => {
+      await triggerChatOrPrompt('@nimbus /nc-shield Auditar segurança, segredos e conformidade DevSecOps');
     })
   );
 
