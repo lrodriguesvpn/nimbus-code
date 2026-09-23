@@ -1,35 +1,22 @@
-# Nimbus Code Lite
+# Nimbus Code (Core Framework & Platform)
 
-## Engenharia de software orientada por IA, na IDE agentica que o seu time ja usa
+> ⚠️ **Propriedade Intelectual & Licenciamento — Venha Pra Nuvem (VPN)**
+> Este repositório central (`nimbus-code`) é a fonte canônica do **Nimbus Code Framework**.
+> Ele contém o core proprietário da VPN (presets institucionais, 15 agentes especialistas `nc-*`, harness de engenharia e catálogo de reuso).
+> Os adaptadores de cliente (`clients/vscode`, `clients/mcp-server`) são distribuídos publicamente sob licença **BSL 1.1** (Source-Available / Avaliação Livre e Produção via Licença VPN).
+> Qualquer alteração exige aprovação do `@nimbus-code-arch-board` via Pull Request (ver [`.github/CODEOWNERS`](.github/CODEOWNERS)).
 
-O **Nimbus Code Lite** e a porta de entrada publica para uma engenharia de software
-mais previsivel com IA: da ideia a especificacao, plano, tarefas, implementacao e
-validacao. Ele funciona de forma **agnostica de IDE agentica**, para que cada time
-adote o mesmo metodo sem abandonar a ferramenta em que ja e produtivo.
+Repositório central do **NIMBUS CODE™ AI Delivery System** para engine do framework,
+presets corporativos, orquestração multi-IDE (`@nimbus`), adaptadores de clientes e infraestrutura de governança.
 
-**Compatibilidade atual:** VS Code com GitHub Copilot, Antigravity, Claude Code,
-Cursor AI e Kiro. A arquitetura tambem permite integracoes via MCP para ampliar os
-ambientes suportados sem prender o cliente a um unico fornecedor de IA.
+## Arquitetura de Camadas do NIMBUS CODE
 
-> O Lite pode ser usado para avaliacao, aprendizado e adocao inicial. Organizações
-> que precisam de governanca e aceleracao em escala podem contratar o **Nimbus Code
-> Enterprise** com a [Venha Pra Nuvem](https://venhapranuvem.com.br).
-
-## Duas ofertas, um metodo de engenharia
-
-| Oferta | Para quem | O que entrega |
+| Camada | Diretório / Módulo | Visibilidade & Licença | Descrição |
 |---|---|---|---|
-| **Nimbus Code Lite** | Desenvolvedores e times que querem experimentar e padronizar o ciclo SDD | Estrutura base para especificacao, planejamento, tarefas e triagem assistida, com liberdade para usar a IDE agentica de preferencia. |
-| **Nimbus Code Enterprise** | Empresas que precisam acelerar entregas com acompanhamento especializado | Framework completo operado com a VPN, governanca corporativa, capacidades avancadas para ambientes Brownfield e apoio elastico de especialistas. |
-
-## Por que adotar
-
-- **Escolha a IDE, preserve o metodo:** use VS Code, Antigravity, Claude Code,
-  Cursor AI ou Kiro sem fragmentar a forma de planejar e entregar software.
-- **Comece pequeno, evolua com seguranca:** valide o modelo com o Lite e evolua
-  para a oferta Enterprise quando a operacao exigir escala e suporte especializado.
-- **IA a servico do resultado:** o framework organiza a colaboracao entre pessoas,
-  agentes e governanca para reduzir retrabalho e aumentar previsibilidade.
+| **Core Framework** | `presets/`, `scripts/`, `specs/`, `templates/`, `bootstrap.sh` | **Privado VPN** (Proprietário) | Presets corporativos, personas `nc-*`, regras S0–S4, SHA-256 e harness. |
+| **Clients / Multi-IDE** | `extensions/vscode/`, `servers/mcp-nimbus/` | **Público / BSL 1.1** | Extensão VS Code/Cursor e Servidor MCP universal (Claude Code, Cursor, AGY). |
+| **Cloud & Entitlement** | `infrastructure/nimbus-code-extension-iac/` | **Privado VPN** (Azure) | IaC Terraform (Container Apps, Storage WORM 5y, Key Vault, PostgreSQL). |
+| **Documentação** | `docs/` | **Público / Governança** | Manuais de onboarding, guias do desenvolvedor e FAQ da BSL 1.1. |
 
 ## Modelo Operacional: "Sanfona de Dev" e BYO-LLM
 
