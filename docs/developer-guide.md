@@ -1613,6 +1613,24 @@ Para entender como o Nimbus Code se posiciona em relação a outros frameworks e
 
 - [GSD Core vs. Nimbus Code](comparisons/gsd-core-vs-nimbus-code.md): Comparação aprofundada de foco operacional (Context Engineering e ciclos de terminal vs. Governança Corporativa Full-Cycle, RACI, DORA, DevSecOps e FinOps).
 - [Understand-Anything vs. Nimbus Harvest & Catálogo de Reuso](comparisons/understand-anything-vs-nimbus-harvest.md): Comparação de propósitos (Visualização/navegação interativa de AST para onboarding humano vs. Mineração on-demand de componentes e assinaturas sem segredos para governança de IA e economia de tokens).
+
+---
+
+## 8. Distribuição Dual-Package (Open Core vs. Enterprise VPN)
+
+O Nimbus Code opera em um modelo de distribuição Dual-Package (Open-Core / Source-Available sob licença BSL 1.1 para a comunidade e Distribuição Completa Privada para a Venha Pra Nuvem e clientes Enterprise):
+
+| Dimensão | Nimbus Code Community (Extensão Pública) | Nimbus Code Enterprise (VPN Monorepo) |
+|---|---|---|
+| **Repositório** | Público no GitHub (`venha-pra-nuvem/nimbus-code-extension` / `github.com/lrodriguesvpn/nimbus-code`) | Privado no GHE VPN (`venha-pra-nuvem.ghe.com/venha-pra-nuvem/nimbus-code-spec-kit-template`) |
+| **Licença** | BSL 1.1 (Business Source License) | Proprietária Enterprise Venha Pra Nuvem |
+| **Squad de Agentes** | Orquestrador `@nimbus` + 18 Papéis via Skills base do Spec Kit | 18 Agentes Nativos dedicados com RACI, Prompts Especializados e Guardrails |
+| **Harness Corporativo** | Não incluso | Catálogo centralizado de prevenção de falhas (`docs/harness/`) |
+| **Harvest & Reuso** | Não incluso | Mineração contínua de código legado Brownfield (`docs/reuse-catalog.yaml`) |
+| **Auto-detecção** | Inicialização comunitária (`constitution.md` + templates SMART/BDD) | Detecta conexão com GHE VPN e aciona bootstrap completo via terminal |
+| **Telemetria de Adoção** | Registro de usuário, empresa, repositório e ambiente na inicialização | Governança corporativa completa com métricas DORA e FinOps de tokens |
+| **Sanfona de Dev** | Não inclusa (Self-service pelo desenvolvedor) | Suporte e expansão de capacidade sob demanda pela Venha Pra Nuvem |
+
 - [Impeccable & Claude Design vs. Nimbus Code (`/nc-designer`)](comparisons/impeccable-and-claude-design-vs-nimbus-code.md): Comparação entre o pacote multi-agente `impeccable`, a skill nativa `frontend-design` da Anthropic e a skill institucional `/nc-designer` criada para internalizar julgamento estético de UI sem dependência de ferramentas externas.
 - [Oportunidades de uso do TypeSafe/Jev no Nimbus Code](comparisons/typesafe-jev-oportunidades-nimbus-code.md): Mapeamento de onde o skill `typesafe-ai` (modelo **Jev**, julgamentos tipados de baixo custo — roteamento, classificação, verificação) reduz custo na camada de decisão dos agentes `/nc-*`, com a ressalva de que o Jev **não gera código** e não substitui o Copilot como motor de implementação. Ver [ADR 0010](adr/0010-adocao-experimental-typesafe-jev-para-julgamentos-tipados.md).
 
