@@ -43,10 +43,10 @@ jobs:
       - name: Compile Extension & MCP Server
         run: |
           echo "📦 Compilando Extensão VS Code..."
-          cd extensions/vscode && npm install && npm run compile
+          cd extensions/vscode && npm ci && npm run compile
           cd ../..
           echo "🔌 Compilando Servidor MCP..."
-          cd servers/mcp-nimbus && npm install && npm run build
+          cd servers/mcp-nimbus && npm ci && npm run build
           cd ../..
 
       - name: Set Target Branch
