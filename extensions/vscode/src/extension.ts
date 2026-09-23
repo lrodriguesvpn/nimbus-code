@@ -13,7 +13,9 @@ export function activate(context: vscode.ExtensionContext) {
     outputChannel.appendLine('[Nimbus Code] Executando em modo LOCAL IRRESTRITO (Teste & DevX ativo).');
   }
 
-  // Função auxiliar para enviar telemetria/registro de inicialização pública para auditoria e CRM
+  // Função auxiliar para enviar telemetria/registro de inicialização pública.
+  // Só é chamada após consentimento explícito do usuário (ver requestTelemetryConsent).
+  // Nenhum dado é enviado sem que `nimbus.telemetry.enabled` esteja habilitado.
   async function registerCommunityTelemetry(workspaceName: string, remoteUrl: string, userEmail?: string, userName?: string, company?: string) {
     const payload = {
       timestamp: new Date().toISOString(),
@@ -61,6 +63,33 @@ export function activate(context: vscode.ExtensionContext) {
     } catch {
       // Falha silenciosa para não bloquear o desenvolvedor
     }
+  }
+
+  // Solicita consentimento explícito antes de qualquer envio de telemetria com dados pessoais.
+  // Retorna true apenas se o usuário aceitar E a configuração permitir (opt-in).
+  // Conformidade LGPD: sem consentimento explícito, nada é transmitido.
+  async function requestTelemetryConsent(): Promise<boolean> {
+    const cfg = vscode.workspace.getConfiguration('nimbus');
+    const enabled = cfg.get<boolean>('telemetry.enabled', false);
+
+    if (!enabled) {
+      outputChannel.appendLine('[Nimbus Code Telemetry] Telemetria desabilitada (nimbus.telemetry.enabled=false). Nenhum dado enviado.');
+      return false;
+    }
+
+    const choice = await vscode.window.showInformationMessage(
+      'O Nimbus Code Community pode registrar dados de inicialização (nome de usuário, e-mail e empresa informados, hostname e plataforma) para suporte da comunidade. Deseja autorizar este envio único?',
+      { modal: true },
+      'Autorizar envio',
+      'Não enviar'
+    );
+
+    if (choice === 'Autorizar envio') {
+      return true;
+    }
+
+    outputChannel.appendLine('[Nimbus Code Telemetry] Usuário não autorizou o envio. Registro mantido apenas local.');
+    return false;
   }
 
   // 0. Status Bar Item (Indicador visual sempre visível e clicável)
@@ -209,21 +238,9 @@ export function activate(context: vscode.ExtensionContext) {
         const rootFolder = vscode.workspace.workspaceFolders![0];
         const rootUri = rootFolder.uri;
         const constitutionUri = vscode.Uri.joinPath(rootUri, 'constitution.md');
-        const specifyDirUri = vscode.Uri.joinPath(rootUri, '.specify');
         const templatesDirUri = vscode.Uri.joinPath(rootUri, '.specify', 'templates');
 
         try {
-          // Solicitar opcionalmente dados para registro e suporte personalizado
-          const userEmail = await vscode.window.showInputBox({
-            prompt: 'Opcional: Informe seu email corporativo para suporte da comunidade e atualizações:',
-            placeHolder: 'seu-email@empresa.com'
-          });
-
-          const userCompany = await vscode.window.showInputBox({
-            prompt: 'Opcional: Nome da sua empresa/organização:',
-            placeHolder: 'Empresa / Time'
-          });
-
           await vscode.workspace.fs.createDirectory(templatesDirUri);
 
           const defaultConstitution = `# Constituição do Projeto (Nimbus Code Community Edition)\n\n## Princípios Não-Negociáveis\n1. **Especificação Antes do Código**: Crie spec.md e plan.md antes de implementar.\n2. **TDD**: Testes automatizados obrigatórios.\n3. **Segurança**: Jamais comite credenciais ou segredos.\n4. **Isolamento**: Altere somente arquivos do escopo da tarefa.\n`;
@@ -232,14 +249,27 @@ export function activate(context: vscode.ExtensionContext) {
           const defaultSpec = `# Feature Specification: [Nome]\n\n**Slug:** \`[slug]\`\n\n## 1. Visão Geral\n[Descrição]\n\n## 2. Requisitos SMART\n- **S/M/A/R/T:** [Critérios]\n\n## 3. Cenários BDD\n- **Dado** ... **Quando** ... **Então** ...\n`;
           await vscode.workspace.fs.writeFile(vscode.Uri.joinPath(templatesDirUri, 'spec-template.md'), Buffer.from(defaultSpec, 'utf8'));
 
-          // Enviar telemetria para registro do usuário/empresa
-          await registerCommunityTelemetry(
-            rootFolder.name,
-            envCheck.remoteUrl || '',
-            userEmail,
-            undefined,
-            userCompany
-          );
+          // Telemetria opcional: apenas com opt-in de configuração + consentimento explícito.
+          const consentGranted = await requestTelemetryConsent();
+          if (consentGranted) {
+            const userEmail = await vscode.window.showInputBox({
+              prompt: 'Opcional: Informe seu email corporativo para suporte da comunidade e atualizações:',
+              placeHolder: 'seu-email@empresa.com'
+            });
+
+            const userCompany = await vscode.window.showInputBox({
+              prompt: 'Opcional: Nome da sua empresa/organização:',
+              placeHolder: 'Empresa / Time'
+            });
+
+            await registerCommunityTelemetry(
+              rootFolder.name,
+              envCheck.remoteUrl || '',
+              userEmail,
+              undefined,
+              userCompany
+            );
+          }
 
           vscode.window.showInformationMessage('✅ Workspace inicializado com sucesso no modo Nimbus Code Community! Use o Copilot Chat para interagir com o @nimbus.');
         } catch (err: any) {
@@ -362,4 +392,3 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {}
-
