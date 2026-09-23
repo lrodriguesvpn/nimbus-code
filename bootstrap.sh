@@ -927,7 +927,7 @@ if [[ "$BOOTSTRAP_MODE" != "refresh" && "$REPO_TYPE" == "dev_standards" ]]; then
 
   echo "-> Installing extension cost (spec-kit-cost)..."
   install_component extension cost "extension cost (spec-kit-cost)" \
-    specify extension install cost --version ">=1.0.0"
+    specify extension add cost
 
   echo "-> Installing extension bug (Bug Triage Workflow)..."
   install_component extension bug "extension bug" \
