@@ -72,7 +72,7 @@ jobs:
               r"venha-pra-nuvem\.ghe\.com|"
               r"ca-nimbus-code-entitlement-api|"
               r"api\.venhapranuvem\.com\.br|"
-              r"(?i:harvest|harness corporativo|18 agentes|"
+              r"(?i:harvest (de codigo|& ingestao)|harness corporativo|18 agentes|"
               r"uso interno exclusivo|inteligência vpn dev)"
           )
           for relative_path in sorted(files):
