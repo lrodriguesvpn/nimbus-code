@@ -1,0 +1,103 @@
+name: CodeQL — SAST
+
+# SAST com GitHub CodeQL (docs/security-baseline-ghe.md, seção 12).
+#
+# - Executa em Pull Requests para main/release/**/hotfix/**, em push na branch
+#   padrão, na merge queue e semanalmente (segunda-feira, 03:30 BRT).
+# - Linguagens vêm de .github/security-governance.json (codeql.languages) —
+#   extensível por repositório. Neste repositório: `actions` (workflows) e
+#   `python` (scripts/*.py). Shell não é suportado pelo CodeQL.
+# - Resultados publicados no Code Scanning (requer GitHub Advanced Security /
+#   GitHub Code Security habilitado — pré-requisito de plano/licença). Sem o
+#   recurso habilitado o upload FALHA: a ausência não é mascarada.
+# - Bloqueio high/critical: o check "CodeQL" criado pelo Code Scanning falha
+#   quando o PR introduz alerta com security severity >= limite configurado em
+#   Settings → Code security → Code scanning → "Check runs failure threshold"
+#   (política: High or higher) e/ou pela regra "Require code scanning results"
+#   do Ruleset. Exceções: dismiss do alerta com justificativa + Exception
+#   Record em .github/security-exceptions.json (seção 15).
+#
+# Nomes estáveis de check: "codeql-analyze (<linguagem>)" e "CodeQL".
+
+on:
+  pull_request:
+    branches: ["main", "release/**", "hotfix/**"]
+  push:
+    branches: ["main"]
+  merge_group: {}
+  schedule:
+    - cron: "30 6 * * 1" # toda segunda-feira, 03:30 BRT
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  languages:
+    name: codeql-languages
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.resolve.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Resolver linguagens declaradas
+        id: resolve
+        run: |
+          set -euo pipefail
+          config=".github/security-governance.json"
+          matrix="$(jq -c '.codeql.languages // [] | map(select(type == "string" and length > 0))' "$config")"
+          if [ "$matrix" = "[]" ]; then
+            echo "::error::codeql.languages vazio em ${config} — declare ao menos uma linguagem suportada pelo CodeQL."
+            exit 1
+          fi
+          echo "matrix=${matrix}" >> "$GITHUB_OUTPUT"
+          echo "Linguagens CodeQL: ${matrix}"
+
+  analyze:
+    name: codeql-analyze (${{ matrix.language }})
+    needs: languages
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ${{ fromJSON(needs.languages.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Resolver build mode
+        id: mode
+        env:
+          LANGUAGE: ${{ matrix.language }}
+        run: |
+          set -euo pipefail
+          mode="$(jq -r --arg l "$LANGUAGE" '.codeql.build_modes[$l] // "none"' .github/security-governance.json)"
+          echo "build_mode=${mode}" >> "$GITHUB_OUTPUT"
+
+      - name: Inicializar CodeQL
+        uses: github/codeql-action/init@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4.38.1
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ steps.mode.outputs.build_mode }}
+          queries: security-extended
+
+      - name: Analisar e publicar no Code Scanning
+        uses: github/codeql-action/analyze@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4.38.1
+        with:
+          category: "/language:${{ matrix.language }}"

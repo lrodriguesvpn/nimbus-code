@@ -1,0 +1,181 @@
+name: PR Quality Gates — Build, Testes, Cobertura e Governança
+
+# Publica os checks obrigatórios de Pull Request com nomes de job ESTÁVEIS
+# (usados como "required status checks" em Rulesets/branch protection — ver
+# docs/security-baseline-ghe.md, seções 9 e 10):
+#
+#   governance-config  valida .github/security-governance.json, exceções,
+#                      pinagem de Actions e configs de SCA
+#   build              comando declarado em quality_gates.build
+#   unit-tests         comando declarado em quality_gates.unit_tests
+#   integration-tests  comando declarado em quality_gates.integration_tests
+#   coverage           gate de cobertura (scripts/coverage-gate.py) quando
+#                      coverage.mode=report
+#
+# Extensível por linguagem: cada repositório de projeto copia este workflow e
+# declara SEUS comandos em .github/security-governance.json — o workflow não
+# assume linguagem. Uma etapa sem comando é reportada explicitamente como
+# "não aplicável" com a justificativa versionada (nunca como sucesso
+# silencioso), e o check governance-config impede que uma etapa N/A seja
+# listada como obrigatória.
+#
+# Neste repositório (shell/documentação): build = validação estática real
+# (bash -n, shellcheck, JSON/YAML, actionlint); unit-tests = suíte mandatória
+# scripts/run-tests.sh; cobertura = not-applicable justificado (sem métrica
+# inventada).
+#
+# Segurança: nenhum secret é usado; GITHUB_TOKEN somente leitura.
+
+on:
+  pull_request:
+    branches: ["main", "release/**", "hotfix/**"]
+  push:
+    branches: ["main"]
+  merge_group: {}
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-quality-gates-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GOVERNANCE_CONFIG: .github/security-governance.json
+  ACTIONLINT_VERSION: "1.7.7"
+  ACTIONLINT_SHA256: "023070a287cd8cccd71515fedc843f1985bf96c436b7effaecce67290e7e0757"
+
+jobs:
+  governance-config:
+    name: governance-config
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Validar configuração de governança de segurança
+        run: bash scripts/validate-security-governance.sh
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Instalar actionlint (versão e checksum pinados)
+        run: |
+          set -euo pipefail
+          archive="actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          curl -sSfL -o "/tmp/${archive}" "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/${archive}"
+          echo "${ACTIONLINT_SHA256}  /tmp/${archive}" | sha256sum -c -
+          mkdir -p "$HOME/.local/bin"
+          tar -xzf "/tmp/${archive}" -C "$HOME/.local/bin" actionlint
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Executar etapa build declarada
+        run: bash scripts/run-quality-gate.sh build
+
+  unit-tests:
+    name: unit-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Executar testes unitários declarados
+        run: bash scripts/run-quality-gate.sh unit_tests
+
+  integration-tests:
+    name: integration-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Executar testes de integração declarados
+        run: bash scripts/run-quality-gate.sh integration_tests
+
+  coverage:
+    name: coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Resolver política de cobertura
+        id: policy
+        run: |
+          set -euo pipefail
+          mode="$(jq -r '.coverage.mode // "report"' "$GOVERNANCE_CONFIG")"
+          echo "mode=${mode}" >> "$GITHUB_OUTPUT"
+          echo "report_path=$(jq -r '.coverage.report_path // ""' "$GOVERNANCE_CONFIG")" >> "$GITHUB_OUTPUT"
+          if [ -n "$(jq -r '.coverage.command // ""' "$GOVERNANCE_CONFIG")" ]; then
+            echo "has_command=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_command=false" >> "$GITHUB_OUTPUT"
+          fi
+          if [ "$mode" = "not-applicable" ]; then
+            reason="$(jq -r '.coverage.not_applicable_reason // ""' "$GOVERNANCE_CONFIG")"
+            if [ -z "$reason" ]; then
+              echo "::error::coverage.mode=not-applicable sem not_applicable_reason em ${GOVERNANCE_CONFIG}."
+              exit 1
+            fi
+            {
+              echo "### Cobertura de testes — NÃO APLICÁVEL (declarado)"
+              echo
+              echo "> ${reason}"
+              echo
+              echo "Nenhuma métrica de cobertura foi calculada ou publicada. O gate obrigatório deste repositório é o check \`unit-tests\`."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::notice::Cobertura não aplicável neste repositório: ${reason}"
+          fi
+
+      - name: Gerar relatório de cobertura (comando declarado)
+        if: steps.policy.outputs.mode == 'report' && steps.policy.outputs.has_command == 'true'
+        run: bash scripts/run-quality-gate.sh coverage
+
+      - name: Avaliar política de cobertura
+        if: steps.policy.outputs.mode == 'report'
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          args=(--report "$(jq -r '.coverage.report_path' "$GOVERNANCE_CONFIG")"
+                --format "$(jq -r '.coverage.report_format // "auto"' "$GOVERNANCE_CONFIG")"
+                --min "$(jq -r '.coverage.global_min_percent // 80' "$GOVERNANCE_CONFIG")"
+                --diff-min "$(jq -r '.coverage.diff_min_percent // 80' "$GOVERNANCE_CONFIG")"
+                --exceptions "$(jq -r '.exceptions_file // ".github/security-exceptions.json"' "$GOVERNANCE_CONFIG")")
+          baseline="$(jq -r '.coverage.baseline_percent // empty' "$GOVERNANCE_CONFIG")"
+          [ -n "$baseline" ] && args+=(--baseline "$baseline")
+          if [ "$EVENT_NAME" = "pull_request" ] && [ -n "$BASE_REF" ]; then
+            args+=(--base-ref "origin/${BASE_REF}")
+          fi
+          python3 scripts/coverage-gate.py "${args[@]}"
+
+      - name: Publicar relatório de cobertura
+        if: always() && steps.policy.outputs.mode == 'report'
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: coverage-report
+          path: ${{ steps.policy.outputs.report_path }}
+          if-no-files-found: error
+          retention-days: 30
