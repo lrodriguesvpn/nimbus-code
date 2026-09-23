@@ -1,1 +1,0 @@
-../../../.specify/extensions/nimbus-code-backlog-sync/.specify-dev/extension-skills/speckit-nimbus-code-backlog-sync-sync/SKILL.md

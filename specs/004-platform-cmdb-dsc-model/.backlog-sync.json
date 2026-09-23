@@ -1,8 +1,0 @@
-{
-  "status": "skipped",
-  "reason": "User opted to use specs/ as single source of truth",
-  "timestamp": "2026-08-12T15:35:03.154-03:00",
-  "backlog_tool": null,
-  "synced_items": 0,
-  "note": "Tasks are managed in specs/004-platform-cmdb-dsc-model/tasks.md. Manual sync with external backlog can be triggered at any time with /speckit-nimbus-code-backlog-sync-sync."
-}

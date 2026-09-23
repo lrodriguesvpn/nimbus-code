@@ -1,5 +1,0 @@
-{
-  "schema_version": 1,
-  "_comment": "Registro versionado de exceções aprovadas aos controles de segurança (docs/security-baseline-ghe.md, seção 15). Toda alteração exige PR revisado por CODEOWNERS. Exceções vencidas quebram o check governance-config. Nunca registre valores de secrets aqui.",
-  "exceptions": []
-}

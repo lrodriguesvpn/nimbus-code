@@ -1,9 +1,0 @@
-contract: delivery-handoff
-payload:
-  intake_entry_id: "INT-001"
-  result_summary: "Entrega sem métricas completas"
-  acceptance_evidence:
-    - "tests ok"
-  pending_owners:
-    - "dev-owner"
-  final_decision: "approved_with_conditions"

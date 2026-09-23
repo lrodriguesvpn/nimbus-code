@@ -1,7 +1,0 @@
-{
-  "chat.agentFilesLocations": {
-    ".github/agents": true,
-    ".claude/agents": false
-},
-"chat.mcp.access": "all"
-}
